@@ -1,0 +1,5 @@
+$CMSSW_BASE/src/PhysicsTools/NanoAOD/test/inspectNanoFile.py QCD_Pt_15to30_RunIISummer20UL18NanoAODv2.root -j QCD_Pt_15to30.json -s QCD_Pt_15to30_size_report.html -d QCD_Pt_15to30_doc.html
+
+#####$CMSSW_BASE/src/PhysicsTools/NanoAOD/test/inspectNanoFile.py root://xrootd-cms.infn.it///store/mc/RunIISummer20UL18NanoAODv2/QCD_Pt_15to30_TuneCP5_13TeV_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v15_L1v1-v1/00000/772FAE2B-D2A0-0245-93C6-3C85ABBD229A.root -j QCD_Pt_15to30.json -s QCD_Pt_15to30_size_report.html -d QCD_Pt_15to30_doc.html
+
+#QCD_Pt_15to30_RunIISummer20UL18NanoAODv2.root  

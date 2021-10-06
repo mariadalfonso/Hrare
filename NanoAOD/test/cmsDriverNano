@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#cmsdriver taken from https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/BTV-RunIISummer20UL18NanoAODv2-00013
+
+EVENTS=1000
+
+# cmsDriver command
+cmsDriver.py  --python_filename QCD_RunIISummer20UL18NanoAODv2_cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:QCD_Pt_15to30_RunIISummer20UL18NanoAODv2.root --conditions 106X_upgrade2018_realistic_v15_L1v1 --step NANO --filein "dbs:/QCD_Pt_15to30_TuneCP5_13TeV_pythia8/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v2/MINIAODSIM" --era Run2_2018,run2_nanoAOD_106Xv1 --no_exec --mc -n $EVENTS --customise=Hrare/NanoAOD/nano_cff.nanoAOD_customizeMesons || exit $? ; 
+
