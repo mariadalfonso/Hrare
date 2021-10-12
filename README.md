@@ -12,11 +12,14 @@ git clone git@github.com:mariadalfonso/Hrare.git --branch main
 
 https://gitlab.cern.ch/cms-nanoAOD/nanoaod-doc/-/wikis/Releases/NanoAODv9
 
-mc: 2016 HIPM : 106X_mcRun2_asymptotic_preVFP_v11
-mc: 2016 : 106X_mcRun2_asymptotic_v17
-mc: 2017 : 106X_mc2017_realistic_v9
-mc: 2018 : 106X_upgrade2018_realistic_v16_L1v1
-data 2016/17/18:  106X_dataRun2_v35
+| Input dataset | GT | Era |
+| ------ | ------ | ------ |
+| RunIISummer20UL16MiniAOD/RunIISummer19UL16MiniAODv2 MC | 106X_mcRun2_asymptotic_v17 or 106X_mcRun2_asymptotic_preVFP_v11 | Run2_2016,run2_nanoAOD_106Xv2 |
+| RunIISummer20UL17MiniAOD/RunIISummer19UL17MiniAODv2 MC | 106X_mc2017_realistic_v9 | Run2_2017,run2_nanoAOD_106Xv2 |
+| RunIISummer20UL18MiniAOD/RunIISummer19UL18MiniAODv2 MC | 106X_upgrade2018_realistic_v16_L1v1 | Run2_2018,run2_nanoAOD_106Xv2 |
+| 2016 UL data (Summer19/20) | 106X_dataRun2_v35 | Run2_2016,run2_nanoAOD_106Xv2 |
+| 2017 UL data (Summer19/20) | 106X_dataRun2_v35 | Run2_2017,run2_nanoAOD_106Xv2 |
+| 2018 UL data (Summer19/20) | 106X_dataRun2_v35 | Run2_2018,run2_nanoAOD_106Xv2 |
 
 # cmsDriver Options
 --customise=Hrare/NanoAOD/nano_cff.nanoAOD_customizeMesons
