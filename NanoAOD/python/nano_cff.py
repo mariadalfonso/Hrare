@@ -5,6 +5,10 @@ from PhysicsTools.NanoAOD.nano_cff import *
 
 def nanoAOD_customizeMesons(process):
     process.load('Hrare.NanoAOD.MesonsReco_cff')
+
+    # remove: slow and unused
+    (run2_nanoAOD_106Xv1).toReplaceWith(process.nanoSequenceMC, process.nanoSequenceMC.copyAndExclude([btagWeightTable]))
+
     # Data 
 #    process.nanoSequence   = cms.Sequence(process.slimmedMuons + process.nanoSequence + process.V0ForMuonFakeSequence + process.V0ForMuonFakeTables)
     process.nanoSequence   = cms.Sequence(process.nanoSequence + process.V0ForMuonFakeSequence + process.V0ForMuonFakeTables)
