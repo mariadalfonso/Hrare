@@ -14,3 +14,16 @@ def findDataset(name):
     for f in fileList: files_ROOT.push_back(f)
 
     return files_ROOT
+
+def findDIR(directory):
+
+    rootFiles = ROOT.vector('string')()
+    for root, directories, filenames in os.walk(directory):
+        for f in filenames:
+
+            filePath = os.path.join(os.path.abspath(root), f)
+            if "failed/" in filePath: continue
+            if "log/" in filePath: continue
+            rootFiles.push_back(filePath)
+
+    return rootFiles
