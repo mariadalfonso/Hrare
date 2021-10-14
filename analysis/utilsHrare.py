@@ -27,3 +27,32 @@ def findDIR(directory):
             rootFiles.push_back(filePath)
 
     return rootFiles
+
+
+
+
+def plot(h,filename,doLogX,color):
+
+   ROOT.gStyle.SetOptStat(1);
+   ROOT.gStyle.SetTextFont(42)
+   c = ROOT.TCanvas("c", "", 800, 700)
+   if doLogX: c.SetLogx();
+#  c.SetLogy()
+
+   h.SetTitle("")
+   h.GetXaxis().SetTitleSize(0.04)
+   h.GetYaxis().SetTitleSize(0.04)
+   h.SetLineColor(color)
+
+   h.Draw()
+
+   label = ROOT.TLatex(); label.SetNDC(True)
+   label.DrawLatex(0.175, 0.740, "#eta")
+   label.DrawLatex(0.205, 0.775, "#rho,#omega")
+   label.DrawLatex(0.270, 0.740, "#phi")
+   label.SetTextSize(0.040); label.DrawLatex(0.100, 0.920, "#bf{CMS Simulation}")
+   label.SetTextSize(0.030); label.DrawLatex(0.630, 0.920, "#sqrt{s} = 13 TeV, L_{int} = X fb^{-1}")
+
+   print("saving file: {} ".format(filename))
+
+   c.SaveAs(filename)
