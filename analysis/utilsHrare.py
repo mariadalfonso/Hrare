@@ -2,6 +2,9 @@ import ROOT
 import os
 from subprocess import call,check_output
 
+if "/functions.so" not in ROOT.gSystem.GetLibraries():
+    ROOT.gSystem.CompileMacro("functions.cc","k")
+
 def findDataset(name):
 
     DASclient = "dasgoclient -query '%(query)s'"
@@ -17,18 +20,37 @@ def findDataset(name):
 
 def findDIR(directory):
 
+    print(directory)
+
+    counter = 0
     rootFiles = ROOT.vector('string')()
     for root, directories, filenames in os.walk(directory):
         for f in filenames:
 
+            counter+=1
             filePath = os.path.join(os.path.abspath(root), f)
             if "failed/" in filePath: continue
             if "log/" in filePath: continue
             rootFiles.push_back(filePath)
+#            if counter>100: break
+#            if counter>50: break
+#            if counter>5: break
 
     return rootFiles
 
 
+
+def SwitchSample(argument):
+    switch = {
+        0: ("DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1_ext1-v1+MINIAODSIM",6067*1000), #NNLO
+        1: ("ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 51.1*1000), #LO
+        2: ("WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 412.7*1000), #LO 
+        3: ("WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",53870.0*1000), #LO
+        4: ("TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",88.2*1000), #NNLO
+        10: ("ZLLphigamma_pythia8",1.*1000),
+        11: ("WLNUphigamma_pythia8",1.*1000)
+    }
+    return switch.get(argument, "BKGdefault, xsecDefault")
 
 
 def plot(h,filename,doLogX,color):

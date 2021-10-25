@@ -30,9 +30,9 @@
 #include <unordered_map>
 #include <utility>
 #include <algorithm>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/functional/hash.hpp>
+//#include <boost/algorithm/string/join.hpp>
+//#include <boost/algorithm/string.hpp>
+//#include <boost/functional/hash.hpp>
 #include <limits>
 #include <map>
 
@@ -67,6 +67,34 @@ float deltaR2(float eta1, float phi1, float eta2, float phi2) {
 
 float deltaR(float eta1, float phi1, float eta2, float phi2) {
   return std::sqrt(deltaR2(eta1,phi1,eta2,phi2));
+}
+
+
+float MesonCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
+                        const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
+
+  float Minv = -1;
+  int index = -1;
+  float ptCandMax=0;
+  PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
+  // loop over all the phiCand
+  for (unsigned int i=0; i<meson_pt.size(); i++) {
+
+    PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
+
+    if(abs(deltaPhi(ph_phi[0], p_meson.phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
+    if(p_meson.pt()<5) continue;  // Higgs candidate is a two body decay
+
+    // save the leading Pt
+    float ptCand = p_meson.pt();
+    if( ptCand < ptCandMax ) continue;
+    ptCandMax=ptCand;
+    Minv = (p_meson + p_ph).mass();
+    index = i;
+  }
+
+  return Minv;
+
 }
 
 Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, const Vec_f& ch,
@@ -115,9 +143,14 @@ Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f
 
 }
 
-float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx) {
-    PtEtaPhiMVector p1(pt[idx[0]], eta[idx[0]], phi[idx[0]], m[idx[0]]);
-    PtEtaPhiMVector p2(pt[idx[1]], eta[idx[1]], phi[idx[1]], m[idx[1]]);
+float mt(float pt1, float phi1, float pt2, float phi2) {
+  return std::sqrt(2*pt1*pt2*(1-std::cos(phi1-phi2)));
+}
+
+
+float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) {
+    PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
+    PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
     return (p1 + p2).mass();
 }
 
