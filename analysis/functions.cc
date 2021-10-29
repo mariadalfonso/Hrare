@@ -77,12 +77,19 @@ float MesonCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
   int index = -1;
   float ptCandMax=0;
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
+
+  if(ph_pt.size()> 0) {
+    if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
+    if(ph_pt[1] > ph_pt[0]) p_ph.SetEta(ph_eta[1]);
+    if(ph_pt[1] > ph_pt[0]) p_ph.SetPhi(ph_phi[1]);
+  }
+
   // loop over all the phiCand
   for (unsigned int i=0; i<meson_pt.size(); i++) {
 
     PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
 
-    if(abs(deltaPhi(ph_phi[0], p_meson.phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
+    if(abs(deltaPhi(p_ph.phi(), p_meson.phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
     if(p_meson.pt()<5) continue;  // Higgs candidate is a two body decay
 
     // save the leading Pt

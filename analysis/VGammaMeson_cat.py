@@ -12,13 +12,12 @@ isZtag = False;
 isWtag = True;
 
 
+BARRELphotons = "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto"
+ENDCAPphotons = "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto"
 
-BARRELphotons = "(Photon_pt>20 and abs(Photon_eta)<1.4442 and Photon_sieie < 0.01015 and Photon_hoe < 0.02197 and Photon_electronVeto and (Photon_cutBased & 2) and Photon_pfRelIso03_chg < 0.65)"
-ENDCAPphotons = "(Photon_pt>20 and abs(Photon_eta)>1.566 and abs(Photon_eta)<2.5 and Photon_sieie < 0.0272 and Photon_hoe < 0.0326 and Photon_electronVeto and (Photon_cutBased & 2) and Photon_pfRelIso03_chg < 0.65)"
+GOODPHI = "(phi_kin_pt>10 && phi_kin_massErr<0.025 && phi_kin_valid)"
 
-GOODPHI = "(phi_kin_pt>5 && phi_kin_massErr<0.025)"
-
-GOODMUON = "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_pfRelIso04_all < 0.15 and Muon_tightId)"
+GOODMUON = "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_pfRelIso04_all < 0.15 and Muon_tightId and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)"
 VETOLEP = "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_pfRelIso04_all < 0.25 and Muon_looseId) or (Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WPL)"
 
 
@@ -29,7 +28,7 @@ def selectionTAG(df):
                  .Define("vetoLeptons","{}".format(VETOLEP))
                  .Filter("Sum(goodMuons) >= 2 and Sum(Muon_charge[goodMuons])==0 ", "At least two good OS muon")
                  .Define("V_mass", "Minv(Muon_pt[goodMuons], Muon_eta[goodMuons], Muon_phi[goodMuons], Muon_mass[goodMuons])")
-                 .Filter("abs(V_mass-91)<15","At least one good Z")
+                 .Filter("V_mass>(91-10) and V_mass<(91+15)","At least one good Z")
              )
         return dftag
 
@@ -53,7 +52,7 @@ def analysis(df,mc,w):
 #              .Filter("nGenIsolatedPhoton>0", "At least one good Photon")  
 #              .Define("HCandMass","MesonCandFromRECO(phi_kin_pt,phi_kin_eta,phi_kin_phi,phi_kin_mass,GenIsolatedPhoton_pt,GenIsolatedPhoton_eta,GenIsolatedPhoton_phi)")
               .Define("goodPhi","{}".format(GOODPHI))
-              .Filter("Sum(goodPhi)>0", "At least one Phi with pt > 5 GeV and massErr < 0.025")
+              .Filter("Sum(goodPhi)>0", "At least one Phi with pt > 10 GeV")
               .Define("HCandMass","MesonCandFromRECO(phi_kin_pt[goodPhi],phi_kin_eta[goodPhi],phi_kin_phi[goodPhi],phi_kin_mass[goodPhi],Photon_pt[goodPhotons],Photon_eta[goodPhotons],Photon_phi[goodPhotons])")
 #              .Filter("abs(HCandMass-125)<30","At least one good Higgs candidate")
               .Define("w","{}".format(w))
@@ -113,7 +112,7 @@ def analysis(df,mc,w):
 
 def readSample(sampleNOW):
 
-    files = findDIR("/work/submit/mariadlf/Hrare/OCT14/{}".format(SwitchSample(sampleNOW)[0]))
+    files = findDIR("{}".format(SwitchSample(sampleNOW)[0]))
 
     print(len(files)) 
     df = ROOT.RDataFrame("Events", files)   
