@@ -15,7 +15,7 @@ isWtag = True;
 BARRELphotons = "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto"
 ENDCAPphotons = "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto"
 
-GOODPHI = "(phi_kin_pt>10 && phi_kin_massErr<0.025 && phi_kin_valid)"
+GOODPHI = "(phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_massErr<0.025 && phi_kin_valid)"
 
 GOODMUON = "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_pfRelIso04_all < 0.15 and Muon_tightId and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)"
 VETOLEP = "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_pfRelIso04_all < 0.25 and Muon_looseId) or (Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WPL)"
@@ -66,8 +66,8 @@ def analysis(df,mc,w):
             "nPhoton",
             "Photon_pt",
             "Photon_eta",
-            "nGenIsolatedPhoton",
-            "GenIsolatedPhoton_pt",
+#            "nGenIsolatedPhoton",
+#            "GenIsolatedPhoton_pt",
             "nphi",
             "phi_kin_massErr",
             "phi_kin_mass",
