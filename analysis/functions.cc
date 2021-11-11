@@ -69,7 +69,6 @@ float deltaR(float eta1, float phi1, float eta2, float phi2) {
   return std::sqrt(deltaR2(eta1,phi1,eta2,phi2));
 }
 
-
 float MesonCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
                         const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
 
@@ -148,6 +147,14 @@ Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f
 
   return idx;
 
+}
+
+bool hasTriggerMatch(const float& eta, const float& phi, const Vec_f& TrigObj_eta, const Vec_f& TrigObj_phi) {
+
+  for (unsigned int jtrig = 0; jtrig < TrigObj_eta.size(); ++jtrig) {
+    if (deltaR(eta, phi, TrigObj_eta[jtrig], TrigObj_phi[jtrig]) < 0.3) return true;
+  }
+  return false;
 }
 
 float mt(float pt1, float phi1, float pt2, float phi2) {
