@@ -2,7 +2,7 @@ import ROOT
 import os
 
 ROOT.ROOT.EnableImplicitMT()
-from utilsHrare import findDataset, findDIR
+from utilsHrare import getMClist, getDATAlist
 from utilsHrare import plot
 from utilsHrare import SwitchSample
 
@@ -110,12 +110,11 @@ def analysis(df,mc,w):
             h = snapshot_tdf.Histo1D(model, hists[h]["name"])        
             plot(h,"PLOTS/plot_"+h.GetName()+".png",False,2)
 
-def readSample(sampleNOW):
+def readMCSample(sampleNOW):
 
-    files = findDIR("{}".format(SwitchSample(sampleNOW)[0]))
-
-    print(len(files)) 
-    df = ROOT.RDataFrame("Events", files)   
+    files = getMClist(sampleNOW)
+    print(len(files))
+    df = ROOT.RDataFrame("Events", files)
 
     nevents = df.Count().GetValue()  ## later with negative weights
     w = (SwitchSample(sampleNOW)[1] / nevents)
@@ -125,16 +124,36 @@ def readSample(sampleNOW):
     print("lumi equivalent fb %s" %lumiEq)
     analysis(df,sampleNOW,w)
 
+def readDataSample(sampleNOW):
+
+    files = getDATAlist()
+    print(len(files))
+
+    df = ROOT.RDataFrame("Events", files)
+
+    w=1.
+    nevents = df.Count().GetValue()
+    print("%s entries in the dataset" %nevents)
+
+    analysis(df,sampleNOW,w)
+
    
 if __name__ == "__main__":
 
-    readSample(10) # signal Z
-    readSample(11) # signal W
-    readSample(1)  # Zgamma
-    readSample(2)  # Wgamma
-    readSample(3)  # W
-    readSample(0)  # DY
-    readSample(4)  # ttbar 2L
+    readDataSample(100)  # SingleMuon
 
+    readMCSample(12) # signal VBF
+    readMCSample(10) # signal Z
+    readMCSample(11) # signal W
+    readMCSample(1)  # Zgamma
+    readMCSample(0)  # DY
+    readMCSample(2)  # Wgamma
+    readMCSample(3)  # W
+    readMCSample(4)  # ttbar 2L
+    readMCSample(5)  # ttbar 1L
+    readMCSample(6)  # gJets
+    readMCSample(7)  # gJets
+    readMCSample(8)  # gJets
+    readMCSample(9)  # gJets
 
 
