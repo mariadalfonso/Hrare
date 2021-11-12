@@ -50,6 +50,19 @@ using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > PtEtaPhiMVector;
+std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
+
+bool isGoodRunLS(const bool isData, const UInt_t run, const UInt_t lumi) {
+
+  if(not isData) return true;
+
+  if(jsonMap.find(run) == jsonMap.end()) return false; // run not found
+
+  auto& validlumis = jsonMap.at(run);
+  auto match = std::lower_bound(std::begin(validlumis), std::end(validlumis), lumi,
+				[](std::pair<unsigned int, unsigned int>& range, unsigned int val) { return range.second < val; });
+  return match->first <= lumi && match->second >= lumi;
+}
 
 
 float deltaPhi(float phi1, float phi2) {
@@ -67,6 +80,15 @@ float deltaR2(float eta1, float phi1, float eta2, float phi2) {
 
 float deltaR(float eta1, float phi1, float eta2, float phi2) {
   return std::sqrt(deltaR2(eta1,phi1,eta2,phi2));
+}
+
+Vec_b cleaningMask(Vec_i indices, int size) {
+
+  Vec_b mask(size, true);
+  for (int idx : indices) {
+    mask[idx] = false;
+  }
+  return mask;
 }
 
 float MesonCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,

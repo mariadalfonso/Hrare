@@ -1,9 +1,30 @@
 import ROOT
 import os
+import json
 from subprocess import call,check_output
 
 if "/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("functions.cc","k")
+
+def loadJSON(fIn):
+
+    if not os.path.isfile(fIn):
+        print("JSON file %s does not exist" % fIn)
+        return
+
+    if not hasattr(ROOT, "jsonMap"):
+        print("jsonMap not found in ROOT dict")
+        return
+
+    info = json.load(open(fIn))
+    print("JSON file %s loaded" % fIn)
+    for k,v in info.items():
+
+        vec = ROOT.std.vector["std::pair<unsigned int, unsigned int>"]()
+        for combo in v:
+            pair = ROOT.std.pair["unsigned int", "unsigned int"](*[int(c) for c in combo])
+            vec.push_back(pair)
+            ROOT.jsonMap[int(k)] = vec
 
 def findDataset(name):
 
