@@ -86,18 +86,29 @@ Vec_b cleaningMask(Vec_i indices, int size) {
 
   Vec_b mask(size, true);
   for (int idx : indices) {
+    if(idx < 0) continue;
     mask[idx] = false;
   }
   return mask;
 }
 
-float MesonCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
+Vec_b cleaningJetFromPhi(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi) {
+
+  Vec_b mask(Jeta.size(), true);
+  for (unsigned int idx = 0; idx < Jeta.size(); ++idx) {
+    if(deltaR(Jeta[idx], Jphi[idx], eta, phi)<0.5) mask[idx] = false;
+  }
+  return mask;
+}
+
+Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
                         const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
 
-  float Minv = -1;
   int index = -1;
   float ptCandMax=0;
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
+  int indexPhoton = 0;
+  Vec_i idx(2, -1); // initialize with -1 a vector of size 2
 
   if(ph_pt.size()> 0) {
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
@@ -111,17 +122,15 @@ float MesonCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
     PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
 
     if(abs(deltaPhi(p_ph.phi(), p_meson.phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
-    if(p_meson.pt()<5) continue;  // Higgs candidate is a two body decay
-
     // save the leading Pt
     float ptCand = p_meson.pt();
     if( ptCand < ptCandMax ) continue;
     ptCandMax=ptCand;
-    Minv = (p_meson + p_ph).mass();
-    index = i;
+    idx[0] = i;
+    idx[1] = indexPhoton;
   }
 
-  return Minv;
+  return idx;
 
 }
 
@@ -190,6 +199,21 @@ float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) 
     return (p1 + p2).mass();
 }
 
+std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& phi, const float& m,
+                               const float& ph_pt, const float& ph_eta, const float& ph_phi) {
+
+  PtEtaPhiMVector p_M(pt, eta, phi, m);
+  PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
+
+  float Minv = (p_M + p_ph).mass();
+  float ptHiggs = (p_M + p_ph).pt();
+
+  std::pair<float, float> pairRECO = std::make_pair(Minv , ptHiggs);
+  return pairRECO;
+
+}
+
+
 float Minv3(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx,
 	    const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
  
@@ -213,7 +237,6 @@ float dPhi_MvsPh(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_
   PtEtaPhiMVector p2(pt[idx[1]], eta[idx[1]], phi[idx[1]], m[idx[1]]);
   
   return  abs(deltaPhi(ph_phi[0], (p1 + p2).phi()));
-
 }
 
 float dEta_MvsPh(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx,
@@ -223,7 +246,6 @@ float dEta_MvsPh(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_
   PtEtaPhiMVector p2(pt[idx[1]], eta[idx[1]], phi[idx[1]], m[idx[1]]);
   
   return  ph_eta[0]-(p1 + p2).eta();
-
 }
 
 

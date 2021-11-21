@@ -7,21 +7,27 @@ from utilsHrare import plot
 from utilsHrare import SwitchSample
 
 doPlot = False
-lumi = 137.
 isZtag = False;
-isWtag = True;
+isWtag = False;
+isVBFtag = True
 
-
-BARRELphotons = "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto"
-ENDCAPphotons = "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto"
-
-GOODPHI = "(phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_massErr<0.025 && phi_kin_valid)"
+if isVBFtag :
+    BARRELphotons = "(Photon_pt>50 and Photon_isScEtaEB and (Photon_cutBased & 3) and Photon_electronVeto)"
+    ENDCAPphotons = ""
+    GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>30 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid)"
+    GOODJETS = "(Jet_pt>30 && abs(Jet_eta)<5 and (Jet_jetId & 2) and jet_mask and jet_mask2)" ## to add PUid
+else:
+    BARRELphotons = "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto"
+    ENDCAPphotons = "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto"
+    GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid)"
 
 GOODMUON = "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)" # ID and Iso will be asked later depending on W and Z
 VETOelectrons = "(Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WPL)"
 LOOSEmuons = "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)"
 
-VETOLEP = "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_pfRelIso04_all < 0.25 and Muon_looseId) or (Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WPL)"
+
+TRIGGERincl = "HLT_Photon35_TwoProngs35"
+TRIGGERvbf = "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
 
 TRIGGERsMUO = "HLT_IsoMu24"
 JSON = "isGoodRunLS(isData, run, luminosityBlock)"
@@ -55,35 +61,67 @@ def selectionTAG(df):
              )
         return dftag
 
+    if isVBFtag:
+        dftag = (df.Define("goodJets","{}".format(GOODJETS))
+                 .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)>1","two jets")
+                 .Define("mJJ","Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])")
+                 .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
+                 .Define("Y1Y2","Jet_eta[goodJets][0]*Jet_eta[goodJets][1]")
+                 .Filter("mJJ>300 and dEtaJJ>3 and Y1Y2<0","Filter on MJJ>300 , Deta>3 and Y1Y2<0")
+                 .Define("vetoElectrons","{}".format(VETOelectrons))
+                 .Define("vetoMuons","{}".format(LOOSEmuons))
+                 .Filter("Sum(vetoElectrons)==0 and Sum(vetoMuons)==0", "no leptons")
+                 .Define("trigger","{}".format(TRIGGERvbf)+" or {}".format(TRIGGERincl))
+                 .Filter("trigger>0", "pass triggers")
+                 .Define("V_mass","0")
+                 )
+    return dftag
+
+def dfGammaMeson(df):
+
+    #    dfbase = (df.Define("goodPhotons", "{}".format(BARRELphotons)+" or {}".format(ENDCAPphotons) )
+    dfOBJ= (df.Define("goodPhotons", "{}".format(BARRELphotons))
+            .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
+            .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
+            .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
+            .Define("goodPhi","{}".format(GOODPHI))
+            .Define("goodPhi_pt", "phi_kin_pt[goodPhi]")
+            .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
+            .Define("goodPhi_phi", "phi_kin_phi[goodPhi]")
+            .Define("goodPhi_mass", "phi_kin_mass[goodPhi]")
+            .Define("goodPhi_trk1_pt", "phi_trk1_pt[goodPhi]")
+            .Define("goodPhi_trk2_pt", "phi_trk2_pt[goodPhi]")
+            .Define("goodPhi_trk1_eta", "phi_trk1_eta[goodPhi]")
+            .Define("goodPhi_trk2_eta", "phi_trk2_eta[goodPhi]")
+            .Define("goodPhiDR","DeltaR(phi_trk1_eta[goodPhi],phi_trk2_eta[goodPhi],phi_trk1_phi[goodPhi],phi_trk2_phi[goodPhi])")
+            )
+
+    return dfOBJ
 
 
-def analysis(df,mc,w):
 
-    dftag = selectionTAG(df)
+def analysis(df,mc,w,isData):
 
-    dfbase = (dftag.Define("goodPhotons", "{}".format(BARRELphotons)+" or {}".format(ENDCAPphotons) )              
-              .Filter("Sum(goodPhotons)>0", "At least one good Photon")
-              .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
-              .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
-              .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
+    dfOBJ= dfGammaMeson(df)
 
+    dfbase = (dfOBJ.Filter("Sum(goodPhotons)==1", "At least one good Photon")
+              .Filter("Sum(goodPhi)>0", "one good Phi (ptPhi, validfit, ptTracks, massErr)")
 #              .Filter("nGenIsolatedPhoton>0", "At least one good Photon")  
 #              .Define("HCandMass","MesonCandFromRECO(phi_kin_pt,phi_kin_eta,phi_kin_phi,phi_kin_mass,GenIsolatedPhoton_pt,GenIsolatedPhoton_eta,GenIsolatedPhoton_phi)")
-              .Define("goodPhi","{}".format(GOODPHI))
-              .Filter("Sum(goodPhi)>0", "At least one Phi with pt > 10 GeV")
-              .Define("goodPhi_pt", "phi_kin_pt[goodPhi]")
-              .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
-              .Define("goodPhi_phi", "phi_kin_phi[goodPhi]")
-              .Define("goodPhi_mass", "phi_kin_mass[goodPhi]")
-              .Define("goodPhi_trk1_pt", "phi_trk1_pt[goodPhi]")
-              .Define("goodPhi_trk2_pt", "phi_trk2_pt[goodPhi]")
-              .Define("goodPhiDR","DeltaR(phi_trk1_eta[goodPhi],phi_trk2_eta[goodPhi],phi_trk1_phi[goodPhi],phi_trk2_phi[goodPhi])")
-              .Define("HCandMass","MesonCandFromRECO(goodPhi_pt,goodPhi_eta,goodPhi_phi,goodPhi_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)")
+              .Define("index_pair","HiggsCandFromRECO(goodPhi_pt,goodPhi_eta,goodPhi_phi,goodPhi_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
+              .Define("HCandMass", "Minv2(goodPhi_pt[index_pair[0]],goodPhi_eta[index_pair[0]],goodPhi_phi[index_pair[0]],goodPhi_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
+              .Define("HCandPT",   "Minv2(goodPhi_pt[index_pair[0]],goodPhi_eta[index_pair[0]],goodPhi_phi[index_pair[0]],goodPhi_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
+              .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
+              .Define("jet_mask2", "cleaningJetFromPhi(Jet_eta, Jet_phi, goodPhi_eta[index_pair[0]], goodPhi_phi[index_pair[0]])")
 #              .Filter("abs(HCandMass-125)<30","At least one good Higgs candidate")
               .Define("w","{}".format(w))
               .Define("mc","{}".format(mc))
+              .Define("isData","{}".format(isData))
+              .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
           )
     
+    dfcandtag = selectionTAG(dfbase)
+
     branchList = ROOT.vector('string')()
     for branchName in [
             "V_mass",
@@ -102,6 +140,9 @@ def analysis(df,mc,w):
             "goodPhi_pt",
             "goodPhi_trk1_pt",
             "goodPhi_trk2_pt",
+            "goodPhi_trk1_eta",
+            "goodPhi_trk2_eta",
+
 #            "phi_kin_massErr",
 #            "phi_kin_mass",
 #            "phi_kin_pt",
@@ -113,11 +154,20 @@ def analysis(df,mc,w):
     ]:
         branchList.push_back(branchName)
         
+    if isVBFtag:
+        for branchName in [
+                "mJJ",
+                "nGoodJets",
+                "dEtaJJ",
+                "Y1Y2",
+        ]:
+            branchList.push_back(branchName)
+
     outputFile = "outname_mc%d"%mc+".root"
     if isZtag : outputFile = "outname_mc%d"%mc+"_Zcat.root"
     if isWtag : outputFile = "outname_mc%d"%mc+"_Wcat.root"
     print(outputFile)
-    snapshot_tdf = dfbase.Snapshot("events", outputFile, branchList)
+    snapshot_tdf = dfcandtag.Snapshot("events", outputFile, branchList)
 
     print("snapshot_tdf DONE")
 
@@ -155,7 +205,7 @@ def readMCSample(sampleNOW):
     lumiEq = (nevents / SwitchSample(sampleNOW)[1])
     print("%s entries in the dataset" %nevents)
     print("lumi equivalent fb %s" %lumiEq)
-    analysis(df,sampleNOW,w)
+    analysis(df,sampleNOW,w,"false")
 
 def readDataSample(sampleNOW):
 
@@ -169,7 +219,7 @@ def readDataSample(sampleNOW):
     print("%s entries in the dataset" %nevents)
 
     loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
-    analysis(df,sampleNOW,w)
+    analysis(df,sampleNOW,w,"true")
 
 def runTest():
 
@@ -180,7 +230,7 @@ def runTest():
     print("%s entries in the dataset" %nevents)
 
     sampleNOW=-1
-    analysis(df,sampleNOW,w)
+    analysis(df,sampleNOW,w,"false")
 
 
    
