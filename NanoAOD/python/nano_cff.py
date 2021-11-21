@@ -7,7 +7,9 @@ def nanoAOD_customizeMesons(process):
     process.load('Hrare.NanoAOD.MesonsReco_cff')
 
     # remove: slow and unused
-    (run2_nanoAOD_106Xv1).toReplaceWith(process.nanoSequenceMC, process.nanoSequenceMC.copyAndExclude([btagWeightTable]))
+    (run2_nanoAOD_106Xv1 | run2_nanoAOD_106Xv2).toReplaceWith(process.nanoSequenceMC, process.nanoSequenceMC.copyAndExclude([btagWeightTable]))
+
+    process.genParticleTable.src = "prunedGenParticles"
 
     # Data 
 #    process.nanoSequence   = cms.Sequence(process.slimmedMuons + process.nanoSequence + process.V0ForMuonFakeSequence + process.V0ForMuonFakeTables)

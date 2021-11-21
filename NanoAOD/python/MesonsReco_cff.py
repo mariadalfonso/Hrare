@@ -33,10 +33,14 @@ V0ForMuonFake = cms.EDProducer(
     maxKsMass  = cms.double(0.55),
     minKsPreselectMass = cms.double(0.4),
     maxKsPreselectMass = cms.double(0.6),
-    minPhiMass  = cms.double(1.00),
+    minPhiMass  = cms.double(1.00), # rho true mass 1020
     maxPhiMass  = cms.double(1.04),
     minPhiPreselectMass = cms.double(0.9),
     maxPhiPreselectMass = cms.double(1.1),
+    minRhosPreselectMass = cms.double(0.4),
+    maxRhosPreselectMass = cms.double(1.1),
+    minRhosMass = cms.double(0.5), # rho true mass 770
+    maxRhosMass = cms.double(1.),
     minDsMass  = cms.double(1.91),
     maxDsMass  = cms.double(2.03),
     minDsPreselectMass = cms.double(1.8),
@@ -105,7 +109,7 @@ KsForMuonFakeVariablesMC = merge_psets(
         ),
 )
 
-KsForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+KsForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0ForMuonFake","Ks"),
     cut=cms.string(""),
     name=cms.string("ks"),
@@ -115,7 +119,7 @@ KsForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     variables = KsForMuonFakeVariables
 )
 
-KsForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+KsForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0ForMuonFakeMC","Ks"),
     cut=cms.string(""),
     name=cms.string("ks"),
@@ -123,6 +127,26 @@ KsForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables = KsForMuonFakeVariablesMC
+)
+
+RhosForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0ForMuonFake","Rho"),
+    cut=cms.string(""),
+    name=cms.string("rho"),
+    doc=cms.string("Rhos Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = KsForMuonFakeVariables # for now same variables rho, k to pipi
+)
+
+RhosForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0ForMuonFakeMC","Rho"),
+    cut=cms.string(""),
+    name=cms.string("rho"),
+    doc=cms.string("Rhos Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = KsForMuonFakeVariablesMC # for now same variables rho, k to pipi
 )
 
 # D0ToKPi
@@ -339,5 +363,5 @@ LambdaForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProduc
 
 V0ForMuonFakeSequence   = cms.Sequence(V0ForMuonFake)
 V0ForMuonFakeMcSequence = cms.Sequence(V0ForMuonFakeMC)
-V0ForMuonFakeTables     = cms.Sequence(KsForMuonFakeTable + D0ForMuonFakeTable + PhiForMuonFakeTable + LambdaForMuonFakeTable)
-V0ForMuonFakeMcTables   = cms.Sequence(KsForMuonFakeMcTable + D0ForMuonFakeMcTable + PhiForMuonFakeMcTable + LambdaForMuonFakeMcTable)
+V0ForMuonFakeTables     = cms.Sequence(KsForMuonFakeTable + RhosForMuonFakeTable + D0ForMuonFakeTable + PhiForMuonFakeTable + LambdaForMuonFakeTable)
+V0ForMuonFakeMcTables   = cms.Sequence(KsForMuonFakeMcTable + RhosForMuonFakeMcTable + D0ForMuonFakeMcTable + PhiForMuonFakeMcTable + LambdaForMuonFakeMcTable)

@@ -222,6 +222,10 @@ private:
 	      const pat::PackedCandidate& pfCand1,
 	      const pat::PackedCandidate& pfCand2);
   pat::CompositeCandidate
+  getRhosToPiPi(const edm::Event& iEvent,
+		const pat::PackedCandidate& pfCand1,
+		const pat::PackedCandidate& pfCand2);
+  pat::CompositeCandidate
   getD0ToKPi(const edm::Event& iEvent,
 	     const pat::PackedCandidate& kaonCand,
 	     const pat::PackedCandidate& pion);
@@ -300,6 +304,10 @@ private:
   double maxPhiPreselectMass_;
   double minPhiMass_;
   double maxPhiMass_;
+  double minRhosPreselectMass_;
+  double maxRhosPreselectMass_;
+  double minRhosMass_;
+  double maxRhosMass_;
   double minDsPreselectMass_;
   double maxDsPreselectMass_;
   double minDsMass_;
@@ -343,6 +351,10 @@ minPhiPreselectMass_(     iConfig.getParameter<double>( "minPhiPreselectMass" ) 
 maxPhiPreselectMass_(     iConfig.getParameter<double>( "maxPhiPreselectMass" ) ),
 minPhiMass_(     iConfig.getParameter<double>( "minPhiMass" ) ),
 maxPhiMass_(     iConfig.getParameter<double>( "maxPhiMass" ) ),
+minRhosPreselectMass_(     iConfig.getParameter<double>( "minRhosPreselectMass" ) ),
+maxRhosPreselectMass_(     iConfig.getParameter<double>( "maxRhosPreselectMass" ) ),
+minRhosMass_(     iConfig.getParameter<double>( "minRhosMass" ) ),
+maxRhosMass_(     iConfig.getParameter<double>( "maxRhosMass" ) ),
 minDsPreselectMass_(     iConfig.getParameter<double>( "minDsPreselectMass" ) ),
 maxDsPreselectMass_(     iConfig.getParameter<double>( "maxDsPreselectMass" ) ),
 minDsMass_(     iConfig.getParameter<double>( "minDsMass" ) ),
@@ -366,6 +378,7 @@ minVtxProb_( iConfig.getParameter<double>( "minVtxProb" ) )
     produces<pat::CompositeCandidateCollection>("D0");
     produces<pat::CompositeCandidateCollection>("Phi");
     produces<pat::CompositeCandidateCollection>("Lambda");
+    produces<pat::CompositeCandidateCollection>("Rho");
 }
 
 bool MesonProducer::isGoodTrack(const pat::PackedCandidate& track){
@@ -531,6 +544,7 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     auto d0s  = std::make_unique<pat::CompositeCandidateCollection>();
     auto phis = std::make_unique<pat::CompositeCandidateCollection>();
     auto lambdas = std::make_unique<pat::CompositeCandidateCollection>();
+    auto rhos = std::make_unique<pat::CompositeCandidateCollection>();
 
     // Build V0 candidates first
 
@@ -556,16 +570,15 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	    phis->push_back(phiCand);
 	  }
 
-	  /*
 	  // RhoToPiPi (750)
-	  auto rhoCand = getRhoToPiPi(iEvent, pfCand1, pfCand2);
+	  auto rhoCand = getRhosToPiPi(iEvent, pfCand1, pfCand2);
 	  if (rhoCand.numberOfDaughters() > 0){
 	    rhoCand.addUserFloat( "doca", tt_doca);
 	    rhos->push_back(rhoCand);
 	  }
-	  */
 
 	  // Look for V0s built from displaced tracks
+
 	  if ( not displacedTrack(pfCand1) or 
 	       not displacedTrack(pfCand2) ) continue;
 
@@ -610,6 +623,7 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     iEvent.put(std::move(d0s), "D0");
     iEvent.put(std::move(phis), "Phi");
     iEvent.put(std::move(lambdas), "Lambda");
+    iEvent.put(std::move(rhos), "Rho");
 }
 
 pat::CompositeCandidate
@@ -651,6 +665,46 @@ MesonProducer::getKsToPiPi(const edm::Event& iEvent,
        ksVtxFit.sigLxy < minSigLxy_ ) return pat::CompositeCandidate();
 
   return ksCand;
+}
+
+
+pat::CompositeCandidate
+MesonProducer::getRhosToPiPi(const edm::Event& iEvent,
+			     const pat::PackedCandidate& ipfCand1,
+			     const pat::PackedCandidate& ipfCand2)
+{
+  pat::CompositeCandidate rhosCand;
+  pat::PackedCandidate pfCand1(ipfCand1);
+  pfCand1.setMass(pion_mass_);
+  pat::PackedCandidate pfCand2(ipfCand2);
+  pfCand2.setMass(pion_mass_);
+  rhosCand.addDaughter( pfCand1 , "trk1" );
+  rhosCand.addDaughter( pfCand2 , "trk2" );
+  AddFourMomenta addP4;
+  addP4.set( rhosCand );
+
+  if ( rhosCand.mass() < minRhosPreselectMass_ or rhosCand.mass() > maxRhosPreselectMass_ )
+    return pat::CompositeCandidate();
+
+  rhosCand.addUserFloat( "trk1_pt",  pfCand1.pt() );
+  rhosCand.addUserFloat( "trk1_eta", pfCand1.eta() );
+  rhosCand.addUserFloat( "trk1_phi", pfCand1.phi() );
+  rhosCand.addUserFloat( "trk2_pt",  pfCand2.pt() );
+  rhosCand.addUserFloat( "trk2_eta", pfCand2.eta() );
+  rhosCand.addUserFloat( "trk2_phi", pfCand2.phi() );
+  rhosCand.addUserFloat( "trk1_sip", trackImpactParameterSignificance(pfCand1) );
+  rhosCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
+  //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
+  //  ksCand.addUserInt( "trk2_mu_index", match_to_muon(pfCand2,*muonHandle_));
+
+  auto rhosVtxFit = fillInfo(rhosCand, iEvent, pfCand1, pfCand2);
+
+  if ( not rhosVtxFit.valid()  or
+       rhosVtxFit.vtxProb() < minVtxProb_ or
+       rhosVtxFit.mass() < minRhosMass_ or
+       rhosVtxFit.mass() > maxRhosMass_ ) return pat::CompositeCandidate();
+
+  return rhosCand;
 }
 
 pat::CompositeCandidate
