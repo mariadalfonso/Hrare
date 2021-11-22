@@ -69,6 +69,7 @@ V0ForMuonFakeMC = V0ForMuonFake.clone( isMC = cms.bool(True) )
 KsForMuonFakeVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
+    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
     trk1_pt      = Var("userFloat('trk1_pt')",         float, doc = "Track 1 pt"),
     trk1_eta     = Var("userFloat('trk1_eta')",        float, doc = "Track 1 eta"),
     trk1_phi     = Var("userFloat('trk1_phi')",        float, doc = "Track 1 phi"),
@@ -154,6 +155,7 @@ RhosForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer
 D0ForMuonFakeVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
+    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
     kaon_pt      = Var("userFloat('kaon_pt')",         float, doc = "Kaon pt"),
     kaon_eta     = Var("userFloat('kaon_eta')",        float, doc = "Kaon eta"),
     kaon_phi     = Var("userFloat('kaon_phi')",        float, doc = "Kaon phi"),
@@ -219,6 +221,7 @@ D0ForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
 PhiForMuonFakeVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
+    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
     trk1_pt      = Var("userFloat('trk1_pt')",         float, doc = "Track 1 pt"),
     trk1_eta     = Var("userFloat('trk1_eta')",        float, doc = "Track 1 eta"),
     trk1_phi     = Var("userFloat('trk1_phi')",        float, doc = "Track 1 phi"),
@@ -300,6 +303,7 @@ PhiForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer"
 LambdaForMuonFakeVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
+    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
     proton_pt      = Var("userFloat('proton_pt')",         float, doc = "Proton pt"),
     proton_eta     = Var("userFloat('proton_eta')",        float, doc = "Proton eta"),
     proton_phi     = Var("userFloat('proton_phi')",        float, doc = "Proton phi"),

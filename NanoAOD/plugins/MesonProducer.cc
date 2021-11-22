@@ -179,6 +179,78 @@ struct KinematicFitResult{
   
 };
 
+std::pair<float, float>
+getAlpha(const GlobalPoint& vtx_position, const GlobalError& vtx_error,
+	 const GlobalPoint& ip_position,  const GlobalError& ip_error,
+	 const GlobalVector &momentum,
+	 bool transverse = true){
+  AlgebraicSymMatrix33 error_matrix(vtx_error.matrix() + ip_error.matrix());
+  GlobalVector dir(vtx_position - ip_position);
+  if (dir.mag() == 0)
+    return std::pair<float, float>(999., 999.);
+
+  GlobalVector p(momentum);
+  if (transverse){
+    dir = GlobalVector(dir.x(), dir.y(), 0);
+    p = GlobalVector(p.x(), p.y(), 0);
+  }
+
+  double dot_product = dir.dot(p);
+  double cosAlpha = dot_product / p.mag() / dir.mag();
+  if (cosAlpha > 1) cosAlpha = 1;
+  if (cosAlpha < -1) cosAlpha = -1;
+
+  // Error propagation
+
+  double c1 = 1 / dir.mag() / p.mag();
+  double c2 = dot_product / pow(dir.mag(), 3) / p.mag();
+
+  double dfdx = p.x() * c1 - dir.x() * c2;
+  double dfdy = p.y() * c1 - dir.y() * c2;
+  double dfdz = p.z() * c1 - dir.z() * c2;
+
+  double err2_cosAlpha =
+    pow(dfdx, 2) * error_matrix(0, 0) +
+    pow(dfdy, 2) * error_matrix(1, 1) +
+    pow(dfdz, 2) * error_matrix(2, 2) +
+    2 * dfdx * dfdy * error_matrix(0, 1) +
+    2 * dfdx * dfdz * error_matrix(0, 2) +
+    2 * dfdy * dfdz * error_matrix(1, 2);
+
+  float err_alpha = fabs(cosAlpha) <= 1 and err2_cosAlpha >=0 ? sqrt(err2_cosAlpha) / sqrt(1-pow(cosAlpha, 2)) : 999;
+  float alpha = acos(cosAlpha);
+  if (isnan(alpha) or isnan(err_alpha))
+    return std::pair<float, float>(999., 999.);
+  else
+    return std::pair<float, float>(alpha, err_alpha);
+}
+
+
+struct DisplacementInformationIn3D{
+  double decayLength, decayLengthErr, decayLength2, decayLength2Err,
+    distaceOfClosestApproach, distaceOfClosestApproachErr, distaceOfClosestApproachSig,
+    distaceOfClosestApproach2, distaceOfClosestApproach2Err, distaceOfClosestApproach2Sig,
+    longitudinalImpactParameter, longitudinalImpactParameterErr, longitudinalImpactParameterSig,
+    longitudinalImpactParameter2, longitudinalImpactParameter2Err,longitudinalImpactParameter2Sig,
+    decayTime, decayTimeError, decayTimeXY, decayTimeXYError,
+    alpha, alphaErr, alphaXY, alphaXYErr;
+  const reco::Vertex *pv,*pv2;
+  int pvIndex,pv2Index;
+  DisplacementInformationIn3D():decayLength(-1.0), decayLengthErr(0.), decayLength2(-1.0), decayLength2Err(0.),
+				distaceOfClosestApproach(-1.0), distaceOfClosestApproachErr(0.0), distaceOfClosestApproachSig(0.0),
+				distaceOfClosestApproach2(-1.0), distaceOfClosestApproach2Err(0.0), distaceOfClosestApproach2Sig(0.0),
+				longitudinalImpactParameter(0.0), longitudinalImpactParameterErr(0.), longitudinalImpactParameterSig(0.),
+				longitudinalImpactParameter2(0.0), longitudinalImpactParameter2Err(0.), longitudinalImpactParameter2Sig(0.),
+    decayTime(-999.), decayTimeError(-999.),
+    decayTimeXY(-999.), decayTimeXYError(-999.),
+    alpha(-999.), alphaErr(-999.),
+    alphaXY(-999.), alphaXYErr(-999.),
+    pv(0), pv2(0),
+    pvIndex(-1), pv2Index(-1)
+  {};
+};
+
+
 struct GenMatchInfo{
   const pat::PackedGenParticle* mc_trk1;
   const pat::PackedGenParticle* mc_trk2;
@@ -260,6 +332,19 @@ private:
   Measurement1D 
   distanceOfClosestApproach( const reco::Track* track,
 			     const reco::Vertex& vertex);
+
+  DisplacementInformationIn3D
+  compute3dDisplacement(const KinematicFitResult& fit,
+			const reco::VertexCollection& vertices,
+			bool closestIn3D = true);
+
+  float
+  computeCandIsolation(	const pat::PackedCandidate& pfCand1,
+			const pat::PackedCandidate& pfCand2,
+			unsigned int primaryVertexIndex,
+			float minPt=0.9, float dR=0.7,
+			std::vector<const pat::PackedCandidate*> ignoreTracks =
+			std::vector<const pat::PackedCandidate*>());
 
   KinematicFitResult 
   fillInfo(pat::CompositeCandidate& ksCand,
@@ -459,7 +544,12 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   // 	 vtxFit.refitVertex->position().y(),
   // 	 vtxFit.refitVertex->position().z());
   addFitInfo(v0Cand, vtxFit, "kin");
-  
+
+  auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
+  int pvIndex = displacement3D.pvIndex;
+
+  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.1)); //minPt and DR
+
   if (isMC_){
     auto gen_tt = getGenMatchInfo( cand1, cand2 );
     if (gen_tt.mc_trk1){
@@ -491,6 +581,85 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
     }
   }
   return vtxFit;
+}
+
+namespace {
+  typedef ROOT::Math::SMatrix<double,3,3,ROOT::Math::MatRepSym<double,3> > cov33_t;
+  typedef ROOT::Math::SMatrix<double,6,6,ROOT::Math::MatRepSym<double,6> > cov66_t;
+  typedef ROOT::Math::SMatrix<double,7,7,ROOT::Math::MatRepSym<double,7> > cov77_t;
+  typedef ROOT::Math::SMatrix<double,9,9,ROOT::Math::MatRepSym<double,9> > cov99_t;
+  typedef ROOT::Math::SVector<double,9> jac9_t;
+
+  cov33_t GlobalError2SMatrix_33(GlobalError m_in)
+  {
+    cov33_t m_out;
+    for (int i=0; i<3; i++) {
+      for (int j=i; j<3; j++)  {
+	m_out(i,j) = m_in.matrix()(i,j);
+      }
+    }
+    return m_out;
+  }
+
+  cov99_t makeCovarianceMatrix(const cov33_t cov_vtx1,
+			       const cov77_t cov_vtx2)
+  {
+    cov99_t cov;
+    cov.Place_at(cov_vtx1,0,0);
+    cov.Place_at(cov_vtx2.Sub<cov66_t>(0,0),3,3);
+    return cov;
+  }
+
+  jac9_t makeJacobianVector2d(const AlgebraicVector3 &vtx1, const AlgebraicVector3 &vtx2,
+			      const AlgebraicVector3 &momentum) {
+    jac9_t jac;
+    const double momentumMag = ROOT::Math::Mag(momentum);
+    const AlgebraicVector3 dist = vtx2 - vtx1;
+    const double distMag = ROOT::Math::Mag(dist);
+    const double factorPositionComponent = 1./(distMag*momentumMag);
+    const double factorMomentumComponent = 1./pow(momentumMag,3);
+    jac(0)=-dist(0)*factorPositionComponent;
+    jac(1)=-dist(1)*factorPositionComponent;
+    jac(3)= dist(0)*factorPositionComponent;
+    jac(4)= dist(1)*factorPositionComponent;
+    jac(6)= momentum(0)*factorMomentumComponent;
+    jac(7)= momentum(1)*factorMomentumComponent;
+    return jac;
+  }
+
+  jac9_t makeJacobianVector2d(const ROOT::Math::PositionVector3D<ROOT::Math::Cartesian3D<double>,
+			      ROOT::Math::DefaultCoordinateSystemTag> &vtx1,
+			      const GlobalPoint &vtx2, const TVector3 &tv3momentum) {
+    return makeJacobianVector2d(AlgebraicVector3(vtx1.X(),vtx1.Y(),vtx1.Z()),
+				AlgebraicVector3(vtx2.x(),vtx2.y(),vtx2.z()),
+				AlgebraicVector3(tv3momentum.x(),tv3momentum.y(),tv3momentum.z()));
+  }
+
+  jac9_t makeJacobianVector3d(const AlgebraicVector3 &vtx1,
+			      const AlgebraicVector3 &vtx2,
+			      const AlgebraicVector3 &momentum)
+  {
+    jac9_t jac;
+    const AlgebraicVector3 dist = vtx2 - vtx1;
+    const double factor2 = 1. / ROOT::Math::Mag2(momentum);
+    const double lifetime = ROOT::Math::Dot(dist, momentum) * factor2;
+    jac.Place_at(-momentum*factor2,0);
+    jac.Place_at( momentum*factor2,3);
+    jac.Place_at( factor2*(dist-2*lifetime*momentum*factor2),6);
+    return jac;
+  }
+
+  jac9_t makeJacobianVector3d(const ROOT::Math::PositionVector3D<ROOT::Math::Cartesian3D<double>,
+			      ROOT::Math::DefaultCoordinateSystemTag> &vtx1,
+			      const GlobalPoint &vtx2, const TVector3 &tv3momentum)
+  {
+    return makeJacobianVector3d(AlgebraicVector3(vtx1.X(),vtx1.Y(),vtx1.Z()),
+				AlgebraicVector3(vtx2.x(),vtx2.y(),vtx2.z()),
+				AlgebraicVector3(tv3momentum.x(),tv3momentum.y(),tv3momentum.z()));
+  }
+
+
+
 }
 
 /*
@@ -696,6 +865,7 @@ MesonProducer::getRhosToPiPi(const edm::Event& iEvent,
   rhosCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
   //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
   //  ksCand.addUserInt( "trk2_mu_index", match_to_muon(pfCand2,*muonHandle_));
+  //  rhosCand.addUserFloat( "iso", computeCandIsolation((pfCand1,pfCand2,pvIndex,0.9,0.1)); //minPt and DR
 
   auto rhosVtxFit = fillInfo(rhosCand, iEvent, pfCand1, pfCand2);
 
@@ -881,6 +1051,197 @@ MesonProducer::getLambdaToPPi(const edm::Event& iEvent,
 
   return lambdaCand;
 }
+
+DisplacementInformationIn3D
+  MesonProducer::compute3dDisplacement(const KinematicFitResult& fit,
+				       const reco::VertexCollection& vertices,
+				       bool closestIn3D)
+{
+  DisplacementInformationIn3D result;
+  if (not fit.valid()) return result;
+
+  // Potential issue: tracks used to build the candidate could
+  // also be used in the primary vertex fit. One can refit the vertices
+  // excluding tracks from the cadndidate. It's not done at the moment
+  // due to non-trivial linkig between primary vertex and its tracks
+  // in MiniAOD. Also not all muons associated to a vertex are really
+  // used in the fit, so the potential bias most likely small.
+
+  auto candTransientTrack = fit.refitMother->refittedTransientTrack();
+
+  const reco::Vertex* bestVertex(0);
+  int bestVertexIndex(-1);
+  double minDistance(999.);
+
+  for ( unsigned int i = 0; i<vertices.size(); ++i ){
+    const auto & vertex = vertices.at(i);
+    if (closestIn3D){
+      auto impactParameter3D = IPTools::absoluteImpactParameter3D(candTransientTrack, vertex);
+      if (impactParameter3D.first and impactParameter3D.second.value() < minDistance){
+	minDistance = impactParameter3D.second.value();
+	bestVertex = &vertex;
+	bestVertexIndex = i;
+      }
+    } else{
+      auto impactParameterZ  = IPTools::signedDecayLength3D(candTransientTrack, GlobalVector(0,0,1), vertex);
+      double distance = fabs(impactParameterZ.second.value());
+      if (impactParameterZ.first and distance < minDistance){
+	minDistance = distance;
+	bestVertex = &vertex;
+	bestVertexIndex = i;
+      }
+    }
+  }
+
+  // find second best vertex
+  const reco::Vertex* bestVertex2(0);
+  int bestVertexIndex2(-1);
+  double minDistance2(999.);
+  for ( unsigned int i = 0; i<vertices.size(); ++i ){
+    const auto & vertex = vertices.at(i);
+    if (closestIn3D){
+      auto impactParameter3D = IPTools::absoluteImpactParameter3D(candTransientTrack, vertex);
+      if (impactParameter3D.first and impactParameter3D.second.value() < minDistance2 and impactParameter3D.second.value() > minDistance){
+	minDistance2 = impactParameter3D.second.value();
+	bestVertex2 = &vertex;
+	bestVertexIndex2 = i;
+      }
+    } else{
+      auto impactParameterZ  = IPTools::signedDecayLength3D(candTransientTrack, GlobalVector(0,0,1), vertex);
+      double distance = fabs(impactParameterZ.second.value());
+      if (impactParameterZ.first and distance < minDistance2 and distance > minDistance){
+	minDistance2 = distance;
+	bestVertex2 = &vertex;
+	bestVertexIndex2 = i;
+      }
+    }
+  }
+
+  if (! bestVertex) return result;
+
+  auto impactParameter3D = IPTools::absoluteImpactParameter3D(candTransientTrack, *bestVertex);
+  auto impactParameterZ  = IPTools::signedDecayLength3D(candTransientTrack, GlobalVector(0,0,1), *bestVertex);
+  result.pv = bestVertex;
+  result.pvIndex = bestVertexIndex;
+  if (impactParameterZ.first) {
+    result.longitudinalImpactParameter    = impactParameterZ.second.value();
+    result.longitudinalImpactParameterSig = impactParameterZ.second.significance();
+    result.longitudinalImpactParameterErr = impactParameterZ.second.error();
+  }
+  if (impactParameter3D.first and not isnan(impactParameter3D.second.error())) {
+    result.distaceOfClosestApproach       = impactParameter3D.second.value();
+    result.distaceOfClosestApproachSig    = impactParameter3D.second.significance();
+    result.distaceOfClosestApproachErr    = impactParameter3D.second.error();
+  }
+
+  // compute decay length
+  VertexDistance3D distance3D;
+  auto dist = distance3D.distance(*bestVertex, fit.refitVertex->vertexState() );
+  result.decayLength    = dist.value();
+  result.decayLengthErr = dist.error();
+
+  VertexDistanceXY distanceXY;
+  auto distXY = distanceXY.distance(*bestVertex, fit.refitVertex->vertexState() );
+
+  if (bestVertex2){
+    auto impactParameter3D2 = IPTools::absoluteImpactParameter3D(candTransientTrack, *bestVertex2);
+    auto impactParameterZ2  = IPTools::signedDecayLength3D(candTransientTrack, GlobalVector(0,0,1), *bestVertex2);
+    result.pv2 = bestVertex2;
+    result.pv2Index = bestVertexIndex2;
+    if (impactParameterZ2.first) {
+      result.longitudinalImpactParameter2    = impactParameterZ2.second.value();
+      result.longitudinalImpactParameter2Sig = impactParameterZ2.second.significance();
+      result.longitudinalImpactParameter2Err = impactParameterZ2.second.error();
+    }
+    if (impactParameter3D2.first) {
+      result.distaceOfClosestApproach2       = impactParameter3D2.second.value();
+      result.distaceOfClosestApproach2Sig    = impactParameter3D2.second.value();
+      result.distaceOfClosestApproach2Err    = impactParameter3D2.second.error();
+    }
+
+    // compute decay length
+    VertexDistance3D distance3D;
+    auto dist = distance3D.distance(*bestVertex2, fit.refitVertex->vertexState() );
+    result.decayLength2    = dist.value();
+    result.decayLength2Err = dist.error();
+
+  }
+
+  //
+  // Pointing angle
+  //
+  auto alpha = getAlpha(fit.refitVertex->vertexState().position(),
+			fit.refitVertex->vertexState().error(),
+			GlobalPoint(Basic3DVector<float>(bestVertex->position())),
+			GlobalError(bestVertex->covariance()),
+			fit.refitMother->currentState().globalMomentum());
+
+  auto alphaXY = getAlpha(fit.refitVertex->vertexState().position(),
+			  fit.refitVertex->vertexState().error(),
+			  GlobalPoint(Basic3DVector<float>(bestVertex->position())),
+			  GlobalError(bestVertex->covariance()),
+			  fit.refitMother->currentState().globalMomentum(),
+			  true);
+
+  result.alpha    = alpha.first;
+  result.alphaErr = alpha.second;
+
+  result.alphaXY    = alphaXY.first;
+  result.alphaXYErr = alphaXY.second;
+
+  //
+  // Decay time information
+  //
+  TVector3 plab(fit.refitMother->currentState().globalMomentum().x(),
+		fit.refitMother->currentState().globalMomentum().y(),
+		fit.refitMother->currentState().globalMomentum().z());
+  const double massOverC = fit.mass()/TMath::Ccgs();
+
+  // get covariance matrix for error propagation in decayTime calculation
+  auto vtxDistanceCov = makeCovarianceMatrix(GlobalError2SMatrix_33(bestVertex->error()),
+					     fit.refitMother->currentState().kinematicParametersError().matrix());
+  auto vtxDistanceJac3d = makeJacobianVector3d(bestVertex->position(), fit.refitVertex->vertexState().position(), plab);
+  auto vtxDistanceJac2d = makeJacobianVector2d(bestVertex->position(), fit.refitVertex->vertexState().position(), plab);
+
+  result.decayTime = dist.value() / plab.Mag() * cos(result.alpha) * massOverC;
+  result.decayTimeError = TMath::Sqrt(ROOT::Math::Similarity(vtxDistanceCov, vtxDistanceJac3d)) * massOverC;
+
+  result.decayTimeXY = distXY.value() / plab.Perp() * cos(result.alphaXY) * massOverC;
+  result.decayTimeXYError = TMath::Sqrt(ROOT::Math::Similarity(vtxDistanceCov, vtxDistanceJac2d)) * massOverC;
+
+  return result;
+
+}
+
+float
+MesonProducer::computeCandIsolation(const pat::PackedCandidate& pfCand1, const pat::PackedCandidate& pfCand2, 
+				    unsigned int primaryVertexIndex,
+				    float minPt, float dR,
+				    std::vector<const pat::PackedCandidate*> ignoreTracks)
+{
+    float sumPt(0);
+    auto b_p4 = pfCand1.p4()+pfCand2.p4();
+    for (const auto& pfCandIso: *pfCandHandle_.product()){
+      bool ignore_track = false;
+      for (auto trk: ignoreTracks){
+	if (trk==&pfCandIso){
+	  ignore_track = true;
+	  break;
+	}
+      }
+      if (ignore_track) continue;
+      if (deltaR(pfCand1, pfCandIso) < 0.01 || deltaR(pfCand2, pfCandIso) < 0.01) continue;
+      if (pfCandIso.charge() == 0 ) continue;
+      if (!pfCandIso.hasTrackDetails()) continue;
+      if (pfCandIso.pt()<minPt) continue;
+      if (pfCandIso.vertexRef().key()!=primaryVertexIndex) continue;
+      if (deltaR(b_p4, pfCandIso) > dR) continue;
+      sumPt += pfCandIso.pt();
+    }
+
+    return b_p4.pt()/(b_p4.pt()+sumPt);
+  }
+
 
 KinematicFitResult 
 MesonProducer::vertexWithKinematicFitter(std::vector<const reco::Track*> trks,
