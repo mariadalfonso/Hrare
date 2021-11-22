@@ -2,7 +2,7 @@ import ROOT
 import os
 
 ROOT.ROOT.EnableImplicitMT()
-from utilsHrare import getMClist, getDATAlist, loadJSON
+from utilsHrare import getMClist, getDATAlist
 from utilsHrare import plot
 from utilsHrare import SwitchSample
 
@@ -218,7 +218,6 @@ def readDataSample(sampleNOW):
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
 
-    loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
     analysis(df,sampleNOW,w,"true")
 
 def runTest():

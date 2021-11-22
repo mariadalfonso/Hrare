@@ -59,6 +59,23 @@ def findDIR(directory):
 
     return rootFiles
 
+def findMany(basedir, regex):
+
+    if basedir[-1] == "/": basedir = basedir[:-1]
+    regex = basedir + "/" + regex
+
+    rootFiles = ROOT.vector('string')()
+    for root, directories, filenames in os.walk(basedir):
+
+        for f in filenames:
+
+            filePath = os.path.join(os.path.abspath(root), f)
+            if "failed/" in filePath: continue
+            if "log/" in filePath: continue
+            if fnmatch.fnmatch(filePath, regex): rootFiles.push_back(filePath)
+
+    return rootFiles
+
 def concatenate(result, tmp1):
     for f in tmp1:
         result.push_back(f)
@@ -74,16 +91,8 @@ def getMClist(sampleNOW):
 
 def getDATAlist():
 
-    files1 = findDIR("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/SingleMuon+Run2018B-UL2018_MiniAODv2-v2+MINIAOD")
-    files2 = findDIR("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/SingleMuon+Run2018C-UL2018_MiniAODv2-v2+MINIAOD")
-    files3 = findDIR("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/SingleMuon+Run2018D-UL2018_MiniAODv2-v3+MINIAOD")
-    files4 = findDIR("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/SingleMuon+Run2018A-UL2018_MiniAODv2-v2+MINIAOD")
-
-    files = ROOT.vector('string')()
-    concatenate(files, files1)
-    concatenate(files, files2)
-    concatenate(files, files3)
-    concatenate(files, files4)
+    loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
+    files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/","SingleMuon+Run2018*")
 
     return files
 
