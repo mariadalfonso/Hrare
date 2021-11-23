@@ -548,7 +548,7 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
   int pvIndex = displacement3D.pvIndex;
 
-  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.1)); //minPt and DR
+  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
 
   if (isMC_){
     auto gen_tt = getGenMatchInfo( cand1, cand2 );
@@ -865,7 +865,6 @@ MesonProducer::getRhosToPiPi(const edm::Event& iEvent,
   rhosCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
   //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
   //  ksCand.addUserInt( "trk2_mu_index", match_to_muon(pfCand2,*muonHandle_));
-  //  rhosCand.addUserFloat( "iso", computeCandIsolation((pfCand1,pfCand2,pvIndex,0.9,0.1)); //minPt and DR
 
   auto rhosVtxFit = fillInfo(rhosCand, iEvent, pfCand1, pfCand2);
 
