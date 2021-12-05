@@ -18,7 +18,7 @@ def merge_psets(*argv):
                 setattr(result,name,value)
     return result
 
-V0ForMuonFake = cms.EDProducer(
+V0prod = cms.EDProducer(
     "MesonProducer",
     beamSpot=cms.InputTag("offlineBeamSpot"),
     vertexCollection=cms.InputTag("offlineSlimmedPrimaryVertices"),
@@ -64,11 +64,11 @@ V0ForMuonFake = cms.EDProducer(
     isMC = cms.bool(False)
 )
 
-V0ForMuonFakeMC = V0ForMuonFake.clone( isMC = cms.bool(True) ) 
+V0prodMC = V0prod.clone( isMC = cms.bool(True) )
 
 # KsToPiPi
 
-KsForMuonFakeVariables = cms.PSet(
+KsVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
     iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
@@ -97,8 +97,8 @@ KsForMuonFakeVariables = cms.PSet(
     kin_sipPV    = Var("userFloat('kin_sipPV')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in 3D wrt PV"),
 )
 
-KsForMuonFakeVariablesMC = merge_psets(
-    KsForMuonFakeVariables,
+KsVariablesMC = merge_psets(
+    KsVariables,
     cms.PSet(
         gen_trk1_pdgId  = Var("userInt(  'gen_trk1_pdgId')",    int,   doc = "Gen match: first track pdg Id"),
         gen_trk1_mpdgId = Var("userInt(  'gen_trk1_mpdgId')",   int,   doc = "Gen match: first track mother pdg Id"),
@@ -112,50 +112,50 @@ KsForMuonFakeVariablesMC = merge_psets(
         ),
 )
 
-KsForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
-    src=cms.InputTag("V0ForMuonFake","Ks"),
+KsTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prod","Ks"),
     cut=cms.string(""),
     name=cms.string("ks"),
     doc=cms.string("Ks Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = KsForMuonFakeVariables
+    variables = KsVariables
 )
 
-KsForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
-    src=cms.InputTag("V0ForMuonFakeMC","Ks"),
+KsMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prodMC","Ks"),
     cut=cms.string(""),
     name=cms.string("ks"),
     doc=cms.string("Ks Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = KsForMuonFakeVariablesMC
+    variables = KsVariablesMC
 )
 
-RhosForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
-    src=cms.InputTag("V0ForMuonFake","Rho"),
+RhosTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prod","Rho"),
     cut=cms.string(""),
     name=cms.string("rho"),
     doc=cms.string("Rhos Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = KsForMuonFakeVariables # for now same variables rho, k to pipi
+    variables = KsVariables # for now same variables rho, k to pipi
 )
 
-RhosForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
-    src=cms.InputTag("V0ForMuonFakeMC","Rho"),
+RhosMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prodMC","Rho"),
     cut=cms.string(""),
     name=cms.string("rho"),
     doc=cms.string("Rhos Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = KsForMuonFakeVariablesMC # for now same variables rho, k to pipi
+    variables = KsVariablesMC # for now same variables rho, k to pipi
 )
 
 
 # Omega ToPiPi + Pi0
-OmegasForMuonFakeVariables = merge_psets(
-    KsForMuonFakeVariables,
+OmegasVariables = merge_psets(
+    KsVariables,
     cms.PSet(
         photon_pt     = Var("userFloat('photon_pt')",    float,   doc = " pt of the photon proxy of pi0"),
         photon_eta    = Var("userFloat('photon_eta')",   float,   doc = " eta of the photon proxy of pi0"),
@@ -166,8 +166,8 @@ OmegasForMuonFakeVariables = merge_psets(
     )
 )
 
-OmegasForMuonFakeVariablesMC = merge_psets(
-    KsForMuonFakeVariablesMC,
+OmegasVariablesMC = merge_psets(
+    KsVariablesMC,
     cms.PSet(
         photon_pt     = Var("userFloat('photon_pt')",   float,   doc = " pt of the photon proxy of pi0"),
         photon_eta    = Var("userFloat('photon_eta')",  float,   doc = " eta of the photon proxy of pi0"),
@@ -178,30 +178,89 @@ OmegasForMuonFakeVariablesMC = merge_psets(
     )
 )
 
-OmegasForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
-    src=cms.InputTag("V0ForMuonFake","Omega"),
+OmegasTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prod","Omega"),
     cut=cms.string(""),
     name=cms.string("omega"),
     doc=cms.string("Omegas Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = OmegasForMuonFakeVariables # for now same variables rho, k to pipi
+    variables = OmegasVariables # for now same variables rho, k to pipi
 )
 
-OmegasForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
-    src=cms.InputTag("V0ForMuonFakeMC","Omega"),
+OmegasMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prodMC","Omega"),
     cut=cms.string(""),
     name=cms.string("omega"),
     doc=cms.string("Omegas Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = OmegasForMuonFakeVariablesMC # for now same variables rho, k to pipi
+    variables = OmegasVariablesMC # for now same variables rho, k to pipi
+)
+
+# PhiToKK and DsToPhiPi
+
+PhiVariables = merge_psets(
+    KsVariables,
+    cms.PSet(
+        ds_pion_pt   = Var("userFloat('ds_pion_pt')",      float, doc = "DsToPhiPi: pion pt"),
+        ds_pion_eta  = Var("userFloat('ds_pion_eta')",     float, doc = "DsToPhiPi: pion eta"),
+        ds_pion_phi  = Var("userFloat('ds_pion_phi')",     float, doc = "DsToPhiPi: pion phi"),
+        #    ds_pion_mu_index = Var("userInt('ds_pion_mu_index')",     float, doc = "DsToPhiPi: pion muon index"),
+        ds_mass      = Var("userFloat('ds_mass')",         float, doc = "DsToPhiPi: 3-body mass with vertex constraint"),
+        ds_vtx_prob  = Var("userFloat('ds_vtx_prob')",     float, doc = "DsToPhiPi: vertex probability"),
+        ds_vtx_chi2dof = Var("userFloat('ds_vtx_chi2dof')", float, doc = "DsToPhiPi: vertex normalized Chi^2"),
+        ds_pt        = Var("userFloat('ds_pt')",           float, doc = "DsToPhiPi: vertex refitted pt"),
+        ds_eta       = Var("userFloat('ds_eta')",          float, doc = "DsToPhiPi: vertex refitted eta"),
+        ds_phi       = Var("userFloat('ds_phi')",          float, doc = "DsToPhiPi: vertex refitted phi"),
+        ds_massErr   = Var("userFloat('ds_massErr')",      float, doc = "DsToPhiPi: vertex refitted mass error"),
+        ds_lxy       = Var("userFloat('ds_lxy')",          float, doc = "DsToPhiPi: vertex displacement in XY plane wrt Beam Spot"),
+        ds_slxy      = Var("userFloat('ds_sigLxy')",       float, doc = "DsToPhiPi: vertex displacement significance in XY plane wrt Beam Spot"),
+        ds_cosAlphaXY = Var("userFloat('ds_cosAlphaXY')",    float, doc = "DsToPhiPi: cosine of pointing angle in XY wrt BS"),
+        ds_sipBS     = Var("userFloat('ds_sipBS')",        float, doc = "DsToPhiPi: impact parameter significance of the candidate trajectory in XY wrt BS"),
+        ds_sipPV     = Var("userFloat('ds_sipPV')",        float, doc = "DsToPhiPi: impact parameter significance of the candidate trajectory in 3D wrt PV"),
+    )
+)
+
+PhiVariablesMC = merge_psets(
+    PhiVariables,
+    cms.PSet(
+        gen_trk1_pdgId  = Var("userInt(  'gen_trk1_pdgId')",    int,   doc = "Gen match: first track pdg Id"),
+        gen_trk1_mpdgId = Var("userInt(  'gen_trk1_mpdgId')",   int,   doc = "Gen match: first track mother pdg Id"),
+        gen_trk1_pt     = Var("userFloat('gen_trk1_pt')",     float,   doc = "Gen match: first track pt"),
+        gen_trk2_pdgId  = Var("userInt(  'gen_trk2_pdgId')",    int,   doc = "Gen match: second track pdg Id"),
+        gen_trk2_mpdgId = Var("userInt(  'gen_trk2_mpdgId')",   int,   doc = "Gen match: second track mother pdg Id"),
+        gen_trk2_pt     = Var("userFloat('gen_trk2_pt')",     float,   doc = "Gen match: second track pt"),
+        gen_pdgId       = Var("userInt(  'gen_pdgId')",         int,   doc = "Gen match: ditrack pdg Id"),
+        gen_mass        = Var("userFloat('gen_mass')",        float,   doc = "Gen match: ditrack mass"),
+        gen_pt          = Var("userFloat('gen_pt')",          float,   doc = "Gen match: ditrack pt"),
+        ),
+)
+
+PhiTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+    src=cms.InputTag("V0prod","Phi"),
+    cut=cms.string(""),
+    name=cms.string("phi"),
+    doc=cms.string("Phi Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = PhiVariables
+)
+
+PhiMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+    src=cms.InputTag("V0prodMC","Phi"),
+    cut=cms.string(""),
+    name=cms.string("phi"),
+    doc=cms.string("Phi Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = PhiVariablesMC
 )
 
 
 # D0ToKPi
 
-D0ForMuonFakeVariables = cms.PSet(
+D0Variables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
     iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
@@ -230,8 +289,8 @@ D0ForMuonFakeVariables = cms.PSet(
     kin_sipPV    = Var("userFloat('kin_sipPV')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in 3D wrt PV"),
 )
 
-D0ForMuonFakeVariablesMC = merge_psets(
-    D0ForMuonFakeVariables,
+D0VariablesMC = merge_psets(
+    D0Variables,
     cms.PSet(
         gen_kaon_pdgId  = Var("userInt(  'gen_kaon_pdgId')",    int,   doc = "Gen match: first track pdg Id"),
         gen_kaon_mpdgId = Var("userInt(  'gen_kaon_mpdgId')",   int,   doc = "Gen match: first track mother pdg Id"),
@@ -245,111 +304,29 @@ D0ForMuonFakeVariablesMC = merge_psets(
         ),
 )
 
-D0ForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
-    src=cms.InputTag("V0ForMuonFake","D0"),
+D0Table=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+    src=cms.InputTag("V0prod","D0"),
     cut=cms.string(""),
     name=cms.string("d0"),
     doc=cms.string("D0s Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = D0ForMuonFakeVariables
+    variables = D0Variables
 )
 
-D0ForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
-    src=cms.InputTag("V0ForMuonFakeMC","D0"),
+D0McTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+    src=cms.InputTag("V0prodMC","D0"),
     cut=cms.string(""),
     name=cms.string("d0"),
     doc=cms.string("D0 Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = D0ForMuonFakeVariablesMC
-)
-
-# PhiToKK and DsToPhiPi
-
-PhiForMuonFakeVariables = cms.PSet(
-    mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
-    doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
-    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
-    trk1_pt      = Var("userFloat('trk1_pt')",         float, doc = "Track 1 pt"),
-    trk1_eta     = Var("userFloat('trk1_eta')",        float, doc = "Track 1 eta"),
-    trk1_phi     = Var("userFloat('trk1_phi')",        float, doc = "Track 1 phi"),
-#    trk1_mu_index = Var("userInt('trk1_mu_index')",      int, doc = "Matched muon index for track 1"),
-    trk2_pt      = Var("userFloat('trk2_pt')",         float, doc = "Track 2 pt"),
-    trk2_eta     = Var("userFloat('trk2_eta')",        float, doc = "Track 2 eta"),
-    trk2_phi     = Var("userFloat('trk2_phi')",        float, doc = "Track 2 phi"),
-#    trk2_mu_index = Var("userInt('trk2_mu_index')",      int, doc = "Matched muon index for track 2"),
-    trk1_sip     = Var("userFloat('trk1_sip')",        float, doc = "Track 1 2D impact parameter significance wrt Beam Spot"),
-    trk2_sip     = Var("userFloat('trk2_sip')",        float, doc = "Track 2 2D impact parameter significance wrt Beam Spot"),
-    kin_valid    = Var("userInt('kin_valid')",         int,   doc = "Kinematic fit: vertex validity"),
-    kin_vtx_prob = Var("userFloat('kin_vtx_prob')",    float, doc = "Kinematic fit: vertex probability"),
-    kin_vtx_chi2dof = Var("userFloat('kin_vtx_chi2dof')", float, doc = "Kinematic fit: vertex normalized Chi^2"),
-    kin_mass     = Var("userFloat('kin_mass')",        float, doc = "Kinematic fit: vertex refitted mass"),
-    kin_pt       = Var("userFloat('kin_pt')",          float, doc = "Kinematic fit: vertex refitted pt"),
-    kin_eta      = Var("userFloat('kin_eta')",         float, doc = "Kinematic fit: vertex refitted eta"),
-    kin_phi      = Var("userFloat('kin_phi')",         float, doc = "Kinematic fit: vertex refitted phi"),
-    kin_massErr  = Var("userFloat('kin_massErr')",     float, doc = "Kinematic fit: vertex refitted mass error"),
-    kin_lxy      = Var("userFloat('kin_lxy')",         float, doc = "Kinematic fit: vertex displacement in XY plane wrt Beam Spot"),
-    kin_slxy     = Var("userFloat('kin_sigLxy')",      float, doc = "Kinematic fit: vertex displacement significance in XY plane wrt Beam Spot"),
-    kin_cosAlphaXY = Var("userFloat('kin_cosAlphaXY')",    float, doc = "Kinematic fit: cosine of pointing angle in XY wrt BS"),
-    kin_sipBS    = Var("userFloat('kin_sipBS')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in XY wrt BS"),
-    kin_sipPV    = Var("userFloat('kin_sipPV')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in 3D wrt PV"),
-    ds_pion_pt   = Var("userFloat('ds_pion_pt')",      float, doc = "DsToPhiPi: pion pt"),
-    ds_pion_eta  = Var("userFloat('ds_pion_eta')",     float, doc = "DsToPhiPi: pion eta"),
-    ds_pion_phi  = Var("userFloat('ds_pion_phi')",     float, doc = "DsToPhiPi: pion phi"),
-#    ds_pion_mu_index = Var("userInt('ds_pion_mu_index')",     float, doc = "DsToPhiPi: pion muon index"),
-    ds_mass      = Var("userFloat('ds_mass')",         float, doc = "DsToPhiPi: 3-body mass with vertex constraint"),
-    ds_vtx_prob  = Var("userFloat('ds_vtx_prob')",     float, doc = "DsToPhiPi: vertex probability"),
-    ds_vtx_chi2dof = Var("userFloat('ds_vtx_chi2dof')", float, doc = "DsToPhiPi: vertex normalized Chi^2"),
-    ds_pt        = Var("userFloat('ds_pt')",           float, doc = "DsToPhiPi: vertex refitted pt"),
-    ds_eta       = Var("userFloat('ds_eta')",          float, doc = "DsToPhiPi: vertex refitted eta"),
-    ds_phi       = Var("userFloat('ds_phi')",          float, doc = "DsToPhiPi: vertex refitted phi"),
-    ds_massErr   = Var("userFloat('ds_massErr')",      float, doc = "DsToPhiPi: vertex refitted mass error"),
-    ds_lxy       = Var("userFloat('ds_lxy')",          float, doc = "DsToPhiPi: vertex displacement in XY plane wrt Beam Spot"),
-    ds_slxy      = Var("userFloat('ds_sigLxy')",       float, doc = "DsToPhiPi: vertex displacement significance in XY plane wrt Beam Spot"),
-    ds_cosAlphaXY = Var("userFloat('ds_cosAlphaXY')",    float, doc = "DsToPhiPi: cosine of pointing angle in XY wrt BS"),
-    ds_sipBS     = Var("userFloat('ds_sipBS')",        float, doc = "DsToPhiPi: impact parameter significance of the candidate trajectory in XY wrt BS"),
-    ds_sipPV     = Var("userFloat('ds_sipPV')",        float, doc = "DsToPhiPi: impact parameter significance of the candidate trajectory in 3D wrt PV"),
-)
-
-PhiForMuonFakeVariablesMC = merge_psets(
-    PhiForMuonFakeVariables,
-    cms.PSet(
-        gen_trk1_pdgId  = Var("userInt(  'gen_trk1_pdgId')",    int,   doc = "Gen match: first track pdg Id"),
-        gen_trk1_mpdgId = Var("userInt(  'gen_trk1_mpdgId')",   int,   doc = "Gen match: first track mother pdg Id"),
-        gen_trk1_pt     = Var("userFloat('gen_trk1_pt')",     float,   doc = "Gen match: first track pt"),
-        gen_trk2_pdgId  = Var("userInt(  'gen_trk2_pdgId')",    int,   doc = "Gen match: second track pdg Id"),
-        gen_trk2_mpdgId = Var("userInt(  'gen_trk2_mpdgId')",   int,   doc = "Gen match: second track mother pdg Id"),
-        gen_trk2_pt     = Var("userFloat('gen_trk2_pt')",     float,   doc = "Gen match: second track pt"),
-        gen_pdgId       = Var("userInt(  'gen_pdgId')",         int,   doc = "Gen match: ditrack pdg Id"),
-        gen_mass        = Var("userFloat('gen_mass')",        float,   doc = "Gen match: ditrack mass"),
-        gen_pt          = Var("userFloat('gen_pt')",          float,   doc = "Gen match: ditrack pt"),
-        ),
-)
-
-PhiForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
-    src=cms.InputTag("V0ForMuonFake","Phi"),
-    cut=cms.string(""),
-    name=cms.string("phi"),
-    doc=cms.string("Phi Variables"),
-    singleton=cms.bool(False),
-    extension=cms.bool(False),
-    variables = PhiForMuonFakeVariables
-)
-
-PhiForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
-    src=cms.InputTag("V0ForMuonFakeMC","Phi"),
-    cut=cms.string(""),
-    name=cms.string("phi"),
-    doc=cms.string("Phi Variables"),
-    singleton=cms.bool(False),
-    extension=cms.bool(False),
-    variables = PhiForMuonFakeVariablesMC
+    variables = D0VariablesMC
 )
 
 # LambdaToPPi
 
-LambdaForMuonFakeVariables = cms.PSet(
+LambdaVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
     iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
@@ -378,8 +355,8 @@ LambdaForMuonFakeVariables = cms.PSet(
     kin_sipPV    = Var("userFloat('kin_sipPV')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in 3D wrt PV"),
 )
 
-LambdaForMuonFakeVariablesMC = merge_psets(
-    LambdaForMuonFakeVariables,
+LambdaVariablesMC = merge_psets(
+    LambdaVariables,
     cms.PSet(
         gen_proton_pdgId  = Var("userInt(  'gen_proton_pdgId')",    int,   doc = "Gen match: first track pdg Id"),
         gen_proton_mpdgId = Var("userInt(  'gen_proton_mpdgId')",   int,   doc = "Gen match: first track mother pdg Id"),
@@ -393,28 +370,28 @@ LambdaForMuonFakeVariablesMC = merge_psets(
         ),
 )
 
-LambdaForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
-    src=cms.InputTag("V0ForMuonFake","Lambda"),
+LambdaTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+    src=cms.InputTag("V0prod","Lambda"),
     cut=cms.string(""),
     name=cms.string("lambda"),
     doc=cms.string("Lambdas Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = LambdaForMuonFakeVariables
+    variables = LambdaVariables
 )
 
-LambdaForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
-    src=cms.InputTag("V0ForMuonFakeMC","Lambda"),
+LambdaMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+    src=cms.InputTag("V0prodMC","Lambda"),
     cut=cms.string(""),
     name=cms.string("lambda"),
     doc=cms.string("Lambda Variables"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
-    variables = LambdaForMuonFakeVariablesMC
+    variables = LambdaVariablesMC
 )
 
 
-V0ForMuonFakeSequence   = cms.Sequence(V0ForMuonFake)
-V0ForMuonFakeMcSequence = cms.Sequence(V0ForMuonFakeMC)
-V0ForMuonFakeTables     = cms.Sequence(KsForMuonFakeTable + RhosForMuonFakeTable + OmegasForMuonFakeTable + D0ForMuonFakeTable + PhiForMuonFakeTable + LambdaForMuonFakeTable)
-V0ForMuonFakeMcTables   = cms.Sequence(KsForMuonFakeMcTable + RhosForMuonFakeMcTable + OmegasForMuonFakeMcTable + D0ForMuonFakeMcTable + PhiForMuonFakeMcTable + LambdaForMuonFakeMcTable)
+V0Sequence   = cms.Sequence(V0prod)
+V0McSequence = cms.Sequence(V0prodMC)
+V0Tables     = cms.Sequence(KsTable + RhosTable + OmegasTable + PhiTable + D0Table + LambdaTable)
+V0McTables   = cms.Sequence(KsMcTable + RhosMcTable + OmegasMcTable + PhiMcTable + D0McTable + LambdaMcTable)
