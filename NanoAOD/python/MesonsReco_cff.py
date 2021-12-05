@@ -41,6 +41,8 @@ V0ForMuonFake = cms.EDProducer(
     maxRhosPreselectMass = cms.double(1.1),
     minRhosMass = cms.double(0.5), # rho true mass 770
     maxRhosMass = cms.double(1.),
+    minOmegasPreselectMass = cms.double(0.3),
+    maxOmegasPreselectMass = cms.double(1.65),
     minDsMass  = cms.double(1.91),
     maxDsMass  = cms.double(2.03),
     minDsPreselectMass = cms.double(1.8),
@@ -149,6 +151,53 @@ RhosForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer
     extension=cms.bool(False),
     variables = KsForMuonFakeVariablesMC # for now same variables rho, k to pipi
 )
+
+
+# Omega ToPiPi + Pi0
+OmegasForMuonFakeVariables = merge_psets(
+    KsForMuonFakeVariables,
+    cms.PSet(
+        photon_pt     = Var("userFloat('photon_pt')",    float,   doc = " pt of the photon proxy of pi0"),
+        photon_eta    = Var("userFloat('photon_eta')",   float,   doc = " eta of the photon proxy of pi0"),
+        photon_phi    = Var("userFloat('photon_phi')",   float,   doc = " phi of the photon proxy of pi0"),
+        photon_pdgId  = Var("userInt('photon_pdgId')",   int,     doc = " pdgId of the photon proxy of pi0"),
+        Nphotons      = Var("userInt('Nphotons')",       int,     doc = " numbers of the photon proxy of pi0"),
+        threemass     = Var("userFloat('3body_mass')",   float,   doc = "mass of 3 pions"),
+    )
+)
+
+OmegasForMuonFakeVariablesMC = merge_psets(
+    KsForMuonFakeVariablesMC,
+    cms.PSet(
+        photon_pt     = Var("userFloat('photon_pt')",   float,   doc = " pt of the photon proxy of pi0"),
+        photon_eta    = Var("userFloat('photon_eta')",  float,   doc = " eta of the photon proxy of pi0"),
+        photon_phi    = Var("userFloat('photon_phi')",  float,   doc = " phi of the photon proxy of pi0"),
+        photon_pdgId  = Var("userInt('photon_pdgId')",  int,     doc = " pdgId of the photon proxy of pi0"),
+        Nphotons      = Var("userInt('Nphotons')",      int,     doc = " numbers of the photon proxy of pi0"),
+        threemass     = Var("userFloat('3body_mass')",  float,   doc = "mass of 3 pions"),
+    )
+)
+
+OmegasForMuonFakeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0ForMuonFake","Omega"),
+    cut=cms.string(""),
+    name=cms.string("omega"),
+    doc=cms.string("Omegas Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = OmegasForMuonFakeVariables # for now same variables rho, k to pipi
+)
+
+OmegasForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0ForMuonFakeMC","Omega"),
+    cut=cms.string(""),
+    name=cms.string("omega"),
+    doc=cms.string("Omegas Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = OmegasForMuonFakeVariablesMC # for now same variables rho, k to pipi
+)
+
 
 # D0ToKPi
 
@@ -367,5 +416,5 @@ LambdaForMuonFakeMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProduc
 
 V0ForMuonFakeSequence   = cms.Sequence(V0ForMuonFake)
 V0ForMuonFakeMcSequence = cms.Sequence(V0ForMuonFakeMC)
-V0ForMuonFakeTables     = cms.Sequence(KsForMuonFakeTable + RhosForMuonFakeTable + D0ForMuonFakeTable + PhiForMuonFakeTable + LambdaForMuonFakeTable)
-V0ForMuonFakeMcTables   = cms.Sequence(KsForMuonFakeMcTable + RhosForMuonFakeMcTable + D0ForMuonFakeMcTable + PhiForMuonFakeMcTable + LambdaForMuonFakeMcTable)
+V0ForMuonFakeTables     = cms.Sequence(KsForMuonFakeTable + RhosForMuonFakeTable + OmegasForMuonFakeTable + D0ForMuonFakeTable + PhiForMuonFakeTable + LambdaForMuonFakeTable)
+V0ForMuonFakeMcTables   = cms.Sequence(KsForMuonFakeMcTable + RhosForMuonFakeMcTable + OmegasForMuonFakeMcTable + D0ForMuonFakeMcTable + PhiForMuonFakeMcTable + LambdaForMuonFakeMcTable)
