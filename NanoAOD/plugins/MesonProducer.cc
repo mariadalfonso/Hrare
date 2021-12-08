@@ -180,53 +180,6 @@ struct KinematicFitResult{
   
 };
 
-std::pair<float, float>
-getAlpha(const GlobalPoint& vtx_position, const GlobalError& vtx_error,
-	 const GlobalPoint& ip_position,  const GlobalError& ip_error,
-	 const GlobalVector &momentum,
-	 bool transverse = true){
-  AlgebraicSymMatrix33 error_matrix(vtx_error.matrix() + ip_error.matrix());
-  GlobalVector dir(vtx_position - ip_position);
-  if (dir.mag() == 0)
-    return std::pair<float, float>(999., 999.);
-
-  GlobalVector p(momentum);
-  if (transverse){
-    dir = GlobalVector(dir.x(), dir.y(), 0);
-    p = GlobalVector(p.x(), p.y(), 0);
-  }
-
-  double dot_product = dir.dot(p);
-  double cosAlpha = dot_product / p.mag() / dir.mag();
-  if (cosAlpha > 1) cosAlpha = 1;
-  if (cosAlpha < -1) cosAlpha = -1;
-
-  // Error propagation
-
-  double c1 = 1 / dir.mag() / p.mag();
-  double c2 = dot_product / pow(dir.mag(), 3) / p.mag();
-
-  double dfdx = p.x() * c1 - dir.x() * c2;
-  double dfdy = p.y() * c1 - dir.y() * c2;
-  double dfdz = p.z() * c1 - dir.z() * c2;
-
-  double err2_cosAlpha =
-    pow(dfdx, 2) * error_matrix(0, 0) +
-    pow(dfdy, 2) * error_matrix(1, 1) +
-    pow(dfdz, 2) * error_matrix(2, 2) +
-    2 * dfdx * dfdy * error_matrix(0, 1) +
-    2 * dfdx * dfdz * error_matrix(0, 2) +
-    2 * dfdy * dfdz * error_matrix(1, 2);
-
-  float err_alpha = fabs(cosAlpha) <= 1 and err2_cosAlpha >=0 ? sqrt(err2_cosAlpha) / sqrt(1-pow(cosAlpha, 2)) : 999;
-  float alpha = acos(cosAlpha);
-  if (isnan(alpha) or isnan(err_alpha))
-    return std::pair<float, float>(999., 999.);
-  else
-    return std::pair<float, float>(alpha, err_alpha);
-}
-
-
 struct DisplacementInformationIn3D{
   double decayLength, decayLengthErr, decayLength2, decayLength2Err,
     distaceOfClosestApproach, distaceOfClosestApproachErr, distaceOfClosestApproachSig,
@@ -351,6 +304,12 @@ private:
 			float minPt=0.9, float dR=0.7,
 			std::vector<const pat::PackedCandidate*> ignoreTracks =
 			std::vector<const pat::PackedCandidate*>());
+
+  std::pair<float, float>
+  getAlpha(const GlobalPoint& vtx_position, const GlobalError& vtx_error,
+	   const GlobalPoint& ip_position,  const GlobalError& ip_error,
+	   const GlobalVector &momentum,
+	   bool transverse = true);
 
   KinematicFitResult 
   fillInfo(pat::CompositeCandidate& ksCand,
@@ -1562,6 +1521,55 @@ MesonProducer::distanceOfClosestApproach( const reco::Track* track,
   Measurement1D doca = distance3D.distance(VertexState(tsos.globalPosition(), tsos.cartesianError().position()), vertex);
   return doca;
 }
+
+std::pair<float, float>
+MesonProducer::getAlpha(const GlobalPoint& vtx_position, const GlobalError& vtx_error,
+			const GlobalPoint& ip_position,  const GlobalError& ip_error,
+			const GlobalVector &momentum,
+			bool transverse)
+{
+  AlgebraicSymMatrix33 error_matrix(vtx_error.matrix() + ip_error.matrix());
+  GlobalVector dir(vtx_position - ip_position);
+  if (dir.mag() == 0)
+    return std::pair<float, float>(999., 999.);
+
+  GlobalVector p(momentum);
+  if (transverse){
+    dir = GlobalVector(dir.x(), dir.y(), 0);
+    p = GlobalVector(p.x(), p.y(), 0);
+  }
+
+  double dot_product = dir.dot(p);
+  double cosAlpha = dot_product / p.mag() / dir.mag();
+  if (cosAlpha > 1) cosAlpha = 1;
+  if (cosAlpha < -1) cosAlpha = -1;
+
+  // Error propagation
+
+  double c1 = 1 / dir.mag() / p.mag();
+  double c2 = dot_product / pow(dir.mag(), 3) / p.mag();
+
+  double dfdx = p.x() * c1 - dir.x() * c2;
+  double dfdy = p.y() * c1 - dir.y() * c2;
+  double dfdz = p.z() * c1 - dir.z() * c2;
+
+  double err2_cosAlpha =
+    pow(dfdx, 2) * error_matrix(0, 0) +
+    pow(dfdy, 2) * error_matrix(1, 1) +
+    pow(dfdz, 2) * error_matrix(2, 2) +
+    2 * dfdx * dfdy * error_matrix(0, 1) +
+    2 * dfdx * dfdz * error_matrix(0, 2) +
+    2 * dfdy * dfdz * error_matrix(1, 2);
+
+  float err_alpha = fabs(cosAlpha) <= 1 and err2_cosAlpha >=0 ? sqrt(err2_cosAlpha) / sqrt(1-pow(cosAlpha, 2)) : 999;
+  float alpha = acos(cosAlpha);
+  if (isnan(alpha) or isnan(err_alpha))
+    return std::pair<float, float>(999., 999.);
+  else
+    return std::pair<float, float>(alpha, err_alpha);
+}
+
+
 
 
 DEFINE_FWK_MODULE(MesonProducer);
