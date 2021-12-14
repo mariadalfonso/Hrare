@@ -476,6 +476,9 @@ DiMuonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
 
   v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
 
+  v0Cand.addUserInt( "muon1_isTightMuon", cand1.isTightMuon((*primaryVertices_).at(pvIndex)) );
+  v0Cand.addUserInt( "muon2_isTightMuon", cand2.isTightMuon((*primaryVertices_).at(pvIndex)) );
+
   if (isMC_){
     auto gen_tt = getGenMatchInfo( cand1, cand2 );
     if (gen_tt.mc_trk1){
@@ -744,6 +747,9 @@ DiMuonProducer::getJpsiToMuMu(const edm::Event& iEvent,
   diMusCand.addUserFloat( "muon2_pt",  pfCand2.pt() );
   diMusCand.addUserFloat( "muon2_eta", pfCand2.eta() );
   diMusCand.addUserFloat( "muon2_phi", pfCand2.phi() );
+  diMusCand.addUserInt( "muon1_isMediumMuon", pfCand1.isMediumMuon() );
+  diMusCand.addUserInt( "muon2_isMediumMuon", pfCand2.isMediumMuon() );
+
   //  diMusCand.addUserFloat( "muon1_sip", trackImpactParameterSignificance(pfCand1) );
   //  diMusCand.addUserFloat( "muon2_sip", trackImpactParameterSignificance(pfCand2) );
   //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
@@ -784,6 +790,8 @@ DiMuonProducer::getUpsilonToMuMu(const edm::Event& iEvent,
   diMusCand.addUserFloat( "muon2_pt",  pfCand2.pt() );
   diMusCand.addUserFloat( "muon2_eta", pfCand2.eta() );
   diMusCand.addUserFloat( "muon2_phi", pfCand2.phi() );
+  diMusCand.addUserInt( "muon1_isMediumMuon", pfCand1.isMediumMuon() );
+  diMusCand.addUserInt( "muon2_isMediumMuon", pfCand2.isMediumMuon() );
   //  diMusCand.addUserFloat( "muon1_sip", trackImpactParameterSignificance(pfCand1) );
   //  diMusCand.addUserFloat( "muon2_sip", trackImpactParameterSignificance(pfCand2) );
   //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
@@ -991,7 +999,7 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
     }
 
     return b_p4.pt()/(b_p4.pt()+sumPt);
-  }
+}
 
 
 KinematicFitResult 
