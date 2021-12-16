@@ -649,6 +649,7 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
 	if ( not isGoodMuon(patMuon1) ) continue;
 	for ( unsigned int j = i+1; j < nMuons; ++j ) {
 	  const pat::Muon& patMuon2( (*muonHandle_)[j] );
+	  if ( not isGoodMuon(patMuon2) ) continue;
 	  if ( patMuon1.charge()*patMuon2.charge() >= 0 ) continue;
 
 	  if (not patMuon1.innerTrack().isNonnull()) continue;
