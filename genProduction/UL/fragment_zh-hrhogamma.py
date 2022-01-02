@@ -17,10 +17,10 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
 #            '23:mMin = 50.0',
 #            '23:onMode = off',
 #            '23:onIfMatch = 5 -5',
-            '25:addChannel = 1  1.00   103   22   333', ##phi(1020) is 333
-#            '25:onIfMatch = 22 333',  ##phi(1020) gamma
-            '333:onMode = off', 
-            '333:onIfMatch = 321 -321',
+            '25:addChannel = 1  1.00   103   22   113', ##rho(770) 113
+#            '25:onIfMatch = 22 113',  ##rho(770) gamma
+            '113:onMode = off', 
+            '113:onIfMatch = 211 -211', ## phi to pi pi
             '23:onMode = off',   # first, turn off all Z decays 
             '23:onIfAny = 11 13 15', # turn on only decays to leptons
         ),
