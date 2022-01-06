@@ -92,7 +92,7 @@ Vec_b cleaningMask(Vec_i indices, int size) {
   return mask;
 }
 
-Vec_b cleaningJetFromPhi(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi) {
+Vec_b cleaningJetFromMeson(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi) {
 
   Vec_b mask(Jeta.size(), true);
   for (unsigned int idx = 0; idx < Jeta.size(); ++idx) {
@@ -114,6 +114,7 @@ Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
     if(ph_pt[1] > ph_pt[0]) p_ph.SetEta(ph_eta[1]);
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPhi(ph_phi[1]);
+    int indexPhoton = 1;
   }
 
   // loop over all the phiCand

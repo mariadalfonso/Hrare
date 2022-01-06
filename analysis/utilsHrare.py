@@ -2,6 +2,7 @@ import ROOT
 import os
 import json
 from subprocess import call,check_output
+import fnmatch
 
 if "/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("functions.cc","k")
@@ -92,14 +93,15 @@ def getMClist(sampleNOW):
 def getDATAlist():
 
     loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
-    files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/","SingleMuon+Run2018*")
+    files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018*")
 
     return files
 
 def SwitchSample(argument):
 
-    dirT2 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/"
-    dirLocal = "/work/submit/mariadlf/Hrare/OCT14/"
+    # cross section from  https://cms-gen-dev.cern.ch/xsdb
+    dirT2 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
+    dirLocal = "/work/submit/mariadlf/Hrare/D01/2018/"
 
     switch = {
         1000: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",6067*1000), #NNLO
@@ -109,16 +111,28 @@ def SwitchSample(argument):
         3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",53870.0*1000), #LO
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",365.3452*1000), #NNLO
-        ##
+##
         6: (dirT2+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",5031*1000), #LO
         7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",1126*1000), #LO
         8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",124.3*1000), #LO
         9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",40.76*1000), #LO
-        ##
-        10: (dirLocal+"ZLLphigamma_pythia8_genFix",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
-        11: (dirLocal+"WLNUphigamma_pythia8",0.66*1000), #xsec = 2pb * 0.33 (Wl) * BR(Hphigamma)=1
-        12: (dirLocal+"vbf-hphigamma-powheg",2.*1000) # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",6447000.0*1000), #LO
+        21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",1988000.0*1000), #LO
+        22: (dirT2+"QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",367500.0*1000), #LO
+        23: (dirT2+"QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",66590.0*1000), #LO
+        24: (dirT2+"QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",16620.0*1000), #LO
+        25: (dirT2+"QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",1104.0*1000), #LO
+##
+        31: (dirT2+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",53330.0*1000), #LO
+        32: (dirT2+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",8875.0*1000), #LO
+        33: (dirT2+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",3338.0*1000), #LO
 
+        34: (dirT2+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",5129.0*1000), #LO
+        35: (dirT2+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",951.5*1000), #LO
+        36: (dirT2+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",361.4*1000), #LO
+#### signal
+        100: (dirLocal+"vbf-hrhogamma-powheg",4.*1000), # xsec = 4pb * BR(Hphigamma)=1 BR(rho->pipi)=1.
+        101: (dirLocal+"vbf-hphigamma-powheg",2.*1000), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kk)=0.49
     }
     return switch.get(argument, "BKGdefault, xsecDefault")
 
