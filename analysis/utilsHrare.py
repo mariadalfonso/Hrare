@@ -82,7 +82,7 @@ def concatenate(result, tmp1):
         result.push_back(f)
 
 
-def getMClist(sampleNOW):
+def getMClist(year,sampleNOW):
 
     files = findDIR("{}".format(SwitchSample(sampleNOW)[0]))
     if sampleNOW==0:
@@ -90,10 +90,25 @@ def getMClist(sampleNOW):
             concatenate(files, files1)
     return files
 
-def getDATAlist():
+def getDATAlist(year,type):
 
-    loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
-    files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018*")
+    if(year == 2018):
+        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
+    if(year == 2017):
+        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
+    if(year == 2016 or year == 12016):
+        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
+
+    if(year == 2018 and type == -1):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018*")
+    if(year == 2018 and type == -31):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018A*")
+    if(year == 2018 and type == -32):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018B*")
+    if(year == 2018 and type == -33):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018C*")
+    if(year == 2018 and type == -34):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018D*")
 
     return files
 

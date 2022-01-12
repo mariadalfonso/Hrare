@@ -24,10 +24,10 @@ if sys.argv[2]=='isPhiCat': isPhiCat = "true"
 if sys.argv[2]=='isRhoCat': isRhoCat = "true"
 
 if isVBF:
-    BARRELphotons = "(Photon_pt>50 and Photon_isScEtaEB and (Photon_cutBased & 3) and Photon_electronVeto)"
+    BARRELphotons = "(Photon_pt>75 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto)"
     ENDCAPphotons = ""
-    GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>30 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid && phi_iso > 0.8)"
-    GOODRHO = "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>30 && rho_kin_valid && rho_iso > 0.8)"
+    GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>5 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
+    GOODRHO = "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
 else:
     BARRELphotons = "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto"
     ENDCAPphotons = "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto"
@@ -81,7 +81,7 @@ def selectionTAG(df):
                  .Define("mJJ","Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])")
                  .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
                  .Define("Y1Y2","Jet_eta[goodJets][0]*Jet_eta[goodJets][1]")
-                 .Filter("mJJ>300 and dEtaJJ>3 and Y1Y2<0","Filter on MJJ>300 , Deta>3 and Y1Y2<0")
+                 .Filter("mJJ>300 and dEtaJJ>3","Filter on MJJ>300 , Deta>3")
                  .Define("vetoElectrons","{}".format(VETOelectrons))
                  .Define("vetoMuons","{}".format(LOOSEmuons))
                  .Filter("Sum(vetoElectrons)==0 and Sum(vetoMuons)==0", "no leptons")
@@ -94,33 +94,36 @@ def selectionTAG(df):
 def dfGammaMeson(df):
 
     #    dfbase = (df.Define("goodPhotons", "{}".format(BARRELphotons)+" or {}".format(ENDCAPphotons) )
-    dfOBJ= (df.Define("goodPhotons", "{}".format(BARRELphotons))
-            .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
-            .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
-            .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
-            .Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
-            .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
-            .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
-            .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
-#
-            .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
-#
-            .Define("goodPhi","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
-            .Define("goodPhi_pt", "phi_kin_pt[goodPhi]")
-            .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
-            .Define("goodPhi_phi", "phi_kin_phi[goodPhi]")
-            .Define("goodPhi_mass", "phi_kin_mass[goodPhi]")
-            .Define("goodPhi_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodPhi]")
-            .Define("goodPhi_trk1_pt", "phi_trk1_pt[goodPhi]")
-            .Define("goodPhi_trk2_pt", "phi_trk2_pt[goodPhi]")
-            .Define("goodPhi_trk1_eta", "phi_trk1_eta[goodPhi]")
-            .Define("goodPhi_trk2_eta", "phi_trk2_eta[goodPhi]")
-            .Define("goodPhiDR","DeltaR(phi_trk1_eta[goodPhi],phi_trk2_eta[goodPhi],phi_trk1_phi[goodPhi],phi_trk2_phi[goodPhi])")
-#
-            .Define("goodRho","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
+    dfa= (df.Define("goodPhotons", "{}".format(BARRELphotons))
+          .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
+          .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
+          .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
+          .Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
+          .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
+          .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
+          .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
+          #
+          .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
+          )
+    dfb= (dfa.Define("goodPhi","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
+          .Define("goodPhi_pt", "phi_kin_pt[goodPhi]")
+          .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
+          .Define("goodPhi_phi", "phi_kin_phi[goodPhi]")
+          .Define("goodPhi_mass", "phi_kin_mass[goodPhi]")
+          .Define("goodPhi_iso", "phi_iso[goodPhi]")
+          .Define("goodPhi_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodPhi]")
+          .Define("goodPhi_trk1_pt", "phi_trk1_pt[goodPhi]")
+          .Define("goodPhi_trk2_pt", "phi_trk2_pt[goodPhi]")
+          .Define("goodPhi_trk1_eta", "phi_trk1_eta[goodPhi]")
+          .Define("goodPhi_trk2_eta", "phi_trk2_eta[goodPhi]")
+          .Define("goodPhiDR","DeltaR(phi_trk1_eta[goodPhi],phi_trk2_eta[goodPhi],phi_trk1_phi[goodPhi],phi_trk2_phi[goodPhi])")
+          )
+
+    dfOBJ= (dfb.Define("goodRho","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
             .Define("goodRho_pt", "rho_kin_pt[goodRho]")
             .Define("goodRho_eta", "rho_kin_eta[goodRho]")
             .Define("goodRho_phi", "rho_kin_phi[goodRho]")
+            .Define("goodRho_iso", "rho_iso[goodRho]")
             .Define("goodRho_mass", "rho_kin_mass[goodRho]")
             .Define("goodRho_vtx_chi2dof", "rho_kin_vtx_chi2dof[goodRho]")
             .Define("goodRho_trk1_pt", "rho_trk1_pt[goodRho]")
@@ -128,10 +131,9 @@ def dfGammaMeson(df):
             .Define("goodRho_trk1_eta", "rho_trk1_eta[goodRho]")
             .Define("goodRho_trk2_eta", "rho_trk2_eta[goodRho]")
             .Define("goodRhoDR","DeltaR(rho_trk1_eta[goodRho],rho_trk2_eta[goodRho],rho_trk1_phi[goodRho],rho_trk2_phi[goodRho])")
-            )
+        )
 
     return dfOBJ
-
 
 def dfHiggsCand(df):
 
@@ -200,6 +202,7 @@ def analysis(df,mc,w,isData):
             "goodPhiDR",
             "goodPhi_mass",
             "goodPhi_pt",
+            "goodPhi_iso",
             "goodPhi_trk1_pt",
             "goodPhi_trk2_pt",
             "goodPhi_trk1_eta",
@@ -214,6 +217,7 @@ def analysis(df,mc,w,isData):
             "goodRhoDR",
             "goodRho_mass",
             "goodRho_pt",
+            "goodRho_iso",
             "goodRho_trk1_pt",
             "goodRho_trk2_pt",
             "goodRho_trk1_eta",
@@ -290,10 +294,9 @@ def readMCSample(sampleNOW):
     analysis(df,sampleNOW,w,"false")
 
 
-def readDataSample():
+def readDataSample(year,type):
 
-    files = getDATAlist()
-    print(len(files))
+    files = getDATAlist(year,type)
 
     df = ROOT.RDataFrame("Events", files)
 
@@ -301,7 +304,7 @@ def readDataSample():
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
 
-    analysis(df,-1,w,"true")
+    analysis(df,type,w,"true")
 
 
 def runTest():
@@ -315,15 +318,12 @@ def runTest():
     sampleNOW=-1
     analysis(df,-1,w,"false")
 
-
    
 if __name__ == "__main__":
 
 #    runTest()
 #    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12
+#    print(int(sys.argv[3]))
 
-    readMCSample(int(sys.argv[3])) # to switch sample
-
-    if not isVBF:
-        df["data"] = readDataSample()  # SingleMuon
-
+    if(int(sys.argv[3]) < 0): readDataSample(2018,int(sys.argv[3]) )  # SingleMuon
+    else: readMCSample(int(sys.argv[3])) # to switch sample

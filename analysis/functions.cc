@@ -110,7 +110,7 @@ Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
   int indexPhoton = 0;
   Vec_i idx(2, -1); // initialize with -1 a vector of size 2
 
-  if(ph_pt.size()> 0) {
+  if(ph_pt.size()> 1) {
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
     if(ph_pt[1] > ph_pt[0]) p_ph.SetEta(ph_eta[1]);
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPhi(ph_phi[1]);
