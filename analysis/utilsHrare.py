@@ -3,9 +3,29 @@ import os
 import json
 from subprocess import call,check_output
 import fnmatch
+from correctionlib import _core
 
 if "/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("functions.cc","k")
+
+def loadCorrectionSet(type,year):
+    # Load CorrectionSet#
+
+    fname = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/"
+    if type=='MUO':
+        fname += "MUO/"+year+"_UL/muon_Z.json.gz"
+    if type=='ELE':
+        fname += "EGM/"+year+"_UL/electron.json.gz"
+    if type=='PH':
+        fname += "EGM/"+year+"_UL/photon.json.gz"
+
+    if fname.endswith(".json.gz"):
+        import gzip
+        with gzip.open(fname,'rt') as file:
+            data = file.read().strip()
+            evaluator = _core.CorrectionSet.from_string(data)
+    else:
+        evaluator = _core.CorrectionSet.from_file(fname)
 
 def loadJSON(fIn):
 
@@ -100,7 +120,14 @@ def getDATAlist(year,type):
         loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
 
     if(year == 2018 and type == -1):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018*")
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018A*")
+    if(year == 2018 and type == -2):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018B*")
+    if(year == 2018 and type == -3):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018C*")
+    if(year == 2018 and type == -4):
+        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018D*")
+
     if(year == 2018 and type == -31):
         files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018A*")
     if(year == 2018 and type == -32):
