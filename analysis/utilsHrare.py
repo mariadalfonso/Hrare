@@ -149,7 +149,7 @@ def SwitchSample(argument):
         1000: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",6067*1000), #NNLO
         0: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1_ext1-v1+MINIAODSIM",6067*1000), #NNLO
         1: (dirT2+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 51.1*1000), #LO
-        2: (dirT2+"WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 412.7*1000), #LO 
+        2: (dirT2+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 191.0*1000), #LO
         3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",53870.0*1000), #LO
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",365.3452*1000), #NNLO
@@ -178,6 +178,27 @@ def SwitchSample(argument):
     }
     return switch.get(argument, "BKGdefault, xsecDefault")
 
+
+def computeWeigths(df, files, sampleNOW, isMC):
+
+    nevents = df.Count().GetValue()
+    print("%s entries in the dataset" %nevents)
+
+    if not isMC:
+        return 1.
+    else:
+        rdf = ROOT.RDataFrame("Runs", files)
+        genEventSumWeight = rdf.Sum("genEventSumw").GetValue()
+        genEventSumNoWeight = rdf.Sum("genEventCount").GetValue()
+
+        weight = (SwitchSample(sampleNOW)[1] / genEventSumWeight)
+        weightApprox = (SwitchSample(sampleNOW)[1] / genEventSumNoWeight)
+        print('weight',weight )
+        print('weightApprox',weightApprox)
+        lumiEq = (genEventSumNoWeight / SwitchSample(sampleNOW)[1])
+        print("lumi equivalent fb %s" %lumiEq)
+
+        return weightApprox ## later with negative weights
 
 def plot(h,filename,doLogX,color):
 

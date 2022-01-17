@@ -4,7 +4,7 @@ import sys
 
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist
-from utilsHrare import plot
+from utilsHrare import plot, computeWeigths
 from utilsHrare import SwitchSample
 
 doPlot = False
@@ -285,12 +285,7 @@ def readMCSample(sampleNOW):
     print(len(files))
     df = ROOT.RDataFrame("Events", files)
 
-    nevents = df.Count().GetValue()  ## later with negative weights
-    w = (SwitchSample(sampleNOW)[1] / nevents)
-
-    lumiEq = (nevents / SwitchSample(sampleNOW)[1])
-    print("%s entries in the dataset" %nevents)
-    print("lumi equivalent fb %s" %lumiEq)
+    w = computeWeigths(df, files, sampleNOW, True)
     analysis(df,sampleNOW,w,"false")
 
 
@@ -300,9 +295,7 @@ def readDataSample(year,type):
 
     df = ROOT.RDataFrame("Events", files)
 
-    w=1.
-    nevents = df.Count().GetValue()
-    print("%s entries in the dataset" %nevents)
+    w = computeWeigths(df, files, sampleNOW, False)
 
     analysis(df,type,w,"true")
 
