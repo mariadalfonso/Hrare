@@ -101,6 +101,47 @@ Vec_b cleaningJetFromMeson(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi)
   return mask;
 }
 
+
+Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& reco_phi, const Vec_f& reco_mass,
+                   const Vec_f& genPart_eta, const Vec_f& genPart_phi,
+                   const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
+                   int pdgToMatch
+                   ) {
+
+  int idxMother = -1;
+  // loop over all the genPartCand
+  for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+    if(genPart_pdgId[i]==25) idxMother = i;
+  }
+
+  int idxMatch = -1;
+  float etaGen = 999.;
+  float phiGen = 999.;
+  // loop over all the genPartCand
+  for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+    if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113) {
+      if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
+        idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
+      }
+    }
+  }
+
+  Vec_i idx(1, -1); // initialize with -1 a vector of size 1
+  // loop over all the recoCand
+  for (unsigned int i=0; i<reco_pt.size(); i++) {
+
+    PtEtaPhiMVector p_reco(reco_pt[i], reco_eta[i], reco_phi[i], reco_mass[i]);
+
+    if(idxMatch<0) continue; // no good Match
+    if(deltaR(etaGen,phiGen,p_reco.eta(),p_reco.phi())>0.01) continue;
+    idx[0] = i;
+
+  }
+
+  return idx;
+
+}
+
 Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
                         const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
 
