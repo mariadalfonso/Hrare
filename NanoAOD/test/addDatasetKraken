@@ -1,5 +1,7 @@
 log into t3serv019.mit.edu
 
+voms-proxy-init  --voms cms -valid 198:0
+
 source /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/curl/7.70.0/etc/profile.d/init.sh
 source ~cmsprod/Tools/Kraken/setup.sh
 addRequest.py --config=nanohr --version=D01 --py=nano --dataset=/SingleMuon/Run2016F-UL2016_MiniAODv2-v2/MINIAOD
