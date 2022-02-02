@@ -21,8 +21,8 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
 #            '25:onIfMatch = 22 113',  ##rho(770) gamma
             '113:onMode = off', 
             '113:onIfMatch = 211 -211',
-            '24:onMode = off',   # first, turn off all Z decays 
-            '24:onIfAny = 11 13 15', # turn on only decays to leptons
+#            '24:onMode = off',   # first, turn off all W decays
+#            '24:onIfAny = 11 13 15', # turn on only decays to leptons
         ),
         pythia8CP5Settings = cms.vstring(
             'Tune:pp 14', 
@@ -88,7 +88,7 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
 
 
 externalLHEProducer = cms.EDProducer("ExternalLHEProducer",
-    args = cms.vstring('/cvmfs/cms.cern.ch/phys_generator/gridpacks/UL/13TeV/powheg/V2/HWJ_slc7_amd64_gcc820_CMSSW_10_6_20_HWplusJ_M125/v1/HWJ_slc7_amd64_gcc820_CMSSW_10_6_20_HWplusJ_M125.tgz'),
+    args = cms.vstring('/cvmfs/cms.cern.ch/phys_generator/gridpacks/UL/13TeV/powheg/V2/HWJ_slc7_amd64_gcc700_CMSSW_10_6_27_WplusH_HToBB_WToLNu_M125_13TeV_powheg/v1/HWJ_slc7_amd64_gcc700_CMSSW_10_6_27_WplusH_HToBB_WToLNu_M125_13TeV_powheg.tgz'),
     nEvents = cms.untracked.uint32(500),
     numberOfParameters = cms.uint32(1),
     outputFile = cms.string('cmsgrid_final.lhe'),
