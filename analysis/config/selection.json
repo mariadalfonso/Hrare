@@ -1,18 +1,47 @@
 {
-    "BARRELphotons" : "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto",
-    "ENDCAPphotons" : "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto",
+    "BARRELphotons" : "(Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto)",
+    "ENDCAPphotons" : "(Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto)",
 
     "GOODMUON" : "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)",
-    "VETOelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WPL)",
     "LOOSEmuons" : "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)",
+    "GOODELE" : "(Electron_pt>20 and abs(Electron_eta)<2.5 and Electron_cutBased >= 2 and abs(Electron_dxy) < 0.2 && abs(Electron_dz) < 0.5)",
+    "LOOSEelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and abs(Electron_dz)<0.5 and abs(Electron_dxy) < 0.2 && Electron_mvaFall17V2noIso_WPL)",
+
     "GOODJETS": "(Jet_pt>30 && abs(Jet_eta)<5 and (Jet_jetId & 2) and jet_mask and jet_mask2)",
 
+    "mesons": [
+	{
+	    "name": "isVBF",
+	    "type": "isPhiCat",
+	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>5 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
+	},
+	{
+	    "name": "isVBF",
+	    "type": "isRhoCat",
+	    "definition": "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
+	},
+	{
+	    "name": "VH",
+	    "type": "isPhiCat",
+	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid && phi_iso > 0.8)"
+	},
+	{
+	    "name": "VH",
+	    "type": "isRhoCat",
+	    "definition": "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>10 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.8)"
+	}
+    ],
     "JSON" : "isGoodRunLS(isData, run, luminosityBlock)",
     "triggers": [
 	{
 	    "name": "isVBF",
 	    "year": 2018,
 	    "definition": "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
+	},
+	{
+	    "name": "isVBF",
+	    "year": 2017,
+	    "definition": "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
 	},
 	{
 	    "name": "oneMU",

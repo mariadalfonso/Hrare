@@ -36,6 +36,11 @@ def getTriggerFromJson(overall, type, year ):
     for trigger in overall:
         if trigger['name'] == type and trigger['year'] == year: return trigger['definition']
 
+def getMesonFromJson(overall, type, cat ):
+
+    for meson in overall:
+        if meson['name'] == type and meson['type'] == cat: return meson['definition']
+
 
 def loadJSON(fIn):
 
@@ -187,6 +192,26 @@ def SwitchSample(argument):
         101: (dirLocal+"vbf-hphigamma-powheg",2.*1000), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kk)=0.49
     }
     return switch.get(argument, "BKGdefault, xsecDefault")
+
+
+def pickTRG(overall,year,PDType,isVBF,isW,isZ):
+
+    TRIGGER=''
+    if(year == 2018 and isVBF and PDType== "EGamma"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+    if(year == 2017 and isVBF and PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+
+    if(year == 2018 and (isW or isZ)):
+
+        if(PDType == "MuonEG"): TRIGGER = "{0}".format(getTriggerFromJson(overall, "muEG", year))
+        elif (PDType == "DoubleMuon"): TRIGGER = "{0} and not {1}".format(getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+        elif (PDType == "SingleMuon"): TRIGGER = "{0} and not {1} and not {2}".format(getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+        elif (PDType == "EGamma"): TRIGGER = "({0} or {1}) and not {2} and not {3} and not {4}".format(getTriggerFromJson(overall, "SEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+        elif(year == 2018):
+            TRIGGER = "{0} or {1} or {2} or {3} or {4}".format(getTriggerFromJson(overall, "SEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+        else:
+            print("PROBLEM with triggers!!!")
+
+    return TRIGGER
 
 
 def computeWeigths(df, files, sampleNOW, isMC):

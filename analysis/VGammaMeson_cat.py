@@ -5,7 +5,7 @@ import json
 
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist
-from utilsHrare import plot, computeWeigths, getTriggerFromJson
+from utilsHrare import plot, computeWeigths, getTriggerFromJson, getMesonFromJson, pickTRG
 from utilsHrare import SwitchSample
 
 doPlot = False
@@ -33,13 +33,6 @@ if sys.argv[4]=='12016': year = 12016
 #$$$$
 #$$$$
 
-if isVBF:
-    GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>5 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
-    GOODRHO = "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
-else:
-    GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid && phi_iso > 0.8)"
-    GOODRHO = "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>10 && rho_kin_valid && rho_iso > 0.8)"
-
 PRESELECTION = "(nPhoton>0 && (nphi or nrho))"
 
 with open("config/selection.json") as jsonFile:
@@ -48,13 +41,15 @@ with open("config/selection.json") as jsonFile:
 
 GOODJETS = jsonObject['GOODJETS']
 LOOSEmuons = jsonObject['LOOSEmuons']
-VETOelectrons = jsonObject['VETOelectrons']
+LOOSEelectrons = jsonObject['LOOSEelectrons']
 GOODMUON = jsonObject['GOODMUON']
+GOODELE = jsonObject['GOODELE']
 JSON = jsonObject['JSON']
 BARRELphotons = jsonObject['BARRELphotons']
 ENDCAPphotons = jsonObject['ENDCAPphotons']
 
 overall = jsonObject['triggers']
+mesons = jsonObject['mesons']
 
 TRIGGER=''
 if(year == 2018 and isVBF): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
@@ -73,7 +68,7 @@ def selectionTAG(df):
     if isZ:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25")
                  .Define("vetoMuons","{}".format(LOOSEmuons))
-                 .Define("vetoElectrons","{}".format(VETOelectrons))
+                 .Define("vetoElectrons","{}".format(LOOSEelectrons))
                  .Filter("Sum(goodMuons) >= 2 and Sum(Muon_charge[goodMuons])==0 and Sum(vetoElectrons)==0 and Sum(vetoMuons)==2", "At least two good OS muon, and no extra loose leptons")
                  .Define("V_mass", "Minv(Muon_pt[goodMuons], Muon_eta[goodMuons], Muon_phi[goodMuons], Muon_mass[goodMuons])")
                  .Filter("V_mass>(91-10) and V_mass<(91+15)","At least one good Z")
@@ -86,7 +81,7 @@ def selectionTAG(df):
 
     if isW:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_tightId and Muon_pfRelIso04_all < 0.15")
-                 .Define("vetoElectrons","{}".format(VETOelectrons))
+                 .Define("vetoElectrons","{}".format(LOOSEelectrons))
                  .Define("vetoMuons","{}".format(LOOSEmuons))
                  .Filter("Sum(goodMuons) == 1 and MET_pt>20 and Sum(vetoElectrons)==0 and Sum(vetoMuons)==1", "Exactly 1 good muon and MET>20 and no loose leptons")
                  .Define("V_mass","mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], MET_pt, MET_phi)")
@@ -104,7 +99,7 @@ def selectionTAG(df):
                  .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
                  .Define("Y1Y2","Jet_eta[goodJets][0]*Jet_eta[goodJets][1]")
                  .Filter("mJJ>300 and dEtaJJ>3","Filter on MJJ>300 , Deta>3")
-                 .Define("vetoElectrons","{}".format(VETOelectrons))
+                 .Define("vetoElectrons","{}".format(LOOSEelectrons))
                  .Define("vetoMuons","{}".format(LOOSEmuons))
                  .Filter("Sum(vetoElectrons)==0 and Sum(vetoMuons)==0", "no leptons")
                  .Define("trigger","{}".format(TRIGGER))
@@ -114,6 +109,15 @@ def selectionTAG(df):
 
 
 def dfGammaMeson(df):
+
+    GOODPHI = ""
+    if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, isVBF , sys.argv[2] ))
+    if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
+
+    GOODRHO = ""
+    if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, isVBF , sys.argv[2] ))
+    if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
+
 
     dfa= (df.Define("goodPhotons", "{}".format(GOODPHOTONS))
           .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
@@ -126,6 +130,7 @@ def dfGammaMeson(df):
           #
           .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
           )
+
     dfb= (dfa.Define("goodPhi","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
           .Define("goodPhi_pt", "phi_kin_pt[goodPhi]")
           .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
