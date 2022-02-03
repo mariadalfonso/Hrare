@@ -18,14 +18,24 @@ def loadCorrectionSet(type,year):
         fname += "EGM/"+year+"_UL/electron.json.gz"
     if type=='PH':
         fname += "EGM/"+year+"_UL/photon.json.gz"
+    if type=='PU':
+        fname += "LUM/"+year+"_UL/puWeights.json.gz"
 
     if fname.endswith(".json.gz"):
         import gzip
         with gzip.open(fname,'rt') as file:
             data = file.read().strip()
             evaluator = _core.CorrectionSet.from_string(data)
+            return evaluator
     else:
         evaluator = _core.CorrectionSet.from_file(fname)
+        return evaluator
+
+def getTriggerFromJson(overall, type, year ):
+
+    for trigger in overall:
+        if trigger['name'] == type and trigger['year'] == year: return trigger['definition']
+
 
 def loadJSON(fIn):
 

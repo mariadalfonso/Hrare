@@ -1,10 +1,11 @@
 import ROOT
 import os
 import sys
+import json
 
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist
-from utilsHrare import plot, computeWeigths
+from utilsHrare import plot, computeWeigths, getTriggerFromJson
 from utilsHrare import SwitchSample
 
 doPlot = False
@@ -23,28 +24,49 @@ if sys.argv[1]=='isVBFtag': isVBF = True
 if sys.argv[2]=='isPhiCat': isPhiCat = "true"
 if sys.argv[2]=='isRhoCat': isRhoCat = "true"
 
+if sys.argv[4]=='2018': year = 2018
+if sys.argv[4]=='2017': year = 2017
+if sys.argv[4]=='2016': year = 2016
+if sys.argv[4]=='12016': year = 12016
+
+#$$$$
+#$$$$
+#$$$$
+
 if isVBF:
-    BARRELphotons = "(Photon_pt>75 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto)"
-    ENDCAPphotons = ""
     GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>5 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
     GOODRHO = "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
 else:
-    BARRELphotons = "Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto"
-    ENDCAPphotons = "Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto"
     GOODPHI = "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid && phi_iso > 0.8)"
     GOODRHO = "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>10 && rho_kin_valid && rho_iso > 0.8)"
 
-GOODJETS = "(Jet_pt>30 && abs(Jet_eta)<5 and (Jet_jetId & 2) and jet_mask and jet_mask2)" ## to add PUid
+PRESELECTION = "(nPhoton>0 && (nphi or nrho))"
 
-GOODMUON = "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)" # ID and Iso will be asked later depending on W and Z
-VETOelectrons = "(Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WPL)"
-LOOSEmuons = "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)"
+with open("config/selection.json") as jsonFile:
+    jsonObject = json.load(jsonFile)
+    jsonFile.close()
 
-TRIGGERincl = "HLT_Photon35_TwoProngs35"
-TRIGGERvbf = "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
+GOODJETS = jsonObject['GOODJETS']
+LOOSEmuons = jsonObject['LOOSEmuons']
+VETOelectrons = jsonObject['VETOelectrons']
+GOODMUON = jsonObject['GOODMUON']
+JSON = jsonObject['JSON']
+BARRELphotons = jsonObject['BARRELphotons']
+ENDCAPphotons = jsonObject['ENDCAPphotons']
 
-TRIGGERsMUO = "HLT_IsoMu24"
-JSON = "isGoodRunLS(isData, run, luminosityBlock)"
+overall = jsonObject['triggers']
+
+TRIGGER=''
+if(year == 2018 and isVBF): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+if(year == 2018 and (isW or isZ)): TRIGGER=getTriggerFromJson(overall, "oneMU", year)
+
+GOODPHOTONS = ""
+if(isVBF): GOODPHOTONS = "{} && Photon_pt>75".format(BARRELphotons)
+if(isW or isZ): GOODPHOTONS = "{0} or {1}".format(BARRELphotons,ENDCAPphotons)
+
+#$$$$
+#$$$$
+#$$$$
 
 def selectionTAG(df):
 
@@ -55,7 +77,7 @@ def selectionTAG(df):
                  .Filter("Sum(goodMuons) >= 2 and Sum(Muon_charge[goodMuons])==0 and Sum(vetoElectrons)==0 and Sum(vetoMuons)==2", "At least two good OS muon, and no extra loose leptons")
                  .Define("V_mass", "Minv(Muon_pt[goodMuons], Muon_eta[goodMuons], Muon_phi[goodMuons], Muon_mass[goodMuons])")
                  .Filter("V_mass>(91-10) and V_mass<(91+15)","At least one good Z")
-                 .Define("trigger","{}".format(TRIGGERsMUO))
+                 .Define("trigger","{}".format(TRIGGER))
                  .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
                  .Define("Mu2_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][1], Muon_phi[goodMuons][1], TrigObj_eta, TrigObj_phi)")
                  .Filter("trigger>0 and ((Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26) or (Mu2_hasTriggerMatch and Muon_pt[goodMuons][1]>26))","pass trigger")
@@ -69,7 +91,7 @@ def selectionTAG(df):
                  .Filter("Sum(goodMuons) == 1 and MET_pt>20 and Sum(vetoElectrons)==0 and Sum(vetoMuons)==1", "Exactly 1 good muon and MET>20 and no loose leptons")
                  .Define("V_mass","mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], MET_pt, MET_phi)")
                  .Filter("V_mass>20","MT>20")
-                 .Define("trigger","{}".format(TRIGGERsMUO))
+                 .Define("trigger","{}".format(TRIGGER))
                  .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
                  .Filter("trigger>0 and Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26","pass trigger")
         )
@@ -85,7 +107,7 @@ def selectionTAG(df):
                  .Define("vetoElectrons","{}".format(VETOelectrons))
                  .Define("vetoMuons","{}".format(LOOSEmuons))
                  .Filter("Sum(vetoElectrons)==0 and Sum(vetoMuons)==0", "no leptons")
-                 .Define("trigger","{}".format(TRIGGERvbf))
+                 .Define("trigger","{}".format(TRIGGER))
                  .Filter("trigger>0", "pass triggers")
         )
     return dftag
@@ -93,8 +115,7 @@ def selectionTAG(df):
 
 def dfGammaMeson(df):
 
-    #    dfbase = (df.Define("goodPhotons", "{}".format(BARRELphotons)+" or {}".format(ENDCAPphotons) )
-    dfa= (df.Define("goodPhotons", "{}".format(BARRELphotons))
+    dfa= (df.Define("goodPhotons", "{}".format(GOODPHOTONS))
           .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
           .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
           .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
@@ -314,9 +335,9 @@ def runTest():
    
 if __name__ == "__main__":
 
-#    runTest()
-#    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12
+    runTest()
+#    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12 2018
 #    print(int(sys.argv[3]))
 
-    if(int(sys.argv[3]) < 0): readDataSample(2018,int(sys.argv[3]) )  # SingleMuon
-    else: readMCSample(int(sys.argv[3])) # to switch sample
+    if(int(sys.argv[3]) < 0): readDataSample(int(sys.argv[4]),int(sys.argv[3]) )  # SingleMuon
+    else: readMCSample(int(sys.argv[4]),int(sys.argv[3])) # to switch sample
