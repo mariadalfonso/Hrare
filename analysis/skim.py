@@ -4,12 +4,19 @@ import json
 from subprocess import call,check_output
 import fnmatch
 import math
+import json
 
-from utilsHrare import findDIR
+from utilsHrare import findDIR, findMany
+from utilsHrare import getTriggerFromJson, pickTRG
 
-TRIGGERvbf = "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
+with open("config/selection.json") as jsonFile:
+    jsonObject = json.load(jsonFile)
+    jsonFile.close()
 
-TRIGGERincl = "HLT_Photon35_TwoProngs35"
+overall = jsonObject['triggers']
+
+#TRIGGERvbf = "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
+#TRIGGERincl = "HLT_Photon35_TwoProngs35"
 
 def groupFiles(fIns, group):
 
@@ -26,20 +33,37 @@ def groupFiles(fIns, group):
 
 if __name__ == "__main__":
 
-    if True: ### skim TTToSemiLeptonic
-    
-        group = 10
-        fOutDir = "/work/submit/mariadlf/SKIMS/D00/GJets_DR-0p4_HT-100To200_Summer20UL18"
-        files =findDIR("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D00/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM")
-        print(len(files))
+    if True:
 
+        type="VH"
+        datasetNumber = -2
+        year = 2018
+        era = "B"
+        PDType =  "SingleMuon"
+        PRESELECTION = "(trigger>0 and nPhoton>0)"
+        isVBF = False
+        isW = True
+        isZ = True
+
+        fOutDir = "/work/submit/mariadlf/SKIMS/D01/"+type+"/"+str(year)+"/"+PDType+"+Run"+era
+        fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
+        datasetExp = (PDType+"+Run"+str(year)+era+"*")
+        files = findMany(fInDir, datasetExp)
+        print("number of INPUT files = ",len(files))
+
+        TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)
+        print(TRIGGER)
+
+        group = math.ceil((len(files)/1)) # one per files otherwise need to handle with hadd
+        print("number of output files = ", group)
         groupedFiles = groupFiles(files, group)
 
         for i, group in enumerate(groupedFiles):
             
-            fOutName = "%s/output_%d.root" % (fOutDir, i)
+            fOutName = "%s/output_%s_%d.root" % (fOutDir, PDType, i)
             print("Create %s" % fOutName)
 
-            rdf = ROOT.ROOT.RDataFrame("Events", group).Define("trigger","{}".format(TRIGGERvbf)+" or {}".format(TRIGGERincl)).Filter("trigger>0").Snapshot("Events", fOutName)
+            regexToDrop = "^(?!.*omega).*$"
+            rdf = ROOT.ROOT.RDataFrame("Events", group).Define("trigger","{}".format(TRIGGER)).Filter("{}".format(PRESELECTION)).Snapshot("Events", fOutName, regexToDrop)
 
             del rdf
