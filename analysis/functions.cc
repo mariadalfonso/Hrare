@@ -105,13 +105,13 @@ Vec_b cleaningJetFromMeson(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi)
 Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& reco_phi, const Vec_f& reco_mass,
                    const Vec_f& genPart_eta, const Vec_f& genPart_phi,
                    const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
-                   int pdgToMatch
+                   int pdgToMatch, int pdgMotherToMatch
                    ) {
 
   int idxMother = -1;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
-    if(genPart_pdgId[i]==25) idxMother = i;
+    if(genPart_pdgId[i]==pdgMotherToMatch) idxMother = i;
   }
 
   int idxMatch = -1;
@@ -119,7 +119,7 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
   float phiGen = 999.;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
-    if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113) {
+    if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113 or abs(genPart_pdgId[i])==310) {
       if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
         idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
