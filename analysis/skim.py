@@ -6,6 +6,9 @@ import fnmatch
 import math
 import json
 
+ROOT.ROOT.EnableImplicitMT()
+ROOT.ROOT.EnableThreadSafety()
+
 from utilsHrare import findDIR, findMany
 from utilsHrare import getTriggerFromJson, pickTRG
 

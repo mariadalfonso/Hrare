@@ -197,7 +197,9 @@ def SwitchSample(argument):
 def pickTRG(overall,year,PDType,isVBF,isW,isZ):
 
     TRIGGER=''
-    if(year == 2018 and isVBF and PDType== "EGamma"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+    if(year == 2018 and isVBF):
+        if (PDType== "EGamma"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
     if(year == 2017 and isVBF and PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
 
     if(year == 2018 and (isW or isZ)):
@@ -205,16 +207,16 @@ def pickTRG(overall,year,PDType,isVBF,isW,isZ):
         if(PDType == "MuonEG"): TRIGGER = "{0}".format(getTriggerFromJson(overall, "muEG", year))
         elif (PDType == "DoubleMuon"): TRIGGER = "{0} and not {1}".format(getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
         elif (PDType == "SingleMuon"): TRIGGER = "{0} and not {1} and not {2}".format(getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
-        elif (PDType == "EGamma"): TRIGGER = "({0} or {1}) and not {2} and not {3} and not {4}".format(getTriggerFromJson(overall, "SEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+        elif (PDType == "EGamma"): TRIGGER = "({0} or {1}) and not {2} and not {3} and not {4}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
         elif(year == 2018):
-            TRIGGER = "{0} or {1} or {2} or {3} or {4}".format(getTriggerFromJson(overall, "SEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+            TRIGGER = "{0} or {1} or {2} or {3} or {4}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
         else:
             print("PROBLEM with triggers!!!")
 
     return TRIGGER
 
 
-def computeWeigths(df, files, sampleNOW, isMC):
+def computeWeigths(df, files, sampleNOW, year, isMC):
 
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
@@ -226,14 +228,15 @@ def computeWeigths(df, files, sampleNOW, isMC):
         genEventSumWeight = rdf.Sum("genEventSumw").GetValue()
         genEventSumNoWeight = rdf.Sum("genEventCount").GetValue()
 
-        weight = (SwitchSample(sampleNOW)[1] / genEventSumWeight)
-        weightApprox = (SwitchSample(sampleNOW)[1] / genEventSumNoWeight)
-        print('weight',weight )
-        print('weightApprox',weightApprox)
-        lumiEq = (genEventSumNoWeight / SwitchSample(sampleNOW)[1])
+        ## this is what we want to do:    lum*xsec/sumGenWeight
+        weight = (SwitchSample(sampleNOW,year)[1] / genEventSumWeight)
+#        weightApprox = (SwitchSample(sampleNOW,year)[1] / genEventSumNoWeight)
+#        print('weight',weight )
+#        print('weightApprox',weightApprox)
+        lumiEq = (genEventSumNoWeight / SwitchSample(sampleNOW,year)[1])
         print("lumi equivalent fb %s" %lumiEq)
 
-        return weightApprox ## later with negative weights
+        return weight
 
 def plot(h,filename,doLogX,color):
 
