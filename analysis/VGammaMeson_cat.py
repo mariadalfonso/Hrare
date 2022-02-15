@@ -6,7 +6,6 @@ import json
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist
 from utilsHrare import plot, computeWeigths, getTriggerFromJson, getMesonFromJson, pickTRG
-from utilsHrare import SwitchSample
 
 doPlot = False
 
@@ -55,10 +54,6 @@ TRIGGER=''
 if(year == 2018 and isVBF): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
 if(year == 2018 and (isW or isZ)): TRIGGER=getTriggerFromJson(overall, "oneMU", year)
 
-GOODPHOTONS = ""
-if(isVBF): GOODPHOTONS = "{} && Photon_pt>75".format(BARRELphotons)
-if(isW or isZ): GOODPHOTONS = "{0} or {1}".format(BARRELphotons,ENDCAPphotons)
-
 #$$$$
 #$$$$
 #$$$$
@@ -67,28 +62,40 @@ def selectionTAG(df):
 
     if isZ:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25")
-                 .Define("vetoMuons","{}".format(LOOSEmuons))
-                 .Define("vetoElectrons","{}".format(LOOSEelectrons))
-                 .Filter("Sum(goodMuons) >= 2 and Sum(Muon_charge[goodMuons])==0 and Sum(vetoElectrons)==0 and Sum(vetoMuons)==2", "At least two good OS muon, and no extra loose leptons")
-                 .Define("V_mass", "Minv(Muon_pt[goodMuons], Muon_eta[goodMuons], Muon_phi[goodMuons], Muon_mass[goodMuons])")
-                 .Filter("V_mass>(91-10) and V_mass<(91+15)","At least one good Z")
-                 .Define("trigger","{}".format(TRIGGER))
-                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
-                 .Define("Mu2_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][1], Muon_phi[goodMuons][1], TrigObj_eta, TrigObj_phi)")
-                 .Filter("trigger>0 and ((Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26) or (Mu2_hasTriggerMatch and Muon_pt[goodMuons][1]>26))","pass trigger")
+                 .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.25")
+                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Define("vetoEle","{}".format(LOOSEelectrons))
+                 .Filter("(Sum(goodMuons)+Sum(goodElectrons))==2 and (Sum(vetoEle)+Sum(vetoMu))==2","at least two good muons or electrons, and no extra loose leptons")
+                 .Define("isMuorEle","Sum(goodMuons)==2?1: Sum(goodElectrons)==2?2 :0")
+                 .Define("V_mass", "(Sum(goodMuons)==2 and Sum(Muon_charge[goodMuons])==0)? Minv(Muon_pt[goodMuons], Muon_eta[goodMuons], Muon_phi[goodMuons], Muon_mass[goodMuons]) : (Sum(goodElectrons)==2 and Sum(Electron_charge[goodElectrons])==0) ? Minv(Electron_pt[goodElectrons], Electron_eta[goodElectrons], Electron_phi[goodElectrons], Electron_mass[goodElectrons]): 0.")
+                 .Filter("(V_mass>(91-10) and V_mass<(91+15))","At least one good Z")
+                 .Define("Z_veto1", "Sum(goodElectrons)==2 ? Minv2(Electron_pt[goodElectrons][0], Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], Electron_mass[goodElectrons][0],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first: -1")
+                 .Define("Z_veto2", "Sum(goodElectrons)==2 ? Minv2(Electron_pt[goodElectrons][1], Electron_eta[goodElectrons][1], Electron_phi[goodElectrons][1], Electron_mass[goodElectrons][1],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first: -1")
+                 .Filter("abs(Z_veto1-91) > 10 and abs(Z_veto2-91) > 10","kill the Z recontructed as gamma + electron")
+#                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
+#                 .Define("Mu2_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][1], Muon_phi[goodMuons][1], TrigObj_eta, TrigObj_phi)")
+#                 .Define("Ele1_hasTriggerMatch", "Sum(goodElectrons)>1 ? hasTriggerMatch(Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], TrigObj_eta, TrigObj_phi) : 0")
+#                 .Define("Ele2_hasTriggerMatch", "Sum(goodElectrons)>1 ? hasTriggerMatch(Electron_eta[goodElectrons][1], Electron_phi[goodElectrons][1], TrigObj_eta, TrigObj_phi) : 0")
+#                 .Filter("trigger>0 and ((Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26) or (Mu2_hasTriggerMatch and Muon_pt[goodMuons][1]>26))","pass trigger")
         )
         return dftag
 
     if isW:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_tightId and Muon_pfRelIso04_all < 0.15")
-                 .Define("vetoElectrons","{}".format(LOOSEelectrons))
-                 .Define("vetoMuons","{}".format(LOOSEmuons))
-                 .Filter("Sum(goodMuons) == 1 and MET_pt>20 and Sum(vetoElectrons)==0 and Sum(vetoMuons)==1", "Exactly 1 good muon and MET>20 and no loose leptons")
-                 .Define("V_mass","mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], MET_pt, MET_phi)")
+                 .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.15")
+                 .Define("vetoEle","{}".format(LOOSEelectrons))
+                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Filter("MET_pt>20 and (Sum(goodMuons)+Sum(goodElectrons))==1 and (Sum(vetoEle)+Sum(vetoMu))==1","MET and one lepton")
+                 .Define("isMuorEle","Sum(goodMuons)==1?1: Sum(goodElectrons)==1?2 :0")
+                 .Define("V_mass","Sum(goodMuons)>0 ? mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], MET_pt, MET_phi) : mt(Electron_pt[goodElectrons][0], Electron_phi[goodElectrons][0], MET_pt, MET_phi)")
                  .Filter("V_mass>20","MT>20")
-                 .Define("trigger","{}".format(TRIGGER))
-                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
-                 .Filter("trigger>0 and Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26","pass trigger")
+                 .Define("Z_veto", "Sum(goodElectrons)==1 ? Minv2(Electron_pt[goodElectrons][0], Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], Electron_mass[goodElectrons][0],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first: -1")
+                 .Filter("abs(Z_veto-91) > 10","kill the Z recontructed as gamma + electron")
+#                 .Define("trigger","{}".format(TRIGGER))
+#                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
+#                 .Filter("trigger>0 and Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26","pass trigger")
         )
         return dftag
 
@@ -99,16 +106,23 @@ def selectionTAG(df):
                  .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
                  .Define("Y1Y2","Jet_eta[goodJets][0]*Jet_eta[goodJets][1]")
                  .Filter("mJJ>300 and dEtaJJ>3","Filter on MJJ>300 , Deta>3")
-                 .Define("vetoElectrons","{}".format(LOOSEelectrons))
-                 .Define("vetoMuons","{}".format(LOOSEmuons))
-                 .Filter("Sum(vetoElectrons)==0 and Sum(vetoMuons)==0", "no leptons")
-                 .Define("trigger","{}".format(TRIGGER))
-                 .Filter("trigger>0", "pass triggers")
+                 .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
+                 .Define("vetoEle","{}".format(LOOSEelectrons))
+                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Filter("(Sum(vetoEle)+Sum(vetoMu)==0)", "no leptons")
+#                 .Define("trigger","{}".format(TRIGGER))
+#                 .Filter("trigger>0", "pass triggers")
         )
     return dftag
 
 
 def dfGammaMeson(df):
+
+    TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)
+
+    GOODPHOTONS = ""
+    if(isVBF): GOODPHOTONS = "{} and Photon_pt>75 and (Photon_cutBased & 3)".format(BARRELphotons)
+    if(isW or isZ): GOODPHOTONS = "{0} or {1}".format(BARRELphotons,ENDCAPphotons)
 
     GOODPHI = ""
     if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, isVBF , sys.argv[2] ))
@@ -190,13 +204,18 @@ def dfHiggsCand(df):
 
 def analysis(df,mc,w,isData):
 
+    lumi = 1.
+    weight = "{0}".format(1.)
+    if mc>0: weight = "{0}*genWeight*{1}".format(lumi,sumw)
+
     dfOBJ= dfGammaMeson(df)
     dfbase = dfHiggsCand(dfOBJ)
     dfcandtag = selectionTAG(dfbase)
-    dfFINAL = (dfcandtag.Define("w","{}".format(w))
+    dfFINAL = (dfcandtag.Define("w","{}".format(weight))
                .Define("mc","{}".format(mc))
                .Define("isData","{}".format(isData))
                .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
+               .Filter("PV_npvsGood>0","one good PV")
     )
 
 
@@ -255,6 +274,7 @@ def analysis(df,mc,w,isData):
     if isZ or isW:
         for branchName in [
                 "V_mass",
+                "isMuorEle",
         ]:
             branchList.push_back(branchName)
 

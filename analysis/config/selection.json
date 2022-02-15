@@ -4,8 +4,8 @@
 
     "GOODMUON" : "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)",
     "LOOSEmuons" : "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)",
-    "GOODELE" : "(Electron_pt>20 and abs(Electron_eta)<2.5 and Electron_cutBased >= 2 and abs(Electron_dxy) < 0.2 && abs(Electron_dz) < 0.5)",
-    "LOOSEelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and abs(Electron_dz)<0.5 and abs(Electron_dxy) < 0.2 && Electron_mvaFall17V2noIso_WPL)",
+    "GOODELE" : "(Electron_pt>20 and abs(Electron_eta)<2.5 and Electron_cutBased >= 2 and abs(Electron_dxy) < 0.2 && abs(Electron_dz) < 0.5 and ele_mask)",
+    "LOOSEelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and Electron_pfRelIso03_all < 0.25 and abs(Electron_dz)<0.5 and abs(Electron_dxy) < 0.2 && Electron_mvaFall17V2noIso_WPL and ele_mask)",
 
     "GOODJETS": "(Jet_pt>30 && abs(Jet_eta)<5 and (Jet_jetId & 2) and jet_mask and jet_mask2)",
 
@@ -13,22 +13,27 @@
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>5 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
+	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05)"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "definition": "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
+	    "definition": "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05)"
+	},
+	{
+	    "name": "isVBF",
+	    "type": "isKsCat",
+	    "definition": "(abs(ks_kin_mass-0.498)<0.05 && ks_kin_pt>5 && ks_trk1_pt>5 && ks_trk2_pt>5 && ks_kin_valid)"
 	},
 	{
 	    "name": "VH",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>10 && phi_trk1_pt>10 && phi_trk2_pt>10 && phi_kin_valid && phi_iso > 0.8)"
+	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
 	},
 	{
 	    "name": "VH",
 	    "type": "isRhoCat",
-	    "definition": "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>10 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.8)"
+	    "definition": "(rho_kin_mass>0.6 && rho_kin_mass<0.95 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05)"
 	}
     ],
     "JSON" : "isGoodRunLS(isData, run, luminosityBlock)",
@@ -64,9 +69,59 @@
 	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle25_CaloIdL_MW||HLT_DoublePhoton70)"
 	},
 	{
-	    "name": "SEL",
+	    "name": "oneEL",
 	    "year": 2018,
 	    "definition": "(HLT_Ele27_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Ele35_WPTight_Gsf||HLT_Ele115_CaloIdVT_GsfTrkIdT)"
-	}		
+	},
+	{
+	    "name": "oneMU",
+	    "year": 2016,
+	    "definition": "(HLT_IsoMu24||HLT_IsoTkMu24||HLT_IsoMu22||HLT_IsoTkMu22||HLT_Mu45_eta2p1||HLT_Mu50)"
+	},
+	{
+	    "name": "diMU",
+	    "year": 2016,
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL)"
+	},
+	{
+	    "name": "muEG",
+	    "year": 2016,
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)"
+	},
+	{
+	    "name": "oneEL",
+	    "year": 2016,
+	    "definition": "(HLT_Ele25_eta2p1_WPTight_Gsf||HLT_Ele27_eta2p1_WPLoose_Gsf||HLT_Ele27_WPTight_Gsf||HLT_Ele30_WPTight_Gsf||HLT_Ele35_WPLoose_Gsf||HLT_Ele27_WP85_Gsf||HLT_Ele27_WPLoose_Gsf||HLT_Ele105_CaloIdVT_GsfTrkIdT||HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_eta2p1_WPTight_Gsf||HLT_Ele32_eta2p1_WPTight_Gsf||HLT_ECALHT800)"
+	},
+	{
+	    "name": "diEL",
+	    "year": 2016,
+	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf)"
+	},
+	{
+	    "name": "oneMU",
+	    "year": 2017,
+	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_IsoMu30||HLT_Mu50)"
+	},
+	{
+	    "name": "diMU",
+	    "year": 2017,
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8||HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8||HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8)"
+	},
+	{
+	    "name": "muEG",
+	    "year": 2017,
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)"
+	},
+	{
+	    "name": "oneEL",
+	    "year": 2017,
+	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
+	},
+	{
+	    "name": "diEL",
+	    "year": 2017,
+	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DiEle27_WPTightCaloOnly_L1DoubleEG||HLT_DoubleEle25_CaloIdL_MW||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)"
+	}
     ]
 }
