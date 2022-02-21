@@ -13,13 +13,31 @@ lumi=59.70
 
 # Create the plot
 
-def getHisto(item, nbin, low, high, doLog,category,mesonCat):
+def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal):
 
    mytree = ROOT.TChain('events')
-   if(category =='_VBFcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
-   if(category =='_Wcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Wp
-   if(category =='_Wcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
-   if(category =='_VBFcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+   if doSignal:
+      if(category =='_VBFcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_Wcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Wp
+      if(category =='_Wcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
+      if(category =='_VBFcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+   else:
+#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc6'+category+mesonCat+year+'.root') # VBF
+#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc7'+category+mesonCat+year+'.root') # VBF
+#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc8'+category+mesonCat+year+'.root') # VBF
+#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc9'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc-31'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc-32'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc-33'+category+mesonCat+year+'.root') # VBF
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-1'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-2'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-3'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-11'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-12'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-13'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-21'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-22'+category+mesonCat+year+'.root') # VH
+      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-23'+category+mesonCat+year+'.root') # VH
    
    h = ROOT.TH1F( 'Higgs', '', nbin, low, high )
 
@@ -31,8 +49,9 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat):
          var = ev.HCandMass
 
       # Fill histograms.
-      if ev.mc==10:
-         h.Fill( var, ev.w)
+      # data
+      if ((category =='_VBFcat' and (ev.mc==-31 or ev.mc==-32 or ev.mc==-33)) or
+          (category =='_Wcat' and (ev.mc==-1 or ev.mc==-2 or ev.mc==-3 or ev.mc==-11 or ev.mc==-12 or ev.mc==-13 or ev.mc==-21 or ev.mc==-22 or ev.mc==-23)) ):
       if ev.mc==1011 or ev.mc==1012:
          h.Fill( var, ev.w)
       if ev.mc==1010 or ev.mc==1020:
@@ -42,7 +61,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat):
 
 def plot(item, nbin, low, high, doLog,category,mesonCat):
 
-   h = getHisto(item, nbin, low, high, doLog,category,mesonCat)
+   h = getHisto(item, nbin, low, high, doLog,category,mesonCat,False)
    
    # Create canvas with pad
    c = ROOT.TCanvas("c", "", 600, 600)
