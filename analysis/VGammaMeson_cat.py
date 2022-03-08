@@ -32,7 +32,7 @@ if sys.argv[4]=='12016': year = 12016
 #$$$$
 #$$$$
 
-PRESELECTION = "(nPhoton>0 && (nphi or nrho))"
+PRESELECTION = "(nPhoton>0 && (nphi>0 or nrho>0) && PV_npvsGood>0)"
 
 with open("config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
@@ -63,7 +63,7 @@ def selectionTAG(df):
     if isZ:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25")
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
-                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.25")
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WP90")
                  .Define("vetoMu","{}".format(LOOSEmuons))
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Filter("(Sum(goodMuons)+Sum(goodElectrons))==2 and (Sum(vetoEle)+Sum(vetoMu))==2","at least two good muons or electrons, and no extra loose leptons")
@@ -84,7 +84,7 @@ def selectionTAG(df):
     if isW:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_tightId and Muon_pfRelIso04_all < 0.15")
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
-                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.15")
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.15 and Electron_mvaFall17V2noIso_WP90")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
                  .Filter("MET_pt>20 and (Sum(goodMuons)+Sum(goodElectrons))==1 and (Sum(vetoEle)+Sum(vetoMu))==1","MET and one lepton")
@@ -125,13 +125,12 @@ def dfGammaMeson(df):
     if(isW or isZ): GOODPHOTONS = "{0} or {1}".format(BARRELphotons,ENDCAPphotons)
 
     GOODPHI = ""
-    if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, isVBF , sys.argv[2] ))
+    if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
     if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
 
     GOODRHO = ""
-    if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, isVBF , sys.argv[2] ))
+    if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
     if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
-
 
     dfa= (df.Define("goodPhotons", "{}".format(GOODPHOTONS))
           .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
@@ -150,8 +149,10 @@ def dfGammaMeson(df):
           .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
           .Define("goodPhi_phi", "phi_kin_phi[goodPhi]")
           .Define("goodPhi_mass", "phi_kin_mass[goodPhi]")
+          .Define("goodPhi_massErr", "phi_kin_massErr[goodPhi]")
           .Define("goodPhi_iso", "phi_iso[goodPhi]")
           .Define("goodPhi_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodPhi]")
+          .Define("goodPhi_vtx_prob", "phi_kin_vtx_prob[goodPhi]")
           .Define("goodPhi_trk1_pt", "phi_trk1_pt[goodPhi]")
           .Define("goodPhi_trk2_pt", "phi_trk2_pt[goodPhi]")
           .Define("goodPhi_trk1_eta", "phi_trk1_eta[goodPhi]")
@@ -165,7 +166,9 @@ def dfGammaMeson(df):
             .Define("goodRho_phi", "rho_kin_phi[goodRho]")
             .Define("goodRho_iso", "rho_iso[goodRho]")
             .Define("goodRho_mass", "rho_kin_mass[goodRho]")
+            .Define("goodRho_massErr", "rho_kin_massErr[goodRho]")
             .Define("goodRho_vtx_chi2dof", "rho_kin_vtx_chi2dof[goodRho]")
+            .Define("goodRho_vtx_prob", "rho_kin_vtx_prob[goodRho]")
             .Define("goodRho_trk1_pt", "rho_trk1_pt[goodRho]")
             .Define("goodRho_trk2_pt", "rho_trk2_pt[goodRho]")
             .Define("goodRho_trk1_eta", "rho_trk1_eta[goodRho]")
@@ -238,6 +241,7 @@ def analysis(df,mc,w,isData):
             #
             "w",
             "mc",
+            "PV_npvsGood",
     ]:
         branchList.push_back(branchName)
 
@@ -253,6 +257,7 @@ def analysis(df,mc,w,isData):
             "goodPhi_trk1_eta",
             "goodPhi_trk2_eta",
             "goodPhi_vtx_chi2dof",
+            "goodPhi_vtx_prob",
         ]:
             branchList.push_back(branchName)
 
@@ -268,6 +273,7 @@ def analysis(df,mc,w,isData):
             "goodRho_trk1_eta",
             "goodRho_trk2_eta",
             "goodRho_vtx_chi2dof",
+            "goodRho_vtx_prob",
         ]:
             branchList.push_back(branchName)
 
