@@ -111,7 +111,15 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
   int idxMother = -1;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
-    if(genPart_pdgId[i]==pdgMotherToMatch) idxMother = i;
+    if(genPart_pdgId[i]==25) idxMother = i;
+  }
+
+  int idxIntermediate = -1;
+  if(pdgMotherToMatch==333 and pdgToMatch==310) {
+    for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+      // take the last of the Higgs
+      if(genPart_pdgId[i]==333 and genPart_genPartIdxMother[i]==idxMother) { idxIntermediate = i; }
+    }
   }
 
   int idxMatch = -1;
@@ -119,24 +127,30 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
   float phiGen = 999.;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
-    if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113 or abs(genPart_pdgId[i])==310) {
+    if(pdgToMatch==310  and abs(genPart_pdgId[i])==pdgToMatch) {
+      if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxIntermediate ) {
+        idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
+      }
+    } else if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113  or abs(genPart_pdgId[i])==443) {
       if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
         idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
     }
   }
 
-  Vec_i idx(1, -1); // initialize with -1 a vector of size 1
+  Vec_i idx(2, -1); // initialize with -1 a vector of size 2
   // loop over all the recoCand
+
   for (unsigned int i=0; i<reco_pt.size(); i++) {
-
     PtEtaPhiMVector p_reco(reco_pt[i], reco_eta[i], reco_phi[i], reco_mass[i]);
-
+    if(idxMother<0) continue; // no good Mother (i.e. Higgs)
     if(idxMatch<0) continue; // no good Match
+
     if(deltaR(etaGen,phiGen,p_reco.eta(),p_reco.phi())>0.01) continue;
     idx[0] = i;
-
   }
+
+  idx[1] = idxMatch; // index of the genPart
 
   return idx;
 
@@ -145,7 +159,9 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
 Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
                         const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
 
+  float Minv = -1;
   int index = -1;
+  float ptHiggs = -1;
   float ptCandMax=0;
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
   int indexPhoton = 0;
@@ -155,7 +171,7 @@ Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
     if(ph_pt[1] > ph_pt[0]) p_ph.SetEta(ph_eta[1]);
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPhi(ph_phi[1]);
-    int indexPhoton = 1;
+    indexPhoton = 1;
   }
 
   // loop over all the phiCand
@@ -168,6 +184,8 @@ Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
     float ptCand = p_meson.pt();
     if( ptCand < ptCandMax ) continue;
     ptCandMax=ptCand;
+    Minv = (p_meson + p_ph).mass();
+    ptHiggs = (p_meson + p_ph).pt();
     idx[0] = i;
     idx[1] = indexPhoton;
   }
@@ -248,9 +266,9 @@ std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& p
   PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
 
   float Minv = (p_M + p_ph).mass();
-  float ptHiggs = (p_M + p_ph).pt();
+  float ptPair = (p_M + p_ph).pt();
 
-  std::pair<float, float> pairRECO = std::make_pair(Minv , ptHiggs);
+  std::pair<float, float> pairRECO = std::make_pair(Minv , ptPair);
   return pairRECO;
 
 }
