@@ -154,6 +154,44 @@ def getDATAlist(year,type):
 
     return files
 
+def getSkims(argument,year,category):
+
+    if(year == 2018):
+        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
+    if(year == 2017):
+        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
+    if(year == 2016 or year == 12016):
+        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
+
+    dirScratch = "/scratch/submit/mariadlf/Hrare/SKIMS/D01"
+    switch = {
+        -1: (("SingleMuon+Run"+"A"),"SingleMuon"),
+        -2: (("SingleMuon+Run"+"B"),"SingleMuon"),
+        -3: (("SingleMuon+Run"+"C"),"SingleMuon"),
+        -4: (("SingleMuon+Run"+"D"),"SingleMuon"),
+        #
+        -11: (("DoubleMuon+Run"+"A"),"DoubleMuon"),
+        -12: (("DoubleMuon+Run"+"B"),"DoubleMuon"),
+        -13: (("DoubleMuon+Run"+"C"),"DoubleMuon"),
+        -14: (("DoubleMuon+Run"+"D"),"DoubleMuon"),
+        #
+        -21: (("MuonEG+Run"+"A"),"MuonEG"),
+        -22: (("MuonEG+Run"+"B"),"MuonEG"),
+        -23: (("MuonEG+Run"+"C"),"MuonEG"),
+        -24: (("MuonEG+Run"+"D"),"MuonEG"),
+        #
+        -31: (("EGamma+Run"+"A"),"EGamma"),
+        -32: (("EGamma+Run"+"B"),"EGamma"),
+        -33: (("EGamma+Run"+"C"),"EGamma"),
+        -34: (("EGamma+Run"+"D"),"EGamma"),
+    }
+
+    tmp_pair = switch.get(argument, "regex, PDtype")
+    finalDir = dirScratch+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
+    pair = (findDIR(finalDir),tmp_pair[1])
+    return pair
+
+
 def SwitchSample(argument):
 
     # cross section from  https://cms-gen-dev.cern.ch/xsdb
@@ -161,35 +199,48 @@ def SwitchSample(argument):
     dirLocal = "/work/submit/mariadlf/Hrare/D01/2018/"
 
     switch = {
-        1000: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",6067*1000), #NNLO
-        0: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1_ext1-v1+MINIAODSIM",6067*1000), #NNLO
-        1: (dirT2+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 51.1*1000), #LO
-        2: (dirT2+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 191.0*1000), #LO
-        3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",53870.0*1000), #LO
-        4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",88.2*1000), #NNLO
-        5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",365.3452*1000), #NNLO
-##
-        6: (dirT2+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",5031*1000), #LO
-        7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",1126*1000), #LO
-        8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",124.3*1000), #LO
-        9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",40.76*1000), #LO
-        20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",6447000.0*1000), #LO
-        21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",1988000.0*1000), #LO
-        22: (dirT2+"QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",367500.0*1000), #LO
-        23: (dirT2+"QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",66590.0*1000), #LO
-        24: (dirT2+"QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",16620.0*1000), #LO
-        25: (dirT2+"QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",1104.0*1000), #LO
-##
-        31: (dirT2+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",53330.0*1000), #LO
-        32: (dirT2+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",8875.0*1000), #LO
-        33: (dirT2+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM",3338.0*1000), #LO
-
-        34: (dirT2+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",5129.0*1000), #LO
-        35: (dirT2+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",951.5*1000), #LO
-        36: (dirT2+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM",361.4*1000), #LO
-#### signal
-        100: (dirLocal+"vbf-hrhogamma-powheg",4.*1000), # xsec = 4pb * BR(Hphigamma)=1 BR(rho->pipi)=1.
-        101: (dirLocal+"vbf-hphigamma-powheg",2.*1000), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        ## SIGNAL
+        1010: (dirLocal+"vbf-hphigamma-powheg"+"/NANOAOD_01",3781.7*0.49), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1011: (dirLocal+"wph-hphigamma-powheg"+"/NANOAOD_01",3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1012: (dirLocal+"wmh-hphigamma-powheg"+"/NANOAOD_01",3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1013: (dirLocal+"zh-hphigamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1014: (dirLocal+"ggzh-hphigamma-powheg"+"/NANOAOD_01",3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1015: (dirLocal+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
+        #
+        1020: (dirLocal+"vbf-hrhogamma-powheg"+"/NANOAOD_01",3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1021: (dirLocal+"wph-hrhogamma-powheg"+"/NANOAOD_01",3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1022: (dirLocal+"wmh-hrhogamma-powheg"+"/NANOAOD_01",3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1023: (dirLocal+"zh-hrhogamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1024: (dirLocal+"ggzh-hrhogamma-powheg"+"/NANOAOD_01",3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        #
+        1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
+        ## SM-BKG
+        0: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,6067*1000), #NNLO
+        1: (dirT2+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 51.1*1000), #LO
+        2: (dirT2+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 191.0*1000), #LO
+        3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,53870.0*1000), #LO
+        4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,88.2*1000), #NNLO
+        5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+"+campaign,365.3452*1000), #NNLO
+        #
+        6: (dirT2+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5031*1000*1.26), #LO *1.26
+        7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1126*1000*1.26), #LO *1.26
+        8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,124.3*1000*1.26), #LO *1.26
+        9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,40.76*1000*1.26), #LO *1.26
+        #
+        20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,6447000.0*1000*1.26), #LO *1.26
+        21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1988000.0*1000*1.26), #LO *1.26
+        22: (dirT2+"QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,367500.0*1000*1.26), #LO *1.26
+        23: (dirT2+"QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,66590.0*1000*1.26), #LO *1.26
+        24: (dirT2+"QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,16620.0*1000*1.26), #LO *1.26
+        25: (dirT2+"QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1104.0*1000*1.26), #LO *1.26
+        #
+        31: (dirT2+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,53330.0*1000), #LO
+        32: (dirT2+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8875.0*1000), #LO
+        33: (dirT2+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,3338.0*1000), #LO
+        34: (dirT2+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,5129.0*1000), #LO
+        35: (dirT2+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,951.5*1000), #LO
+        36: (dirT2+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,361.4*1000), #LO
+        #
     }
     return switch.get(argument, "BKGdefault, xsecDefault")
 
