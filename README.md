@@ -14,9 +14,11 @@ https://gitlab.cern.ch/cms-nanoAOD/nanoaod-doc/-/wikis/Releases/NanoAODv9
 
 | Input dataset | GT | Era |
 | ------ | ------ | ------ |
-| RunIISummer20UL16MiniAOD/RunIISummer19UL16MiniAODv2 MC | 106X_mcRun2_asymptotic_v17 or 106X_mcRun2_asymptotic_preVFP_v11 | Run2_2016,run2_nanoAOD_106Xv2 |
-| RunIISummer20UL17MiniAOD/RunIISummer19UL17MiniAODv2 MC | 106X_mc2017_realistic_v9 | Run2_2017,run2_nanoAOD_106Xv2 |
-| RunIISummer20UL18MiniAOD/RunIISummer19UL18MiniAODv2 MC | 106X_upgrade2018_realistic_v16_L1v1 | Run2_2018,run2_nanoAOD_106Xv2 |
+| RunIISummer20UL16MiniAODAPV MC | 106X_mcRun2_asymptotic_preVFP_v11 | Run2_2016_HIPM,run2_nanoAOD_106Xv2 |
+| RunIISummer20UL16MiniAOD MC | 106X_mcRun2_asymptotic_v17 | Run2_2016,run2_nanoAOD_106Xv2 |
+| RunIISummer20UL17MiniAOD MC | 106X_mc2017_realistic_v9 | Run2_2017,run2_nanoAOD_106Xv2 |
+| RunIISummer20UL18MiniAOD MC | 106X_upgrade2018_realistic_v16_L1v1 | Run2_2018,run2_nanoAOD_106Xv2 |
+| HIPM_UL2016 data (Summer19/20) | 106X_dataRun2_v35 | Run2_2016_HIPM,run2_nanoAOD_106Xv2 |
 | 2016 UL data (Summer19/20) | 106X_dataRun2_v35 | Run2_2016,run2_nanoAOD_106Xv2 |
 | 2017 UL data (Summer19/20) | 106X_dataRun2_v35 | Run2_2017,run2_nanoAOD_106Xv2 |
 | 2018 UL data (Summer19/20) | 106X_dataRun2_v35 | Run2_2018,run2_nanoAOD_106Xv2 |
