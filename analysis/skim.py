@@ -7,8 +7,8 @@ import math
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
-from utilsHrare import findDIR, findMany
-from utilsHrare import getTriggerFromJson, pickTRG, getSkimsFromJson
+from utilsHrare import findMany
+from utilsHrare import pickTRG, getSkimsFromJson
 
 with open("config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
@@ -38,7 +38,9 @@ def groupFiles(fIns, group):
 
 if __name__ == "__main__":
 
-    valid = ['year=', "era=", "PDType=", "SkimType="]
+    whichJob = -1
+
+    valid = ['year=', "era=", "PDType=", "SkimType=","whichJob="]
     opts, args = getopt.getopt(sys.argv[1:], "", valid)
 
     for opt, arg in opts:
@@ -50,8 +52,10 @@ if __name__ == "__main__":
             PDType = str(arg)
         if opt == "--SkimType":
             skimType = str(arg)
+        if opt == "--whichJob":
+            whichJob = int(arg)
 
-    print("year=",year," era=",era," PDType=",PDType," skimType=",skimType)
+    print("year=",year," era=",era," PDType=",PDType," skimType=",skimType," whichJob=",whichJob)
 
     if True:
         isVBF = False
@@ -79,7 +83,9 @@ if __name__ == "__main__":
         groupedFiles = groupFiles(files, group)
 
         for i, group in enumerate(groupedFiles):
-            
+            passJob = whichJob == -1 or whichJob == i
+            if(passJob == False): continue
+
             fOutName = "%s/output_%s_%d.root" % (fOutDir, PDType, i)
             print("Create %s" % fOutName)
 
