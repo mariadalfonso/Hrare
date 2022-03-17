@@ -1,16 +1,14 @@
 import ROOT
-import os
-import json
+import os, sys, getopt, json, time, subprocess, socket
 from subprocess import call,check_output
 import fnmatch
 import math
-import json
 
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
 from utilsHrare import findDIR, findMany
-from utilsHrare import getTriggerFromJson, pickTRG
+from utilsHrare import getTriggerFromJson, pickTRG, getSkimsFromJson
 
 with open("config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
@@ -18,8 +16,11 @@ with open("config/selection.json") as jsonFile:
 
 overall = jsonObject['triggers']
 
-#TRIGGERvbf = "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
-#TRIGGERincl = "HLT_Photon35_TwoProngs35"
+with open("config/skimDB.json") as jsonFile:
+    skimObject = json.load(jsonFile)
+    jsonFile.close()
+
+skims = skimObject['skims']
 
 def groupFiles(fIns, group):
 
@@ -30,34 +31,50 @@ def groupFiles(fIns, group):
         a = i*filesPerGroup
         b = (i+1)*filesPerGroup
         subFiles = fIns[a:b]
+        print(subFiles)
         ret.append(subFiles)
     
     return ret
 
 if __name__ == "__main__":
 
+    valid = ['year=', "era=", "PDType=", "SkimType="]
+    opts, args = getopt.getopt(sys.argv[1:], "", valid)
+
+    for opt, arg in opts:
+        if opt == "--year":
+            year = int(arg)
+        if opt == "--era":
+            era = str(arg)
+        if opt == "--PDType":
+            PDType = str(arg)
+        if opt == "--SkimType":
+            skimType = str(arg)
+
+    print("year=",year," era=",era," PDType=",PDType," skimType=",skimType)
+
     if True:
-
-        type="VH"
-        datasetNumber = -2
-        year = 2018
-        era = "B"
-        PDType =  "SingleMuon"
-        PRESELECTION = "(trigger>0 and nPhoton>0)"
         isVBF = False
-        isW = True
-        isZ = True
+        isW = False
+        isZ = False
 
-        fOutDir = "/work/submit/mariadlf/SKIMS/D01/"+type+"/"+str(year)+"/"+PDType+"+Run"+era
+        if skimType== "VBF": isVBF=True
+        if skimType== "VH": isW=True
+        if skimType== "VH": isZ=True
+
+        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
         fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
-        datasetExp = (PDType+"+Run"+str(year)+era+"*")
+        datasetExp = (str(PDType)+"+Run"+str(year)+str(era)+"*")
         files = findMany(fInDir, datasetExp)
         print("number of INPUT files = ",len(files))
 
         TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)
-        print(TRIGGER)
+        print("TRIGGER=",TRIGGER)
 
-        group = math.ceil((len(files)/1)) # one per files otherwise need to handle with hadd
+        PRESELECTION=getSkimsFromJson(skims, skimType)
+        print("PRESELECTION",PRESELECTION)
+
+        group = math.ceil((len(files)/1))
         print("number of output files = ", group)
         groupedFiles = groupFiles(files, group)
 

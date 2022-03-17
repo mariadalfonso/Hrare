@@ -1,0 +1,18 @@
+{
+    "skims": [
+        {
+	    "type": "VH",
+	    "PDType": "EGamma",
+	    "year" : 2018,
+	    "era" : "RunA",
+            "PRESELECTION" : "(trigger>0 and nPhoton>0 and (nElectron>0 or nMuon>0))"
+	},
+        {
+	    "type": "VBF",
+	    "PDType": "EGamma",
+	    "year" : 2018,
+	    "era" : "RunA",
+            "PRESELECTION" : "(trigger>0 and nPhoton>0)"
+	}
+    ]
+}
