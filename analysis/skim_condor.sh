@@ -2,6 +2,13 @@
 
 USERPROXY=`id -u`
 echo ${USERPROXY}
+#voms-proxy-init --voms cms --valid 168:00
+
+alias cmsvoms='voms-proxy-init -rfc -voms cms; cp /tmp/x509up_u'$(id -u)' ~/'
+
+cmsvoms
+echo ${cmsvoms}
+ls -ltra ~/x509up_u${USERPROXY}
 
 line=1
 
@@ -9,7 +16,7 @@ while [ $line -le 5 ]
 do
 
 echo 'PROCESSING' $line
-    
+
 #set -- $line
 whichYear=$1
 whichEra=$2
@@ -39,7 +46,7 @@ Output = logs/simple_skim_${whichSample}_${whichJob}.out
 Error  = logs/simple_skim_${whichSample}_${whichJob}.error
 transfer_input_files = skim.py, utilsHrare.py, functions.cc
 use_x509userproxy = True
-x509userproxy = /tmp/x509up_u${USERPROXY}
+x509userproxy = /home/submit/mariadlf/x509up_u${USERPROXY}
 Requirements = ((BOSCOGroup == "bosco_cms" && BOSCOCluster == "ce03.cmsaf.mit.edu") || (BOSCOCluster == "t3serv008.mit.edu")) && (Machine != "t3btch070.mit.edu") && (Machine != "t3desk014.mit.edu")
 +REQUIRED_OS = "rhel7"
 Queue
