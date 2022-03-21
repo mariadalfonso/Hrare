@@ -95,6 +95,27 @@ def findDIR(directory):
 
     return rootFiles
 
+
+def findManyXRDFS(basedir, regex):
+
+    print("regex=",regex)
+    print("basedir=",basedir)
+
+    command = f"xrdfs root://xrootd.cmsaf.mit.edu ls -R /store/user/paus/nanohr/D01 | grep "+regex+" | grep '.root'"
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, shell=True)
+    result = proc.stdout.readlines()
+    paths = ["root://xrootd.cmsaf.mit.edu/" + r.rstrip().decode("utf-8") for r in result]
+    print(paths)
+    print('RESULTS = ',len(result))
+
+    rootFiles = ROOT.vector('string')()
+    for f in paths:
+        rootFiles.push_back(f)
+
+    return rootFiles
+
+
 def findMany(basedir, regex):
 
     if basedir[-1] == "/": basedir = basedir[:-1]

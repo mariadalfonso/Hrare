@@ -8,7 +8,10 @@ alias cmsvoms='voms-proxy-init -rfc -voms cms; cp /tmp/x509up_u'$(id -u)' ~/'
 
 cmsvoms
 echo ${cmsvoms}
-ls -ltra ~/x509up_u${USERPROXY}
+ls -ltra ~/x509up_u${USERPROXY} 
+
+echo 'WHOAMI?'
+whoami
 
 line=1
 
@@ -23,6 +26,13 @@ whichEra=$2
 whichPD=$3
 whichSkim=$4
 whichJob=$5
+
+whichYear=2018
+whichEra="A"
+whichPD="EGamma"
+whichSkim="VH" 
+whichJob=4
+
 
 if [ ! -d "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/VBF/2018/" ]; then
   echo "creating output folders" /scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/
@@ -44,7 +54,7 @@ transfer_input_files = ""
 Log    = logs/simple_skim_${whichSample}_${whichJob}.log
 Output = logs/simple_skim_${whichSample}_${whichJob}.out
 Error  = logs/simple_skim_${whichSample}_${whichJob}.error
-transfer_input_files = skim.py, utilsHrare.py, functions.cc
+transfer_input_files = skim.py, ../utilsHrare.py, ../functions.cc, ../config/selection.json, ../config/skimDB.json
 use_x509userproxy = True
 x509userproxy = /home/submit/mariadlf/x509up_u${USERPROXY}
 Requirements = ((BOSCOGroup == "bosco_cms" && BOSCOCluster == "ce03.cmsaf.mit.edu") || (BOSCOCluster == "t3serv008.mit.edu")) && (Machine != "t3btch070.mit.edu") && (Machine != "t3desk014.mit.edu")

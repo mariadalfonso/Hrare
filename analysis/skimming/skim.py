@@ -7,16 +7,18 @@ import math
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
-from utilsHrare import findMany
+from utilsHrare import findManyXRDFS
 from utilsHrare import pickTRG, getSkimsFromJson
 
-with open("config/selection.json") as jsonFile:
+#with open("config/selection.json") as jsonFile:
+with open("selection.json") as jsonFile:    
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
 overall = jsonObject['triggers']
 
-with open("config/skimDB.json") as jsonFile:
+#with open("config/skimDB.json") as jsonFile:
+with open("skimDB.json") as jsonFile:    
     skimObject = json.load(jsonFile)
     jsonFile.close()
 
@@ -31,7 +33,7 @@ def groupFiles(fIns, group):
         a = i*filesPerGroup
         b = (i+1)*filesPerGroup
         subFiles = fIns[a:b]
-        print(subFiles)
+#        print(subFiles)
         ret.append(subFiles)
     
     return ret
@@ -58,6 +60,7 @@ if __name__ == "__main__":
     print("year=",year," era=",era," PDType=",PDType," skimType=",skimType," whichJob=",whichJob)
 
     if True:
+
         isVBF = False
         isW = False
         isZ = False
@@ -68,8 +71,8 @@ if __name__ == "__main__":
 
         fOutDir = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
         fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
-        datasetExp = (str(PDType)+"+Run"+str(year)+str(era)+"*")
-        files = findMany(fInDir, datasetExp)
+        datasetExp = (str(PDType)+"+Run"+str(year)+str(era))
+        files = findManyXRDFS(fInDir, datasetExp)
         print("number of INPUT files = ",len(files))
 
         TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)

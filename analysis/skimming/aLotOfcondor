@@ -1,0 +1,7 @@
+source skim_condor.sh 2018 "A" "EGamma" "VH" 5
+
+#whichYear=$1
+#whichEra=$2
+#whichPD=$3
+#whichSkim=$4
+#whichJob=$5
