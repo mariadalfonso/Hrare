@@ -69,8 +69,8 @@ if __name__ == "__main__":
         if skimType== "VH": isW=True
         if skimType== "VH": isZ=True
 
-        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
         fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
+#        fInDir = "xrdfs root://xrootd.cmsaf.mit.edu ls /store/user/paus/nanohr/D01"
         datasetExp = (str(PDType)+"+Run"+str(year)+str(era))
         files = findManyXRDFS(fInDir, datasetExp)
         print("number of INPUT files = ",len(files))
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             passJob = whichJob == -1 or whichJob == i
             if(passJob == False): continue
 
-            fOutName = "%s/output_%s_%d.root" % (fOutDir, PDType, i)
+            fOutName = "out_%d.root" % (i)
             print("Create %s" % fOutName)
 
             regexToDrop = "^(?!.*omega).*$"

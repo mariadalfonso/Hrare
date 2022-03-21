@@ -98,14 +98,16 @@ def findDIR(directory):
 
 def findManyXRDFS(basedir, regex):
 
+    server = "root://xrootd.cmsaf.mit.edu/"
+    print("using ",server)
     print("regex=",regex)
     print("basedir=",basedir)
 
-    command = f"xrdfs root://xrootd.cmsaf.mit.edu ls -R /store/user/paus/nanohr/D01 | grep "+regex+" | grep '.root'"
+    command = f"xrdfs "+server+" ls -R /store/user/paus/nanohr/D01 | grep "+regex+" | grep '.root'"
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, shell=True)
     result = proc.stdout.readlines()
-    paths = ["root://xrootd.cmsaf.mit.edu/" + r.rstrip().decode("utf-8") for r in result]
+    paths = [server + r.rstrip().decode("utf-8") for r in result]
     print(paths)
     print('RESULTS = ',len(result))
 
