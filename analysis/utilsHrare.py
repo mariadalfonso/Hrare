@@ -4,6 +4,10 @@ import json
 from subprocess import call,check_output
 import fnmatch
 from correctionlib import _core
+import glob
+from XRootD import client
+from XRootD.client.flags import DirListFlags
+import subprocess
 
 if "/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("functions.cc","k")
@@ -95,6 +99,26 @@ def findDIR(directory):
 
     return rootFiles
 
+def findManyClient(basedir, regex):
+
+    rootFiles = ROOT.vector('string')()
+
+    directory = '/store/user/paus/nanohr/D01'
+    fs = client.FileSystem('root://xrootd.cmsaf.mit.edu/')
+    lsst = fs.dirlist(directory,DirListFlags.RECURSIVE)
+#    lsst = fs.dirlist(directory)
+
+    for e in lsst[1]:
+        filePath  = e.name
+        if fnmatch.fnmatch(filePath, regex):
+            filename= 'root://xrootd.cmsaf.mit.edu/'+directory+e.name
+            if "failed/" in filename: continue
+            if "log/" in filename: continue
+            if "tmp_" in filename: continue
+            if ".txt" in filename: continue
+            rootFiles.push_back(filename)
+
+    return rootFiles
 
 def findManyXRDFS(basedir, regex):
 

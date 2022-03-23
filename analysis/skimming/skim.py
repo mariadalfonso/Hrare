@@ -7,7 +7,7 @@ import math
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
-from utilsHrare import findManyXRDFS
+from utilsHrare import findManyXRDFS, findManyClient
 from utilsHrare import pickTRG, getSkimsFromJson
 
 #with open("config/selection.json") as jsonFile:
@@ -71,8 +71,11 @@ if __name__ == "__main__":
 
         fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
 #        fInDir = "xrdfs root://xrootd.cmsaf.mit.edu ls /store/user/paus/nanohr/D01"
-        datasetExp = (str(PDType)+"+Run"+str(year)+str(era))
-        files = findManyXRDFS(fInDir, datasetExp)
+#        datasetExp = (str(PDType)+"+Run"+str(year)+str(era))
+#        files = findManyXRDFS(fInDir, datasetExp)
+        datasetExp = ("/"+str(PDType)+"+Run"+str(year)+str(era)+"*")
+        files = findManyClient(fInDir, datasetExp)
+
         print("number of INPUT files = ",len(files))
 
         TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)

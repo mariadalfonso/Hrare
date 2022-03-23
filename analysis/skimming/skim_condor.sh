@@ -3,21 +3,19 @@
 USERPROXY=`id -u`
 echo ${USERPROXY}
 
-alias cmsvoms='voms-proxy-init -rfc -voms cms; cp /tmp/x509up_u'$(id -u)' ~/'
+alias cmsvoms='voms-proxy-init -rfc -voms cms --valid 168:00 -pwstdin < $HOME/.grid-cert-passphrase; cp /tmp/x509up_u'$(id -u)' ~/'
 
-cmsvoms
+#cmsvoms
 echo ${cmsvoms}
 ls -ltra ~/x509up_u${USERPROXY} 
 
-echo 'WHOAMI?'
-whoami
-
 line=1
+
+filename=("toResubmit_"$1"_"$2"_"$3"_"$4".txt")
+touch $filename
 
 while [ $line -le 1 ]
 do
-
-echo 'PROCESSING' $line
 
 #set -- $line
 whichYear=$1
@@ -25,6 +23,8 @@ whichEra=$2
 whichPD=$3
 whichSkim=$4
 whichJob=$5
+
+echo 'PROCESSING' $whichJob
 
 fOutDir=("/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"$whichSkim"/"$whichYear"/"$whichPD"+Run"$whichEra)
 echo $fOutDir
@@ -49,8 +49,7 @@ Log    = logs/simple_skim_${whichSample}_${whichJob}.log
 Output = logs/simple_skim_${whichSample}_${whichJob}.out
 Error  = logs/simple_skim_${whichSample}_${whichJob}.error
 transfer_input_files = skim.py, ../utilsHrare.py, ../functions.cc, ../config/selection.json, ../config/skimDB.json
-transfer_output_remaps = "out_"${whichJob}".root = "${fOutDir}"/"out_"${whichJob}".root"
-max_retries = 3
+transfer_output_remaps = "out_${whichJob}.root = ${fOutDir}/out_${whichJob}.root"
 use_x509userproxy = True
 x509userproxy = /home/submit/mariadlf/x509up_u${USERPROXY}
 +AccountingGroup = "analysis.mariadlf"
