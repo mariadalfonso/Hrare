@@ -1,0 +1,7 @@
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018A-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_A_2018.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_B_2018.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_C_2018.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018D-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_D_2018.txt

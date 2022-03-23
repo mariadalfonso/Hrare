@@ -1,7 +1,39 @@
-source skim_condor.sh 2018 "A" "EGamma" "VH" 5
+#!/bin/sh
 
-#whichYear=$1
-#whichEra=$2
-#whichPD=$3
-#whichSkim=$4
-#whichJob=$5
+##source ./skim_condor.sh 2018 "D" "MuonEG" "VH" 51 "files_Egamma_D_2018.txt"
+
+echo" -------------------- "
+echo" -- SUBMITTING VBF -- "
+echo" -------------------- "
+
+len=$(cat catalog/files_Egamma_C_2018.txt | wc -l)
+
+for (( c=0; c<=$len; c++ ))
+do
+    source ./skim_condor.sh 2018 "C" "EGamma" "VBF" $c "files_Egamma_C_2018.txt"
+done
+
+exit
+
+len=$(cat catalog/files_Egamma_B_2018.txt | wc -l)
+
+for (( c=0; c<=2152; c++ ))
+do
+    source ./skim_condor.sh 2018 "B" "EGamma" "VBF" $c "files_Egamma_B_2018.txt"
+done
+
+len=$(cat catalog/files_Egamma_A_2018.txt | wc -l)
+
+for (( c=0; c<=$len; c++ ))
+do
+    source ./skim_condor.sh 2018 "A" "EGamma" "VBF" $c "files_Egamma_A_2018.txt"
+done
+
+exit
+
+len=$(cat catalog/files_Egamma_D_2018.txt | wc -l)
+
+for (( c=0; c<=$len; c++ ))
+do
+    source ./skim_condor.sh 2018 "D" "EGamma" "VBF" $c "files_Egamma_D_2018.txt"
+done

@@ -99,6 +99,16 @@ def findDIR(directory):
 
     return rootFiles
 
+def readListFromFile(filename):
+
+    rootFiles = ROOT.vector('string')()
+    with open(filename, "r") as f:
+        for item in f:
+            rootFiles.push_back(item)
+
+    return rootFiles
+
+
 def findManyClient(basedir, regex):
 
     rootFiles = ROOT.vector('string')()

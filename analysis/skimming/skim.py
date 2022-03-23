@@ -7,7 +7,7 @@ import math
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
-from utilsHrare import findManyXRDFS, findManyClient
+from utilsHrare import findManyXRDFS, findManyClient, readListFromFile
 from utilsHrare import pickTRG, getSkimsFromJson
 
 #with open("config/selection.json") as jsonFile:
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     whichJob = -1
 
-    valid = ['year=', "era=", "PDType=", "SkimType=","whichJob="]
+    valid = ['year=', "era=", "PDType=", "SkimType=","whichJob=","whichFile="]
     opts, args = getopt.getopt(sys.argv[1:], "", valid)
 
     for opt, arg in opts:
@@ -56,8 +56,10 @@ if __name__ == "__main__":
             skimType = str(arg)
         if opt == "--whichJob":
             whichJob = int(arg)
+        if opt == "--whichFile":
+            whichFile = str(arg)
 
-    print("year=",year," era=",era," PDType=",PDType," skimType=",skimType," whichJob=",whichJob)
+    print("year=",year," era=",era," PDType=",PDType," skimType=",skimType," whichJob=",whichJob," whichFile=",whichFile)
 
     if True:
 
@@ -69,12 +71,14 @@ if __name__ == "__main__":
         if skimType== "VH": isW=True
         if skimType== "VH": isZ=True
 
+#        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
         fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
 #        fInDir = "xrdfs root://xrootd.cmsaf.mit.edu ls /store/user/paus/nanohr/D01"
 #        datasetExp = (str(PDType)+"+Run"+str(year)+str(era))
 #        files = findManyXRDFS(fInDir, datasetExp)
-        datasetExp = ("/"+str(PDType)+"+Run"+str(year)+str(era)+"*")
-        files = findManyClient(fInDir, datasetExp)
+#        datasetExp = ("/"+str(PDType)+"+Run"+str(year)+str(era)+"*")
+#        files = findManyClient(fInDir, datasetExp)
+        files = readListFromFile(whichFile)
 
         print("number of INPUT files = ",len(files))
 

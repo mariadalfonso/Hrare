@@ -9,7 +9,8 @@ cd CMSSW_12_2_0/src/
 eval `scramv1 runtime -sh` # cmsenv is an alias not on the workers
 cd ../..
 
-python3 skim.py --year=$1 --era=$2 --PDType=$3 --SkimType=$4 --whichJob=$5
+
+python3 skim.py --year=$1 --era=$2 --PDType=$3 --SkimType=$4 --whichJob=$5 --whichFile=$6
 
 status=$?
 
