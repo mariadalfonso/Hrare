@@ -144,66 +144,54 @@ def dfGammaMeson(df):
           .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
           )
 
-    dfb= (dfa.Define("goodPhi","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
-          .Define("goodPhi_pt", "phi_kin_pt[goodPhi]")
-          .Define("goodPhi_eta", "phi_kin_eta[goodPhi]")
-          .Define("goodPhi_phi", "phi_kin_phi[goodPhi]")
-          .Define("goodPhi_mass", "phi_kin_mass[goodPhi]")
-          .Define("goodPhi_massErr", "phi_kin_massErr[goodPhi]")
-          .Define("goodPhi_iso", "phi_iso[goodPhi]")
-          .Define("goodPhi_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodPhi]")
-          .Define("goodPhi_vtx_prob", "phi_kin_vtx_prob[goodPhi]")
-          .Define("goodPhi_trk1_pt", "phi_trk1_pt[goodPhi]")
-          .Define("goodPhi_trk2_pt", "phi_trk2_pt[goodPhi]")
-          .Define("goodPhi_trk1_eta", "phi_trk1_eta[goodPhi]")
-          .Define("goodPhi_trk2_eta", "phi_trk2_eta[goodPhi]")
-          .Define("goodPhiDR","DeltaR(phi_trk1_eta[goodPhi],phi_trk2_eta[goodPhi],phi_trk1_phi[goodPhi],phi_trk2_phi[goodPhi])")
-          )
+    if(isPhiCat=="true"):
+         dfOBJ = (df.Filter("nphi>0").Define("goodMeson","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
+                  .Filter("Sum(goodMeson)>0", "one good Rho/Phi (pt, validfit, ptTracks)")
+                  .Define("goodMeson_pt", "phi_kin_pt[goodMeson]")
+                  .Define("goodMeson_eta", "phi_kin_eta[goodMeson]")
+                  .Define("goodMeson_phi", "phi_kin_phi[goodMeson]")
+                  .Define("goodMeson_mass", "phi_kin_mass[goodMeson]")
+                  .Define("goodMeson_iso", "phi_iso[goodMeson]")
+                  .Define("goodMeson_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodMeson]")
+                  .Define("goodMeson_vtx_prob", "phi_kin_vtx_prob[goodMeson]")
+                  .Define("goodMeson_massErr", "phi_kin_massErr[goodMeson]")
+                  .Define("goodMeson_trk1_pt", "phi_trk1_pt[goodMeson]")
+                  .Define("goodMeson_trk2_pt", "phi_trk2_pt[goodMeson]")
+                  .Define("goodMeson_trk1_eta", "phi_trk1_eta[goodMeson]")
+                  .Define("goodMeson_trk2_eta", "phi_trk2_eta[goodMeson]")
+                  .Define("goodMeson_DR","DeltaR(phi_trk1_eta[goodMeson],phi_trk2_eta[goodMeson],phi_trk1_phi[goodMeson],phi_trk2_phi[goodMeson])")
+                  )
 
-    dfOBJ= (dfb.Define("goodRho","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
-            .Define("goodRho_pt", "rho_kin_pt[goodRho]")
-            .Define("goodRho_eta", "rho_kin_eta[goodRho]")
-            .Define("goodRho_phi", "rho_kin_phi[goodRho]")
-            .Define("goodRho_iso", "rho_iso[goodRho]")
-            .Define("goodRho_mass", "rho_kin_mass[goodRho]")
-            .Define("goodRho_massErr", "rho_kin_massErr[goodRho]")
-            .Define("goodRho_vtx_chi2dof", "rho_kin_vtx_chi2dof[goodRho]")
-            .Define("goodRho_vtx_prob", "rho_kin_vtx_prob[goodRho]")
-            .Define("goodRho_trk1_pt", "rho_trk1_pt[goodRho]")
-            .Define("goodRho_trk2_pt", "rho_trk2_pt[goodRho]")
-            .Define("goodRho_trk1_eta", "rho_trk1_eta[goodRho]")
-            .Define("goodRho_trk2_eta", "rho_trk2_eta[goodRho]")
-            .Define("goodRhoDR","DeltaR(rho_trk1_eta[goodRho],rho_trk2_eta[goodRho],rho_trk1_phi[goodRho],rho_trk2_phi[goodRho])")
-        )
+    if(isRhoCat=="true"):
+         dfOBJ = (df.Filter("nrho>0").Define("goodMeson","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
+                  .Filter("Sum(goodMeson)>0", "one good Rho/Phi (pt, validfit, ptTracks)")
+                  .Define("goodMeson_pt", "rho_kin_pt[goodMeson]")
+                  .Define("goodMeson_eta", "rho_kin_eta[goodMeson]")
+                  .Define("goodMeson_phi", "rho_kin_phi[goodMeson]")
+                  .Define("goodMeson_iso", "rho_iso[goodMeson]")
+                  .Define("goodMeson_mass", "rho_kin_mass[goodMeson]")
+                  .Define("goodMeson_vtx_chi2dof", "rho_kin_vtx_chi2dof[goodMeson]")
+                  .Define("goodMeson_vtx_prob", "rho_kin_vtx_prob[goodMeson]")
+                  .Define("goodMeson_massErr", "rho_kin_massErr[goodMeson]")
+                  .Define("goodMeson_trk1_pt", "rho_trk1_pt[goodMeson]")
+                  .Define("goodMeson_trk2_pt", "rho_trk2_pt[goodMeson]")
+                  .Define("goodMeson_trk1_eta", "rho_trk1_eta[goodMeson]")
+                  .Define("goodMeson_trk2_eta", "rho_trk2_eta[goodMeson]")
+                  .Define("goodMeson_DR","DeltaR(rho_trk1_eta[goodMeson],rho_trk2_eta[goodMeson],rho_trk1_phi[goodMeson],rho_trk2_phi[goodMeson])")
+                  )
 
     return dfOBJ
 
 def dfHiggsCand(df):
 
-    if(isPhiCat=="true"):
-
-        dfbase = (df.Filter("Sum(goodPhotons)>0", "At least one good Photon")
-                  .Filter("Sum(goodPhi)>0", "one good Phi (ptPhi, validfit, ptTracks)")
-                  .Define("index_pair","HiggsCandFromRECO(goodPhi_pt,goodPhi_eta,goodPhi_phi,goodPhi_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
-                  .Define("jet_mask2", "cleaningJetFromMeson(Jet_eta, Jet_phi, goodPhi_eta[index_pair[0]], goodPhi_phi[index_pair[0]])")
-                  .Define("HCandMass", "Minv2(goodPhi_pt[index_pair[0]],goodPhi_eta[index_pair[0]],goodPhi_phi[index_pair[0]],goodPhi_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
-                  .Define("HCandPT",   "Minv2(goodPhi_pt[index_pair[0]],goodPhi_eta[index_pair[0]],goodPhi_phi[index_pair[0]],goodPhi_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
+    dfbase = (df.Filter("Sum(goodPhotons)>0", "At least one good Photon")
+              .Filter("Sum(goodMeson)>0", "one good Phi (ptPhi, validfit, ptTracks)")
+              .Define("index_pair","HiggsCandFromRECO(goodMeson_pt,goodMeson_eta,goodMeson_phi,goodMeson_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
+              .Define("jet_mask2", "cleaningJetFromMeson(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
+              .Define("HCandMass", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
+              .Define("HCandPT", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
               )
-        return dfbase
-
-
-    if(isRhoCat=="true"):
-
-        dfbase = (df.Filter("Sum(goodPhotons)>0", "At least one good Photon")
-                  .Filter("Sum(goodRho)>0", "one good Rho (ptPhi, validfit, ptTracks)")
-                  .Define("index_pair","HiggsCandFromRECO(goodRho_pt,goodRho_eta,goodRho_phi,goodRho_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
-                  .Define("jet_mask2", "cleaningJetFromMeson(Jet_eta, Jet_phi, goodRho_eta[index_pair[0]], goodRho_phi[index_pair[0]])")
-                  .Define("HCandMass", "Minv2(goodRho_pt[index_pair[0]],goodRho_eta[index_pair[0]],goodRho_phi[index_pair[0]],goodRho_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
-                  .Define("HCandPT",   "Minv2(goodRho_pt[index_pair[0]],goodRho_eta[index_pair[0]],goodRho_phi[index_pair[0]],goodRho_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
-                  )
-
-        return dfbase
-
+    return dfbase
 
 def analysis(df,mc,w,isData):
 
@@ -245,37 +233,20 @@ def analysis(df,mc,w,isData):
     ]:
         branchList.push_back(branchName)
 
-    if(isPhiCat=="true"):
-        for branchName in [
-            "goodPhi",
-            "goodPhiDR",
-            "goodPhi_mass",
-            "goodPhi_pt",
-            "goodPhi_iso",
-            "goodPhi_trk1_pt",
-            "goodPhi_trk2_pt",
-            "goodPhi_trk1_eta",
-            "goodPhi_trk2_eta",
-            "goodPhi_vtx_chi2dof",
-            "goodPhi_vtx_prob",
-        ]:
-            branchList.push_back(branchName)
-
-    if(isRhoCat=="true"):
-        for branchName in [
-            "goodRho",
-            "goodRhoDR",
-            "goodRho_mass",
-            "goodRho_pt",
-            "goodRho_iso",
-            "goodRho_trk1_pt",
-            "goodRho_trk2_pt",
-            "goodRho_trk1_eta",
-            "goodRho_trk2_eta",
-            "goodRho_vtx_chi2dof",
-            "goodRho_vtx_prob",
-        ]:
-            branchList.push_back(branchName)
+    for branchName in [
+            "goodMeson",
+            "goodMeson_DR",
+            "goodMeson_mass",
+            "goodMeson_pt",
+            "goodMeson_iso",
+            "goodMeson_trk1_pt",
+            "goodMeson_trk2_pt",
+            "goodMeson_trk1_eta",
+            "goodMeson_trk2_eta",
+            "goodMeson_vtx_chi2dof",
+            "goodMeson_vtx_prob",
+    ]:
+        branchList.push_back(branchName)
 
     if isZ or isW:
         for branchName in [
@@ -294,12 +265,15 @@ def analysis(df,mc,w,isData):
             branchList.push_back(branchName)
 
     outputFile = "outname_mc%d"%mc+".root"
-    cat = ""
-    if(isPhiCat=="true"): cat = "_PhiCat"
-    if(isRhoCat=="true"): cat = "_RhoCat"
-    if isZ : outputFile = "outname_mc%d"%mc+"_Zcat"+cat+".root"
-    if isW : outputFile = "outname_mc%d"%mc+"_Wcat"+cat+".root"
-    if isVBF: outputFile = "outname_mc%d"%mc+"_VBFcat"+cat+".root"
+    catM = ""
+    if(isPhiCat=="true"): catM = "PhiCat"
+    if(isRhoCat=="true"): catM = "RhoCat"
+    catTag = ""
+    if(isZ): catTag = "Zcat"
+    if(isW): catTag = "Wcat"
+    if(isVBF): catTag = "VBFcat"
+    outputFile = "MARCH30/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
+    print(outputFile)
 
     snapshot_tdf = dfFINAL.Snapshot("events", outputFile, branchList)
     print("snapshot_tdf DONE")
