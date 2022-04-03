@@ -5,11 +5,19 @@ from array import array
 ROOT.gStyle.SetOptStat(0)
 
 year = '_2018'
-directory = '../FEB9sig/'
+directory = '../MARCH26/2018/'
 
-#lumi=137
-lumi=59.70
-#lumi=45.97
+from LoadTree import loadTree
+
+ROOT.gStyle.SetOptStat(0)
+
+lumis={
+    '_12016': 19.52, #APV #(B-F for 2016 pre)
+    '_22016': 16.80, #postVFP
+    '_2016': 35.9,
+    '_2017': 36.4, #41.5, #(C,D,E,F for 2017)
+    '_2018': 59.70,
+}
 
 # Create the plot
 
@@ -20,43 +28,36 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal):
       if(category =='_VBFcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
       if(category =='_Wcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Wp
       if(category =='_Wcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
+      if(category =='_Zcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z
       if(category =='_VBFcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_Wcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Wp
+      if(category =='_Wcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Wm
+      if(category =='_Zcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z
    else:
-#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc6'+category+mesonCat+year+'.root') # VBF
-#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc7'+category+mesonCat+year+'.root') # VBF
-#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc8'+category+mesonCat+year+'.root') # VBF
-#      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc9'+category+mesonCat+year+'.root') # VBF
-      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc-31'+category+mesonCat+year+'.root') # VBF
-      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc-32'+category+mesonCat+year+'.root') # VBF
-      if(category =='_VBFcat'): mytree.Add(directory+'outname_mc-33'+category+mesonCat+year+'.root') # VBF
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-1'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-2'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-3'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-11'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-12'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-13'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-21'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-22'+category+mesonCat+year+'.root') # VH
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc-23'+category+mesonCat+year+'.root') # VH
-   
+      mytree = loadTree(mytree, directory , category, mesonCat, year ) # all sigm, BKG , data, 
+
+
    h = ROOT.TH1F( 'Higgs', '', nbin, low, high )
 
    print(item)
 
    for ev in mytree:
-      
+
       if item == 4 :
          var = ev.HCandMass
 
       # Fill histograms.
-      # data
+#      if (category =='_VBFcat' and (ev.mc==6 or ev.mc==7 or ev.mc==8 or ev.mc==9)):
+#      if (category =='_VBFcat' and (ev.mc==7 or ev.mc==8 or ev.mc==9)):
       if ((category =='_VBFcat' and (ev.mc==-31 or ev.mc==-32 or ev.mc==-33)) or
           (category =='_Wcat' and (ev.mc==-1 or ev.mc==-2 or ev.mc==-3 or ev.mc==-11 or ev.mc==-12 or ev.mc==-13 or ev.mc==-21 or ev.mc==-22 or ev.mc==-23)) ):
-      if ev.mc==1011 or ev.mc==1012:
-         h.Fill( var, ev.w)
-      if ev.mc==1010 or ev.mc==1020:
-         h.Fill( var, ev.w)
-
+         h.Fill( var, ev.w )
+      if ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022: #W
+         h.Fill( var, ev.w )
+      if ev.mc==1013 or ev.mc==1023: #Z
+         h.Fill( var, ev.w )
+      if ev.mc==1010 or ev.mc==1020: #VBF
+         h.Fill( var, ev.w )
    return h
 
 def plot(item, nbin, low, high, doLog,category,mesonCat):
@@ -110,10 +111,10 @@ def plot(item, nbin, low, high, doLog,category,mesonCat):
    text.SetTextFont(42)
    text.DrawLatex(0.15 + 0.10, 0.93, "Simulation")
    text.SetTextSize(0.04)
-   text.DrawLatex(0.65, 0.93, "#sqrt{s} = 13 TeV,%0.2f fb^{-1}"% (lumi))   
+   text.DrawLatex(0.65, 0.93, "#sqrt{s} = 13 TeV,%0.2f fb^{-1}"% (lumis[year]))
 
 
-   string = category+mesonCat+"_isEle"
+   string = category+mesonCat
 
    if item==4:
       c.SaveAs("HCandMass"+string+".png")
@@ -123,3 +124,6 @@ if __name__ == "__main__":
 
    plot(4, 200, 0. , 200.,True,'_Wcat','_PhiCat') # HCandMass
    plot(4, 200, 0. , 200.,True,'_VBFcat','_PhiCat') # HCandMass
+#   plot(4, 200, 0. , 200.,True,'_VBFcat','_RhoCat') # HCandMass
+#   plot(4, 200, 0. , 200.,True,'_VBFcat','_PhiCat') # HCandMass
+#   plot(4, 200, 0. , 200.,True,'_Wcat','_RhoCat') # HCandMass
