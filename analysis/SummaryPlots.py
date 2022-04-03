@@ -1,18 +1,23 @@
 import ROOT
 import os
 
-category = '_Wcat'
-directory = ''
-mytree = ROOT.TChain('events')
-mytree.Add(directory+'outname_mc1'+category+'.root')  #ZG
-mytree.Add(directory+'outname_mc2'+category+'.root')  #WG
-mytree.Add(directory+'outname_mc10'+category+'.root') #ZH
-mytree.Add(directory+'outname_mc11'+category+'.root') #WH
-mytree.Add(directory+'outname_mc3'+category+'.root')  #Wjets
-mytree.Add(directory+'outname_mc4'+category+'.root')  #tt2l
-mytree.Add(directory+'outname_mc0'+category+'.root')  #DY
+from LoadTree import loadTree
 
-lumi=137
+category = '_Wcat'
+mesonCat= '_PhiCat'
+year = '_2018'
+directory = '../MARCH26/2018/'
+
+mytree = ROOT.TChain('events')
+mytree = loadTree(mytree, directory , category, mesonCat, year )
+
+lumis={
+    '_12016': 19.52, #APV #(B-F for 2016 pre)
+    '_22016': 16.80, #postVFP
+    '_2016': 35.9,
+    '_2017': 36.4, #41.5, #(C,D,E,F for 2017)
+    '_2018': 59.70,
+}
 
 # Create the plot
 
@@ -22,9 +27,14 @@ def plot(item, nbin, low, high, doLog):
    hZG = ROOT.TH1F( 'hZG', 'This is the distribution', nbin, low, high )
    hW = ROOT.TH1F( 'hW', 'This is the distribution', nbin, low, high )
    hWG = ROOT.TH1F( 'hWG', 'This is the distribution', nbin, low, high )
-   hTT2L = ROOT.TH1F( 'hTT2L', 'This is the distribution', nbin, low, high )
+   hTT12L = ROOT.TH1F( 'hTT12L', 'This is the distribution', nbin, low, high )
    hZH = ROOT.TH1F( 'hZH', 'This is the distribution', nbin, low, high )
    hWH = ROOT.TH1F( 'hWH', 'This is the distribution', nbin, low, high )
+   hGJet = ROOT.TH1F( 'hGJet', 'This is the distribution', nbin, low, high )
+   hJet = ROOT.TH1F( 'hJet', 'This is the distribution', nbin, low, high )
+   hVBFH = ROOT.TH1F( 'hVBFH', 'This is the distribution', nbin, low, high )
+   hData = ROOT.TH1F( 'hData', '', nbin, low, high )
+
 
    print(item)
 
@@ -48,15 +58,24 @@ def plot(item, nbin, low, high, doLog):
          hZG.Fill( var, ev.w)
       if ev.mc==2:
          hWG.Fill( var, ev.w)
-      if ev.mc==3:
+      if (ev.mc==31 or ev.mc==32 or ev.mc==33):
          hW.Fill( var, ev.w)
-      if ev.mc==4:
-         hTT2L.Fill( var, ev.w)
-      if ev.mc==10:
+      if (ev.mc==4 or ev.mc==5):
+         hTT12L.Fill( var, ev.w)
+      if (ev.mc==6 or ev.mc==7 or ev.mc==8 or ev.mc==9):
+         hGJet.Fill( var, ev.w)
+      ####
+      if ev.mc==1013 or ev.mc==1023:
          hZH.Fill( var, ev.w)
-      if ev.mc==11:
+      if ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022:
          hWH.Fill( var, ev.w)
-                  
+      if ev.mc==1010 or ev.mc==1020:
+         hVBFH.Fill( var, ev.w)
+      ####
+      if ev.mc<0:
+         if (item==4 and var>115 and var<135) : continue
+         hData.Fill( var )
+
    # Create canvas with pad
    c = ROOT.TCanvas("c", "", 600, 600)
    pad = ROOT.TPad("upper_pad", "", 0, 0, 1, 1)
@@ -66,13 +85,27 @@ def plot(item, nbin, low, high, doLog):
    pad.Draw()
    pad.cd()
  
+   redDark = (191, 34, 41)
+#   redMed = (255, 40, 0)
+   redMed = (237, 41, 57)
+#   redMed = (220,0,5)
+#   redLight = (255,61,65)
+   redLight = (255,82,82)
+   orange = (255, 204, 153)
+   gray = (136,139,141)
+   azure = (100, 192, 232)
+   azureDark = (96, 147, 172)
+   green = (144, 238, 144)
+   greenDark = (98, 172, 141)
+   gold = (212 ,175, 55)
+
    # Draw stackXS with MC contributions
    stack = ROOT.THStack()
-   for h, color in zip([hZG, hDY, hTT2L, hWG, hW, hZH, hWH], [(100, 192, 232), (96, 147, 172), (136,139,141), (144, 238, 144), (98,  172, 141), (191, 34, 41), (237, 41, 57)]):
+   for h, color in zip([hZG, hDY, hTT12L, hWG, hW, hGJet, hJet, hZH, hWH, hVBFH], [azure, azureDark, gray, green, greenDark, orange, gold, redDark, redMed, redLight]):
       h.SetLineWidth(1)
       h.SetLineColor(1)
       h.SetFillColor(ROOT.TColor.GetColor(*color))
-      h.Scale(lumi)
+      h.Scale(lumis[year])
       stack.Add(h)
       if item==4: stack.SetMaximum(10*max(hWH.GetMaximum(),hZH.GetMaximum()))
       if item==2: stack.SetMaximum(6*max(hWG.GetMaximum(),hZG.GetMaximum()))
@@ -109,13 +142,18 @@ def plot(item, nbin, low, high, doLog):
    legend.SetTextAlign(32)
    #legend.AddEntry(data, "Data" ,"lep")
 
-   if hZG: legend.AddEntry(hZG, "ZG", "f")
-   if hDY: legend.AddEntry(hDY, "DY + jets", "f")
-   if hWG: legend.AddEntry(hWG, "WG", "f")
-   if hW: legend.AddEntry(hW, "W + jets", "f")
-   if hTT2L: legend.AddEntry(hTT2L, "TT2l", "f")
-   if hZH: legend.AddEntry(hZH, "ZH(#gamma#phi)", "f")
-   if hWH: legend.AddEntry(hWH, "WH(#gamma#phi)", "f")
+   if hZG and hZG.Integral()>0: legend.AddEntry(hZG, "ZG", "f")
+   if hDY and hDY.Integral()>0: legend.AddEntry(hDY, "DY + jets", "f")
+   if hWG and hWG.Integral()>0: legend.AddEntry(hWG, "WG", "f")
+   if hW and hW.Integral()>0: legend.AddEntry(hW, "W + jets", "f")
+   if hTT12L and hTT12L.Integral()>0: legend.AddEntry(hTT12L, "TT12l", "f")
+   if hGJet and hGJet.Integral()>0: legend.AddEntry(hGJet, "#gamma + jets", "f")
+   if hZH and hZH.Integral()>0: legend.AddEntry(hZH, "ZH(#gamma#phi)", "f")
+   if hWH and hWH.Integral()>0: legend.AddEntry(hWH, "WH(#gamma#phi)", "f")
+   if hVBFH and hVBFH.Integral()>0: legend.AddEntry(hVBFH, "qqH(#gamma#phi)", "f")
+
+   if hData and hData.Integral()>0: legend.AddEntry(hData, "Data" ,"lep")
+
    legend.Draw("SAME")
  
    # Add label

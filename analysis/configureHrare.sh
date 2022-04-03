@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# -1 is data, 2 is signal, 1 is BKG
+isMC=-1
+
 for year in "2018";
 #for year in "12016" "2016" "2017" "2018";
 do
@@ -61,19 +64,34 @@ fi
 
 if [ $cat = "isWtag" ]; then
 
-##python3 VGammaMeson_cat.py $cat $type 11  >> $TMPDATFILE  # signal WLNU
-python3 VGammaMeson_cat.py $cat $type 2  $year >> $TMPDATFILE  # WG
-python3 VGammaMeson_cat.py $cat $type 3  $year >> $TMPDATFILE  # Wjets
-python3 VGammaMeson_cat.py $cat $type 31 $year >> $TMPDATFILE  # Wjets 0J
-python3 VGammaMeson_cat.py $cat $type 32 $year >> $TMPDATFILE  # Wjets 1J
-python3 VGammaMeson_cat.py $cat $type 33 $year >> $TMPDATFILE  # Wjets 2J
-python3 VGammaMeson_cat.py $cat $type 1  $year >> $TMPDATFILE  # ZG
-python3 VGammaMeson_cat.py $cat $type 0  $year >> $TMPDATFILE  # DYjets
-python3 VGammaMeson_cat.py $cat $type 34 $year >> $TMPDATFILE  # DYjets 0J
-python3 VGammaMeson_cat.py $cat $type 35 $year >> $TMPDATFILE  # DYjets 1J
-python3 VGammaMeson_cat.py $cat $type 36 $year >> $TMPDATFILE  # DYjets 2J
-python3 VGammaMeson_cat.py $cat $type 4  $year >> $TMPDATFILE  # TT2l
-python3 VGammaMeson_cat.py $cat $type 5  $year >> $TMPDATFILE  # TT1l  (BROKEN SAMPLE - 2018)
+
+    if [[ "$isMC" == '2' ]]; then
+
+        python3 VGammaMeson_cat.py $cat $type 1011 $year >> $TMPDATFILE #w+ Phi
+        python3 VGammaMeson_cat.py $cat $type 1012 $year >> $TMPDATFILE #w-
+        python3 VGammaMeson_cat.py $cat $type 1013 $year >> $TMPDATFILE #zh
+        python3 VGammaMeson_cat.py $cat $type 1021 $year >> $TMPDATFILE #w+ Rho
+        python3 VGammaMeson_cat.py $cat $type 1022 $year >> $TMPDATFILE #w-
+        python3 VGammaMeson_cat.py $cat $type 1023 $year >> $TMPDATFILE #zh
+
+    fi
+
+    if [[ "$isMC" == '1' ]]; then
+
+        python3 VGammaMeson_cat.py $cat $type 2  $year >> $TMPDATFILE  # WG
+##      python3 VGammaMeson_cat.py $cat $type 3  $year >> $TMPDATFILE  # Wjets
+        python3 VGammaMeson_cat.py $cat $type 31 $year >> $TMPDATFILE  # Wjets 0J
+        python3 VGammaMeson_cat.py $cat $type 32 $year >> $TMPDATFILE  # Wjets 1J
+        python3 VGammaMeson_cat.py $cat $type 33 $year >> $TMPDATFILE  # Wjets 2J
+        python3 VGammaMeson_cat.py $cat $type 1  $year >> $TMPDATFILE  # ZG
+##      python3 VGammaMeson_cat.py $cat $type 0  $year >> $TMPDATFILE  # DYjets
+        python3 VGammaMeson_cat.py $cat $type 34 $year >> $TMPDATFILE  # DYjets 0J
+        python3 VGammaMeson_cat.py $cat $type 35 $year >> $TMPDATFILE  # DYjets 1J
+        python3 VGammaMeson_cat.py $cat $type 36 $year >> $TMPDATFILE  # DYjets 2J
+        python3 VGammaMeson_cat.py $cat $type 4  $year >> $TMPDATFILE  # TT2l
+#       python3 VGammaMeson_cat.py $cat $type 5  $year >> $TMPDATFILE  # TT1l  (BROKEN SAMPLE - 2018)
+
+    fi
 
 python3 VGammaMeson_cat.py $cat $type -1 $year >> $TMPDATFILE  # SingleMuonA 2018
 python3 VGammaMeson_cat.py $cat $type -2 $year >> $TMPDATFILE  # SingleMuonB 2018
