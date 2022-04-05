@@ -1,0 +1,5 @@
+combine -M AsymptoticLimits -t -1 cms_datacard_ws.txt
+
+#combine -M FitDiagnostics --saveShapes --saveWithUncertainties -t -1 cms_datacard_ws.txt --saveNormalizations --keepFailures --plots --skipBOnlyFit
+#text2workspace.py cms_datacard_ws.txt 
+#combine -M FitDiagnostics --saveShapes --saveWithUncertainties -t -1 cms_datacard_ws.root --saveNormalizations --keepFailures --plots --skipBOnlyFit

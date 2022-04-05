@@ -6,7 +6,7 @@ from LoadTree import loadTree
 category = '_Wcat'
 mesonCat= '_PhiCat'
 year = '_2018'
-directory = '../MARCH26/2018/'
+directory = '/home/submit/mariadlf/Hrare/analysis/2018/APR5/'
 
 mytree = ROOT.TChain('events')
 mytree = loadTree(mytree, directory , category, mesonCat, year )

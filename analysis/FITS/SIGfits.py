@@ -61,7 +61,7 @@ def  fitSig(tag , mesonCat, year ):
     # -----------------------------------------------------------------------------
 
     norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
-    rooTest_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR) # no range means contants
+    Sig_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR) # no range means contants
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -70,10 +70,19 @@ def  fitSig(tag , mesonCat, year ):
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
 
+    cb_mu.setConstant()
+    cb_sigma.setConstant()
+    cb_alphaL.setConstant()
+    cb_alphaR.setConstant()
+    cb_nL.setConstant()
+    cb_nR.setConstant()
+    Sig_norm.setConstant()
+
     # Import model and all its components into the workspace
     getattr(w,'import')(model)
 
-    getattr(w,'import')(rooTest_norm)
+    getattr(w,'import')(Sig_norm)
+    print('integral signal = ',Sig_norm.Print())
 
     # Import data into the workspace
     getattr(w,'import')(data)
@@ -195,7 +204,7 @@ def  fitBkg(tag , mesonCat, year ):
     # -----------------------------------------------------------------------------
 
     norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
-    rooTest_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR, 0.5*norm_SR, 2*norm_SR)
+    BKG_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR, 0.5*norm_SR, 2*norm_SR)
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -247,7 +256,8 @@ def  fitBkg(tag , mesonCat, year ):
     getattr(w,'import')(model)
 
     # Import model_norm
-    getattr(w,'import')(rooTest_norm)
+    getattr(w,'import')(BKG_norm)
+    print("integral BKG",BKG_norm.Print())
 
     # Import data into the workspace
     getattr(w,'import')(data)
@@ -286,10 +296,12 @@ def makePlot():
 if __name__ == "__main__":
 
     fitSig('_Wcat','_RhoCat',2018)
-    fitSig('_VBFcat','_PhiCat',2018)
+    fitBkg('_Wcat','_RhoCat',2018)
+
+    fitSig('_Wcat','_PhiCat',2018)
+    fitBkg('_Wcat','_PhiCat',2018)
+
     fitSig('_VBFcat','_RhoCat',2018)
     fitBkg('_VBFcat','_RhoCat',2018)
     fitBkg('_VBFcat','_PhiCat',2018)
-    fitBkg('_Wcat','_PhiCat',2018)
-    fitBkg('_Wcat','_RhoCat',2018)
-    makePlot()
+#    makePlot()
