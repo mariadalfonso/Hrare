@@ -33,6 +33,18 @@ SigPdf={
     'VBFcat': 'crystal_ball',
 }
 
+SigPdfNorm={
+    'Wcat': 'crystal_ball_norm',
+    'Zcat': 'crystal_ball_norm',
+    'VBFcat': 'crystal_ball_norm',
+}
+
+BkgPdfNorm={
+    'Wcat': 'exp1_norm',
+    'Zcat': 'exp1_norm',
+    'VBFcat': 'bxg_norm',
+}
+
 mcAll = ['WH','bkg']
 category = ['Wcat']
 #category = [ 'Wcat','Zcat']
@@ -46,6 +58,7 @@ ROOT.gROOT.SetBatch()
 ################### OPEN OUTPUT ############
 w = ROOT.RooWorkspace("w","w")
 
+############ DATACARD ###########
 datName = "cms_datacard_ws"
 datName += ".txt"
 
@@ -83,22 +96,39 @@ for cat in category:
             if opts.inputFileBKG != "":
                 wInput=fBkgIn.Get("w")
                 name = BkgPdf[cat]
+                nameNorm = BkgPdfNorm[cat]
         else:
             if opts.inputFileSig != "":
                 wInput=fSigIn.Get("w")
                 name = SigPdf[cat]
+                nameNorm = SigPdfNorm[cat]
             
         print("proc=",proc," cat=",cat," name=",name)
         func = wInput.pdf(name)
         if func == None: raise IOError("Unable to get func" + name)
-        w.Import(func)
-        
+        getattr(w,'import')(func)
+        funcNorm = wInput.var(nameNorm)
+        if funcNorm == None: raise IOError("Unable to get func normalization " + nameNorm)
+        getattr(w,'import')(funcNorm)
+
         datacard.write("shapes")
         datacard.write("\t"+proc )
         datacard.write("\t"+cat )
         datacard.write("\t"+opts.output )
         datacard.write("\tw:"+name )
         datacard.write("\n")
+
+    wInput=fBkgIn.Get("w")
+    wInput.Print()
+    hist_data = wInput.data("datahist")
+    hist_data.SetName("observed_data")
+    getattr(w,'import')(hist_data)
+    datacard.write("shapes")
+    datacard.write("\tdata_obs" )
+    datacard.write("\t"+cat )
+    datacard.write("\t"+opts.output )
+    datacard.write("\tw:"+"observed_data")
+    datacard.write("\n")
 
 #### OBSERVATION
 datacard.write("-------------------------------------\n")

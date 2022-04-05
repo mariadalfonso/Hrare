@@ -5,7 +5,7 @@ from array import array
 ROOT.gStyle.SetOptStat(0)
 
 year = '_2018'
-directory = '../MARCH26/2018/'
+directory = '/home/submit/mariadlf/Hrare/analysis/MARCH26/2018/'
 
 from LoadTree import loadTree
 
@@ -36,7 +36,6 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal):
    else:
       mytree = loadTree(mytree, directory , category, mesonCat, year ) # all sigm, BKG , data, 
 
-
    h = ROOT.TH1F( 'Higgs', '', nbin, low, high )
 
    print(item)
@@ -46,18 +45,23 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal):
       if item == 4 :
          var = ev.HCandMass
 
-      # Fill histograms.
-#      if (category =='_VBFcat' and (ev.mc==6 or ev.mc==7 or ev.mc==8 or ev.mc==9)):
-#      if (category =='_VBFcat' and (ev.mc==7 or ev.mc==8 or ev.mc==9)):
-      if ((category =='_VBFcat' and (ev.mc==-31 or ev.mc==-32 or ev.mc==-33)) or
-          (category =='_Wcat' and (ev.mc==-1 or ev.mc==-2 or ev.mc==-3 or ev.mc==-11 or ev.mc==-12 or ev.mc==-13 or ev.mc==-21 or ev.mc==-22 or ev.mc==-23)) ):
-         h.Fill( var, ev.w )
-      if ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022: #W
-         h.Fill( var, ev.w )
-      if ev.mc==1013 or ev.mc==1023: #Z
-         h.Fill( var, ev.w )
-      if ev.mc==1010 or ev.mc==1020: #VBF
-         h.Fill( var, ev.w )
+      # Fill histograms
+      if (doSignal) :
+         if ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022: #W
+            h.Fill( var, ev.w )
+         if ev.mc==1013 or ev.mc==1023: #Z
+            h.Fill( var, ev.w )
+         if ev.mc==1010 or ev.mc==1020: #VBF
+            h.Fill( var, ev.w )
+      else :
+         if ev.mc<0:   # only DATA
+            h.Fill( var, ev.w )
+
+   #Loop over tree done
+   if ev.mc>=0:
+      print("lumi = ",lumis[year])
+      h.Scale(lumis[year])
+
    return h
 
 def plot(item, nbin, low, high, doLog,category,mesonCat):
@@ -112,7 +116,6 @@ def plot(item, nbin, low, high, doLog,category,mesonCat):
    text.DrawLatex(0.15 + 0.10, 0.93, "Simulation")
    text.SetTextSize(0.04)
    text.DrawLatex(0.65, 0.93, "#sqrt{s} = 13 TeV,%0.2f fb^{-1}"% (lumis[year]))
-
 
    string = category+mesonCat
 

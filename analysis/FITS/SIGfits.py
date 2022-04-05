@@ -2,34 +2,44 @@ from ROOT import *
 
 from prepareFits import getHisto
 
+gSystem.Load("libHiggsAnalysisCombinedLimit.so")
+
 blinded=False
+
+xlowRange = 90.
+xhighRange = 170.
+
+x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
+
+x.setRange("full", xlowRange  , xhighRange)
+x.setRange("left", xlowRange, 115)
+x.setRange("right", 135, xhighRange)
 
 def  fitSig(tag , mesonCat, year ):
 
     data_full = getHisto(4, 200*10, 0. , 200., True, tag, mesonCat,True)
     
-    xlowRange = 125-25.
-    xhighRange = 125+25.
     x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
 
     x.setRange("full", xlowRange, xhighRange)
+
     data = RooDataHist('datahist', 'data', RooArgList(x), data_full)
 
-    xlow = 115
-    xhigh = 135
+    # -----------------------------------------------------------------------------
 
-    cb_mu = RooRealVar('cb_mu', 'cb_mu', xlow, 1e-4, xhigh)
-    cb_sigmaL = RooRealVar('cb_sigmaL', 'cb_sigmaL',0., 2.)
-    cb_sigmaR = RooRealVar('cb_sigmaR', 'cb_sigmaR',0., 2.)
+    cb_mu = RooRealVar('cb_mu', 'cb_mu', 125., 125-10. , 125+10.)
+    cb_sigma = RooRealVar('cb_sigma', 'cb_sigma',0., 3.)
     cb_alphaL = RooRealVar('cb_alphaL', 'cb_alphaL',0., 5.)
     cb_alphaR = RooRealVar('cb_alphaR', 'cb_alphaR',0., 5.)
-    cb_nL = RooRealVar('cb_nL', 'cb_nL',0., 5.)
+    cb_nL = RooRealVar('cb_nL', 'cb_nL',2., 50.)
     cb_nR = RooRealVar('cb_nR', 'cb_nR',0., 5.)
 
-    pdf_crystalball = RooCrystalBall('crystal_ball', 'crystal_ball', x, cb_mu, cb_sigmaL, cb_sigmaR, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
+    pdf_crystalball = RooDoubleCBFast('crystal_ball', 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
     model = pdf_crystalball
 
-    model.fitTo(data)
+    # -----------------------------------------------------------------------------
+
+    model.fitTo(data,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"))
 
     # Here we will plot the results
     canvas = TCanvas("canvas", "canvas", 800, 800)
@@ -45,8 +55,13 @@ def  fitSig(tag , mesonCat, year ):
     plotFrameWithNormRange.Draw()
 
     canvas.Draw()
- 
-    canvas.SaveAs("signal_"+tag+"_"+mesonCat+"_"+str(year)+".png")
+
+    canvas.SaveAs("WS/signal_"+tag+"_"+mesonCat+"_"+str(year)+".png")
+
+    # -----------------------------------------------------------------------------
+
+    norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
+    rooTest_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR) # no range means contants
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -56,10 +71,12 @@ def  fitSig(tag , mesonCat, year ):
     w = RooWorkspace("w", "workspace")
 
     # Import model and all its components into the workspace
-    w.Import(model)
+    getattr(w,'import')(model)
+
+    getattr(w,'import')(rooTest_norm)
 
     # Import data into the workspace
-    w.Import(data)
+    getattr(w,'import')(data)
 
     # Print workspace contents
     w.Print()
@@ -69,25 +86,16 @@ def  fitSig(tag , mesonCat, year ):
     # Save workspace in file
 
     # Save the workspace into a ROOT file
-    w.writeToFile("Signal"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
+    w.writeToFile("WS/Signal"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
 
 def  fitBkg(tag , mesonCat, year ):
 
     data_full = getHisto(4, 250, 0. , 250., True, tag, mesonCat, False)
-
-    xlowRange = 60.
-    xhighRange = 250.
-    x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
-
-    x.setRange("sr", 90, 250)
-    x.setRange("left", 90, 115)
-    x.setRange("right", 135, 200)
-
     data = RooDataHist('datahist', 'data', RooArgList(x), data_full)
 
     blindedData = data.reduce(RooFit.CutRange("left,right"))
 
-    #-------------------
+    # -----------------------------------------------------------------------------
     # BERN law
     bern_c0 = RooRealVar('bern_c0', 'bern_c0', 0.2, 0., 0.5)
     bern_c1 = RooRealVar('bern_c1', 'bern_c1', 0.1, 0., 1.)
@@ -113,14 +121,14 @@ def  fitBkg(tag , mesonCat, year ):
 
 #    if blinded: pdf_bern4.selectNormalizationRange(RooFit.CutRange("left,right"))
 
-    #-------------------
-    # GAUSS law
+    # -----------------------------------------------------------------------------
+    # GAUS law
     gauss_mu = RooRealVar('gauss_mu', 'gauss_mu', 30., 0, 50.)
     gauss_sigma = RooRealVar('gauss_sigma', 'gaus_sigma', 15, 10., 50)
     pdf_gauss = RooGaussian('gauss', 'gauss', x , gauss_mu, gauss_sigma)
 
-    #-------------------
-    # POWER law
+    # -----------------------------------------------------------------------------
+    # POW law
     # str expressions of formulae
     formula_pow1 = 'TMath::Power(@0, @1)'
     formula_pow2 = '(1.-@1)*TMath::Power(@0,@2) + @1*TMath::Power(@0,@3)'
@@ -141,6 +149,8 @@ def  fitBkg(tag , mesonCat, year ):
     pdf_pow3 = RooGenericPdf('pow3', 'pow3', formula_pow3,
                             RooArgList(x, pow_frac1, pow_frac2, pow_p1, pow_p2, pow_p3))
 
+    # -----------------------------------------------------------------------------
+    # EXP law
     exp_p1 = RooRealVar('exp_p1', 'exp_p1', -0.1, -10, 0)
     exp_p2 = RooRealVar('exp_p2', 'exp_p2', -1e-2, -10, 0)
     exp_p3 = RooRealVar('exp_p3', 'exp_p3', -1e-3, -10, 0)
@@ -177,8 +187,15 @@ def  fitBkg(tag , mesonCat, year ):
 #    model = pdf_exp1
 #    model = pdf_exp1_conv_gauss
 
-    if blinded: model.fitTo(blindedData,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("sr"))
-    else: model.fitTo(data,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("sr"))
+    # -----------------------------------------------------------------------------
+
+    if blinded: model.fitTo(blindedData,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"))
+    else: model.fitTo(data,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"))
+
+    # -----------------------------------------------------------------------------
+
+    norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
+    rooTest_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR, 0.5*norm_SR, 2*norm_SR)
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -199,7 +216,7 @@ def  fitBkg(tag , mesonCat, year ):
 #        model.plotOn(plotFrameWithNormRange, RooFit.LineColor(2), RooFit.Range("full"), RooFit.NormRange("left,right"), RooFit.LineStyle(10))
     else:
         data.plotOn(plotFrameWithNormRange)
-        model.plotOn(plotFrameWithNormRange, RooFit.Range("sr"), RooFit.NormRange("sr"), RooFit.LineColor(2), RooFit.LineStyle(10))
+        model.plotOn(plotFrameWithNormRange, RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineColor(2), RooFit.LineStyle(10))
 #        model.plotOn(plotFrameWithNormRange, RooFit.Components("exp3"), RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineColor(kBlue)) ;
 #        model.plotOn(plotFrameWithNormRange, RooFit.Components("bern4"), RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineColor(kBlue)) ;
 #        model.plotOn(plotFrameWithNormRange, RooFit.Components("pow3"), RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineColor(kBlue)) ;
@@ -216,8 +233,8 @@ def  fitBkg(tag , mesonCat, year ):
 
     canvas.Draw()
 
-    if blinded: canvas.SaveAs("bkg_"+tag+"_"+mesonCat+"_"+str(year)+"REDUCED.png")
-    else: canvas.SaveAs("bkg_"+tag+"_"+mesonCat+"_"+str(year)+".png")
+    if blinded: canvas.SaveAs("WS/bkg_"+tag+"_"+mesonCat+"_"+str(year)+"REDUCED.png")
+    else: canvas.SaveAs("WS/bkg_"+tag+"_"+mesonCat+"_"+str(year)+".png")
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -227,13 +244,13 @@ def  fitBkg(tag , mesonCat, year ):
     w = RooWorkspace("w", "workspace")
 
     # Import model and all its components into the workspace
-    w.Import(model)
+    getattr(w,'import')(model)
 
     # Import model_norm
-    w.Import(igx_sig)
+    getattr(w,'import')(rooTest_norm)
 
     # Import data into the workspace
-    w.Import(data)
+    getattr(w,'import')(data)
 
     # Print workspace contents
     w.Print()
@@ -243,9 +260,7 @@ def  fitBkg(tag , mesonCat, year ):
     # Save workspace in file
 
     # Save the workspace into a ROOT file
-    w.writeToFile("Bkg"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
-
-
+    w.writeToFile("WS/Bkg"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
 
 def makePlot():
 
