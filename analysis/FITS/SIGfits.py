@@ -15,80 +15,86 @@ x.setRange("full", xlowRange  , xhighRange)
 x.setRange("left", xlowRange, 115)
 x.setRange("right", 135, xhighRange)
 
-def  fitSig(tag , mesonCat, year ):
-
-    data_full = getHisto(4, 200*10, 0. , 200., True, tag, mesonCat,True)
-    
-    x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
-
-    x.setRange("full", xlowRange, xhighRange)
-
-    data = RooDataHist('datahist', 'data', RooArgList(x), data_full)
-
-    # -----------------------------------------------------------------------------
-
-    cb_mu = RooRealVar('cb_mu', 'cb_mu', 125., 125-10. , 125+10.)
-    cb_sigma = RooRealVar('cb_sigma', 'cb_sigma',0., 3.)
-    cb_alphaL = RooRealVar('cb_alphaL', 'cb_alphaL',0., 5.)
-    cb_alphaR = RooRealVar('cb_alphaR', 'cb_alphaR',0., 5.)
-    cb_nL = RooRealVar('cb_nL', 'cb_nL',2., 50.)
-    cb_nR = RooRealVar('cb_nR', 'cb_nR',0., 5.)
-
-    pdf_crystalball = RooDoubleCBFast('crystal_ball', 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
-    model = pdf_crystalball
-
-    # -----------------------------------------------------------------------------
-
-    model.fitTo(data,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"))
-
-    # Here we will plot the results
-    canvas = TCanvas("canvas", "canvas", 800, 800)
-
-    plotFrameWithNormRange = x.frame(RooFit.Title("mH_"+tag+"_"+mesonCat+"_"+str(year)))
-
-    # Plot only the blinded data, and then plot the PDF over the full range as well as both sidebands
-    data.plotOn(plotFrameWithNormRange)
-    model.plotOn(plotFrameWithNormRange, RooFit.LineColor(2), RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineStyle(10))
-    model.paramOn(plotFrameWithNormRange, RooFit.Layout(0.65,0.99,0.75))
-    plotFrameWithNormRange.getAttText().SetTextSize(0.02);
-    
-    plotFrameWithNormRange.Draw()
-
-    canvas.Draw()
-
-    canvas.SaveAs("WS/signal_"+tag+"_"+mesonCat+"_"+str(year)+".png")
-
-    # -----------------------------------------------------------------------------
-
-    norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
-    Sig_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR) # no range means contants
-
-    # -----------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------
-    # Create workspace, import data and model
+def  fitSig(tag , mesonCat, year):
 
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
 
-    cb_mu.setConstant()
-    cb_sigma.setConstant()
-    cb_alphaL.setConstant()
-    cb_alphaR.setConstant()
-    cb_nL.setConstant()
-    cb_nR.setConstant()
-    Sig_norm.setConstant()
+    mcSig = ["WH", "ZH"]
+    for sig in mcSig:
 
-    # Import model and all its components into the workspace
-    getattr(w,'import')(model)
+        if (sig == "WH" and tag == "_Zcat"): continue
+        print(tag, ' ', sig)
 
-    getattr(w,'import')(Sig_norm)
-    print('integral signal = ',Sig_norm.Print())
+        data_full = getHisto(4, 200*10, 0. , 200., True, tag, mesonCat, True, sig)
 
-    # Import data into the workspace
-    getattr(w,'import')(data)
+        x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
 
-    # Print workspace contents
-    w.Print()
+        x.setRange("full", xlowRange, xhighRange)
+
+        data = RooDataHist('datahist'+tag+'_'+sig, 'data', RooArgList(x), data_full)
+
+        # -----------------------------------------------------------------------------
+
+        cb_mu = RooRealVar('cb_mu'+tag+'_'+sig, 'cb_mu', 125., 125-10. , 125+10.)
+        cb_sigma = RooRealVar('cb_sigma'+tag+'_'+sig, 'cb_sigma', 0., 3.)
+        cb_alphaL = RooRealVar('cb_alphaL'+tag+'_'+sig, 'cb_alphaL', 0., 5.)
+        cb_alphaR = RooRealVar('cb_alphaR'+tag+'_'+sig, 'cb_alphaR', 0., 5.)
+        cb_nL = RooRealVar('cb_nL'+tag+'_'+sig, 'cb_nL', 2., 50.)
+        cb_nR = RooRealVar('cb_nR'+tag+'_'+sig, 'cb_nR', 0., 5.)
+
+        pdf_crystalball = RooDoubleCBFast('crystal_ball'+tag+'_'+sig, 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
+        model = pdf_crystalball
+
+        # -----------------------------------------------------------------------------
+
+        model.fitTo(data,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"))
+
+        # Here we will plot the results
+        canvas = TCanvas("canvas", "canvas", 800, 800)
+
+        plotFrameWithNormRange = x.frame(RooFit.Title("mH_"+tag+"_"+mesonCat+"_"+str(year)))
+
+        # Plot only the blinded data, and then plot the PDF over the full range as well as both sidebands
+        data.plotOn(plotFrameWithNormRange)
+        model.plotOn(plotFrameWithNormRange, RooFit.LineColor(2), RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineStyle(10))
+        model.paramOn(plotFrameWithNormRange, RooFit.Layout(0.65,0.99,0.75))
+        plotFrameWithNormRange.getAttText().SetTextSize(0.02);
+
+        plotFrameWithNormRange.Draw()
+
+        canvas.Draw()
+
+        canvas.SaveAs("WS/signal_"+tag+"_"+mesonCat+"_"+str(year)+".png")
+
+        # -----------------------------------------------------------------------------
+
+        norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
+        Sig_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_SR) # no range means contants
+
+        # -----------------------------------------------------------------------------
+        # -----------------------------------------------------------------------------
+        # Create workspace, import data and model
+
+        cb_mu.setConstant()
+        cb_sigma.setConstant()
+        cb_alphaL.setConstant()
+        cb_alphaR.setConstant()
+        cb_nL.setConstant()
+        cb_nR.setConstant()
+        Sig_norm.setConstant()
+
+        # Import model and all its components into the workspace
+        getattr(w,'import')(model)
+
+        getattr(w,'import')(Sig_norm)
+        print('integral signal = ',Sig_norm.Print())
+
+        # Import data into the workspace
+        getattr(w,'import')(data)
+
+        # Print workspace contents
+        w.Print()
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -97,10 +103,10 @@ def  fitSig(tag , mesonCat, year ):
     # Save the workspace into a ROOT file
     w.writeToFile("WS/Signal"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
 
-def  fitBkg(tag , mesonCat, year ):
+def  fitBkg(tag , mesonCat, year):
 
-    data_full = getHisto(4, 250, 0. , 250., True, tag, mesonCat, False)
-    data = RooDataHist('datahist', 'data', RooArgList(x), data_full)
+    data_full = getHisto(4, 250, 0. , 250., True, tag, mesonCat, False, -1 )
+    data = RooDataHist('datahist'+tag, 'data', RooArgList(x), data_full)
 
     blindedData = data.reduce(RooFit.CutRange("left,right"))
 
@@ -160,14 +166,14 @@ def  fitBkg(tag , mesonCat, year ):
 
     # -----------------------------------------------------------------------------
     # EXP law
-    exp_p1 = RooRealVar('exp_p1', 'exp_p1', -0.1, -10, 0)
+    exp_p1 = RooRealVar('exp_p1'+tag, 'exp_p1', -0.1, -10, 0)
     exp_p2 = RooRealVar('exp_p2', 'exp_p2', -1e-2, -10, 0)
     exp_p3 = RooRealVar('exp_p3', 'exp_p3', -1e-3, -10, 0)
     exp_c1 = RooRealVar('exp_c1', 'exp_c1', 0., 1.)
     exp_c2 = RooRealVar('exp_c2', 'exp_c2', 0., 1.)
     exp_c3 = RooRealVar('exp_c3', 'exp_c3', 0., 1.)
 
-    pdf_exp1 = RooExponential('exp1', 'exp1', x, exp_p1)
+    pdf_exp1 = RooExponential('exp1'+tag+'_bkg', 'exp1', x, exp_p1)
     pdf_single_exp2 = RooExponential('single_exp2', 'single_exp2', x, exp_p2)
     pdf_single_exp3 = RooExponential('single_exp3', 'single_exp3', x, exp_p3)
 
@@ -298,10 +304,10 @@ if __name__ == "__main__":
     fitSig('_Wcat','_RhoCat',2018)
     fitBkg('_Wcat','_RhoCat',2018)
 
-    fitSig('_Wcat','_PhiCat',2018)
-    fitBkg('_Wcat','_PhiCat',2018)
+    fitSig('_Zcat','_RhoCat',2018)
+    fitBkg('_Zcat','_RhoCat',2018)
 
-    fitSig('_VBFcat','_RhoCat',2018)
-    fitBkg('_VBFcat','_RhoCat',2018)
-    fitBkg('_VBFcat','_PhiCat',2018)
+#    fitSig('_VBFcat','_RhoCat',2018)
+#    fitBkg('_VBFcat','_RhoCat',2018)
+#    fitBkg('_VBFcat','_PhiCat',2018)
 #    makePlot()

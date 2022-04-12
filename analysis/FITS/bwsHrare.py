@@ -10,8 +10,9 @@ parser= OptionParser()
 parser.add_option("","--inputFileSig",type='string',help="Input ROOT file. [%default]", default="WS/Signal_Wcat__RhoCat_2018_workspace.root")
 parser.add_option("","--inputFileBKG",type='string',help="Input ROOT file bkg model. [%default]", default="WS/Bkg_Wcat__RhoCat_2018_workspace.root")
 
-parser.add_option("-o","--output",type='string',help="Output ROOT file. [%default]", default="workspace_STAT.root")
-parser.add_option("-d","--datCardName",type='string',help="Output txt file. [%default]", default="datacard_STAT.txt")
+parser.add_option("-c","--whichCat",type='string',help="Which category (Wcat, Zcatm Zinvcatm, VBFcat)", default="Wcat")
+parser.add_option("-o","--output",type='string',help="Output ROOT file. [%default]", default="workspace_STAT_Rho_2018.root")
+parser.add_option("-d","--datCardName",type='string',help="Output txt file. [%default]", default="datacard_STAT_Rho_2018.txt")
 
 lumis={
     12016: 19.52, #APV
@@ -33,21 +34,15 @@ SigPdf={
     'VBFcat': 'crystal_ball',
 }
 
-SigPdfNorm={
-    'Wcat': 'crystal_ball_norm',
-    'Zcat': 'crystal_ball_norm',
-    'VBFcat': 'crystal_ball_norm',
-}
+if opts.whichCat=='Wcat':
+    sigAll = ['WH','ZH']
+    mcAll = ['WH','ZH','bkg']
+    category = ['Wcat']
 
-BkgPdfNorm={
-    'Wcat': 'exp1_norm',
-    'Zcat': 'exp1_norm',
-    'VBFcat': 'bxg_norm',
-}
-
-mcAll = ['WH','bkg']
-category = ['Wcat']
-#category = [ 'Wcat','Zcat']
+if opts.whichCat=='Zcat':
+    sigAll = ['ZH']
+    mcAll = ['ZH','bkg']
+    category = ['Zcat']
 
 opts, args = parser.parse_args()
 
@@ -95,13 +90,13 @@ for cat in category:
         if proc=='bkg':
             if opts.inputFileBKG != "":
                 wInput=fBkgIn.Get("w")
-                name = BkgPdf[cat]
-                nameNorm = BkgPdfNorm[cat]
+                name = BkgPdf[cat]+"_"+cat+"_"+proc
+                nameNorm = name+"_norm"
         else:
             if opts.inputFileSig != "":
                 wInput=fSigIn.Get("w")
-                name = SigPdf[cat]
-                nameNorm = SigPdfNorm[cat]
+                name = SigPdf[cat]+"_"+cat+"_"+proc
+                nameNorm = name+"_norm"
             
         print("proc=",proc," cat=",cat," name=",name)
         func = wInput.pdf(name)
@@ -120,7 +115,7 @@ for cat in category:
 
     wInput=fBkgIn.Get("w")
     wInput.Print()
-    hist_data = wInput.data("datahist")
+    hist_data = wInput.data("datahist"+'_'+cat)
     hist_data.SetName("observed_data")
     getattr(w,'import')(hist_data)
     datacard.write("shapes")
@@ -157,8 +152,11 @@ datacard.write("\n")
 datacard.write("process\t")
 for cat in category:
     for idx,proc in enumerate(mcAll): ## TRICK, put the only signal first
-        print(idx)
-        datacard.write("\t%d"%idx)
+        print(idx,proc,(-1)*idx)
+        if (proc=='bkg'): datacard.write("\t1")
+        else:
+            newIDX=(-1)*idx
+            datacard.write("\t%d"%newIDX)
 datacard.write("\n")
 datacard.write("rate\t")
 for cat in category:
