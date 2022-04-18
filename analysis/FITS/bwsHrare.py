@@ -10,9 +10,17 @@ parser= OptionParser()
 parser.add_option("","--inputFileSig",type='string',help="Input ROOT file. [%default]", default="WS/Signal_Wcat__RhoCat_2018_workspace.root")
 parser.add_option("","--inputFileBKG",type='string',help="Input ROOT file bkg model. [%default]", default="WS/Bkg_Wcat__RhoCat_2018_workspace.root")
 
-parser.add_option("-c","--whichCat",type='string',help="Which category (Wcat, Zcatm Zinvcatm, VBFcat)", default="Wcat")
+parser.add_option("-c","--whichCat",type='string',help="Which category (Wcat, Zcat Zinvcatm, VBFcat)", default="Wcat")
 parser.add_option("-o","--output",type='string',help="Output ROOT file. [%default]", default="workspace_STAT_Rho_2018.root")
 parser.add_option("-d","--datCardName",type='string',help="Output txt file. [%default]", default="datacard_STAT_Rho_2018.txt")
+
+opts, args = parser.parse_args()
+
+sys.argv=[]
+import ROOT
+ROOT.gROOT.SetBatch()
+
+############ CONFIGURABLES ###########
 
 lumis={
     12016: 19.52, #APV
@@ -34,6 +42,8 @@ SigPdf={
     'VBFcat': 'crystal_ball',
 }
 
+print(opts.whichCat)
+
 if opts.whichCat=='Wcat':
     sigAll = ['WH','ZH']
     mcAll = ['WH','ZH','bkg']
@@ -44,18 +54,18 @@ if opts.whichCat=='Zcat':
     mcAll = ['ZH','bkg']
     category = ['Zcat']
 
-opts, args = parser.parse_args()
-
-sys.argv=[]
-import ROOT
-ROOT.gROOT.SetBatch()
+if opts.whichCat=='VBFcat':
+    sigAll = ['VBFH']
+    mcAll = ['VBFH','bkg']
+    category = ['VBFcat']
 
 ################### OPEN OUTPUT ############
 w = ROOT.RooWorkspace("w","w")
 
 ############ DATACARD ###########
-datName = "cms_datacard_ws"
-datName += ".txt"
+#datName = "cms_datacard_ws"
+#datName += ".txt"
+datName = opts.datCardName
 
 numChannel = len(mcAll)-1
 print("-> Opening datacard",datName)

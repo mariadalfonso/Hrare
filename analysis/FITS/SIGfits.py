@@ -20,10 +20,12 @@ def  fitSig(tag , mesonCat, year):
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
 
-    mcSig = ["WH", "ZH"]
+    mcSig = ["WH", "ZH","VBFH"]
     for sig in mcSig:
 
         if (sig == "WH" and tag == "_Zcat"): continue
+        if (sig == "WH" and tag == "_VBFcat"): continue
+        if (sig == "ZH" and tag == "_VBFcat"): continue
         print(tag, ' ', sig)
 
         data_full = getHisto(4, 200*10, 0. , 200., True, tag, mesonCat, True, sig)
@@ -190,7 +192,7 @@ def  fitBkg(tag , mesonCat, year):
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern1, pdf_gauss);
 
     if tag=='_VBFcat':
-        model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
+        model = RooFFTConvPdf ('bxg'+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
     elif tag=='_Wcat' or tag=='_Zcat':
         model = pdf_exp1
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_exp3, pdf_gauss);
@@ -301,13 +303,23 @@ def makePlot():
 
 if __name__ == "__main__":
 
+    fitSig('_VBFcat','_PhiCat',2018)
+    fitBkg('_VBFcat','_PhiCat',2018)
+
+    fitSig('_VBFcat','_RhoCat',2018)
+    fitBkg('_VBFcat','_RhoCat',2018)
+
     fitSig('_Wcat','_RhoCat',2018)
     fitBkg('_Wcat','_RhoCat',2018)
 
     fitSig('_Zcat','_RhoCat',2018)
     fitBkg('_Zcat','_RhoCat',2018)
 
-#    fitSig('_VBFcat','_RhoCat',2018)
-#    fitBkg('_VBFcat','_RhoCat',2018)
+    fitSig('_Wcat','_PhiCat',2018)
+    fitBkg('_Wcat','_PhiCat',2018)
+
+    fitSig('_Zcat','_PhiCat',2018)
+    fitBkg('_Zcat','_PhiCat',2018)
+
 #    fitBkg('_VBFcat','_PhiCat',2018)
 #    makePlot()

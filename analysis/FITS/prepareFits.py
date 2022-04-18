@@ -5,7 +5,8 @@ from array import array
 ROOT.gStyle.SetOptStat(0)
 
 year = '_2018'
-directory = '/home/submit/mariadlf/Hrare/analysis/APR5/2018/'
+directory = '/home/submit/mariadlf/Hrare/analysis/APR12/2018/'
+#directory = '/home/submit/mariadlf/Hrare/analysis/APR5/2018/'
 #directory = '/home/submit/mariadlf/Hrare/analysis/MARCH26/2018/'
 
 from LoadTree import loadTree
@@ -49,13 +50,24 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       if item == 4 :
          var = ev.HCandMass
 
+      idxMeson = ev.index_pair[0]
+      idxPh = ev.index_pair[1]
+
+      if ev.goodMeson_iso[idxMeson] < 0.9 :  continue
+
+      ## OPTIMIZED PHASE SPACE
+      if(category =='_Zcat' or category =='_Wcat'):
+         if ev.goodPhotons_pt[idxPh]<40 :  continue
+         if ev.goodMeson_pt[idxMeson]<40 : continue
+         if ev.goodMeson_iso[idxMeson] < 0.9 :  continue
+
       # Fill histograms
       if (doSignal) :
          if (nameSig=='WH' and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022)): #W
             h.Fill( var, ev.w )
          if (nameSig=='ZH' and (ev.mc==1013 or ev.mc==1023)): #Z
             h.Fill( var, ev.w )
-         if ev.mc==1010 or ev.mc==1020: #VBF
+         if (nameSig=='VBFH' and (ev.mc==1010 or ev.mc==1020)): #VBF
             h.Fill( var, ev.w )
       else :
          if ev.mc<0:   # only DATA
