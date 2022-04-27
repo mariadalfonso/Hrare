@@ -9,16 +9,22 @@ from utilsHrare import plot, computeWeigths, getTriggerFromJson, getMesonFromJso
 
 doPlot = False
 
+isGF = False
+isZinv = False
 isZ = False
 isW = False
 isVBF = False
+isVBFlow = False
 
 isPhiCat = "false"
 isRhoCat = "false"
 
+if sys.argv[1]=='isGFtag': isGF = True
+if sys.argv[1]=='isZinvtag': isZinv = True
 if sys.argv[1]=='isZtag': isZ = True
 if sys.argv[1]=='isWtag': isW = True
 if sys.argv[1]=='isVBFtag': isVBF = True
+if sys.argv[1]=='isVBFtaglow': isVBFlow = True
 
 if sys.argv[2]=='isPhiCat': isPhiCat = "true"
 if sys.argv[2]=='isRhoCat': isRhoCat = "true"
@@ -99,7 +105,7 @@ def selectionTAG(df):
         )
         return dftag
 
-    if isVBF:
+    if isVBF or isVBFlow:
         dftag = (df.Define("goodJets","{}".format(GOODJETS))
                  .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)>1","two jets")
                  .Define("mJJ","Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])")
@@ -109,28 +115,57 @@ def selectionTAG(df):
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
-                 .Filter("(Sum(vetoEle)+Sum(vetoMu)==0)", "no leptons")
+                 .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
-        )
-    return dftag
+                 .Filter("MET_pt<100","MET<100")
+                 )
+        return dftag
 
+    if isZinv:
+        dftag = (df.Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
+                 .Define("vetoEle","{}".format(LOOSEelectrons))
+                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Filter("MET_pt>50","MET>50")
+                 .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
+#                 .Define("trigger","{}".format(TRIGGER))
+#                 .Filter("trigger>0", "pass triggers")
+                 .Define("dPhiGammaMET","deltaPhi(goodPhotons_phi[index_pair[1]], MET_phi)")
+                 .Define("dPhiMesonMET","deltaPhi(goodMeson_phi[index_pair[0]], MET_phi)")
+                 .Define("ptRatioMEThiggs","abs(MET_pt-HCandPT)/HCandPT")
+                 )
+        return dftag
+
+    if isGF:
+        dftag = (df.Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
+                 .Define("vetoEle","{}".format(LOOSEelectrons))
+                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
+                 #                 .Define("trigger","{}".format(TRIGGER))
+                 #                 .Filter("trigger>0", "pass triggers")
+                 .Filter("MET_pt<100","MET<100")
+                 .Define("goodJets","{}".format(GOODJETS))
+                 .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)<2","0 or 1 jet")
+                 )
+        return dftag
 
 def dfGammaMeson(df):
 
-    TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)
+    TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
 
     GOODPHOTONS = ""
     if(isVBF): GOODPHOTONS = "{} and Photon_pt>75 and (Photon_cutBased & 3)".format(BARRELphotons)
     if(isW or isZ): GOODPHOTONS = "{0} or {1}".format(BARRELphotons,ENDCAPphotons)
+    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>40 and Photon_pt<75".format(BARRELphotons,ENDCAPphotons)
+    if(isZinv or isGF): GOODphotons = "({0} or {1}) and Photon_pt>40".format(BARRELphotons,ENDCAPphotons)
 
     GOODPHI = ""
-    if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
-    if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
+    if(isVBF or isVBFlow): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
+    if(isW or isZ or isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
 
     GOODRHO = ""
-    if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
-    if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
+    if(isVBF or isVBFlow): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
+    if(isW or isZ or isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
 
     dfa= (df.Define("goodPhotons", "{}".format(GOODPHOTONS))
           .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
@@ -255,7 +290,15 @@ def analysis(df,mc,w,isData):
         ]:
             branchList.push_back(branchName)
 
-    if isVBF:
+    if isZinv:
+        for branchName in [
+                "dPhiGammaMET",
+                "dPhiMesonMET",
+                "ptRatioMEThiggs",
+        ]:
+            branchList.push_back(branchName)
+
+    if isVBF or isVBFlow:
         for branchName in [
                 "mJJ",
                 "nGoodJets",
@@ -269,9 +312,12 @@ def analysis(df,mc,w,isData):
     if(isPhiCat=="true"): catM = "PhiCat"
     if(isRhoCat=="true"): catM = "RhoCat"
     catTag = ""
-    if(isZ): catTag = "Zcat"
-    if(isW): catTag = "Wcat"
-    if(isVBF): catTag = "VBFcat"
+    if isZ: catTag = "Zcat"
+    if isZinv: catTag = "Zinvcat"
+    if isW: catTag = "Wcat"
+    if isVBF: catTag = "VBFcat"
+    if isVBFlow: catTag = "VBFcatlow"
+    if isGF: catTag = "GFcat"
     outputFile = "MARCH30/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
     print(outputFile)
 
@@ -325,6 +371,29 @@ def readDataSample(year,type):
 
     analysis(df,type,w,"true")
 
+def readDataSkims(datasetNumber,year,category):
+
+    print("enum",datasetNumber)
+    print("year",year)
+    print("cat",category)
+    if (category=="isZtag" or category=="isWtag"):
+        pair = getSkims(datasetNumber,year,"VH")
+    elif category=="isVBFtag":
+        pair = getSkims(datasetNumber,year,"VBF")
+    if (category=="isZinvtag" or category=="isVBFtaglow" or category=="isGFtag"):
+        pair = getSkims(datasetNumber,year,"Zinv")
+
+    files = pair[0]
+    PDType = pair[1]
+    print(len(files))
+    print(PDType)
+
+    df = ROOT.RDataFrame("Events", files)
+    nevents = df.Count().GetValue()
+    print("%s entries in the dataset" %nevents)
+
+    analysis(df,year,datasetNumber,1.,"true",PDType)
+    print("***ANALYSIS DONE ***")
 
 def runTest():
 

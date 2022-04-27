@@ -4,8 +4,8 @@ from array import array
 
 ROOT.gStyle.SetOptStat(0)
 
-year = '_2018'
-directory = '/home/submit/mariadlf/Hrare/analysis/APR12/2018/'
+#year = '_2018'
+directory = '/home/submit/mariadlf/Hrare/analysis/APR26/2018/'
 #directory = '/home/submit/mariadlf/Hrare/analysis/APR5/2018/'
 #directory = '/home/submit/mariadlf/Hrare/analysis/MARCH26/2018/'
 
@@ -19,25 +19,39 @@ lumis={
     '_2016': 35.9,
     '_2017': 36.4, #41.5, #(C,D,E,F for 2017)
     '_2018': 59.70,
+    '_12018': 45.70,
 }
 
 # Create the plot
 
 def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
+   year = '_2018'
    mytree = ROOT.TChain('events')
    if doSignal:
-      if(category =='_VBFcat' and mesonCat == '_PhiCat'): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_GFcat' and mesonCat == '_PhiCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') # VBF
+      if(category =='_GFcat' and mesonCat == '_PhiCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat' and mesonCat == '_PhiCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcatlow' and mesonCat == '_PhiCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
       if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Wp
       if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
       if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z
       if(category =='_Zcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1015'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Zinv Wp
+      if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Zinv Wp
       #
-      if(category =='_VBFcat' and mesonCat == '_RhoCat'): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_GFcat' and mesonCat == '_RhoCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') # VBF
+      if(category =='_GFcat' and mesonCat == '_RhoCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat' and mesonCat == '_RhoCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcatlow' and mesonCat == '_RhoCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
       if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Wp
       if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Wm
       if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z
       if(category =='_Zcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1025'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Zinv
    else:
       mytree = loadTree(mytree, directory , category, mesonCat, year ) # all sigm, BKG , data, 
 
@@ -54,6 +68,8 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       idxPh = ev.index_pair[1]
 
       if ev.goodMeson_iso[idxMeson] < 0.9 :  continue
+      leadTrkPt = max(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson])
+      if leadTrkPt < 20: continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zcat' or category =='_Wcat'):
@@ -61,13 +77,41 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          if ev.goodMeson_pt[idxMeson]<40 : continue
          if ev.goodMeson_iso[idxMeson] < 0.9 :  continue
 
+      ## OPTIMIZED PHASE SPACE
+      if(category =='_Zinvcat'):
+         if ev.goodPhotons_pt[idxPh]<40 :  continue
+         if ev.goodMeson_pt[idxMeson]<40 : continue
+#         if min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson]) < 10: continue
+         if ev.MET_pt<100 :  continue
+         if abs(ev.dPhiGammaMET)<1. : continue
+         if abs(ev.dPhiMesonMET)<1. : continue
+         if ev.ptRatioMEThiggs>0.8: continue
+
+      ## OPTIMIZED PHASE SPACE
+      if(category =='_VBFcatlow'):
+         if ev.goodPhotons_pt[idxPh]<40 :  continue
+         if ev.goodPhotons_pt[idxPh]>75 :  continue
+         if ev.goodMeson_pt[idxMeson]<40 : continue
+
+      ## OPTIMIZED PHASE SPACE
+      if(category =='_GFcat'):
+         if ev.goodPhotons_pt[idxPh]<40 :  continue
+         if ev.goodMeson_pt[idxMeson]<40 : continue
+
+#      if mesonCat == '_RhoCat' and ev.goodMeson_mass[idxMeson]<0.64: continue;
+#      if mesonCat == '_RhoCat' and ev.goodMeson_mass[idxMeson]>0.90: continue;
+
       # Fill histograms
       if (doSignal) :
          if (nameSig=='WH' and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022)): #W
             h.Fill( var, ev.w )
          if (nameSig=='ZH' and (ev.mc==1013 or ev.mc==1023)): #Z
             h.Fill( var, ev.w )
-         if (nameSig=='VBFH' and (ev.mc==1010 or ev.mc==1020)): #VBF
+         if ((nameSig=='VBFH' or nameSig=='VBFHlow') and (ev.mc==1010 or ev.mc==1020)): #VBF
+            h.Fill( var, ev.w )
+         if (nameSig=='ZinvH' and (ev.mc==1015 or ev.mc==1025)): #VBF
+            h.Fill( var, ev.w )
+         if (nameSig=='ggH' and (ev.mc==1017 or ev.mc==1027)): #VBF
             h.Fill( var, ev.w )
       else :
          if ev.mc<0:   # only DATA
@@ -75,6 +119,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    #Loop over tree done
    if ev.mc>=0:
+      if(category == '_Zinvcat' or category == '_GFcat' or category == '_VBFcatlow'): year = '_12018'
       print("lumi = ",lumis[year])
       h.Scale(lumis[year])
 

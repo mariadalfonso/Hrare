@@ -173,7 +173,6 @@ def concatenate(result, tmp1):
     for f in tmp1:
         result.push_back(f)
 
-
 def getMClist(year,sampleNOW):
 
     files = findDIR("{}".format(SwitchSample(sampleNOW)[0]))
@@ -249,11 +248,17 @@ def getSkims(argument,year,category):
     return pair
 
 
-def SwitchSample(argument):
+def SwitchSample(argument,year):
 
     # cross section from  https://cms-gen-dev.cern.ch/xsdb
     dirT2 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
     dirLocal = "/work/submit/mariadlf/Hrare/D01/2018/"
+
+    campaign = ""
+    if(year == 2018): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
+    if(year == 2017): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
+    if(year == 2016): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
+    if(year == 12016): campaign = "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*"
 
     switch = {
         ## SIGNAL
@@ -262,13 +267,20 @@ def SwitchSample(argument):
         1012: (dirLocal+"wmh-hphigamma-powheg"+"/NANOAOD_01",3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1013: (dirLocal+"zh-hphigamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1014: (dirLocal+"ggzh-hphigamma-powheg"+"/NANOAOD_01",3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1015: (dirLocal+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
+        1015: (dirLocal+"zinvh-hphigamma-powheg"+"/NANOAOD_01",(177.6 - 24.5)*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1016: (dirLocal+"ggzinvh-hphigamma-powheg"+"/NANOAOD_01",24.5*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1017: (dirLocalNEW+"ggh-hphigamma-powheg"+"/NANOAOD_01",46870*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        #
+        1019: (dirLocal+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #
         1020: (dirLocal+"vbf-hrhogamma-powheg"+"/NANOAOD_01",3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1021: (dirLocal+"wph-hrhogamma-powheg"+"/NANOAOD_01",3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1022: (dirLocal+"wmh-hrhogamma-powheg"+"/NANOAOD_01",3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1023: (dirLocal+"zh-hrhogamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1024: (dirLocal+"ggzh-hrhogamma-powheg"+"/NANOAOD_01",3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1023: (dirLocal+"zh-hrhogamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1024: (dirLocal+"ggzh-hrhogamma-powheg"+"/NANOAOD_01",3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1025: (dirLocal+"zinvh-hrhogamma-powheg"+"/NANOAOD_01",(177.6 - 24.5)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1026: (dirLocal+"ggzinvh-hrhogamma-powheg"+"/NANOAOD_01",24.5), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1027: (dirLocalNEW+"ggh-hrhogamma-powheg"+"/NANOAOD_01",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         #
         1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
         ## SM-BKG
@@ -302,12 +314,15 @@ def SwitchSample(argument):
     return switch.get(argument, "BKGdefault, xsecDefault")
 
 
-def pickTRG(overall,year,PDType,isVBF,isW,isZ):
+def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv):
 
     TRIGGER=''
     if(year == 2018 and isVBF):
         if (PDType== "EGamma"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
         elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
+    if(year == 2018 and isZinv):
+        if (PDType== "TAU"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)     # MC seems the same
     if(year == 2017 and isVBF and PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
 
     if(year == 2018 and (isW or isZ)):

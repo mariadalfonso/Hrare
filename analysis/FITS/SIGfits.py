@@ -20,12 +20,44 @@ def  fitSig(tag , mesonCat, year):
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
 
-    mcSig = ["WH", "ZH","VBFH"]
+    mcSig = ["WH", "ZH", "VBFH", "ZinvH", "ggH"]
     for sig in mcSig:
 
+        # 1l: ZH, WH
+        if (sig == "VBFH" and tag == "_Wcat"): continue
+        if (sig == "ggH" and tag == "_Wcat"): continue
+#        if (sig == "VBFHlow" and tag == "_Wcat"): continue
+        if (sig == "ZinvH" and tag == "_Wcat"): continue
+        # MET: WH, ZinvH
+        if (sig == "ZH" and tag == "_Zinvcat"): continue
+        if (sig == "VBFH" and tag == "_Zinvcat"): continue
+#        if (sig == "VBFHlow" and tag == "_Zinvcat"): continue
+        if (sig == "ggH" and tag == "_Zinvcat"): continue
+        ##
         if (sig == "WH" and tag == "_Zcat"): continue
+        if (sig == "VBFH" and tag == "_Zcat"): continue
+        if (sig == "ggH" and tag == "_Zcat"): continue
+#        if (sig == "VBFHlow" and tag == "_Zcat"): continue
+        if (sig == "ZinvH" and tag == "_Zcat"): continue
+        ##
+        if (sig == "ZH" and tag == "_GFcat"): continue
+        if (sig == "WH" and tag == "_GFcat"): continue
+        if (sig == "ZinvH" and tag == "_GFcat"): continue
+#        if (sig == "VBFH" and tag == "_GFcat"): continue
+#        if (sig == "VBFHlow" and tag == "_GFcat"): continue
+        ## ggh cat: GF and VBF
         if (sig == "WH" and tag == "_VBFcat"): continue
         if (sig == "ZH" and tag == "_VBFcat"): continue
+        if (sig == "ZinvH" and tag == "_VBFcat"): continue
+        if (sig == "ggH" and tag == "_VBFcat"): continue
+#        if (sig == "VBFHlow" and tag == "_VBFcat"): continue
+        ##
+        if (sig == "WH" and tag == "_VBFcatlow"): continue
+        if (sig == "ZH" and tag == "_VBFcatlow"): continue
+        if (sig == "ZinvH" and tag == "_VBFcatlow"): continue
+#        if (sig == "VBFH" and tag == "_VBFcatlow"): continue
+        if (sig == "ggH" and tag == "_VBFcatlow"): continue
+
         print(tag, ' ', sig)
 
         data_full = getHisto(4, 200*10, 0. , 200., True, tag, mesonCat, True, sig)
@@ -191,7 +223,7 @@ def  fitBkg(tag , mesonCat, year):
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern5, pdf_gauss);
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern1, pdf_gauss);
 
-    if tag=='_VBFcat':
+    if tag=='_VBFcat' or tag=='_VBFcatlow' or tag=='_Zinvcat' or tag=='_GFcat':
         model = RooFFTConvPdf ('bxg'+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
     elif tag=='_Wcat' or tag=='_Zcat':
         model = pdf_exp1
@@ -303,12 +335,6 @@ def makePlot():
 
 if __name__ == "__main__":
 
-    fitSig('_VBFcat','_PhiCat',2018)
-    fitBkg('_VBFcat','_PhiCat',2018)
-
-    fitSig('_VBFcat','_RhoCat',2018)
-    fitBkg('_VBFcat','_RhoCat',2018)
-
     fitSig('_Wcat','_RhoCat',2018)
     fitBkg('_Wcat','_RhoCat',2018)
 
@@ -320,6 +346,32 @@ if __name__ == "__main__":
 
     fitSig('_Zcat','_PhiCat',2018)
     fitBkg('_Zcat','_PhiCat',2018)
+
+    fitSig('_VBFcatlow','_RhoCat',2018)
+    fitBkg('_VBFcatlow','_RhoCat',2018)
+
+    fitSig('_VBFcatlow','_PhiCat',2018)
+    fitBkg('_VBFcatlow','_PhiCat',2018)
+
+    fitSig('_VBFcat','_PhiCat',2018)
+    fitBkg('_VBFcat','_PhiCat',2018)
+
+    fitSig('_VBFcat','_RhoCat',2018)
+    fitBkg('_VBFcat','_RhoCat',2018)
+
+    fitSig('_Zinvcat','_PhiCat',2018)
+    fitSig('_Zinvcat','_RhoCat',2018)
+
+    fitBkg('_Zinvcat','_PhiCat',2018)
+    fitBkg('_Zinvcat','_RhoCat',2018)
+
+    fitSig('_GFcat','_PhiCat',2018)
+    fitBkg('_GFcat','_PhiCat',2018)
+
+    fitSig('_GFcat','_RhoCat',2018)
+    fitBkg('_GFcat','_RhoCat',2018)
+
+    exit()
 
 #    fitBkg('_VBFcat','_PhiCat',2018)
 #    makePlot()

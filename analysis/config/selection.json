@@ -1,6 +1,6 @@
 {
-    "BARRELphotons" : "(Photon_pt>20 and Photon_isScEtaEB and (Photon_cutBased & 2) and Photon_electronVeto)",
-    "ENDCAPphotons" : "(Photon_pt>20 and Photon_isScEtaEE and (Photon_cutBased & 2) and Photon_electronVeto)",
+    "BARRELphotons" : "(Photon_pt>20 and Photon_isScEtaEB and Photon_mvaID_WP90 and Photon_electronVeto)",
+    "ENDCAPphotons" : "(Photon_pt>20 and Photon_isScEtaEE and Photon_mvaID_WP90 and Photon_electronVeto)",
 
     "GOODMUON" : "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)",
     "LOOSEmuons" : "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)",
@@ -33,7 +33,7 @@
 	{
 	    "name": "VH",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.8)"
+	    "definition": "(abs(phi_kin_mass-1.02)<0.01 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)"
 	},
 	{
 	    "name": "VH",
@@ -42,7 +42,28 @@
 	}
     ],
     "JSON" : "isGoodRunLS(isData, run, luminosityBlock)",
+
+    "JSONfile": [
+	{
+	    "year": 2018,
+	    "file": "Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
+	},
+	{
+	    "year": 2017,
+	    "file": "Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
+	},
+	{
+	    "year": 2016,
+	    "file": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
+	}
+    ],
+
     "triggers": [
+	{
+	    "name": "isZinv",
+	    "year": 2018,
+	    "definition": "HLT_Photon35_TwoProngs35"
+	},
 	{
 	    "name": "isVBF",
 	    "year": 2018,
@@ -66,7 +87,7 @@
 	{
 	    "name": "muEG",
 	    "year": 2018,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)"
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)"
 	},
 	{
 	    "name": "diEL",
@@ -85,18 +106,35 @@
 	},
 	{
 	    "name": "diMU",
+	    "year": 12016,
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL)",
+	    "note": "valid only for HIPM"
+	},
+	{
+	    "name": "diMU",
 	    "year": 2016,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL)"
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL)"
+	},
+	{
+	    "name": "muEG",
+	    "year": 12016,
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)",
+	    "note": "valid only for HIPM"
 	},
 	{
 	    "name": "muEG",
 	    "year": 2016,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)"
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)"
+	},
+	{
+	    "name": "oneEL",
+	    "year": 12016,
+	    "definition": "(HLT_Ele25_eta2p1_WPTight_Gsf||HLT_Ele27_eta2p1_WPLoose_Gsf||HLT_Ele27_WPTight_Gsf||HLT_Ele30_WPTight_Gsf||HLT_Ele35_WPLoose_Gsf||HLT_Ele27_WP85_Gsf||HLT_Ele27_WPLoose_Gsf||HLT_Ele105_CaloIdVT_GsfTrkIdT||HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_eta2p1_WPTight_Gsf||HLT_Ele32_eta2p1_WPTight_Gsf||HLT_ECALHT800)"
 	},
 	{
 	    "name": "oneEL",
 	    "year": 2016,
-	    "definition": "(HLT_Ele25_eta2p1_WPTight_Gsf||HLT_Ele27_eta2p1_WPLoose_Gsf||HLT_Ele27_WPTight_Gsf||HLT_Ele30_WPTight_Gsf||HLT_Ele35_WPLoose_Gsf||HLT_Ele27_WP85_Gsf||HLT_Ele27_WPLoose_Gsf||HLT_Ele105_CaloIdVT_GsfTrkIdT||HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_eta2p1_WPTight_Gsf||HLT_Ele32_eta2p1_WPTight_Gsf||HLT_ECALHT800)"
+	    "definition": "(HLT_Ele25_eta2p1_WPTight_Gsf||HLT_Ele27_eta2p1_WPLoose_Gsf||HLT_Ele27_WPTight_Gsf||HLT_Ele105_CaloIdVT_GsfTrkIdT||HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_eta2p1_WPTight_Gsf||HLT_Ele32_eta2p1_WPTight_Gsf||HLT_ECALHT800)"
 	},
 	{
 	    "name": "diEL",
@@ -106,27 +144,48 @@
 	{
 	    "name": "oneMU",
 	    "year": 2017,
-	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_IsoMu30||HLT_Mu50)"
+	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50)",
+	    "note": "valid only for CtoF"
+	},
+	{
+	    "name": "diMUctoF",
+	    "year": 2017,
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)",
+	    "note": "valid only for CtoF"
 	},
 	{
 	    "name": "diMU",
 	    "year": 2017,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8||HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8||HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8)"
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)",
+	    "note": "valid only for B"
+	},
+	{
+	    "name": "muEGcdef",
+	    "year": 2017,
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)",
+	    "note": "valid only for CtoF"
 	},
 	{
 	    "name": "muEG",
 	    "year": 2017,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)"
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)",
+	    "note": "valid only for CtoF"
 	},
 	{
-	    "name": "oneEL",
+	    "name": "oneELdef",
 	    "year": 2017,
 	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
 	},
 	{
+	    "name": "oneEL",
+	    "year": 2017,
+	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
+	},
+	{
 	    "name": "diEL",
 	    "year": 2017,
-	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DiEle27_WPTightCaloOnly_L1DoubleEG||HLT_DoubleEle25_CaloIdL_MW||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)"
+	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DiEle27_WPTightCaloOnly_L1DoubleEG||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)",
+	    "note": "valid only for CtoF"
 	}
     ]
 }

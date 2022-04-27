@@ -34,15 +34,35 @@ BkgPdf={
     'Wcat': 'exp1',
     'Zcat': 'exp1',
     'VBFcat': 'bxg',
+    'Zinvcat': 'bxg',
+    'VBFcatlow': 'bxg',
+    'GFcat': 'bxg',
 }
 
 SigPdf={
     'Wcat': 'crystal_ball',
     'Zcat': 'crystal_ball',
     'VBFcat': 'crystal_ball',
+    'Zinvcat': 'crystal_ball',
+    'VBFcatlow': 'crystal_ball',
+    'GFcat': 'crystal_ball',
 }
 
+ENUM={
+    'ggH': 0,
+    'VBFH': -1,
+    'WH': -2,
+    'ZH': -3,
+    'ZinvH': -4,
+}
+
+
 print(opts.whichCat)
+
+if opts.whichCat=='GFcat':
+    sigAll = ['ggH','VBFH']
+    mcAll = ['ggH','VBFH','bkg']
+    category = ['GFcat']
 
 if opts.whichCat=='Wcat':
     sigAll = ['WH','ZH']
@@ -58,6 +78,16 @@ if opts.whichCat=='VBFcat':
     sigAll = ['VBFH']
     mcAll = ['VBFH','bkg']
     category = ['VBFcat']
+
+if opts.whichCat=='VBFcatlow':
+    sigAll = ['VBFH']
+    mcAll = ['VBFH','bkg']
+    category = ['VBFcatlow']
+
+if opts.whichCat=='Zinvcat':
+    sigAll = ['WH','ZinvH']
+    mcAll = ['WH','ZinvH','bkg']
+    category = ['Zinvcat']
 
 ################### OPEN OUTPUT ############
 w = ROOT.RooWorkspace("w","w")
@@ -165,7 +195,8 @@ for cat in category:
         print(idx,proc,(-1)*idx)
         if (proc=='bkg'): datacard.write("\t1")
         else:
-            newIDX=(-1)*idx
+#            newIDX=(-1)*idx
+            newIDX=ENUM[proc]
             datacard.write("\t%d"%newIDX)
 datacard.write("\n")
 datacard.write("rate\t")
