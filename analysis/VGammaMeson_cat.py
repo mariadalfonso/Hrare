@@ -52,13 +52,10 @@ GOODELE = jsonObject['GOODELE']
 JSON = jsonObject['JSON']
 BARRELphotons = jsonObject['BARRELphotons']
 ENDCAPphotons = jsonObject['ENDCAPphotons']
+METFLAG = jsonObject['METFLAG']
 
 overall = jsonObject['triggers']
 mesons = jsonObject['mesons']
-
-TRIGGER=''
-if(year == 2018 and isVBF): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
-if(year == 2018 and (isW or isZ)): TRIGGER=getTriggerFromJson(overall, "oneMU", year)
 
 #$$$$
 #$$$$
@@ -69,7 +66,7 @@ def selectionTAG(df):
     if isZ:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25")
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
-                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.25 and Electron_mvaFall17V2noIso_WP90")
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2noIso_WP90")
                  .Define("vetoMu","{}".format(LOOSEmuons))
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Filter("(Sum(goodMuons)+Sum(goodElectrons))==2 and (Sum(vetoEle)+Sum(vetoMu))==2","at least two good muons or electrons, and no extra loose leptons")
@@ -90,12 +87,12 @@ def selectionTAG(df):
     if isW:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_tightId and Muon_pfRelIso04_all < 0.15")
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
-                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_pfRelIso03_all < 0.15 and Electron_mvaFall17V2noIso_WP90")
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP90")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
-                 .Filter("MET_pt>20 and (Sum(goodMuons)+Sum(goodElectrons))==1 and (Sum(vetoEle)+Sum(vetoMu))==1","MET and one lepton")
+                 .Filter("DeepMETResolutionTune_pt>20 and (Sum(goodMuons)+Sum(goodElectrons))==1 and (Sum(vetoEle)+Sum(vetoMu))==1","MET and one lepton")
                  .Define("isMuorEle","Sum(goodMuons)==1?1: Sum(goodElectrons)==1?2 :0")
-                 .Define("V_mass","Sum(goodMuons)>0 ? mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], MET_pt, MET_phi) : mt(Electron_pt[goodElectrons][0], Electron_phi[goodElectrons][0], MET_pt, MET_phi)")
+                 .Define("V_mass","Sum(goodMuons)>0 ? mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], DeepMETResolutionTune_pt, DeepMETResolutionTune_phi) : mt(Electron_pt[goodElectrons][0], Electron_phi[goodElectrons][0], DeepMETResolutionTune_pt, DeepMETResolutionTune_phi)")
                  .Filter("V_mass>20","MT>20")
                  .Define("Z_veto", "Sum(goodElectrons)==1 ? Minv2(Electron_pt[goodElectrons][0], Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], Electron_mass[goodElectrons][0],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first: -1")
                  .Filter("abs(Z_veto-91) > 10","kill the Z recontructed as gamma + electron")
@@ -118,7 +115,7 @@ def selectionTAG(df):
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
-                 .Filter("MET_pt<100","MET<100")
+                 .Filter("DeepMETResolutionTune_pt<100","DeepMETResolutionTune_pt<100")
                  )
         return dftag
 
@@ -126,13 +123,15 @@ def selectionTAG(df):
         dftag = (df.Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
-                 .Filter("MET_pt>50","MET>50")
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
-                 .Define("dPhiGammaMET","deltaPhi(goodPhotons_phi[index_pair[1]], MET_phi)")
-                 .Define("dPhiMesonMET","deltaPhi(goodMeson_phi[index_pair[0]], MET_phi)")
-                 .Define("ptRatioMEThiggs","abs(MET_pt-HCandPT)/HCandPT")
+                 .Filter("DeepMETResolutionTune_pt>50","MET>50")
+                 .Define("dPhiGammaMET","deltaPhi(goodPhotons_phi[index_pair[1]], DeepMETResolutionTune_phi)")
+                 .Define("dPhiMesonMET","deltaPhi(goodMeson_phi[index_pair[0]], DeepMETResolutionTune_phi)")
+                 .Define("ptRatioMEThiggs","abs(DeepMETResolutionTune_pt-HCandPT)/HCandPT")
+                 .Define("metFilter","{}".format(METFLAG))
+                 .Filter("metFilter", "pass METfilter")
                  )
         return dftag
 
@@ -143,9 +142,10 @@ def selectionTAG(df):
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
                  #                 .Define("trigger","{}".format(TRIGGER))
                  #                 .Filter("trigger>0", "pass triggers")
-                 .Filter("MET_pt<100","MET<100")
+                 .Filter("DeepMETResolutionTune_pt<100","DeepMETResolutionTune_pt<100")
                  .Define("goodJets","{}".format(GOODJETS))
-                 .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)<2","0 or 1 jet")
+                 .Define("nGoodJets","Sum(goodJets)")
+                 .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and (Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])<300))","0 or 1 jet or 2jets with Mjj<300)")
                  )
         return dftag
 
@@ -154,17 +154,20 @@ def dfGammaMeson(df):
     TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
 
     GOODPHOTONS = ""
-    if(isVBF): GOODPHOTONS = "{} and Photon_pt>75 and (Photon_cutBased & 3)".format(BARRELphotons)
-    if(isW or isZ): GOODPHOTONS = "{0} or {1}".format(BARRELphotons,ENDCAPphotons)
-    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>40 and Photon_pt<75".format(BARRELphotons,ENDCAPphotons)
-    if(isZinv or isGF): GOODphotons = "({0} or {1}) and Photon_pt>40".format(BARRELphotons,ENDCAPphotons)
+    if(isW or isZ): GOODPHOTONS = "({0} or {1}) and and Photon_mvaID_WP80 and (Photon_pixelSeed == false)".format(BARRELphotons,ENDCAPphotons)
+    if(isVBF): GOODPHOTONS = "{} and Photon_pt>75 and Photon_mvaID_WP80 and Photon_electronVeto".format(BARRELphotons)
+    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>40 and Photon_pt<75 and Photon_mvaID_WP80 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons)
+    if(isZinv or isGF): GOODphotons = "({0} or {1}) and Photon_pt>40 and and Photon_mvaID_WP80 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons)
 
     GOODPHI = ""
-    if(isVBF or isVBFlow): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
-    if(isW or isZ or isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
+    if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
+    if(isVBFlow or isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isZinv" , sys.argv[2] ))
+    if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
+    print(GOODPHI)
 
     GOODRHO = ""
-    if(isVBF or isVBFlow): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
+    if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
+    if(isVBFlow or isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isZinv" , sys.argv[2] ))
     if(isW or isZ or isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
 
     dfa= (df.Define("goodPhotons", "{}".format(GOODPHOTONS))
@@ -175,6 +178,7 @@ def dfGammaMeson(df):
           .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
           .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
           .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
+          .Define("goodPhotons_mvaID", "Photon_mvaID[goodPhotons]")
           #
           .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
           )
@@ -225,6 +229,8 @@ def dfHiggsCand(df):
               .Define("jet_mask2", "cleaningJetFromMeson(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
               .Define("HCandMass", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
               .Define("HCandPT", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
+              .Define("dPhiGammaMesonCand","deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]])")
+              .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
               )
     return dfbase
 
@@ -257,10 +263,13 @@ def analysis(df,mc,w,isData):
             "goodPhotons_hoe",
             "goodPhotons_r9",
             "goodPhotons_sieie",
+            "goodPhotons_mvaID",
             #
             "trigger",
             "SoftActivityJetNjets5",
-            "MET_pt",
+            "DeepMETResolutionTune_pt",
+            "dPhiGammaMesonCand",
+            "dEtaGammaMesonCand",
             #
             "w",
             "mc",
@@ -272,6 +281,7 @@ def analysis(df,mc,w,isData):
             "goodMeson",
             "goodMeson_DR",
             "goodMeson_mass",
+            "goodMeson_massErr",
             "goodMeson_pt",
             "goodMeson_iso",
             "goodMeson_trk1_pt",
@@ -295,6 +305,12 @@ def analysis(df,mc,w,isData):
                 "dPhiGammaMET",
                 "dPhiMesonMET",
                 "ptRatioMEThiggs",
+        ]:
+            branchList.push_back(branchName)
+
+    if isGF:
+        for branchName in [
+                "nGoodJets",
         ]:
             branchList.push_back(branchName)
 

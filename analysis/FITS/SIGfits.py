@@ -223,8 +223,10 @@ def  fitBkg(tag , mesonCat, year):
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern5, pdf_gauss);
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern1, pdf_gauss);
 
-    if tag=='_VBFcat' or tag=='_VBFcatlow' or tag=='_Zinvcat' or tag=='_GFcat':
+    if tag=='_VBFcat' or tag=='_VBFcatlow' or tag=='_Zinvcat':
         model = RooFFTConvPdf ('bxg'+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
+    elif tag=='_GFcat':
+        model = RooFFTConvPdf ('bxg'+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern3, pdf_gauss);
     elif tag=='_Wcat' or tag=='_Zcat':
         model = pdf_exp1
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_exp3, pdf_gauss);

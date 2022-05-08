@@ -5,9 +5,7 @@ from array import array
 ROOT.gStyle.SetOptStat(0)
 
 #year = '_2018'
-directory = '/home/submit/mariadlf/Hrare/analysis/APR26/2018/'
-#directory = '/home/submit/mariadlf/Hrare/analysis/APR5/2018/'
-#directory = '/home/submit/mariadlf/Hrare/analysis/MARCH26/2018/'
+directory = '/home/submit/mariadlf/Hrare/analysis/MAY5/2018/'
 
 from LoadTree import loadTree
 
@@ -68,6 +66,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       idxPh = ev.index_pair[1]
 
       if ev.goodMeson_iso[idxMeson] < 0.9 :  continue
+      # checked for the VBF as well
       leadTrkPt = max(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson])
       if leadTrkPt < 20: continue
 
@@ -75,31 +74,31 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       if(category =='_Zcat' or category =='_Wcat'):
          if ev.goodPhotons_pt[idxPh]<40 :  continue
          if ev.goodMeson_pt[idxMeson]<40 : continue
-         if ev.goodMeson_iso[idxMeson] < 0.9 :  continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zinvcat'):
          if ev.goodPhotons_pt[idxPh]<40 :  continue
          if ev.goodMeson_pt[idxMeson]<40 : continue
 #         if min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson]) < 10: continue
-         if ev.MET_pt<100 :  continue
+         if ev.DeepMETResolutionTune_pt<75 :  continue
          if abs(ev.dPhiGammaMET)<1. : continue
          if abs(ev.dPhiMesonMET)<1. : continue
          if ev.ptRatioMEThiggs>0.8: continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_VBFcatlow'):
-         if ev.goodPhotons_pt[idxPh]<40 :  continue
-         if ev.goodPhotons_pt[idxPh]>75 :  continue
+         if ev.goodPhotons_pt[idxPh]<40 :  continue # already applied
+         if ev.goodPhotons_pt[idxPh]>75 :  continue # already applied
          if ev.goodMeson_pt[idxMeson]<40 : continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_GFcat'):
          if ev.goodPhotons_pt[idxPh]<40 :  continue
          if ev.goodMeson_pt[idxMeson]<40 : continue
+#         if ev.nGoodJets < 2: continue
 
-#      if mesonCat == '_RhoCat' and ev.goodMeson_mass[idxMeson]<0.64: continue;
-#      if mesonCat == '_RhoCat' and ev.goodMeson_mass[idxMeson]>0.90: continue;
+      if mesonCat == '_RhoCat' and abs(ev.goodMeson_mass[idxMeson]-0.77) > 2.*0.07: continue # 2 sigma
+      if mesonCat == '_PhiCat' and abs(ev.goodMeson_mass[idxMeson]-1.02) > 3.*0.004: continue # 3. sigma
 
       # Fill histograms
       if (doSignal) :
