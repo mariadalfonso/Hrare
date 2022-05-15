@@ -146,35 +146,33 @@ def  fitBkg(tag , mesonCat, year):
 
     # -----------------------------------------------------------------------------
     # BERN law
-    bern_c0 = RooRealVar('bern_c0', 'bern_c0', 0.2, 0., 0.5)
-    bern_c1 = RooRealVar('bern_c1', 'bern_c1', 0.1, 0., 1.)
-    bern_c2 = RooRealVar('bern_c2', 'bern_c2', 0.1, 0., 1.)
-    bern_c3 = RooRealVar('bern_c3', 'bern_c3', 0.5, 0., 5.)
-    bern_c4 = RooRealVar('bern_c4', 'bern_c4', 0.5, 0., 5.)
-    bern_c5 = RooRealVar('bern_c5', 'bern_c5', 1e-2, 0., 0.1)
+    bern_c0 = RooRealVar('bern_c0'+tag, 'bern_c0', 0.2, 0., 0.5)
+    bern_c1 = RooRealVar('bern_c1'+tag, 'bern_c1', 0.1, 0., 1.)
+    bern_c2 = RooRealVar('bern_c2'+tag, 'bern_c2', 0.1, 0., 1.)
+    bern_c3 = RooRealVar('bern_c3'+tag, 'bern_c3', 0.5, 0., 5.)
+    bern_c4 = RooRealVar('bern_c4'+tag, 'bern_c4', 0.5, 0., 5.)
+    bern_c5 = RooRealVar('bern_c5'+tag, 'bern_c5', 1e-2, 0., 0.1)
 
-    pdf_bern0 = RooBernstein('bern0', 'bern0', x,
+    pdf_bern0 = RooBernstein('bern0'+tag, 'bern0', x,
                              RooArgList(bern_c0))
-    pdf_bern1 = RooBernstein('bern1', 'bern1', x,
+    pdf_bern1 = RooBernstein('bern1'+tag, 'bern1', x,
                              RooArgList(bern_c0, bern_c1))
-    pdf_bern2 = RooBernstein('bern2', 'bern2', x,
+    pdf_bern2 = RooBernstein('bern2'+tag, 'bern2', x,
                              RooArgList(bern_c0, bern_c1, bern_c2))
-    pdf_bern3 = RooBernstein('bern3', 'bern3', x,
+    pdf_bern3 = RooBernstein('bern3'+tag, 'bern3', x,
                              RooArgList(bern_c0, bern_c1, bern_c2, bern_c3))
-    pdf_bern4 = RooBernstein('bern4', 'bern4', x,
-                             RooArgList(bern_c0, bern_c1, bern_c2, bern_c3,
-                                        bern_c4))
-    pdf_bern5 = RooBernstein('bern5', 'bern5', x,
-                             RooArgList(bern_c0, bern_c1, bern_c2, bern_c3,
-                                        bern_c4, bern_c5))
+    pdf_bern4 = RooBernstein('bern4'+tag, 'bern4', x,
+                             RooArgList(bern_c0, bern_c1, bern_c2, bern_c3,bern_c4))
+    pdf_bern5 = RooBernstein('bern5'+tag, 'bern5', x,
+                             RooArgList(bern_c0, bern_c1, bern_c2, bern_c3,bern_c4, bern_c5))
 
 #    if blinded: pdf_bern4.selectNormalizationRange(RooFit.CutRange("left,right"))
 
     # -----------------------------------------------------------------------------
     # GAUS law
-    gauss_mu = RooRealVar('gauss_mu', 'gauss_mu', 30., 0, 50.)
-    gauss_sigma = RooRealVar('gauss_sigma', 'gaus_sigma', 15, 10., 50)
-    pdf_gauss = RooGaussian('gauss', 'gauss', x , gauss_mu, gauss_sigma)
+    gauss_mu = RooRealVar('gauss_mu'+tag, 'gauss_mu', 30., 0, 50.)
+    gauss_sigma = RooRealVar('gauss_sigma'+tag, 'gaus_sigma', 15, 10., 50)
+    pdf_gauss = RooGaussian('gauss'+tag, 'gauss', x , gauss_mu, gauss_sigma)
 
     # -----------------------------------------------------------------------------
     # POW law

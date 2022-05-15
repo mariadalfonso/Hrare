@@ -29,12 +29,14 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       #   mytree.Add(directory5+'outname_mc24'+category+mesonCat+year+'.root')  #PtJet
       #   mytree.Add(directory5+'outname_mc25'+category+mesonCat+year+'.root')  #PtJet
       mytree.Add(directory+'outname_mc-31'+category+mesonCat+year+'.root')  #DATA EG
-      mytree.Add(directory+'outname_mc-32'+category+mesonCat+year+'.root')  #DATA
-      mytree.Add(directory+'outname_mc-33'+category+mesonCat+year+'.root')  #DATA
-      mytree.Add(directory+'outname_mc-34'+category+mesonCat+year+'.root')  #DATA
+      mytree.Add(directory+'outname_mc-32'+category+mesonCat+year+'.root')  #DATA EG
+      mytree.Add(directory+'outname_mc-33'+category+mesonCat+year+'.root')  #DATA EG
+      mytree.Add(directory+'outname_mc-34'+category+mesonCat+year+'.root')  #DATA EG
    elif category=='_Zinvcat':
       mytree.Add(directory+'outname_mc1015'+category+mesonCat+year+'.root') #Z-H phi
       mytree.Add(directory+'outname_mc1025'+category+mesonCat+year+'.root') #Z-H rho
+      mytree.Add(directory+'outname_mc1016'+category+mesonCat+year+'.root') #ggZ-H phi
+      mytree.Add(directory+'outname_mc1026'+category+mesonCat+year+'.root') #ggZ-H rho
       mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') #W+H phi
       mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') #W-H
       mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') #W+H rho
@@ -68,7 +70,8 @@ def loadTree(mytree, directory , category, mesonCat, year ):
    elif category=='_Zcat':
       mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') #Z-H phi
       mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') #Z-H rho
-      
+      mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') #ggZ-H phi
+      mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') #ggZ-H rho
       mytree.Add(directory+'outname_mc1'+category+mesonCat+year+'.root')  #ZG   
       mytree.Add(directory+'outname_mc34'+category+mesonCat+year+'.root')  #DY0Jet
       mytree.Add(directory+'outname_mc35'+category+mesonCat+year+'.root')  #DY1Jet
@@ -103,10 +106,11 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') #W+H phi
       mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') #W-H
       mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') #Z-H
+      mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') #ggZ-H
       mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') #W+H rho
       mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') #W-H      
       mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') #Z-H
-      
+      mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') #ggZ-H
       mytree.Add(directory+'outname_mc1'+category+mesonCat+year+'.root')  #ZG
       mytree.Add(directory+'outname_mc2'+category+mesonCat+year+'.root')  #WG
       mytree.Add(directory+'outname_mc31'+category+mesonCat+year+'.root')  #W0Jet
