@@ -1,0 +1,31 @@
+Combination of Zinvcat=DATACARDS/datacard_STAT_Phi_Zinvcat_2018.txt  Wcat=DATACARDS/datacard_STAT_Phi_Wcat_2018.txt  Zcat=DATACARDS/datacard_STAT_Phi_Zcat_2018.txt  VBFcat=DATACARDS/datacard_STAT_Phi_VBFcat_2018.txt  VBFcatlow=DATACARDS/datacard_STAT_Phi_VBFcatlow_2018.txt
+imax 5 number of bins
+jmax 4 number of processes minus 1
+kmax 0 number of nuisance parameters
+----------------------------------------------------------------------------------------------------------------------------------
+shapes VBFH       VBFcat     DATACARDS/workspace_STAT_Phi_VBFcat_2018.root w:crystal_ball_VBFcat_VBFH
+shapes bkg        VBFcat     DATACARDS/workspace_STAT_Phi_VBFcat_2018.root w:bxg_VBFcat_bkg
+shapes data_obs   VBFcat     DATACARDS/workspace_STAT_Phi_VBFcat_2018.root w:observed_data
+shapes VBFH       VBFcatlow  DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root w:crystal_ball_VBFcatlow_VBFH
+shapes bkg        VBFcatlow  DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root w:bxg_VBFcatlow_bkg
+shapes data_obs   VBFcatlow  DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root w:observed_data
+shapes WH         Wcat       DATACARDS/workspace_STAT_Phi_Wcat_2018.root w:crystal_ball_Wcat_WH
+shapes ZH         Wcat       DATACARDS/workspace_STAT_Phi_Wcat_2018.root w:crystal_ball_Wcat_ZH
+shapes bkg        Wcat       DATACARDS/workspace_STAT_Phi_Wcat_2018.root w:exp1_Wcat_bkg
+shapes data_obs   Wcat       DATACARDS/workspace_STAT_Phi_Wcat_2018.root w:observed_data
+shapes ZH         Zcat       DATACARDS/workspace_STAT_Phi_Zcat_2018.root w:crystal_ball_Zcat_ZH
+shapes bkg        Zcat       DATACARDS/workspace_STAT_Phi_Zcat_2018.root w:exp1_Zcat_bkg
+shapes data_obs   Zcat       DATACARDS/workspace_STAT_Phi_Zcat_2018.root w:observed_data
+shapes WH         Zinvcat    DATACARDS/workspace_STAT_Phi_Zinvcat_2018.root w:crystal_ball_Zinvcat_WH
+shapes ZinvH      Zinvcat    DATACARDS/workspace_STAT_Phi_Zinvcat_2018.root w:crystal_ball_Zinvcat_ZinvH
+shapes bkg        Zinvcat    DATACARDS/workspace_STAT_Phi_Zinvcat_2018.root w:bxg_Zinvcat_bkg
+shapes data_obs   Zinvcat    DATACARDS/workspace_STAT_Phi_Zinvcat_2018.root w:observed_data
+----------------------------------------------------------------------------------------------------------------------------------
+bin          Zinvcat    Wcat       Zcat       VBFcat     VBFcatlow
+observation  -1         -1         -1         -1         -1       
+----------------------------------------------------------------------------------------------------------------------------------
+bin          Zinvcat    Zinvcat    Zinvcat    Wcat       Wcat       Wcat       Zcat       Zcat       VBFcat     VBFcat     VBFcatlow  VBFcatlow
+process      ZinvH      WH         bkg        ZH         WH         bkg        ZH         bkg        VBFH       bkg        VBFH       bkg      
+process      -3         -2         1          -1         -2         1          -1         1          0          1          0          1        
+rate         1          1          1          1          1          1          1          1          1          1          1          1        
+----------------------------------------------------------------------------------------------------------------------------------

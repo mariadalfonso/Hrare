@@ -1,51 +1,52 @@
-python bwsHrare.py --whichCat=GFcat --inputFileSig=WS/Signal_GFcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_GFcat__RhoCat_2018_workspace.root --output=workspace_STAT_Rho_GFcat_2018.root --datCardName=datacard_STAT_Rho_GFcat_2018.txt
+##########
 
-python bwsHrare.py --whichCat=GFcat --inputFileSig=WS/Signal_GFcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_GFcat__PhiCat_2018_workspace.root --output=workspace_STAT_Phi_GFcat_2018.root --datCardName=datacard_STAT_Phi_GFcat_2018.txt
+python bwsHrare.py --whichCat=GFcat --inputFileSig=WS/Signal_GFcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_GFcat__RhoCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Rho_GFcat_2018.root --datCardName=DATACARDS/datacard_STAT_Rho_GFcat_2018.txt
 
-python bwsHrare.py --whichCat=VBFcatlow --inputFileSig=WS/Signal_VBFcatlow__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcatlow__RhoCat_2018_workspace.root --output=workspace_STAT_Rho_VBFcatlow_2018.root --datCardName=datacard_STAT_Rho_VBFcatlow_2018.txt
+python bwsHrare.py --whichCat=GFcat --inputFileSig=WS/Signal_GFcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_GFcat__PhiCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Phi_GFcat_2018.root --datCardName=DATACARDS/datacard_STAT_Phi_GFcat_2018.txt
 
-python bwsHrare.py --whichCat=VBFcatlow --inputFileSig=WS/Signal_VBFcatlow__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcatlow__PhiCat_2018_workspace.root --output=workspace_STAT_Phi_VBFcatlow_2018.root --datCardName=datacard_STAT_Phi_VBFcatlow_2018.txt
+python bwsHrare.py --whichCat=VBFcatlow --inputFileSig=WS/Signal_VBFcatlow__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcatlow__RhoCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root --datCardName=DATACARDS/datacard_STAT_Rho_VBFcatlow_2018.txt
 
-python bwsHrare.py --whichCat=VBFcat --inputFileSig=WS/Signal_VBFcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcat__RhoCat_2018_workspace.root --output=workspace_STAT_Rho_VBFcat_2018.root --datCardName=datacard_STAT_Rho_VBFcat_2018.txt
+python bwsHrare.py --whichCat=VBFcatlow --inputFileSig=WS/Signal_VBFcatlow__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcatlow__PhiCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root --datCardName=DATACARDS/datacard_STAT_Phi_VBFcatlow_2018.txt
 
-python bwsHrare.py --whichCat=VBFcat --inputFileSig=WS/Signal_VBFcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcat__PhiCat_2018_workspace.root --output=workspace_STAT_Phi_VBFcat_2018.root --datCardName=datacard_STAT_Phi_VBFcat_2018.txt
+python bwsHrare.py --whichCat=VBFcat --inputFileSig=WS/Signal_VBFcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcat__RhoCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Rho_VBFcat_2018.root --datCardName=DATACARDS/datacard_STAT_Rho_VBFcat_2018.txt
 
-python bwsHrare.py --whichCat=Zinvcat --inputFileSig=WS/Signal_Zinvcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zinvcat__RhoCat_2018_workspace.root --output=workspace_STAT_Rho_Zinvcat_2018.root --datCardName=datacard_STAT_Rho_Zinvcat_2018.txt
+python bwsHrare.py --whichCat=VBFcat --inputFileSig=WS/Signal_VBFcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_VBFcat__PhiCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Phi_VBFcat_2018.root --datCardName=DATACARDS/datacard_STAT_Phi_VBFcat_2018.txt
 
-python bwsHrare.py --whichCat=Zinvcat --inputFileSig=WS/Signal_Zinvcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zinvcat__PhiCat_2018_workspace.root --output=workspace_STAT_Phi_Zinvcat_2018.root --datCardName=datacard_STAT_Phi_Zinvcat_2018.txt
+python bwsHrare.py --whichCat=Zinvcat --inputFileSig=WS/Signal_Zinvcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zinvcat__RhoCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root --datCardName=DATACARDS/datacard_STAT_Rho_Zinvcat_2018.txt
 
-python bwsHrare.py --whichCat=Wcat --inputFileSig=WS/Signal_Wcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_Wcat__RhoCat_2018_workspace.root --output=workspace_STAT_Rho_Wcat_2018.root --datCardName=datacard_STAT_Rho_Wcat_2018.txt
+python bwsHrare.py --whichCat=Zinvcat --inputFileSig=WS/Signal_Zinvcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zinvcat__PhiCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Phi_Zinvcat_2018.root --datCardName=DATACARDS/datacard_STAT_Phi_Zinvcat_2018.txt
 
-python bwsHrare.py --whichCat=Wcat --inputFileSig=WS/Signal_Wcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_Wcat__PhiCat_2018_workspace.root --output=workspace_STAT_Phi_Wcat_2018.root --datCardName=datacard_STAT_Phi_Wcat_2018.txt
+python bwsHrare.py --whichCat=Wcat --inputFileSig=WS/Signal_Wcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_Wcat__RhoCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Rho_Wcat_2018.root --datCardName=DATACARDS/datacard_STAT_Rho_Wcat_2018.txt
 
-python bwsHrare.py --whichCat=Zcat --inputFileSig=WS/Signal_Zcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zcat__RhoCat_2018_workspace.root --output=workspace_STAT_Rho_Zcat_2018.root --datCardName=datacard_STAT_Rho_Zcat_2018.txt
+python bwsHrare.py --whichCat=Wcat --inputFileSig=WS/Signal_Wcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_Wcat__PhiCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Phi_Wcat_2018.root --datCardName=DATACARDS/datacard_STAT_Phi_Wcat_2018.txt
 
-python bwsHrare.py --whichCat=Zcat --inputFileSig=WS/Signal_Zcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zcat__PhiCat_2018_workspace.root --output=workspace_STAT_Phi_Zcat_2018.root --datCardName=datacard_STAT_Phi_Zcat_2018.txt
+python bwsHrare.py --whichCat=Zcat --inputFileSig=WS/Signal_Zcat__RhoCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zcat__RhoCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Rho_Zcat_2018.root --datCardName=DATACARDS/datacard_STAT_Rho_Zcat_2018.txt
+
+python bwsHrare.py --whichCat=Zcat --inputFileSig=WS/Signal_Zcat__PhiCat_2018_workspace.root --inputFileBKG=WS/Bkg_Zcat__PhiCat_2018_workspace.root --output=DATACARDS/workspace_STAT_Phi_Zcat_2018.root --datCardName=DATACARDS/datacard_STAT_Phi_Zcat_2018.txt
 
 ##########
 
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_GFcat_2018.txt  > results.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_GFcat_2018.txt  >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_GFcat_2018.txt  > results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_GFcat_2018.txt  >> results.txt
 
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_VBFcat_2018.txt  >> results.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_VBFcat_2018.txt  >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_VBFcat_2018.txt  >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_VBFcat_2018.txt  >> results.txt
 
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_VBFcatlow_2018.txt  >> results.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_VBFcatlow_2018.txt  >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_VBFcatlow_2018.txt  >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_VBFcatlow_2018.txt  >> results.txt
 
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_Zinvcat_2018.txt >> results.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_Zinvcat_2018.txt >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_Zinvcat_2018.txt >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_Zinvcat_2018.txt >> results.txt
 
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_Wcat_2018.txt >> results.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_Wcat_2018.txt >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_Wcat_2018.txt >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_Wcat_2018.txt >> results.txt
 
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_Zcat_2018.txt >> results.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_Zcat_2018.txt >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_Zcat_2018.txt >> results.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_Zcat_2018.txt >> results.txt
 
-##########
 
-combineCards.py Zinvcat=datacard_STAT_Rho_Zinvcat_2018.txt Wcat=datacard_STAT_Rho_Wcat_2018.txt VBFcat=datacard_STAT_Rho_VBFcat_2018.txt VBFcatlow=datacard_STAT_Rho_VBFcatlow_2018.txt > datacard_STAT_Rho_comb.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Rho_comb.txt
+combineCards.py Zinvcat=DATACARDS/datacard_STAT_Rho_Zinvcat_2018.txt Wcat=DATACARDS/datacard_STAT_Rho_Wcat_2018.txt Zcat=DATACARDS/datacard_STAT_Rho_Zcat_2018.txt VBFcat=DATACARDS/datacard_STAT_Rho_VBFcat_2018.txt VBFcatlow=DATACARDS/datacard_STAT_Rho_VBFcatlow_2018.txt > DATACARDS/datacard_STAT_Rho_comb.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Rho_comb.txt
 
-combineCards.py Zinvcat=datacard_STAT_Phi_Zinvcat_2018.txt Wcat=datacard_STAT_Phi_Wcat_2018.txt VBFcat=datacard_STAT_Phi_VBFcat_2018.txt VBFcatlow=datacard_STAT_Phi_VBFcatlow_2018.txt > datacard_STAT_Phi_comb.txt
-combine -M AsymptoticLimits -t -1 datacard_STAT_Phi_comb.txt
+combineCards.py Zinvcat=DATACARDS/datacard_STAT_Phi_Zinvcat_2018.txt Wcat=DATACARDS/datacard_STAT_Phi_Wcat_2018.txt Zcat=DATACARDS/datacard_STAT_Phi_Zcat_2018.txt VBFcat=DATACARDS/datacard_STAT_Phi_VBFcat_2018.txt VBFcatlow=DATACARDS/datacard_STAT_Phi_VBFcatlow_2018.txt > DATACARDS/datacard_STAT_Phi_comb.txt
+combine -M AsymptoticLimits -t -1 DATACARDS/datacard_STAT_Phi_comb.txt
