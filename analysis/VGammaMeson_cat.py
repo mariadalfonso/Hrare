@@ -147,8 +147,9 @@ def selectionTAG(df):
                  #                 .Filter("trigger>0", "pass triggers")
                  .Filter("DeepMETResolutionTune_pt<100","DeepMETResolutionTune_pt<100")
                  .Define("goodJets","{}".format(GOODJETS))
-                 .Define("nGoodJets","Sum(goodJets)")
+                 .Define("nGoodJets","Sum(goodJets)*1.0f")
                  .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and (Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])<300))","0 or 1 jet or 2jets with Mjj<300)")
+                 .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
                  )
         return dftag
 
@@ -245,28 +246,44 @@ def analysis(df,mc,w,isData):
     weight = "{0}".format(1.)
     if mc>0: weight = "{0}*genWeight*{1}".format(lumi,sumw)
 
+    dfOBJ= dfGammaMeson(df)
+    dfbase = dfHiggsCand(dfOBJ)
+    dfcandtag = selectionTAG(dfbase)
+
     MVAweights = ""
     if(isGF): MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , sys.argv[2] ))
 
-    s='''
-    TMVA::Experimental::RReader model("{0}");
-    computeModel = TMVA::Experimental::Compute<16, float>(model);
-    '''
-    ROOT.gInterpreter.ProcessLine(s.format(MVAweights))
+#    s='''
+#    TMVA::Experimental::RReader model("{0}");
+#    computeModel = TMVA::Experimental::Compute<16, float>(model);
+#    '''
+#    ROOT.gInterpreter.ProcessLine(s.format(MVAweights))
+
+    ROOT.gInterpreter.ProcessLine('''
+    TMVA::Experimental::RReader model("weights_mva/TMVAClassification_BDTG_d3_t400.weightsMODmay31.xml");
+    computeModel = TMVA::Experimental::Compute<10, float>(model);
+    ''')
 
     variables = ROOT.model.GetVariableNames()
     print(variables)
 
-    dfOBJ= dfGammaMeson(df)
-    dfbase = dfHiggsCand(dfOBJ)
-    dfcandtag = selectionTAG(dfbase)
+
     dfFINAL = (dfcandtag.Define("w","{}".format(weight))
                .Define("mc","{}".format(mc))
                .Define("isData","{}".format(isData))
                .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
                .Filter("PV_npvsGood>0","one good PV")
-    )
-
+               ## extra variables for MVA-MAY31-GF-PHI below
+               .Define("HCandPT_norm","(HCandMass>0) ? HCandPT/HCandMass: 0.f")
+               .Define("photon_pt_norm","(index_pair[1]!= -1) ? goodPhotons_pt[index_pair[1]]/HCandPT: 0.f")
+               .Define("photon_eta","(index_pair[1]!= -1) ? goodPhotons_eta[index_pair[1]]: -1.f")
+               .Define("meson_DR","(index_pair[0]!= -1) ? goodMeson_DR[index_pair[0]]: 0.f")
+               .Define("meson_pt_norm","(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]/HCandPT: 0.f")
+               .Define("meson_mass","(index_pair[0]!= -1) ? goodMeson_mass[index_pair[0]]: 0.f")
+               .Define("meson_massErr","(index_pair[0]!= -1) ? goodMeson_massErr[index_pair[0]]: 0.f")
+               .Define("meson_iso","(index_pair[0]!= -1) ? goodMeson_iso[index_pair[0]]: 0.f")
+               .Define("MVAdisc", ROOT.computeModel, ROOT.model.GetVariableNames())
+               )
 
     branchList = ROOT.vector('string')()
     for branchName in [
@@ -324,6 +341,12 @@ def analysis(df,mc,w,isData):
                 "dPhiGammaMET",
                 "dPhiMesonMET",
                 "ptRatioMEThiggs",
+        ]:
+            branchList.push_back(branchName)
+
+    if isGF:
+        for branchName in [
+                "MVAdisc",
         ]:
             branchList.push_back(branchName)
 
