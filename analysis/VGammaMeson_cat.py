@@ -5,7 +5,7 @@ import json
 
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist
-from utilsHrare import plot, computeWeigths, getTriggerFromJson, getMesonFromJson, pickTRG
+from utilsHrare import plot, computeWeigths, getTriggerFromJson, getMesonFromJson, pickTRG, getMVAFromJson
 
 doPlot = False
 
@@ -54,7 +54,8 @@ BARRELphotons = jsonObject['BARRELphotons']
 ENDCAPphotons = jsonObject['ENDCAPphotons']
 METFLAG = jsonObject['METFLAG']
 
-overall = jsonObject['triggers']
+MVA = jsonObject['MVAweights']
+TRIGGERS = jsonObject['triggers']
 mesons = jsonObject['mesons']
 
 #$$$$
@@ -130,6 +131,8 @@ def selectionTAG(df):
                  .Define("dPhiGammaMET","deltaPhi(goodPhotons_phi[index_pair[1]], DeepMETResolutionTune_phi)")
                  .Define("dPhiMesonMET","deltaPhi(goodMeson_phi[index_pair[0]], DeepMETResolutionTune_phi)")
                  .Define("ptRatioMEThiggs","abs(DeepMETResolutionTune_pt-HCandPT)/HCandPT")
+                 .Define("goodJets","{}".format(GOODJETS))
+                 .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)>1","two jets")
                  .Define("metFilter","{}".format(METFLAG))
                  .Filter("metFilter", "pass METfilter")
                  )
@@ -151,7 +154,7 @@ def selectionTAG(df):
 
 def dfGammaMeson(df):
 
-    TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
+    TRIGGER=pickTRG(TRIGGERS,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
 
     GOODPHOTONS = ""
     if(isW or isZ): GOODPHOTONS = "({0} or {1}) and and Photon_mvaID_WP80 and (Photon_pixelSeed == false)".format(BARRELphotons,ENDCAPphotons)
@@ -179,6 +182,7 @@ def dfGammaMeson(df):
           .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
           .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
           .Define("goodPhotons_mvaID", "Photon_mvaID[goodPhotons]")
+          .Define("goodPhotons_energyErr", "Photon_energyErr[goodPhotons]")
           #
           .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
           )
@@ -231,6 +235,7 @@ def dfHiggsCand(df):
               .Define("HCandPT", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
               .Define("dPhiGammaMesonCand","deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]])")
               .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
+               .Define("sigmaHCandMass_Rel2","(goodPhotons_energyErr[index_pair[1]]*goodPhotons_energyErr[index_pair[1]])/(goodPhotons_pt[index_pair[1]]*goodPhotons_pt[index_pair[1]]) + (goodMeson_massErr[index_pair[0]]*goodMeson_massErr[index_pair[0]])/(goodMeson_mass[index_pair[0]]*goodMeson_mass[index_pair[0]])")
               )
     return dfbase
 
@@ -239,6 +244,18 @@ def analysis(df,mc,w,isData):
     lumi = 1.
     weight = "{0}".format(1.)
     if mc>0: weight = "{0}*genWeight*{1}".format(lumi,sumw)
+
+    MVAweights = ""
+    if(isGF): MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , sys.argv[2] ))
+
+    s='''
+    TMVA::Experimental::RReader model("{0}");
+    computeModel = TMVA::Experimental::Compute<16, float>(model);
+    '''
+    ROOT.gInterpreter.ProcessLine(s.format(MVAweights))
+
+    variables = ROOT.model.GetVariableNames()
+    print(variables)
 
     dfOBJ= dfGammaMeson(df)
     dfbase = dfHiggsCand(dfOBJ)
@@ -256,6 +273,7 @@ def analysis(df,mc,w,isData):
             "HCandMass",
             "HCandPT",
             "index_pair",
+            "sigmaHCandMass_Rel2",
             #
             "goodPhotons_pt",
             "goodPhotons_eta",
@@ -264,6 +282,7 @@ def analysis(df,mc,w,isData):
             "goodPhotons_r9",
             "goodPhotons_sieie",
             "goodPhotons_mvaID",
+            "goodPhotons_energyErr",
             #
             "trigger",
             "SoftActivityJetNjets5",
@@ -308,7 +327,7 @@ def analysis(df,mc,w,isData):
         ]:
             branchList.push_back(branchName)
 
-    if isGF:
+    if isGF or isZinv:
         for branchName in [
                 "nGoodJets",
         ]:
@@ -429,5 +448,24 @@ if __name__ == "__main__":
 #    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12 2018
 #    print(int(sys.argv[3]))
 
-    if(int(sys.argv[3]) < 0): readDataSample(int(sys.argv[4]),int(sys.argv[3]) )  # SingleMuon
+    if ( sys.argv[1]=="isVBFtag" and int(sys.argv[3]) in [ -31, -32, 33, -34, -76, -81, -82, -83, -84, -85, -86]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims VBF
+
+    elif ( (sys.argv[1]=="isZinvtag" or sys.argv[1]=="isVBFtaglow" or sys.argv[1]=="isGFtag") and int(sys.argv[3]) in [-62, -63, -64]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims Tau
+
+    elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-1, -2, -3, -4, -5, -6, -7, -8]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims singleMu
+    elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-11, -12, -13, -14, -15, -16, -17, -18]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims doubleMu
+    elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-21, -22, -23, -24, -25, -26, -27, -28]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims MuEG
+    elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-31, -32, -33, -34, -35, -36, -37, -38]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims EG
+    elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-41, -42, -43, -44, -45, -46, -47, -48]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims DoubleEG
+    elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-51, -52, -53, -54, -55, -56, -57, -58]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims SingleElectron
+    elif(int(sys.argv[3]) < 0):
+        readDataSample(int(sys.argv[4]),int(sys.argv[3]) )  # DATA
     else: readMCSample(int(sys.argv[4]),int(sys.argv[3])) # to switch sample
