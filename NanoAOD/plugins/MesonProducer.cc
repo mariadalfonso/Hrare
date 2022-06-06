@@ -520,6 +520,16 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
 
   v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
 
+  if( vtxFit.valid() ) {
+
+    const auto & vtx_point = vtxFit.refitVertex->vertexState().position();
+    v0Cand.addUserFloat( "bestVtx_X", vtx_point.x());
+    v0Cand.addUserFloat( "bestVtx_Y", vtx_point.y());
+    v0Cand.addUserFloat( "bestVtx_Z", vtx_point.z());
+    v0Cand.addUserInt( "bestVtx_idx", pvIndex);
+
+  }
+
   if (isMC_){
     auto gen_tt = getGenMatchInfo( cand1, cand2 );
     if (gen_tt.mc_trk1){
