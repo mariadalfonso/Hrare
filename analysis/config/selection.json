@@ -11,6 +11,18 @@
 
     "METFLAG": "(Flag_globalSuperTightHalo2016Filter and Flag_EcalDeadCellTriggerPrimitiveFilter and Flag_eeBadScFilter and Flag_ecalBadCalibFilter and Flag_HBHENoiseIsoFilter and Flag_HBHENoiseFilter)",
 
+    "MVAweights": [
+        {
+            "name": "isGF",
+            "type": "isPhiCat",
+            "file": "weights_mva/ggH_phi_trainall_weights/TMVAClassification_BDTG_d3_t400.weights.xml"
+        },
+        {
+            "name": "isGF",
+            "type": "isRhoCat",
+            "file": "weights_mva/ggH_rho_trainall_weights/TMVAClassification_BDTG_d3_t400.weights.xml"
+        }
+    ],
     "mesons": [
 	{
 	    "name": "isZinv",
