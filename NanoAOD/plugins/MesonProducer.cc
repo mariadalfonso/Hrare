@@ -31,6 +31,7 @@
 #include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
+#include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 #include "TMVA/Reader.h"
 
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
@@ -40,6 +41,7 @@
 #include <TLorentzVector.h>
 #include <TVector.h>
 #include <TMatrix.h>
+#include "TMatrixDSym.h"
 #include <algorithm>
 
 // 
@@ -273,8 +275,8 @@ private:
   vertexWithKinematicFitter(std::vector<const reco::Track*> trks,
 			    std::vector<float> masses);
 
-  pair<double,double> computeDCA(const pat::PackedCandidate &kaon,
-   				 reco::BeamSpot beamSpot);
+  //  pair<double,double> computeDCA(const pat::PackedCandidate &kaon,
+  //   				 reco::BeamSpot beamSpot);
   GenMatchInfo getGenMatchInfo( const pat::PackedCandidate& track1,
 				    const pat::PackedCandidate& track2);
   // Two track DOCA
@@ -319,6 +321,11 @@ private:
 	   string cand1_name = "trk1",
 	   string cand2_name = "trk2");
 
+  reco::Vertex refit_vertex(edm::Event& iEvent, const edm::EventSetup& iSetup, size_t ipv, bool beamSpotContrant, const std::vector<pat::PackedCandidate> &pfCandHandle);
+  reco::Track fix_track(const reco::Track *tk, double delta=1e-8);
+  reco::Track fix_track(const reco::TrackRef& tk);
+  //  reco::Track fix_track(const reco::Track *tk, double delta);
+
   // ----------member data ---------------------------
     
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
@@ -326,6 +333,7 @@ private:
 
   edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
   const reco::VertexCollection* primaryVertices_;
+  vector<reco::Vertex> possibleVtxs_ = {};
 
   edm::EDGetTokenT<std::vector<pat::Muon>> muonToken_;
   edm::EDGetTokenT<std::vector<pat::PackedCandidate>> pfCandToken_;
@@ -492,6 +500,139 @@ namespace {
   }    
 }
 
+reco::Vertex MesonProducer::refit_vertex(edm::Event& iEvent, const edm::EventSetup& iSetup, size_t ipv, bool beamSpotContrant, const std::vector<pat::PackedCandidate> &pfCandHandle)
+{
+  unsigned int i;
+  std::vector<reco::TransientTrack> mytracks;
+
+  edm::ESHandle<TransientTrackBuilder> TTBuilder;
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",TTBuilder);
+
+  edm::Handle<reco::BeamSpot> recoBeamSpotHandle;
+  iEvent.getByLabel("offlineBeamSpot", recoBeamSpotHandle);
+  reco::BeamSpot vertexBeamSpot = *recoBeamSpotHandle;
+
+  // edm::Handle<vector<reco::Vertex>> vtxHandle;
+  // iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtxHandle);
+
+  // cout << "========> Vtx: " << ipv << endl;
+  for (i = 0; i < pfCandHandle.size(); i++) {
+    const pat::PackedCandidate &ptk = pfCandHandle[i];
+
+    if (!ptk.hasTrackDetails()) continue;
+
+    if (ptk.fromPV(ipv) < 3) continue;
+
+    // Equivalent to the below
+    // if (ptk.pvAssociationQuality() != pat::PackedCandidate::PVAssociationQuality::UsedInFitTight) continue;
+    // auto vtxTK = ptk.vertexRef();
+    // auto vtxMINI = (*vtxHandle)[ipv];
+    // if (vtxTK->x() != vtxMINI.x() || vtxTK->y() != vtxMINI.y() || vtxTK->z() != vtxMINI.z()) continue;
+
+    auto tk = ptk.bestTrack();
+    reco::TransientTrack transientTrack = TTBuilder->build(fix_track(tk));
+    transientTrack.setBeamSpot(vertexBeamSpot);
+    mytracks.push_back(transientTrack);
+  }
+
+  if (mytracks.size() < 2) {
+    // cout << "[WARNING]: Less than 2 tracks for vertex "<<ipv<<" fit" << endl;
+    return reco::Vertex(); // Invalid vertex
+  }
+
+  AdaptiveVertexFitter theFitter;
+  if (beamSpotContrant) {
+    TransientVertex tmp = theFitter.vertex(mytracks, vertexBeamSpot);
+    return tmp;
+  }
+  else {
+    TransientVertex tmp = theFitter.vertex(mytracks);
+    return tmp;
+  }
+
+}
+
+reco::Track MesonProducer::fix_track(const reco::TrackRef& tk)
+{
+  reco::Track t = reco::Track(*tk);
+  return fix_track(&t);
+}
+
+/* Check for a not positive definite covariance matrix. If the covariance
+ * matrix is not positive definite, we force it to be positive definite by
+ * adding the minimum eigenvalue to the diagonal of the covariance matrix plus
+ * `delta`.
+ *
+ * See https://nhigham.com/2020/12/22/what-is-a-modified-cholesky-factorization/.
+ *
+ * Note: There may be better ways of doing this, but since most of these tracks
+ * don't end up in the final sample, this is probably good enough. */
+reco::Track MesonProducer::fix_track(const reco::Track *tk, double delta)
+{
+  unsigned int i, j;
+  double min_eig = 1;
+
+  /* Get the original covariance matrix. */
+  reco::TrackBase::CovarianceMatrix cov = tk->covariance();
+
+  /* Convert it from an SMatrix to a TMatrixD so we can get the eigenvalues. */
+  TMatrixDSym new_cov(cov.kRows);
+  for (i = 0; i < cov.kRows; i++) {
+    for (j = 0; j < cov.kRows; j++) {
+      /* Need to check for nan or inf, because for some reason these
+       * cause a segfault when calling Eigenvectors().
+       *
+       * No idea what to do here or why this happens. */
+      if (std::isnan(cov(i,j)) || std::isinf(cov(i,j)))
+	cov(i,j) = 1e-6;
+      new_cov(i,j) = cov(i,j);
+    }
+  }
+
+  /* Get the eigenvalues. */
+  TVectorD eig(cov.kRows);
+  new_cov.EigenVectors(eig);
+  for (i = 0; i < cov.kRows; i++)
+    if (eig(i) < min_eig)
+      min_eig = eig(i);
+
+  /* If the minimum eigenvalue is less than zero, then subtract it from the
+   * diagonal and add `delta`. */
+  if (min_eig < 0) {
+    for (i = 0; i < cov.kRows; i++)
+      cov(i,i) -= min_eig - delta;
+  }
+
+  /* Correct for the fact that the impact parameter error is significantly
+   * different in data and MC. Technically we should be *decreasing* the data
+   * uncertainty since according to Marco Musich:
+   *
+   * > we suspect that the track uncertainty in data is over-estimated, while
+   * > it should be well calibrated in MC.  To corroborate this, here is a
+   * > plot from the recent alignment paper which shows the pull of the pixel
+   * > residuals for various reconstruction passes and MC:
+   * > for an ideally calibrated detector you expect a peak around 1, but for
+   * > the "alignment during data-taking" which is what was used for the
+   * > BParking Prompt reconstruction you can see it's pretty shifted to
+   * > lower values, meaning the error is overestimated.
+   * > So I would recommend to scale down the data uncertainties.
+   *
+   * However, we can't do this because this would cause the impact parameter
+   * significance to increase which means that some events which didn't
+   * trigger should have triggered. Therefore, we *increase* the error on the
+   * MC.
+   *
+   * This number comes from looking at the impact parameter error for the
+   * trigger muon for the B0 -> J/psi K* events. I tested both a scaling and
+   * an offset and the offset seemed to match really well, whereas the
+   * scaling didn't work. */
+  if (isMC_)
+    cov(reco::TrackBase::i_dxy, reco::TrackBase::i_dxy) = pow(sqrt(cov(reco::TrackBase::i_dxy, reco::TrackBase::i_dxy)) + 0.0003,2);
+
+  return reco::Track(tk->chi2(), tk->ndof(), tk->referencePoint(), tk->momentum(), tk->charge(), cov, tk->algo(), (reco::TrackBase::TrackQuality) tk->qualityMask());
+}
+
+
 KinematicFitResult 
 MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
 			const edm::Event& iEvent,
@@ -507,7 +648,8 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   masses.push_back(cand1.mass());
   masses.push_back(cand2.mass());
   auto vtxFit = vertexWithKinematicFitter(trks, masses);
-  vtxFit.postprocess(*beamSpot_, *primaryVertices_);
+  //  vtxFit.postprocess(*beamSpot_, *primaryVertices_);
+  vtxFit.postprocess(*beamSpot_, possibleVtxs_);
 
   // printf("vtxFit (x,y,z): (%7.3f,%7.3f,%7.3f)\n", 
   // 	 vtxFit.refitVertex->position().x(),
@@ -515,7 +657,8 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   // 	 vtxFit.refitVertex->position().z());
   addFitInfo(v0Cand, vtxFit, "kin");
 
-  auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
+  //  auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
+  auto displacement3D = compute3dDisplacement(vtxFit, possibleVtxs_ ,true);
   int pvIndex = displacement3D.pvIndex;
 
   v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
@@ -688,6 +831,36 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // auto nMuons = muonHandle_->size();
     auto nPFCands = pfCandHandle_->size();
     
+    // REFIT VERTICES as in
+    // https://github.com/ocerri/BPH_RDntuplizer/blob/1fef8bb05ebf8eb99a3d75343197eb72da52ab83/plugins/B2DstMuDecayTreeProducer.cc#L142
+    for(uint i_vtx = 0; i_vtx<pvHandle->size(); i_vtx++) {
+      auto vtx = (*pvHandle)[i_vtx];
+      /* Cut on the number of degrees of freedom. The number of degrees of
+       * freedom is calculated as:
+       *
+       *     ndof = -3 + 2*(w_1 + w_2 + ...)
+       *
+       *  where w_1, w_2, etc. are weights for each track associated with the
+       *  vertex. Quoting from https://arxiv.org/pdf/1405.6569.pdf:
+       *
+       *  > In the adaptive vertex fit, each track in the vertex is assigned
+       *  > a weight between 0 and 1, which reflects the likelihood that it
+       *  > genuinely > belongs to the vertex.
+       *
+       *  Therefore, the number of degrees of freedom is strongly correlated
+       *  with the number of tracks. We cut here requiring more than 4 which
+       *  translates roughly to at least 4 "good" tracks. This is because for
+       *  ndof <= 4 the data and MC do not seem to agree, and there is an
+       *  excess of vertices with low ndof in data. */
+      if (vtx.ndof() <= 4) continue;
+      reco::Vertex tmp = refit_vertex(iEvent, iSetup, i_vtx, 1, *pfCandHandle_);
+      if (tmp.isValid()) possibleVtxs_.push_back(tmp);
+      // else {
+      // cout << "[WARNING] Invalid vertex refit for " << i_vtx << endl;
+      // possibleVtxs.push_back(vtx);
+      // }
+    }
+
     // Output collection
     auto kss  = std::make_unique<pat::CompositeCandidateCollection>();
     auto d0s  = std::make_unique<pat::CompositeCandidateCollection>();
@@ -1057,7 +1230,8 @@ MesonProducer::getPhiToKK(const edm::Event& iEvent,
     masses.push_back(pion.mass());
 
     auto vtxFit = vertexWithKinematicFitter(trks, masses);
-    vtxFit.postprocess(*beamSpot_, *primaryVertices_);
+    //    vtxFit.postprocess(*beamSpot_, *primaryVertices_);
+    vtxFit.postprocess(*beamSpot_, possibleVtxs_);
 
     if ( vtxFit.valid()  and vtxFit.vtxProb() > minVtxProb_ and
 	 vtxFit.mass() > minDsMass_ and vtxFit.mass() < maxDsMass_ )
@@ -1336,7 +1510,7 @@ MesonProducer::vertexWithKinematicFitter(std::vector<const reco::Track*> trks,
   double ndf = 0.;
   float mass_err(mass_err_);
   for (unsigned int i=0; i<trks.size(); ++i){
-    transTrks.push_back((*theTTBuilder_).build(trks[i]));
+    transTrks.push_back((*theTTBuilder_).build(fix_track(trks[i])));
     particles.push_back(factory.particle(transTrks.back(),masses[i],chi,ndf,mass_err));
   }
 
@@ -1367,6 +1541,7 @@ MesonProducer::vertexWithKinematicFitter(std::vector<const reco::Track*> trks,
 }
 
 
+/*
 pair<double,double> MesonProducer::computeDCA(const pat::PackedCandidate &kaon,
                                                  reco::BeamSpot beamSpot){
 
@@ -1381,6 +1556,7 @@ pair<double,double> MesonProducer::computeDCA(const pat::PackedCandidate &kaon,
     
   return DCA;
 }
+*/
 namespace{
 
   const pat::PackedGenParticle*
@@ -1499,8 +1675,8 @@ float MesonProducer::distanceOfClosestApproach( const reco::Track* track1,
 					     const reco::Track* track2)
 {
   TwoTrackMinimumDistance md;
-  const reco::TransientTrack tt1 = theTTBuilder_->build(track1);
-  const reco::TransientTrack tt2 = theTTBuilder_->build(track2);
+  const reco::TransientTrack tt1 = theTTBuilder_->build(fix_track(track1));
+  const reco::TransientTrack tt2 = theTTBuilder_->build(fix_track(track2));
   if ( not md.calculate( tt1.initialFreeState(), tt2.initialFreeState() ) ) return -1.0;
   return md.distance();
 }
@@ -1511,7 +1687,7 @@ MesonProducer::distanceOfClosestApproach( const reco::Track* track,
 {
   if (not vertex->vertexIsValid()) return Measurement1D(-1.0,-1.0);
   VertexDistance3D distance3D;
-  const reco::TransientTrack tt = theTTBuilder_->build(track);
+  const reco::TransientTrack tt = theTTBuilder_->build(fix_track(track));
   assert(impactPointExtrapolator_);
   auto tsos = impactPointExtrapolator_->extrapolate(tt.initialFreeState(), vertex->position());
   if ( not tsos.isValid()) return Measurement1D(-1.0,-1.0);
@@ -1524,7 +1700,7 @@ MesonProducer::distanceOfClosestApproach( const reco::Track* track,
 					     const reco::Vertex& vertex)
 {
   VertexDistance3D distance3D;
-  const reco::TransientTrack tt = theTTBuilder_->build(track);
+  const reco::TransientTrack tt = theTTBuilder_->build(fix_track(track));
   assert(impactPointExtrapolator_);
   auto tsos = impactPointExtrapolator_->extrapolate(tt.initialFreeState(), GlobalPoint(Basic3DVector<float>(vertex.position())));
   if ( not tsos.isValid()) return Measurement1D(-1.0,-1.0);
