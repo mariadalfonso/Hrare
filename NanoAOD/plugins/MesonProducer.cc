@@ -1080,12 +1080,18 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
   float mass3 = 0.;
   int nPhotons = 0;
 
-  for (const pat::PackedCandidate& iphoton: *pfCandHandle_){
+  const auto & vtx_point = omegasVtxFit.refitVertex->vertexState().position();
+
+  for (unsigned int k=0; k < pfCandHandle_->size(); ++k){
+    auto iphoton(pfCandHandle_->at(k));
+
     if (iphoton.charge() != 0 ) continue;
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
     if (abs(iphoton.pdgId()) !=22) continue; // otherwise some "KL" enters
     if (iphoton.pt() < 5. ) continue;
     if (deltaR(pfCand1, iphoton) > 0.05 && deltaR(pfCand2, iphoton) > 0.05) continue; // photon should be collimated
+
+    iphoton.setVertex(math::XYZPoint(vtx_point.x(), vtx_point.y(), vtx_point.z()));
 
     pat::CompositeCandidate omegaFullCand;
     pat::PackedCandidate photon(iphoton);
