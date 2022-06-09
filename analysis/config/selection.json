@@ -12,16 +12,26 @@
     "METFLAG": "(Flag_globalSuperTightHalo2016Filter and Flag_EcalDeadCellTriggerPrimitiveFilter and Flag_eeBadScFilter and Flag_ecalBadCalibFilter and Flag_HBHENoiseIsoFilter and Flag_HBHENoiseFilter)",
 
     "MVAweights": [
-        {
-            "name": "isGF",
-            "type": "isPhiCat",
-            "file": "weights_mva/ggH_phi_trainall_weights/TMVAClassification_BDTG_d3_t400.weights.xml"
-        },
-        {
-            "name": "isGF",
-            "type": "isRhoCat",
-            "file": "weights_mva/ggH_rho_trainall_weights/TMVAClassification_BDTG_d3_t400.weights.xml"
-        }
+	{
+	    "name": "isVBF",
+	    "type": "isPhiCat",
+	    "file": "weightsJUNE/dataset_phi_VBF/TMVAClassification_BDTG_d3_t400.weights.xml"
+	},
+	{
+	    "name": "isVBF",
+	    "type": "isRhoCat",
+	    "file": "weightsJUNE/dataset_rho_VBF/TMVAClassification_BDTG_d3_t400.weights.xml"
+	},
+	{
+	    "name": "isGF",
+	    "type": "isPhiCat",
+	    "file": "weightsJUNE/dataset_ggH_phi/TMVAClassification_BDTG_d3_t400.weights.xml"
+	},
+	{
+	    "name": "isGF",
+	    "type": "isRhoCat",
+	    "file": "weightsJUNE/dataset_ggH_rho/TMVAClassification_BDTG_d3_t400.weights.xml"
+	}
     ],
     "mesons": [
 	{
@@ -99,6 +109,11 @@
 	    "definition": "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3"
 	},
 	{
+	    "name": "isVBF",
+	    "year": 12016,
+	    "definition": "HLT_Photon75_R9Id90_HE10_Iso40_EBOnly_VBF or HLT_Photon90_R9Id90_HE10_Iso40_EBOnly_VBF or HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_VBF"
+	},
+	{
 	    "name": "oneMU",
 	    "year": 2018,
 	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50)"
@@ -172,7 +187,7 @@
 	    "note": "valid only for CtoF"
 	},
 	{
-	    "name": "diMUctoF",
+	    "name": "diMUcdef",
 	    "year": 2017,
 	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)",
 	    "note": "valid only for CtoF"
@@ -201,15 +216,25 @@
 	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
 	},
 	{
-	    "name": "oneEL",
+	    "name": "oneELc",
 	    "year": 2017,
 	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
 	},
 	{
-	    "name": "diEL",
+	    "name": "oneEL",
+	    "year": 2017,
+	    "definition": "(HLT_Ele27_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
+	},
+	{
+	    "name": "diELcdef",
 	    "year": 2017,
 	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DiEle27_WPTightCaloOnly_L1DoubleEG||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)",
 	    "note": "valid only for CtoF"
+	},
+	{
+	    "name": "diEL",
+	    "year": 2017,
+	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)"
 	}
     ]
 }
