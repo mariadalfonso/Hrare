@@ -4,10 +4,11 @@ import sys
 import json
 
 ROOT.ROOT.EnableImplicitMT()
-from utilsHrare import getMClist, getDATAlist
+from utilsHrare import getMClist, getDATAlist, getSkims
 from utilsHrare import plot, computeWeigths, getTriggerFromJson, getMesonFromJson, pickTRG, getMVAFromJson
 
 doPlot = False
+doMVA = False
 
 isGF = False
 isZinv = False
@@ -39,6 +40,12 @@ if sys.argv[4]=='12016': year = 12016
 #$$$$
 
 PRESELECTION = "(nPhoton>0 && (nphi>0 or nrho>0) && PV_npvsGood>0)"
+CLEAN_LepMes = "{}".format("(Sum(goodMeson)>0 and isMuorEle==1) ? deltaR(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]]):(Sum(goodMeson)>0 and isMuorEle==2) ? deltaR(Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]]): -999")
+
+CLEAN_JetMes = "{}".format("Sum(goodMeson)>0 ? std::min(deltaR(Jet_eta[goodJets][0], Jet_phi[goodJets][0], goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]]),deltaR(Jet_eta[goodJets][1], Jet_phi[goodJets][1], goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])):-999")
+
+CLEAN_JetPH = "{}".format("Sum(goodPhotons)>0 ? std::min(deltaR(Jet_eta[goodJets][0], Jet_phi[goodJets][0], goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]]),deltaR(Jet_eta[goodJets][1], Jet_phi[goodJets][1], goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]])):-999")
+
 
 with open("config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
@@ -100,23 +107,34 @@ def selectionTAG(df):
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
 #                 .Filter("trigger>0 and Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26","pass trigger")
+                 .Define("deltaLepMeson","{}".format(CLEAN_LepMes))
+                 .Define("dPhiGammaMET","abs(deltaPhi(goodPhotons_phi[index_pair[1]], DeepMETResolutionTune_phi))")
+                 .Define("dPhiMesonMET","abs(deltaPhi(goodMeson_phi[index_pair[0]], DeepMETResolutionTune_phi))")
         )
         return dftag
 
     if isVBF or isVBFlow:
+
+        VBFcut = "mJJ>300 and dEtaJJ>3"
         dftag = (df.Define("goodJets","{}".format(GOODJETS))
-                 .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)>1","two jets")
+                 .Define("nGoodJets","Sum(goodJets)*1.0f").Filter("Sum(goodJets)>1","two jets")
                  .Define("mJJ","Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])")
                  .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
+                 .Define("dPhiJJ","abs(deltaPhi(Jet_phi[goodJets][0],Jet_phi[goodJets][1]))")
                  .Define("Y1Y2","Jet_eta[goodJets][0]*Jet_eta[goodJets][1]")
-                 .Filter("mJJ>300 and dEtaJJ>3","Filter on MJJ>300 , Deta>3")
+                 .Filter("{}".format(VBFcut),"Filter on MJJ , Deta, Y1Y2")
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
-                 .Filter("DeepMETResolutionTune_pt<100","DeepMETResolutionTune_pt<100")
+                 .Define("jet1Pt","Jet_pt[goodJets][0]")
+                 .Define("jet2Pt","Jet_pt[goodJets][1]")
+                 .Define("deltaJetMeson","{}".format(CLEAN_JetMes))
+                 .Define("deltaJetPhoton","{}".format(CLEAN_JetPH))
+                 .Filter("DeepMETResolutionTune_pt<75","DeepMETResolutionTune_pt<75")
+                 .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
                  )
         return dftag
 
@@ -128,11 +146,11 @@ def selectionTAG(df):
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
                  .Filter("DeepMETResolutionTune_pt>50","MET>50")
-                 .Define("dPhiGammaMET","deltaPhi(goodPhotons_phi[index_pair[1]], DeepMETResolutionTune_phi)")
-                 .Define("dPhiMesonMET","deltaPhi(goodMeson_phi[index_pair[0]], DeepMETResolutionTune_phi)")
+                 .Define("dPhiGammaMET","abs(deltaPhi(goodPhotons_phi[index_pair[1]], DeepMETResolutionTune_phi))")
+                 .Define("dPhiMesonMET","abs(deltaPhi(goodMeson_phi[index_pair[0]], DeepMETResolutionTune_phi))")
                  .Define("ptRatioMEThiggs","abs(DeepMETResolutionTune_pt-HCandPT)/HCandPT")
                  .Define("goodJets","{}".format(GOODJETS))
-                 .Define("nGoodJets","Sum(goodJets)").Filter("Sum(goodJets)>1","two jets")
+                 .Define("nGoodJets","Sum(goodJets)*1.0f").Filter("Sum(goodJets)>1","two jets")
                  .Define("metFilter","{}".format(METFLAG))
                  .Filter("metFilter", "pass METfilter")
                  )
@@ -153,7 +171,7 @@ def selectionTAG(df):
                  )
         return dftag
 
-def dfGammaMeson(df):
+def dfGammaMeson(df,PDType):
 
     TRIGGER=pickTRG(TRIGGERS,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
 
@@ -163,34 +181,41 @@ def dfGammaMeson(df):
     if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>40 and Photon_pt<75 and Photon_mvaID_WP80 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons)
     if(isZinv or isGF): GOODphotons = "({0} or {1}) and Photon_pt>40 and and Photon_mvaID_WP80 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons)
 
+    dfOBJ = (df.Filter("nPhoton>0 and PV_npvsGood>0","photon from nano >0 and PV_npvsGood > 0")
+             .Define("triggerAna","{}".format(TRIGGER))
+             .Filter("triggerAna>0", "pass triggers")
+             .Define("goodPhotons", "{}".format(GOODphotons))
+             .Define("nGoodPhotons","Sum(goodPhotons)*1.0f")
+             .Filter("Sum(goodPhotons)>0", "At least one good Photon")
+             .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
+             .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
+             .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
+             .Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
+             .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
+             .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
+             .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
+             .Define("goodPhotons_mvaID", "Photon_mvaID[goodPhotons]")
+             .Define("goodPhotons_energyErr", "Photon_energyErr[goodPhotons]")
+             .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
+             )
+    return dfOBJ
+
+def dfHiggsCand(df):
+
     GOODPHI = ""
     if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
     if(isVBFlow or isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isZinv" , sys.argv[2] ))
     if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
-    print(GOODPHI)
 
     GOODRHO = ""
     if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF" , sys.argv[2] ))
     if(isVBFlow or isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isZinv" , sys.argv[2] ))
     if(isW or isZ or isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH" , sys.argv[2] ))
 
-    dfa= (df.Define("goodPhotons", "{}".format(GOODPHOTONS))
-          .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
-          .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
-          .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
-          .Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
-          .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
-          .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
-          .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
-          .Define("goodPhotons_mvaID", "Photon_mvaID[goodPhotons]")
-          .Define("goodPhotons_energyErr", "Photon_energyErr[goodPhotons]")
-          #
-          .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
-          )
-
     if(isPhiCat=="true"):
-         dfOBJ = (df.Filter("nphi>0").Define("goodMeson","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
-                  .Filter("Sum(goodMeson)>0", "one good Rho/Phi (pt, validfit, ptTracks)")
+
+        dfbase = (df.Filter("nphi>0").Define("goodMeson","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
+                  .Filter("Sum(goodMeson)>0", "one good Phi (ptPhi, validfit, ptTracks)")
                   .Define("goodMeson_pt", "phi_kin_pt[goodMeson]")
                   .Define("goodMeson_eta", "phi_kin_eta[goodMeson]")
                   .Define("goodMeson_phi", "phi_kin_phi[goodMeson]")
@@ -198,6 +223,11 @@ def dfGammaMeson(df):
                   .Define("goodMeson_iso", "phi_iso[goodMeson]")
                   .Define("goodMeson_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "phi_kin_vtx_prob[goodMeson]")
+                  .Define("goodMeson_sipPV", "phi_kin_sipPV[goodMeson]")
+#                  .Define("goodMeson_bestVtx_idx", "phi_bestVtx_idx[goodMeson]")
+#                  .Define("goodMeson_bestVtx_X", "phi_bestVtx_X[goodMeson]")
+#                  .Define("goodMeson_bestVtx_Y", "phi_bestVtx_Y[goodMeson]")
+#                  .Define("goodMeson_bestVtx_Z", "phi_bestVtx_Z[goodMeson]")
                   .Define("goodMeson_massErr", "phi_kin_massErr[goodMeson]")
                   .Define("goodMeson_trk1_pt", "phi_trk1_pt[goodMeson]")
                   .Define("goodMeson_trk2_pt", "phi_trk2_pt[goodMeson]")
@@ -207,8 +237,9 @@ def dfGammaMeson(df):
                   )
 
     if(isRhoCat=="true"):
-         dfOBJ = (df.Filter("nrho>0").Define("goodMeson","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
-                  .Filter("Sum(goodMeson)>0", "one good Rho/Phi (pt, validfit, ptTracks)")
+
+        dfbase = (df.Filter("nrho>0").Define("goodMeson","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
+                  .Filter("Sum(goodMeson)>0", "one good Rho (ptPhi, validfit, ptTracks)")
                   .Define("goodMeson_pt", "rho_kin_pt[goodMeson]")
                   .Define("goodMeson_eta", "rho_kin_eta[goodMeson]")
                   .Define("goodMeson_phi", "rho_kin_phi[goodMeson]")
@@ -216,6 +247,11 @@ def dfGammaMeson(df):
                   .Define("goodMeson_mass", "rho_kin_mass[goodMeson]")
                   .Define("goodMeson_vtx_chi2dof", "rho_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "rho_kin_vtx_prob[goodMeson]")
+                  .Define("goodMeson_sipPV", "rho_kin_sipPV[goodMeson]")
+#                  .Define("goodMeson_bestVtx_idx", "rho_bestVtx_idx[goodMeson]")
+#                  .Define("goodMeson_bestVtx_X", "rho_bestVtx_X[goodMeson]")
+#                  .Define("goodMeson_bestVtx_Y", "rho_bestVtx_Y[goodMeson]")
+#                  .Define("goodMeson_bestVtx_Z", "rho_bestVtx_Z[goodMeson]")
                   .Define("goodMeson_massErr", "rho_kin_massErr[goodMeson]")
                   .Define("goodMeson_trk1_pt", "rho_trk1_pt[goodMeson]")
                   .Define("goodMeson_trk2_pt", "rho_trk2_pt[goodMeson]")
@@ -224,49 +260,45 @@ def dfGammaMeson(df):
                   .Define("goodMeson_DR","DeltaR(rho_trk1_eta[goodMeson],rho_trk2_eta[goodMeson],rho_trk1_phi[goodMeson],rho_trk2_phi[goodMeson])")
                   )
 
-    return dfOBJ
-
-def dfHiggsCand(df):
-
-    dfbase = (df.Filter("Sum(goodPhotons)>0", "At least one good Photon")
-              .Filter("Sum(goodMeson)>0", "one good Phi (ptPhi, validfit, ptTracks)")
-              .Define("index_pair","HiggsCandFromRECO(goodMeson_pt,goodMeson_eta,goodMeson_phi,goodMeson_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
-              .Define("jet_mask2", "cleaningJetFromMeson(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
-              .Define("HCandMass", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
-              .Define("HCandPT", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
-              .Define("dPhiGammaMesonCand","deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]])")
-              .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
+    dfFinal = (dfbase.Define("index_pair","HiggsCandFromRECO(goodMeson_pt,goodMeson_eta,goodMeson_phi,goodMeson_mass,goodPhotons_pt,goodPhotons_eta,goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
+               .Define("jet_mask2", "cleaningJetFromMeson(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
+	       .Define("HCandMass", "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first")
+               .Define("HCandPT",   "Minv2(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).second")
+               .Define("dPhiGammaMesonCand","abs(deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]]))")
+               .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
                .Define("sigmaHCandMass_Rel2","(goodPhotons_energyErr[index_pair[1]]*goodPhotons_energyErr[index_pair[1]])/(goodPhotons_pt[index_pair[1]]*goodPhotons_pt[index_pair[1]]) + (goodMeson_massErr[index_pair[0]]*goodMeson_massErr[index_pair[0]])/(goodMeson_mass[index_pair[0]]*goodMeson_mass[index_pair[0]])")
-              )
-    return dfbase
+               )
+    return dfFinal
 
-def analysis(df,mc,w,isData):
+def analysis(df,year,mc,sumw,isData,PDType):
 
     lumi = 1.
     weight = "{0}".format(1.)
     if mc>0: weight = "{0}*genWeight*{1}".format(lumi,sumw)
 
-    dfOBJ= dfGammaMeson(df)
+    dfOBJ= dfGammaMeson(df,PDType)
     dfbase = dfHiggsCand(dfOBJ)
     dfcandtag = selectionTAG(dfbase)
 
     MVAweights = ""
     if(isGF): MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , sys.argv[2] ))
+    if(isVBF): MVAweights = "{}".format(getMVAFromJson(MVA, "isVBF" , sys.argv[2] ))
+    print(MVAweights)
 
-#    s='''
-#    TMVA::Experimental::RReader model("{0}");
-#    computeModel = TMVA::Experimental::Compute<16, float>(model);
-#    '''
-#    ROOT.gInterpreter.ProcessLine(s.format(MVAweights))
+    NVar = "0"
+    if(isGF): NVar = "11";
+    if(isVBF): NVar = "23";
 
-    ROOT.gInterpreter.ProcessLine('''
-    TMVA::Experimental::RReader model("weights_mva/TMVAClassification_BDTG_d3_t400.weightsMODmay31.xml");
-    computeModel = TMVA::Experimental::Compute<10, float>(model);
-    ''')
+    s ='''
+    TMVA::Experimental::RReader model("{0}");
+    computeModel = TMVA::Experimental::Compute<{1}, float>(model);
+    '''
 
-    variables = ROOT.model.GetVariableNames()
-    print(variables)
+    print(s.format(MVAweights,NVar))
+    if doMVA : ROOT.gInterpreter.ProcessLine(s.format(MVAweights,NVar))
 
+    if doMVA : variables = ROOT.model.GetVariableNames()
+    if doMVA : print(variables)
 
     dfFINAL = (dfcandtag.Define("w","{}".format(weight))
                .Define("mc","{}".format(mc))
@@ -326,6 +358,11 @@ def analysis(df,mc,w,isData):
             "goodMeson_trk2_eta",
             "goodMeson_vtx_chi2dof",
             "goodMeson_vtx_prob",
+            "goodMeson_sipPV",
+#            "goodMeson_bestVtx_idx",
+#            "goodMeson_bestVtx_X",
+#            "goodMeson_bestVtx_Y",
+#            "goodMeson_bestVtx_Z",
     ]:
         branchList.push_back(branchName)
 
@@ -333,6 +370,13 @@ def analysis(df,mc,w,isData):
         for branchName in [
                 "V_mass",
                 "isMuorEle",
+        ]:
+            branchList.push_back(branchName)
+
+    if isW:
+        for branchName in [
+                "dPhiGammaMET",
+                "dPhiMesonMET",
         ]:
             branchList.push_back(branchName)
 
@@ -344,7 +388,7 @@ def analysis(df,mc,w,isData):
         ]:
             branchList.push_back(branchName)
 
-    if isGF:
+    if (isGF or isVBF) and doMVA:
         for branchName in [
                 "MVAdisc",
         ]:
@@ -361,7 +405,12 @@ def analysis(df,mc,w,isData):
                 "mJJ",
                 "nGoodJets",
                 "dEtaJJ",
+                "dPhiJJ",
                 "Y1Y2",
+                "deltaJetMeson",
+                "deltaJetPhoton",
+                "jet1Pt",
+                "jet2Pt",
         ]:
             branchList.push_back(branchName)
 
@@ -471,7 +520,7 @@ if __name__ == "__main__":
 #    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12 2018
 #    print(int(sys.argv[3]))
 
-    if ( sys.argv[1]=="isVBFtag" and int(sys.argv[3]) in [ -31, -32, 33, -34, -76, -81, -82, -83, -84, -85, -86]):
+    if ( sys.argv[1]=="isVBFtag" and int(sys.argv[3]) in [ -31, -32, -33, -34, -76, -81, -82, -83, -84, -85, -86]):
         readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1]) # skims VBF
 
     elif ( (sys.argv[1]=="isZinvtag" or sys.argv[1]=="isVBFtaglow" or sys.argv[1]=="isGFtag") and int(sys.argv[3]) in [-62, -63, -64]):
