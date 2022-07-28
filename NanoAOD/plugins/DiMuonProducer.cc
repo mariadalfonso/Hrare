@@ -406,6 +406,7 @@ bool DiMuonProducer::displacedTrack(const pat::PackedCandidate& track){
 }
 
 bool DiMuonProducer::isGoodMuon(const pat::Muon& muon){
+  if ( not muon.innerTrack().isNonnull()) return false;
   if ( not muon.isLooseMuon() ) return false;
   if ( not muon.isTrackerMuon() ) return false;
   if ( not muon.innerTrack()->quality(reco::Track::highPurity) ) return false; 
@@ -476,8 +477,8 @@ DiMuonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
 
   v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
 
-  v0Cand.addUserInt( "muon1_isTightMuon", cand1.isTightMuon((*primaryVertices_).at(pvIndex)) );
-  v0Cand.addUserInt( "muon2_isTightMuon", cand2.isTightMuon((*primaryVertices_).at(pvIndex)) );
+  v0Cand.addUserInt( "muon1_isTightMuon", (pvIndex!=-1) ? cand1.isTightMuon((*primaryVertices_).at(pvIndex)): false );
+  v0Cand.addUserInt( "muon2_isTightMuon", (pvIndex!=-1) ? cand2.isTightMuon((*primaryVertices_).at(pvIndex)): false );
 
   if (isMC_){
     auto gen_tt = getGenMatchInfo( cand1, cand2 );
@@ -635,7 +636,7 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     }
 
     auto nMuons = muonHandle_->size();
-    auto nPFCands = pfCandHandle_->size();
+    //    auto nPFCands = pfCandHandle_->size();
     
     // Output collection
     auto jpsis = std::make_unique<pat::CompositeCandidateCollection>();
@@ -647,13 +648,11 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
       for ( unsigned int i = 0; i < nMuons-1; ++i ) {
 	const pat::Muon& patMuon1( (*muonHandle_)[i] );
 	if ( not isGoodMuon(patMuon1) ) continue;
+
 	for ( unsigned int j = i+1; j < nMuons; ++j ) {
 	  const pat::Muon& patMuon2( (*muonHandle_)[j] );
 	  if ( not isGoodMuon(patMuon2) ) continue;
 	  if ( patMuon1.charge()*patMuon2.charge() >= 0 ) continue;
-
-	  if (not patMuon1.innerTrack().isNonnull()) continue;
-	  if (not patMuon2.innerTrack().isNonnull()) continue;
 
 	  //	  if ( not isGoodTrack(pfCand2) ) continue;
 	  //	  if ( not isGoodPair(pfCand1,pfCand2) ) continue;
