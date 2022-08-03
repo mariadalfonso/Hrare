@@ -328,6 +328,7 @@ private:
 
   // ----------member data ---------------------------
     
+
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const reco::BeamSpot* beamSpot_;
 
@@ -348,6 +349,7 @@ private:
   const AnalyticalImpactPointExtrapolator* impactPointExtrapolator_;
 
   bool isMC_;
+  bool doFitxTrackCov = false;
 
   //  double minMuonPt_;
   //  double maxMuonEta_;
@@ -648,8 +650,8 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   masses.push_back(cand1.mass());
   masses.push_back(cand2.mass());
   auto vtxFit = vertexWithKinematicFitter(trks, masses);
-  //  vtxFit.postprocess(*beamSpot_, *primaryVertices_);
-  vtxFit.postprocess(*beamSpot_, possibleVtxs_);
+  if(doFitxTrackCov) vtxFit.postprocess(*beamSpot_, possibleVtxs_);
+  else  vtxFit.postprocess(*beamSpot_, *primaryVertices_);
 
   // printf("vtxFit (x,y,z): (%7.3f,%7.3f,%7.3f)\n", 
   // 	 vtxFit.refitVertex->position().x(),
@@ -657,9 +659,14 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   // 	 vtxFit.refitVertex->position().z());
   addFitInfo(v0Cand, vtxFit, "kin");
 
-  //  auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
-  auto displacement3D = compute3dDisplacement(vtxFit, possibleVtxs_ ,true);
-  int pvIndex = displacement3D.pvIndex;
+  int pvIndex = -1;
+  if(doFitxTrackCov) {
+    auto displacement3D = compute3dDisplacement(vtxFit, possibleVtxs_ ,true);
+    pvIndex = displacement3D.pvIndex;
+  } else {
+    auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
+    pvIndex = displacement3D.pvIndex;
+  }
 
   v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
 
@@ -1236,8 +1243,8 @@ MesonProducer::getPhiToKK(const edm::Event& iEvent,
     masses.push_back(pion.mass());
 
     auto vtxFit = vertexWithKinematicFitter(trks, masses);
-    //    vtxFit.postprocess(*beamSpot_, *primaryVertices_);
-    vtxFit.postprocess(*beamSpot_, possibleVtxs_);
+    if(doFitxTrackCov) vtxFit.postprocess(*beamSpot_, possibleVtxs_);
+    else  vtxFit.postprocess(*beamSpot_, *primaryVertices_);
 
     if ( vtxFit.valid()  and vtxFit.vtxProb() > minVtxProb_ and
 	 vtxFit.mass() > minDsMass_ and vtxFit.mass() < maxDsMass_ )
@@ -1516,7 +1523,8 @@ MesonProducer::vertexWithKinematicFitter(std::vector<const reco::Track*> trks,
   double ndf = 0.;
   float mass_err(mass_err_);
   for (unsigned int i=0; i<trks.size(); ++i){
-    transTrks.push_back((*theTTBuilder_).build(fix_track(trks[i])));
+    if(doFitxTrackCov) transTrks.push_back((*theTTBuilder_).build(fix_track(trks[i])));
+    else transTrks.push_back((*theTTBuilder_).build(trks[i]));
     particles.push_back(factory.particle(transTrks.back(),masses[i],chi,ndf,mass_err));
   }
 
@@ -1681,8 +1689,16 @@ float MesonProducer::distanceOfClosestApproach( const reco::Track* track1,
 					     const reco::Track* track2)
 {
   TwoTrackMinimumDistance md;
-  const reco::TransientTrack tt1 = theTTBuilder_->build(fix_track(track1));
-  const reco::TransientTrack tt2 = theTTBuilder_->build(fix_track(track2));
+  reco::TransientTrack tt1;
+  reco::TransientTrack tt2;
+
+  if(doFitxTrackCov) { 
+    tt1 = theTTBuilder_->build(fix_track(track1));
+    tt2 = theTTBuilder_->build(fix_track(track2));
+  } else {
+    tt1 = theTTBuilder_->build(track1);
+    tt2 = theTTBuilder_->build(track2);
+  }
   if ( not md.calculate( tt1.initialFreeState(), tt2.initialFreeState() ) ) return -1.0;
   return md.distance();
 }
@@ -1693,7 +1709,10 @@ MesonProducer::distanceOfClosestApproach( const reco::Track* track,
 {
   if (not vertex->vertexIsValid()) return Measurement1D(-1.0,-1.0);
   VertexDistance3D distance3D;
-  const reco::TransientTrack tt = theTTBuilder_->build(fix_track(track));
+  reco::TransientTrack tt;
+  if(doFitxTrackCov) tt = theTTBuilder_->build(fix_track(track)); 
+  else tt = theTTBuilder_->build(track);
+
   assert(impactPointExtrapolator_);
   auto tsos = impactPointExtrapolator_->extrapolate(tt.initialFreeState(), vertex->position());
   if ( not tsos.isValid()) return Measurement1D(-1.0,-1.0);
@@ -1706,7 +1725,10 @@ MesonProducer::distanceOfClosestApproach( const reco::Track* track,
 					     const reco::Vertex& vertex)
 {
   VertexDistance3D distance3D;
-  const reco::TransientTrack tt = theTTBuilder_->build(fix_track(track));
+  reco::TransientTrack tt;
+  if(doFitxTrackCov) tt = theTTBuilder_->build(fix_track(track));
+  else tt = theTTBuilder_->build(track);
+
   assert(impactPointExtrapolator_);
   auto tsos = impactPointExtrapolator_->extrapolate(tt.initialFreeState(), GlobalPoint(Basic3DVector<float>(vertex.position())));
   if ( not tsos.isValid()) return Measurement1D(-1.0,-1.0);
