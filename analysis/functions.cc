@@ -48,8 +48,7 @@ using Vec_f = ROOT::VecOps::RVec<float>;
 using Vec_i = ROOT::VecOps::RVec<int>;
 using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
-
-typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > PtEtaPhiMVector;
+typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
 bool isGoodRunLS(const bool isData, const UInt_t run, const UInt_t lumi) {
@@ -63,7 +62,6 @@ bool isGoodRunLS(const bool isData, const UInt_t run, const UInt_t lumi) {
 				[](std::pair<unsigned int, unsigned int>& range, unsigned int val) { return range.second < val; });
   return match->first <= lumi && match->second >= lumi;
 }
-
 
 float deltaPhi(float phi1, float phi2) {
   float result = phi1 - phi2;
@@ -101,13 +99,45 @@ Vec_b cleaningJetFromMeson(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi)
   return mask;
 }
 
+bool checkMother(const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
+                 int pdgToMatch,
+                 int pdgMotherToMatch
+		 ) {
+
+  int idxMother = -1;
+  // loop over all the genPartCand
+  for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+    if(genPart_pdgId[i]==25) idxMother = i;
+  }
+
+  int idxIntermediate = -1;
+  if(pdgMotherToMatch==333 and (pdgToMatch==310 or pdgToMatch==130)) {
+    for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+      if(genPart_pdgId[i]==333 and genPart_genPartIdxMother[i]==idxMother) { idxIntermediate = i; }
+    }
+  }
+
+  int idxMatch = -1.;
+  // loop over all the genPartCand
+  for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+    if(abs(genPart_pdgId[i])==pdgToMatch) {
+      if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxIntermediate ) {
+	idxMatch=i;
+      }
+    }
+  }
+
+  bool foundMother = (idxMatch!=-1);
+  return foundMother;
+
+}
 
 Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& reco_phi, const Vec_f& reco_mass,
-                   const Vec_f& genPart_eta, const Vec_f& genPart_phi,
-                   const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
-                   int pdgToMatch, int pdgMotherToMatch
-                   ) {
-
+		   const Vec_f& genPart_eta, const Vec_f& genPart_phi,
+		   const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
+		   int pdgToMatch,
+		   int pdgMotherToMatch
+		   ) {
   int idxMother = -1;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
@@ -117,7 +147,6 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
   int idxIntermediate = -1;
   if(pdgMotherToMatch==333 and pdgToMatch==310) {
     for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
-      // take the last of the Higgs
       if(genPart_pdgId[i]==333 and genPart_genPartIdxMother[i]==idxMother) { idxIntermediate = i; }
     }
   }
@@ -129,42 +158,42 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
     if(pdgToMatch==310  and abs(genPart_pdgId[i])==pdgToMatch) {
       if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxIntermediate ) {
-        idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
+	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
     } else if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113  or abs(genPart_pdgId[i])==443) {
       if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
-        idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
+	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
     }
   }
 
   Vec_i idx(2, -1); // initialize with -1 a vector of size 2
-  // loop over all the recoCand
 
+  idx[1] = idxMatch; // index of the genPart (-1 if not found gen cand)
+
+  // loop over all the recoCand
   for (unsigned int i=0; i<reco_pt.size(); i++) {
     PtEtaPhiMVector p_reco(reco_pt[i], reco_eta[i], reco_phi[i], reco_mass[i]);
     if(idxMother<0) continue; // no good Mother (i.e. Higgs)
     if(idxMatch<0) continue; // no good Match
-
     if(deltaR(etaGen,phiGen,p_reco.eta(),p_reco.phi())>0.01) continue;
     idx[0] = i;
   }
-
-  idx[1] = idxMatch; // index of the genPart
 
   return idx;
 
 }
 
 Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
-                        const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
+			const Vec_f& meson_trk1_pt, const Vec_f& meson_trk2_pt,
+			const Vec_f& wrong_meson_pt,
+			const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
 
   float Minv = -1;
-  int index = -1;
   float ptHiggs = -1;
   float ptCandMax=0;
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
-  int indexPhoton = 0;
+  unsigned int indexPhoton = 0;
   Vec_i idx(2, -1); // initialize with -1 a vector of size 2
 
   if(ph_pt.size()> 1) {
@@ -174,17 +203,27 @@ Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
     indexPhoton = 1;
   }
 
+  float ptWrongMax=0;
+  for (unsigned int j=0; j<wrong_meson_pt.size(); j++) {
+    if(wrong_meson_pt[j] <  ptWrongMax) continue;
+    ptWrongMax = wrong_meson_pt[j];
+  }
+
   // loop over all the phiCand
   for (unsigned int i=0; i<meson_pt.size(); i++) {
 
-    PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
+    if(max(meson_trk1_pt[i], meson_trk2_pt[i]) < 20) continue;
 
-    if(abs(deltaPhi(p_ph.phi(), p_meson.phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
+    PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
+    if((p_meson + p_ph).M()<5.) continue; // object disambiguiation
+
     // save the leading Pt
     float ptCand = p_meson.pt();
+
+    if(ptCandMax < ptWrongMax) continue; // we want the leading meson to the of the right flavor
     if( ptCand < ptCandMax ) continue;
     ptCandMax=ptCand;
-    Minv = (p_meson + p_ph).mass();
+    Minv = (p_meson + p_ph).M();
     ptHiggs = (p_meson + p_ph).pt();
     idx[0] = i;
     idx[1] = indexPhoton;
@@ -204,9 +243,9 @@ Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f
   float minPtTracks_= phiHyp ? 10: 0.f;
   float minPtMeson_= phiHyp ? 10: 20.f;
 
-  PtEtaPhiMVector pPhoton(ph_pt[0], ph_eta[0], ph_phi[0], 0.);
+  float phiLeadingPhoton = ph_phi[0];
+  if(ph_pt[1] > ph_pt[0]) phiLeadingPhoton = ph_phi[1];
 
-  //  PtEtaPhiMVector MesonCand(0,0,0,0);
   float mass=-100;
   float ptCandMax=0;
   for (unsigned int i=0; i<pt.size(); i++) {
@@ -221,7 +260,7 @@ Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f
       PtEtaPhiMVector p1(pt[i], eta[i], phi[i], m[i]);
       PtEtaPhiMVector p2(pt[j], eta[j], phi[j], m[j]);
 
-      if(abs(deltaPhi(ph_phi[0], (p1 + p2).phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
+      if(abs(deltaPhi(phiLeadingPhoton, (p1 + p2).phi()))<float(M_PI/2)) continue; // M,gamma opposite hemishpere
 
       if(deltaR(eta[i], phi[i], eta[j], phi[j])>0.5) continue; // meson's decay product inside a narrow cone
 
@@ -256,7 +295,7 @@ float mt(float pt1, float phi1, float pt2, float phi2) {
 float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) {
     PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
     PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
-    return (p1 + p2).mass();
+    return (p1 + p2).M();
 }
 
 std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& phi, const float& m,
@@ -265,7 +304,7 @@ std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& p
   PtEtaPhiMVector p_M(pt, eta, phi, m);
   PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
 
-  float Minv = (p_M + p_ph).mass();
+  float Minv = (p_M + p_ph).M();
   float ptPair = (p_M + p_ph).pt();
 
   std::pair<float, float> pairRECO = std::make_pair(Minv , ptPair);
@@ -280,7 +319,7 @@ float Minv3(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m,
   PtEtaPhiMVector p1(pt[idx[0]], eta[idx[0]], phi[idx[0]], m[idx[0]]);
   PtEtaPhiMVector p2(pt[idx[1]], eta[idx[1]], phi[idx[1]], m[idx[1]]);
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
-  return (p1 + p2 + p_ph).mass();
+  return (p1 + p2 + p_ph).M();
   
 }
 
