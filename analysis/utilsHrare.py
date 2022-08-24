@@ -45,6 +45,10 @@ def getMesonFromJson(overall, type, cat ):
     for meson in overall:
         if meson['name'] == type and meson['type'] == cat: return meson['definition']
 
+def getMVAFromJson(overall, type, cat ):
+
+    for meson in overall:
+        if meson['name'] == type and meson['type'] == cat: return meson['file']
 
 def loadJSON(fIn):
 
@@ -225,21 +229,77 @@ def getSkims(argument,year,category):
         -2: (("SingleMuon+Run"+"B"),"SingleMuon"),
         -3: (("SingleMuon+Run"+"C"),"SingleMuon"),
         -4: (("SingleMuon+Run"+"D"),"SingleMuon"),
+        -5: (("SingleMuon+Run"+"E"),"SingleMuon"),
+        -6: (("SingleMuon+Run"+"F"),"SingleMuon"),
+        -7: (("SingleMuon+Run"+"G"),"SingleMuon"),
+        -8: (("SingleMuon+Run"+"H"),"SingleMuon"),
         #
         -11: (("DoubleMuon+Run"+"A"),"DoubleMuon"),
         -12: (("DoubleMuon+Run"+"B"),"DoubleMuon"),
         -13: (("DoubleMuon+Run"+"C"),"DoubleMuon"),
         -14: (("DoubleMuon+Run"+"D"),"DoubleMuon"),
+        -15: (("DoubleMuon+Run"+"E"),"DoubleMuon"),
+        -16: (("DoubleMuon+Run"+"F"),"DoubleMuon"),
+        -17: (("DoubleMuon+Run"+"G"),"DoubleMuon"),
+        -18: (("DoubleMuon+Run"+"H"),"DoubleMuon"),        ,
         #
         -21: (("MuonEG+Run"+"A"),"MuonEG"),
         -22: (("MuonEG+Run"+"B"),"MuonEG"),
         -23: (("MuonEG+Run"+"C"),"MuonEG"),
         -24: (("MuonEG+Run"+"D"),"MuonEG"),
+        -25: (("MuonEG+Run"+"E"),"MuonEG"),
+        -26: (("MuonEG+Run"+"F"),"MuonEG"),
+        -27: (("MuonEG+Run"+"G"),"MuonEG"),
+        -28: (("MuonEG+Run"+"H"),"MuonEG"),
         #
         -31: (("EGamma+Run"+"A"),"EGamma"),
         -32: (("EGamma+Run"+"B"),"EGamma"),
         -33: (("EGamma+Run"+"C"),"EGamma"),
         -34: (("EGamma+Run"+"D"),"EGamma"),
+        -35: (("EGamma+Run"+"E"),"EGamma"),
+        -36: (("EGamma+Run"+"F"),"EGamma"),
+        -37: (("EGamma+Run"+"G"),"EGamma"),
+        -38: (("EGamma+Run"+"H"),"EGamma"),
+        #
+        -41: (("DoubleEG+Run"+"A"),"DoubleEG"),
+        -42: (("DoubleEG+Run"+"B"),"DoubleEG"),
+        -43: (("DoubleEG+Run"+"C"),"DoubleEG"),
+        -43: (("DoubleEG+Run"+"C"),"DoubleEG"),
+        -44: (("DoubleEG+Run"+"D"),"DoubleEG"),
+        -45: (("DoubleEG+Run"+"E"),"DoubleEG"),
+        -46: (("DoubleEG+Run"+"F"),"DoubleEG"),
+        -47: (("DoubleEG+Run"+"G"),"DoubleEG"),
+        -48: (("DoubleEG+Run"+"H"),"DoubleEG"),
+        #
+        -51: (("SingleElectron+Run"+"A"),"SingleElectron"),
+        -52: (("SingleElectron+Run"+"B"),"SingleElectron"),
+        -53: (("SingleElectron+Run"+"C"),"SingleElectron"),
+        -54: (("SingleElectron+Run"+"D"),"SingleElectron"),
+        -55: (("SingleElectron+Run"+"E"),"SingleElectron"),
+        -56: (("SingleElectron+Run"+"F"),"SingleElectron"),
+        -57: (("SingleElectron+Run"+"G"),"SingleElectron"),
+        -58: (("SingleElectron+Run"+"H"),"SingleElectron"),
+        #
+        -61: (("Tau+Run"+"A"),"Tau"),
+        -62: (("Tau+Run"+"B"),"Tau"),
+        -63: (("Tau+Run"+"C"),"Tau"),
+        -64: (("Tau+Run"+"D"),"Tau"),
+        #
+#        -71: (("SinglePhoton+Run"+"A"),"SinglePhoton"),
+#        -72: (("SinglePhoton+Run"+"B"),"SinglePhoton"),
+#        -73: (("SinglePhoton+Run"+"C"),"SinglePhoton"),
+#        -74: (("SinglePhoton+Run"+"D"),"SinglePhoton"),
+#        -75: (("SinglePhoton+Run"+"E"),"SinglePhoton"),
+        -76: (("SinglePhoton+Run"+"F"),"SinglePhoton"), # only this used 
+#        -77: (("SinglePhoton+Run"+"G"),"SinglePhoton"),
+#        -78: (("SinglePhoton+Run"+"H"),"SinglePhoton"),
+        #
+        -81: (("SinglePhoton+Run"+"B-ver1-HIPM"),"SinglePhoton"),
+        -82: (("SinglePhoton+Run"+"B-ver1-HIPM"),"SinglePhoton"),
+        -83: (("SinglePhoton+Run"+"C-HIPM"),"SinglePhoton"),
+        -84: (("SinglePhoton+Run"+"D-HIPM"),"SinglePhoton"),
+        -85: (("SinglePhoton+Run"+"E-HIPM"),"SinglePhoton"),
+        -86: (("SinglePhoton+Run"+"F-HIPM"),"SinglePhoton"),
     }
 
     tmp_pair = switch.get(argument, "regex, PDtype")
@@ -262,26 +322,24 @@ def SwitchSample(argument,year):
 
     switch = {
         ## SIGNAL
-        1010: (dirLocal+"vbf-hphigamma-powheg"+"/NANOAOD_01",3781.7*0.49), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1011: (dirLocal+"wph-hphigamma-powheg"+"/NANOAOD_01",3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1012: (dirLocal+"wmh-hphigamma-powheg"+"/NANOAOD_01",3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1013: (dirLocal+"zh-hphigamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1014: (dirLocal+"ggzh-hphigamma-powheg"+"/NANOAOD_01",3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1015: (dirLocal+"zinvh-hphigamma-powheg"+"/NANOAOD_01",(177.6 - 24.5)*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1016: (dirLocal+"ggzinvh-hphigamma-powheg"+"/NANOAOD_01",24.5*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1017: (dirLocalNEW+"ggh-hphigamma-powheg"+"/NANOAOD_01",46870*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1010: (dirT2+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7*0.49), #NNLO
+        1011: (dirT2+"WplusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1012: (dirT2+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1013: (dirT2+"ZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1014: (dirT2+"ggZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1015: (dirT2+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.6 - 24.5)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1016: (dirT2+"ggZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.5*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1017: (dirT2+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,46870*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         #
-        1019: (dirLocal+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
-        #
-        1020: (dirLocal+"vbf-hrhogamma-powheg"+"/NANOAOD_01",3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1021: (dirLocal+"wph-hrhogamma-powheg"+"/NANOAOD_01",3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1022: (dirLocal+"wmh-hrhogamma-powheg"+"/NANOAOD_01",3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1023: (dirLocal+"zh-hrhogamma-powheg"+"/NANOAOD_01",3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1024: (dirLocal+"ggzh-hrhogamma-powheg"+"/NANOAOD_01",3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1025: (dirLocal+"zinvh-hrhogamma-powheg"+"/NANOAOD_01",(177.6 - 24.5)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1026: (dirLocal+"ggzinvh-hrhogamma-powheg"+"/NANOAOD_01",24.5), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1027: (dirLocalNEW+"ggh-hrhogamma-powheg"+"/NANOAOD_01",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        #
+        1020: (dirT2+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1021: (dirT2+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1022: (dirT2+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1023: (dirT2+"ZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1024: (dirT2+"ggZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1025: (dirT2+"ZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.6 - 24.5)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1026: (dirT2+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.5), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1027: (dirT2+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        ##
         1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
         ## SM-BKG
         0: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,6067*1000), #NNLO
@@ -295,6 +353,8 @@ def SwitchSample(argument,year):
         7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1126*1000*1.26), #LO *1.26
         8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,124.3*1000*1.26), #LO *1.26
         9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,40.76*1000*1.26), #LO *1.26
+        10: (dirT2+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
+        13: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
         #
         20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,6447000.0*1000*1.26), #LO *1.26
         21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1988000.0*1000*1.26), #LO *1.26
