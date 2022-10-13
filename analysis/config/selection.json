@@ -7,7 +7,7 @@
     "GOODELE" : "(Electron_pt>20 and abs(Electron_eta)<2.5 and Electron_mvaFall17V2Iso_WPL and abs(Electron_dxy) < 0.2 && abs(Electron_dz) < 0.5 and ele_mask)",
     "LOOSEelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and abs(Electron_dz)<0.5 and abs(Electron_dxy) < 0.2 && Electron_mvaFall17V2Iso_WPL and ele_mask)",
 
-    "GOODJETS": "(Jet_pt>30 && abs(Jet_eta)<5 and (Jet_jetId & 2) and (Jet_puId > 0) and jet_mask and jet_mask2)",
+    "GOODJETS": "(Jet_pt>20 && abs(Jet_eta)<4.7 and (Jet_jetId & 2) and (Jet_puId > 0) and jet_mask and jet_mask2)",
 
     "METFLAG": "(Flag_globalSuperTightHalo2016Filter and Flag_EcalDeadCellTriggerPrimitiveFilter and Flag_eeBadScFilter and Flag_ecalBadCalibFilter and Flag_HBHENoiseIsoFilter and Flag_HBHENoiseFilter)",
 
@@ -15,72 +15,95 @@
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "file": "weightsJULY/VBF_phi/TMVAClassification_BDTG_d3_t400.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/JUL11/VBF_phi/weights/TMVAClassification_BDTG_d3_t400.weights.xml"
+	    "file": "weightsLargeMassAUG/VBF_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBF_phi/dataset_training_2of3_events__13_vars/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "file": "weightsJULY/VBF_rho/TMVAClassification_BDTG_d3_t400.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/JUL11/VBF_rho/weights/TMVAClassification_BDTG_d3_t400.weights.xml"
+	    "file": "weightsLargeMassAUG/VBF_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBF_rho/dataset_training_2of3_events__13_vars/weights/TMVAClassification_BDTG.weights.xml"
 	},
         {
             "name": "isGF",
             "type": "isPhiCat",
             "file": "weightsLargeMassAUG/ggH_phi/TMVAClassification_BDTG.weights.xml",
-            "org": "/work/submit/kyoon/RareHiggs/test/AUG23/ggH_phi/dataset/weights/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/training/ggH_phi/dataset_training_2of3_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
         },
         {
             "name": "isGF",
             "type": "isRhoCat",
             "file": "weightsLargeMassAUG/ggH_rho/TMVAClassification_BDTG.weights.xml",
-            "org": "/work/submit/kyoon/RareHiggs/test/AUG23/ggH_rho/dataset/weights/TMVAClassification_BDTG.weights.xml",
+            "org": "/work/submit/kyoon/RareHiggs/test/training/ggH_rho/dataset_training_2of3_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
         },
 	{
 	    "name": "isVBFlow",
 	    "type": "isRhoCat",
-	    "file": "weightsJULY/VBFlow_rho/TMVAClassification_BDTG_d3_t400.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/JUL25/VBFcatlow_rho/weights/TMVAClassification_BDTG_d3_t400.weights.xml"
+	    "file": "weightsLargeMassAUG/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBFlow_rho/dataset_training_1of2_events__17_vars/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isPhiCat",
-	    "file": "weightsJULY/VBFlow_phi/TMVAClassification_BDTG_d3_t400.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/JUL25/VBFcatlow_phi/weights/TMVAClassification_BDTG_d3_t400.weights.xml"
-	}
+	    "file": "weightsLargeMassAUG/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBFlow_phi/dataset_training_1of2_events__17_vars/weights/TMVAClassification_BDTG.weights.xml"
+	},
+       {
+            "name": "isZinv",
+            "type": "isRhoCat",
+            "file": "weightsOCT/Zinv_rho/TMVAClassification_BDTG.weights.xml",
+            "org1": "/work/submit/kyoon/RareHiggs/test/training/Zinv_rho/dataset__MH110-140__training_1of2_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
+	},
+        {
+            "name": "isZinv",
+            "type": "isPhiCat",
+            "file": "weightsOCT/Zinv_phi/TMVAClassification_BDTG.weights.xml",
+            "org1": "/work/submit/kyoon/RareHiggs/test/training/Zinv_phi/dataset__MH110-140__training_1of2_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
+        }
     ],
     "mesons": [
 	{
 	    "name": "isZinv",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.005 && phi_kin_pt>38 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.1 * phi_kin_vtx_chi2dof && phi_doca < 0.015)",
-	    "notes":" used for isVBFlow, isZinv, isGF"
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015)",
+	    "notes":" used for isZinv, isGF"
 	},
 	{
 	    "name": "isZinv",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.1 * rho_kin_vtx_chi2dof && rho_doca < 0.015)",
-	    "notes":" used for isVBFlow, isZinv, isGF"
+	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05 * rho_kin_vtx_chi2dof && rho_doca < 0.015)",
+	    "notes":" used for isZinv, isGF"
 	},
+        {
+            "name": "isVBFlow",
+            "type": "isPhiCat",
+            "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)",
+        },
+        {
+            "name": "isVBFlow",
+            "type": "isRhoCat",
+            "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)",
+        },
+
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.005 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.1 * phi_kin_vtx_chi2dof && phi_doca < 0.015)"
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<3*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.1 * rho_kin_vtx_chi2dof && rho_doca < 0.015)"
+	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
 	},
 	{
 	    "name": "VH",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.005 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9 && phi_doca < 0.015)"
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)"
 	},
 	{
 	    "name": "VH",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<3*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.1 * rho_kin_vtx_chi2dof && rho_doca < 0.015)"
+	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
 	},
 	{
 	    "name": "isVBF",

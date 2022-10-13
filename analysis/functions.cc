@@ -48,6 +48,10 @@ using Vec_f = ROOT::VecOps::RVec<float>;
 using Vec_i = ROOT::VecOps::RVec<int>;
 using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
+using stdVec_i = std::vector<int>;
+using stdVec_b = std::vector<bool>;
+using stdVec_f = std::vector<float>;
+
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
@@ -184,7 +188,7 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
 
 }
 
-Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
+stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
 			const Vec_f& meson_trk1_pt, const Vec_f& meson_trk2_pt,
 			const Vec_f& wrong_meson_pt,
 			const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
@@ -194,7 +198,7 @@ Vec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec
   float ptCandMax=0;
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
   unsigned int indexPhoton = 0;
-  Vec_i idx(2, -1); // initialize with -1 a vector of size 2
+  stdVec_i idx(2, -1); // initialize with -1 a vector of size 2
 
   if(ph_pt.size()> 1) {
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
@@ -351,5 +355,36 @@ float dEta_MvsPh(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_
 float dR_Constituents(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx) {
   return deltaR(eta[idx[0]], phi[idx[0]], eta[idx[1]], phi[idx[1]]);
 }
+
+float compute_jet_HiggsVars_var(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_mass,
+                                const float ph_pt, const float ph_eta, const float ph_phi,
+                                const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
+                                unsigned int var)
+{
+
+  if(jet_pt.size() < 2) return -1;
+  // passing only the one that make the Higgs candidate
+
+  PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
+  PtEtaPhiMVector p_mes(mes_pt, mes_eta, mes_phi, mes_mass);
+
+  PtEtaPhiMVector p_Hig = (p_ph + p_mes);
+
+  PtEtaPhiMVector p_j1(jet_pt[0], jet_eta[0], jet_phi[0], jet_mass[0]);
+  PtEtaPhiMVector p_j2(jet_pt[1], jet_eta[1], jet_phi[1], jet_mass[1]);
+
+  if(p_j1.Pt() < p_j1.Pt()) printf("Pt jet reversed!\n");
+
+  float deltaEtaJJ = fabs(p_j1.Eta()-p_j2.Eta());
+
+  float theVar = 0;
+  if     (var == 0) theVar = fabs(p_Hig.Eta()-(p_j1.Eta()+p_j2.Eta())/2.)/deltaEtaJJ; //zeppenfeld variable
+  else if(var == 1) theVar = fabs(p_Hig.Eta()-p_j1.Eta());
+  else if(var == 2) theVar = fabs(p_Hig.Eta()-p_j2.Eta());
+
+  return theVar;
+
+}
+
 
 #endif

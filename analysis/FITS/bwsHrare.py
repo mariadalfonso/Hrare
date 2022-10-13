@@ -22,19 +22,11 @@ ROOT.gROOT.SetBatch()
 
 ############ CONFIGURABLES ###########
 
-lumis={
-    12016: 19.52, #APV
-    22016: 16.80, #postVFP
-    2016: 35.9,
-    2017: 41.5,
-    2018: 60.0,
-}
-
 BkgPdf={
     'Wcat': 'exp1',
     'Zcat': 'exp1',
     'VBFcat': 'bxg',
-    'Zinvcat': 'bxg',
+    'Zinvcat': 'exp1',
     'VBFcatlow': 'bxg',
     'GFcat': 'bxg',
 }
