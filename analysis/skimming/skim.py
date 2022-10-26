@@ -10,15 +10,19 @@ ROOT.ROOT.EnableThreadSafety()
 from utilsHrare import findManyXRDFS, findManyClient, readListFromFile
 from utilsHrare import pickTRG, getSkimsFromJson
 
-#with open("config/selection.json") as jsonFile:
-with open("selection.json") as jsonFile:    
+with open("config/selection.json") as jsonFile:
+#with open("selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
-overall = jsonObject['triggers']
+with open("config/trigger.json") as trgJsonFile:
+    trgObject = json.load(trgJsonFile)
+    trgJsonFile.close()
 
-#with open("config/skimDB.json") as jsonFile:
-with open("skimDB.json") as jsonFile:    
+overall = trgObject['triggers']
+
+with open("config/skimDB.json") as jsonFile:
+#with open("skimDB.json") as jsonFile:
     skimObject = json.load(jsonFile)
     jsonFile.close()
 
@@ -62,27 +66,31 @@ if __name__ == "__main__":
     print("year=",year," era=",era," PDType=",PDType," skimType=",skimType," whichJob=",whichJob," whichFile=",whichFile)
 
     if True:
-
         isVBF = False
         isW = False
         isZ = False
+        isZinv = False
 
         if skimType== "VBF": isVBF=True
+        if skimType== "Zinv": isZinv=True
         if skimType== "VH": isW=True
         if skimType== "VH": isZ=True
 
-#        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
+        checkFile = "skimming/catalog/files_"+str(PDType)+"_"+str(era)+"_"+str(year)+".txt"
+        print("checkFile",checkFile)
+        print("whichFile",whichFile)
+
+        if checkFile!=whichFile:
+            print("FILE MISMATCH")
+
+        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
         fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
 #        fInDir = "xrdfs root://xrootd.cmsaf.mit.edu ls /store/user/paus/nanohr/D01"
-#        datasetExp = (str(PDType)+"+Run"+str(year)+str(era))
-#        files = findManyXRDFS(fInDir, datasetExp)
-#        datasetExp = ("/"+str(PDType)+"+Run"+str(year)+str(era)+"*")
-#        files = findManyClient(fInDir, datasetExp)
+        datasetExp = ("/"+str(PDType)+"+Run"+str(year)+str(era)+"*")
         files = readListFromFile(whichFile)
-
         print("number of INPUT files = ",len(files))
 
-        TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ)
+        TRIGGER=pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv)
         print("TRIGGER=",TRIGGER)
 
         PRESELECTION=getSkimsFromJson(skims, skimType)
@@ -96,8 +104,9 @@ if __name__ == "__main__":
             passJob = whichJob == -1 or whichJob == i
             if(passJob == False): continue
 
-            fOutName = "out_%d.root" % (i)
+            fOutName = "%s/output_%s_%d_%d.root" % (fOutDir, PDType, year, i)
             print("Create %s" % fOutName)
+            print("input file %s"  % group)
 
             regexToDrop = "^(?!.*omega).*$"
             rdf = ROOT.ROOT.RDataFrame("Events", group).Define("trigger","{}".format(TRIGGER)).Filter("{}".format(PRESELECTION)).Snapshot("Events", fOutName, regexToDrop)

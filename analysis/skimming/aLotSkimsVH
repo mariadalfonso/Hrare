@@ -1,0 +1,30 @@
+#!/bin/sh
+
+echo" -------------------- "
+echo" -- SUBMITTING VH --- "
+echo" -------------------- "
+
+era="B"
+year="2017"
+PDType="SingleElectron"
+len=$(cat skimming/catalog/files_$PDType\_$era\_$year.txt | wc -l)
+
+for (( c=0; c<=$len; c++ ))
+do  
+    yourfilenames=`ls -ltrah /scratch/submit/cms/mariadlf/Hrare/newSKIMS/D01/VH/$year/$PDType+Run$era/output\_$PDType\_$year\_$c.root | grep 'M Oct ' | wc -l`
+    if [[ "$yourfilenames" == '1' ]]; then                                                                                                                            
+        continue                                                                                                                                                      
+    fi                                                                                                                                                                
+    echo $yourfilenames                                                                                                                                               
+
+    python3 skim.py --year=$year --era=$era --PDType=$PDType --SkimType="VH" --whichJob=$c --whichFile="skimming/catalog/files_"$PDType"_"$era"_"$year".txt" &
+    sleep 20
+
+done
+
+
+#whichYear=$1
+#whichEra=$2
+#whichPD=$3
+#whichSkim=$4
+#whichJob=$5
