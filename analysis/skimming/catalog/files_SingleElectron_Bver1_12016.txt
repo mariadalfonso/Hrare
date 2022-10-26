@@ -1,0 +1,12 @@
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/11792047-2C63-7F47-90DE-7A78EC68F777.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/2034DBE3-2C2A-2348-A9F1-3A404AAE1437.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/4AB98FE6-E4D2-3243-ADEC-D785BC87C49C.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/584387A9-7735-1048-8031-2591B2A18455.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/5B56B1DA-367C-F948-8B49-76896DA1B2E9.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/5F9FC5C7-950F-1F41-BE00-2C6F4B0DCF9B.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/6242B334-4E07-CE46-AB55-B782A0D1F7D2.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/86118EF6-B46D-EF41-8164-F3619DF32156.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/8DADD4CB-C8A0-8B46-BC68-5D1410AC0A37.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/B3529E8D-09AA-CC4F-905C-4AE81C651E09.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/DFAA9A64-AB0C-E442-9F7A-FFFB1CA6F178.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/E1A37235-C702-2E47-BC57-580B320A66AE.root

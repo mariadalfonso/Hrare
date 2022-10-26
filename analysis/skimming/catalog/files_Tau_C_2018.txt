@@ -409,3 +409,12 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_Mini
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/FE3DBDD8-0E81-8741-87F5-95912DA95558.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/FE9C8826-A7C9-BE43-B9B1-C9EB6F780563.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/FED3CD66-1E28-8D44-8D49-A8EDC8F646A9.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/20586886-6B07-B944-980C-B8A8C4DF91DD.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/508EA416-7F03-3047-AB39-22993FC6FB06.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/5C3D1F30-8BE5-F046-91BD-418EC86FE203.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/7322466E-6E48-1D49-BC80-8D84B61B96A9.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/7D0C3284-84BB-F64F-8431-4FFC4D157240.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/946CBCC4-A97F-A84F-B6BE-A58EC8FB5CC7.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/E2324B6B-8865-0046-8A0A-5386EEF273A8.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/1D4A9261-8E3F-CC42-A187-FE9414556DF2.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/2B45F3C5-3A8C-5943-81D0-1B39063A42E8.root
