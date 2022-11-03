@@ -3,15 +3,15 @@ imax 3 number of bins
 jmax 3 number of processes minus 1
 kmax 0 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
-shapes VBFH       VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:crystal_ball_VBFcat_VBFH
-shapes bkg        VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:bxg_VBFcat_bkg
+shapes VBFH       VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:crystal_ball_RhoCat_VBFcat_VBFH
+shapes bkg        VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:bxg_RhoCat_VBFcat_bkg
 shapes data_obs   VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:observed_data
-shapes VBFH       VBFcatlow  DATACARDS/workspace_STAT_RhoCat_VBFcatlow_2018.root w:crystal_ball_VBFcatlow_VBFH
-shapes bkg        VBFcatlow  DATACARDS/workspace_STAT_RhoCat_VBFcatlow_2018.root w:bxg_VBFcatlow_bkg
-shapes data_obs   VBFcatlow  DATACARDS/workspace_STAT_RhoCat_VBFcatlow_2018.root w:observed_data
-shapes WH         Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:crystal_ball_Zinvcat_WH
-shapes ZinvH      Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:crystal_ball_Zinvcat_ZinvH
-shapes bkg        Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:exp1_Zinvcat_bkg
+shapes VBFH       VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:crystal_ball_RhoCat_VBFcatlow_VBFH
+shapes bkg        VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:bxg_RhoCat_VBFcatlow_bkg
+shapes data_obs   VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:observed_data
+shapes WH         Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:crystal_ball_RhoCat_Zinvcat_WH
+shapes ZinvH      Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:crystal_ball_RhoCat_Zinvcat_ZinvH
+shapes bkg        Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:exp1_RhoCat_Zinvcat_bkg
 shapes data_obs   Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:observed_data
 ----------------------------------------------------------------------------------------------------------------------------------
 bin          Zinvcat    VBFcat     VBFcatlow

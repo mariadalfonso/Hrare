@@ -3,9 +3,9 @@ imax 1 number of channels
 jmax 1 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
-shapes	VBFH	VBFcatlow	DATACARDS/workspace_STAT_PhiCat_VBFcatlow_2018.root	w:crystal_ball_VBFcatlow_VBFH
-shapes	bkg	VBFcatlow	DATACARDS/workspace_STAT_PhiCat_VBFcatlow_2018.root	w:bxg_VBFcatlow_bkg
-shapes	data_obs	VBFcatlow	DATACARDS/workspace_STAT_PhiCat_VBFcatlow_2018.root	w:observed_data
+shapes	VBFH	VBFcatlow	DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root	w:crystal_ball_PhiCat_VBFcatlow_VBFH
+shapes	bkg	VBFcatlow	DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root	w:bxg_PhiCat_VBFcatlow_bkg
+shapes	data_obs	VBFcatlow	DATACARDS/workspace_STAT_Phi_VBFcatlow_2018.root	w:observed_data
 -------------------------------------
 bin	VBFcatlow
 observation	-1

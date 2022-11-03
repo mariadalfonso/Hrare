@@ -13,16 +13,21 @@ resultFile="resultsOCT12.txt"
 
 ##########
 
+echo $cardDIR
+echo $wsDIR
+
 for meson in "Phi" "Rho";
+#for meson in "Rho";
 do
+    echo $meson
     
-python bwsHrare.py --whichCat=GFcat --inputFileSig=$wsDIR/Signal_GFcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_GFcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\_GFcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_GFcat_2018.txt
+    python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=GFcat --inputFileSig=$wsDIR/Signal_GFcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_GFcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\_GFcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_GFcat_2018.txt
 
-python bwsHrare.py --whichCat=VBFcatlow --inputFileSig=$wsDIR/Signal_VBFcatlow__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_VBFcatlow__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\Cat_VBFcatlow_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_VBFcatlow_2018.txt
+    python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=VBFcatlow --inputFileSig=$wsDIR/Signal_VBFcatlow__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_VBFcatlow__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\_VBFcatlow_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_VBFcatlow_2018.txt
 
-python bwsHrare.py --whichCat=VBFcat --inputFileSig=$wsDIR/Signal_VBFcat__$meson\Cat_Run2_workspace.root --inputFileBKG=$wsDIR/Bkg_VBFcat__$meson\Cat_Run2_workspace.root --output=$cardDIR/workspace_STAT_$meson\_VBFcat_Run2.root --datCardName=$cardDIR/datacard_STAT_$meson\_VBFcat_Run2.txt
+    python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=VBFcat --inputFileSig=$wsDIR/Signal_VBFcat__$meson\Cat_Run2_workspace.root --inputFileBKG=$wsDIR/Bkg_VBFcat__$meson\Cat_Run2_workspace.root --output=$cardDIR/workspace_STAT_$meson\_VBFcat_Run2.root --datCardName=$cardDIR/datacard_STAT_$meson\_VBFcat_Run2.txt
 
-python bwsHrare.py --whichCat=Zinvcat --inputFileSig=$wsDIR/Signal_Zinvcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_Zinvcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\_Zinvcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_Zinvcat_2018.txt
+    python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=Zinvcat --inputFileSig=$wsDIR/Signal_Zinvcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_Zinvcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\_Zinvcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_Zinvcat_2018.txt
 
 ##
 
@@ -31,7 +36,6 @@ python bwsHrare.py --whichCat=Zinvcat --inputFileSig=$wsDIR/Signal_Zinvcat__$mes
 #python bwsHrare.py --whichCat=Zcat --inputFileSig=$wsDIR/Signal_Zcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_Zcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\Cat_Zcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_Zcat_2018.txt
 
 ##########
-
 done
 
 echo $resultFile

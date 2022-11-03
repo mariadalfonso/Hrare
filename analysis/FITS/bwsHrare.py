@@ -11,6 +11,7 @@ parser.add_option("","--inputFileSig",type='string',help="Input ROOT file. [%def
 parser.add_option("","--inputFileBKG",type='string',help="Input ROOT file bkg model. [%default]", default="WS/Bkg_Wcat__RhoCat_2018_workspace.root")
 
 parser.add_option("-c","--whichCat",type='string',help="Which category (Wcat, Zcat Zinvcatm, VBFcat)", default="Wcat")
+parser.add_option("-m","--whichMeson",type='string',help="Which meson (_RhoCat or _PhiCat)", default="_RhoCat")
 parser.add_option("-o","--output",type='string',help="Output ROOT file. [%default]", default="workspace_STAT_Rho_2018.root")
 parser.add_option("-d","--datCardName",type='string',help="Output txt file. [%default]", default="datacard_STAT_Rho_2018.txt")
 
@@ -20,24 +21,26 @@ sys.argv=[]
 import ROOT
 ROOT.gROOT.SetBatch()
 
+doSyst=False
+
 ############ CONFIGURABLES ###########
 
 BkgPdf={
-    'Wcat': 'exp1',
-    'Zcat': 'exp1',
-    'VBFcat': 'bxg',
-    'Zinvcat': 'exp1',
-    'VBFcatlow': 'bxg',
-    'GFcat': 'bxg',
+    'Wcat': 'exp1'+opts.whichMeson,
+    'Zcat': 'exp1'+opts.whichMeson,
+    'VBFcat': 'bxg'+opts.whichMeson,
+    'Zinvcat': 'exp1'+opts.whichMeson,
+    'VBFcatlow': 'bxg'+opts.whichMeson,
+    'GFcat': 'bxg'+opts.whichMeson,
 }
 
 SigPdf={
-    'Wcat': 'crystal_ball',
-    'Zcat': 'crystal_ball',
-    'VBFcat': 'crystal_ball',
-    'Zinvcat': 'crystal_ball',
-    'VBFcatlow': 'crystal_ball',
-    'GFcat': 'crystal_ball',
+    'Wcat': 'crystal_ball'+opts.whichMeson,
+    'Zcat': 'crystal_ball'+opts.whichMeson,
+    'VBFcat': 'crystal_ball'+opts.whichMeson,
+    'Zinvcat': 'crystal_ball'+opts.whichMeson,
+    'VBFcatlow': 'crystal_ball'+opts.whichMeson,
+    'GFcat': 'crystal_ball'+opts.whichMeson,
 }
 
 ENUM={
@@ -48,6 +51,41 @@ ENUM={
     'ZinvH': -4,
 }
 
+QCDscale={
+    'ggH': '-', #??
+    'VBFH': '0.997/1.004',
+    'WH': '0.993/1.005',
+    'ZH': '0.993/1.004',
+    'ZinvH': '0.993/1.004',
+}
+
+pdf_Higgs={
+    'ggH': '1.032',
+    'VBFH': '1.021',
+    'WH': '1.021',
+    'ZH': '1.021', #assume the majority is not ggZH
+    'ZinvH': '1.021', #assume the majority is not ggZH
+}
+
+lumi={
+    '_2016': '1.007',
+    '_2017': '1.008',
+    '_2018': '1.011',
+}
+
+def addSystematics(systname, systtype, value, whichProc, category, mcAll, datacard):
+
+    datacard.write(systname+" \t"+systtype)
+    for cat in category:
+        print("cat",cat)
+        for proc in mcAll:
+            print("proc",proc)
+            if (proc==whichProc): datacard.write("\t"+value)
+            else:
+                datacard.write("\t-")
+    datacard.write("\n")
+
+############ cat and processes ###########
 
 print(opts.whichCat)
 
@@ -147,7 +185,7 @@ for cat in category:
 
     wInput=fBkgIn.Get("w")
     wInput.Print()
-    hist_data = wInput.data("datahist"+'_'+cat)
+    hist_data = wInput.data("datahist"+opts.whichMeson+'_'+cat)
     hist_data.SetName("observed_data")
     getattr(w,'import')(hist_data)
     datacard.write("shapes")
@@ -201,10 +239,35 @@ for cat in category:
 #        else:
 #	    datacard.write("\t-1")
 datacard.write("\n")
-############ SYST########
+
+############ SYST ########
+if doSyst:
+    datacard.write("-------------------------------------\n")
+    datacard.write("lumi_13TeV \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                datacard.write("\t%.3f"%(1.025) )
+
+    datacard.write("\n")
+    ##
+    for proc in mcAll:
+        print("proc",proc)
+        if (proc=='bkg'): continue
+        else:
+            addSystematics("QCDscale_"+proc, 'lnN' ,QCDscale[proc], proc, category, mcAll, datacard)
+            if (proc=='ggH'):
+                addSystematics("pdf_Higgs_gg", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
+            else: addSystematics("pdf_Higgs_qq", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
+    ##
+
+    ### Add autoMCStats
+    datacard.write("\n")
+    datacard.write("* autoMCStats 0\n")
+
 datacard.write("-------------------------------------\n")
 
+############ DONE ########
 w.writeToFile(opts.output)
 print("->Done")
-
-

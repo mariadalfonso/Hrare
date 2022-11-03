@@ -55,6 +55,24 @@ using stdVec_f = std::vector<float>;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
+Vec_i indices(const int& size, const int& start = 0) {
+    Vec_i res(size, 0);
+    std::iota(std::begin(res), std::end(res), start);
+    return res;
+}
+
+
+Vec_f NomUpDownVar(const float up, const float down, const float nom, float weight) {
+
+  Vec_f res(3, 1);
+  weight *= nom; // update the weight for the nominal value
+  res[0] = weight;  // nom
+  res[1] = weight*up/nom;  // up
+  res[2] = weight*down/nom;  // down
+  return res;
+}
+
+
 bool isGoodRunLS(const bool isData, const UInt_t run, const UInt_t lumi) {
 
   if(not isData) return true;

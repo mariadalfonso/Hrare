@@ -3,8 +3,8 @@ imax 1 number of channels
 jmax 1 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
-shapes	VBFH	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:crystal_ball_VBFcat_VBFH
-shapes	bkg	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:bxg_VBFcat_bkg
+shapes	VBFH	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:crystal_ball_PhiCat_VBFcat_VBFH
+shapes	bkg	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:bxg_PhiCat_VBFcat_bkg
 shapes	data_obs	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:observed_data
 -------------------------------------
 bin	VBFcat

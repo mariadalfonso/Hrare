@@ -3,9 +3,9 @@ imax 1 number of channels
 jmax 2 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
-shapes	WH	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:crystal_ball_Zinvcat_WH
-shapes	ZinvH	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:crystal_ball_Zinvcat_ZinvH
-shapes	bkg	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:exp1_Zinvcat_bkg
+shapes	WH	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:crystal_ball_RhoCat_Zinvcat_WH
+shapes	ZinvH	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:crystal_ball_RhoCat_Zinvcat_ZinvH
+shapes	bkg	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:exp1_RhoCat_Zinvcat_bkg
 shapes	data_obs	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:observed_data
 -------------------------------------
 bin	Zinvcat

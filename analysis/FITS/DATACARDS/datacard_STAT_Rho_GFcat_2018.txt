@@ -3,9 +3,9 @@ imax 1 number of channels
 jmax 2 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
-shapes	ggH	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:crystal_ball_GFcat_ggH
-shapes	VBFH	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:crystal_ball_GFcat_VBFH
-shapes	bkg	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:bxg_GFcat_bkg
+shapes	ggH	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:crystal_ball_RhoCat_GFcat_ggH
+shapes	VBFH	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:crystal_ball_RhoCat_GFcat_VBFH
+shapes	bkg	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:bxg_RhoCat_GFcat_bkg
 shapes	data_obs	GFcat	DATACARDS/workspace_STAT_Rho_GFcat_2018.root	w:observed_data
 -------------------------------------
 bin	GFcat

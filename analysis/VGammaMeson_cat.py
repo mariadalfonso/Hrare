@@ -313,7 +313,22 @@ def dfHiggsCand(df):
                )
     return dfFinal
 
-def analysis(df,year,mc,sumw,isData,PDType):
+def dfwithSYST(df,year):
+
+    dfFinal_withSF = (df
+                      .Define("SFpu_Nom",'corr_sf.eval_puSF(Pileup_nTrueInt,"nominal")')
+                      .Define("SFpu_Up",'corr_sf.eval_puSF(Pileup_nTrueInt,"up")')
+                      .Define("SFpu_Dn",'corr_sf.eval_puSF(Pileup_nTrueInt,"down")')
+                      .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn,w)")
+                      ##
+                      .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w)")
+
+                      .Define("idx_nom_up_down", "indices(3)")
+                      )
+    return dfFinal_withSF
+
+
+def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
 
     lumi = 1.
     weight = "{0}".format(1.)
@@ -328,9 +343,31 @@ def analysis(df,year,mc,sumw,isData,PDType):
         if((isVBFlow or isGF or isZinv) and year == 2018): lumiIntegrated = lumis['12018']
         print('lumiIntegrated=',lumiIntegrated, ' year=',year)
 
-    dfOBJ= dfGammaMeson(df,PDType,isData)
+    dfComm = (df
+              .Define("mc","{}".format(mc))
+              .Define("isData","{}".format(isData))
+              .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
+              .Define("w","{}".format(weight))
+              .Define("wraw","{}".format(weight))
+              .Define("lumiIntegrated","{}".format(lumiIntegrated))
+              .Filter("PV_npvsGood>0","one good PV")
+              )
+
+    return dfComm
+
+
+
+def analysis(df,year,mc,sumw,isData,PDType):
+
+
+    dfCom = dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv)
+    dfOBJ= dfGammaMeson(dfCom,PDType)
     dfbase = dfHiggsCand(dfOBJ)
     dfcandtag = selectionTAG(dfbase)
+    if (doSyst and isData == "false"):
+        dfpreFINAL = dfwithSYST(dfcandtag,year)
+    else:
+        dfpreFINAL = dfcandtag
 
     MVAweights = ""
     if(isGF): MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , sys.argv[2] ))
@@ -356,13 +393,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if doMVA : variables = ROOT.model.GetVariableNames()
     if doMVA : print(variables)
 
-    dfFINAL = (dfcandtag.Define("w","{}".format(weight))
-               .Define("mc","{}".format(mc))
-               .Define("isData","{}".format(isData))
-               .Define("w","{}".format(weight))
-               .Define("lumiIntegrated","{}".format(lumiIntegrated))
-               .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
-               .Filter("PV_npvsGood>0","one good PV")
+    dfFINAL = (dfpreFINAL
                ## extra variables for MVA-SEPT7 GF-VBF-VBFlow below
                .Define("HCandPT__div_sqrtHCandMass", "(HCandMass>0) ? HCandPT/sqrt(HCandMass): 0.f")
                .Define("HCandPT__div_HCandMass", "(HCandMass>0) ? HCandPT/HCandMass: 0.f")
@@ -492,7 +523,6 @@ def analysis(df,year,mc,sumw,isData,PDType):
         ]:
             branchList.push_back(branchName)
 
-    outputFile = "outname_mc%d"%mc+".root"
     catM = ""
     if(isPhiCat=="true"): catM = "PhiCat"
     if(isRhoCat=="true"): catM = "RhoCat"
@@ -503,13 +533,13 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isVBF: catTag = "VBFcat"
     if isVBFlow: catTag = "VBFcatlow"
     if isGF: catTag = "GFcat"
-    outputFile = "MARCH30/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
-    print(outputFile)
 
     if True:
+        outputFile = "MARCH30/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
+        print(outputFile)
+
         snapshot_tdf = dfFINAL.Snapshot("events", outputFile, branchList)
         print("snapshot_tdf DONE")
-        print("*** SUMMARY :")
         print(outputFile)
 
     if False:
@@ -518,8 +548,8 @@ def analysis(df,year,mc,sumw,isData,PDType):
         report = dfFINAL.Report()
         report.Print()
 
-
     if doPlot:
+        print("---------------- PLOTTING with SYST -------------")
         hists = {
             #        "Z_mass":     {"name":"Z_mass","title":"Di Muon mass; m_{#mu^{+}#mu^{-}} (GeV);N_{Events}","bin":500,"xmin":70,"xmax":120},
 #            "V_mass":     {"name":"V_mass","title":"transverse mass; m_{T}(#mu^{+} MET} (GeV);N_{Events}","bin":80,"xmin":40,"xmax":120},
@@ -533,18 +563,41 @@ def analysis(df,year,mc,sumw,isData,PDType):
 #        }
 
         outputFileHisto = "OCT12/{0}/histoname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
+        print(outputFileHisto)
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
 
+        histos = []
         for h in hists:
+
+            # 1D is for nom only
             model = (hists[h]["name"], hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
-            h = dfFINAL.Histo1D(model, hists[h]["name"],"w")
+            h1d = dfFINAL.Histo1D(model, hists[h]["name"], "w")
+            histos.append(h1d)
 
-            hx = ROOT.RDF.Experimental.VariationsFor(h);
-            hx["PhotonSYST:down"].SetName("HCandMass:PhotonSYST:down");
-            hx["PhotonSYST:down"].Write();
-            hx["PhotonSYST:down"].SetName("HCandMass:PhotonSYST:up");
-            hx["PhotonSYST:up"].Write();
+            ## to use the SYST that change the variable
+            hx = ROOT.RDF.Experimental.VariationsFor(h1d);
+            hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn");
+            histos.append(hx["PhotonSYST:dn"])
+            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up");
+            histos.append(hx["PhotonSYST:up"])
 
+            ## those that change the weights only
+            # 2D is for nom, up, down
+            model2d_pu = (hists[h]["name"]+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+            histos.append(dfFINAL.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
+            model2d_L1 = (hists[h]["name"]+":L1", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+            histos.append(dfFINAL.Histo2D(model2d_L1, hists[h]["name"], "idx_nom_up_down", "L1PreFiring_weights"))
+
+#        evtcounts = []
+#        evtcount = dfFINAL.Count()
+#        evtcounts.append(evtcount)
+#        ROOT.ROOT.RDF.RunGraphs(evtcounts)
+
+        outputFileHisto = "OCT31/{0}/SYSThistooutname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
+        myfile = ROOT.TFile(outputFileHisto,"RECREATE")
+
+        for h in histos:
+            h.Write()
         myfile.Close()
         myfile.Write()
 

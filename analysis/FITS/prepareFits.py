@@ -2,8 +2,6 @@ import ROOT
 import os
 from array import array
 
-ROOT.gStyle.SetOptStat(0)
-
 from LoadTree import loadTree
 from LoadTree import resetTree
 
@@ -77,14 +75,22 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    for ev in mytree:
 
-      if item == 43:
+      if abs(item) == 43:
          var = -1
-         if(category =='_GFcat'):
-            if ev.MVAdisc[0]>0.0:  var = ev.HCandMass
-         elif category =='_Zinvcat':
-            if ev.MVAdisc[0]>0.6:  var = ev.HCandMass
+         if item> 0:
+            if(category =='_GFcat'):
+               if ev.MVAdisc[0]>0.0:  var = ev.HCandMass
+            elif category =='_Zinvcat':
+               if ev.MVAdisc[0]>0.6:  var = ev.HCandMass
+            else:
+               if ev.MVAdisc[0]>0.3:  var = ev.HCandMass
          else:
-            if ev.MVAdisc[0]>0.3:  var = ev.HCandMass
+            if(category =='_GFcat'):
+               if ev.MVAdisc[0]<0.0:  var = ev.HCandMass
+            elif category =='_Zinvcat':
+               if ev.MVAdisc[0]<0.6:  var = ev.HCandMass
+            else:
+               if ev.MVAdisc[0]<0.3:  var = ev.HCandMass
 
       if item == 4:
          var = ev.HCandMass
