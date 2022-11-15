@@ -1,0 +1,22 @@
+-------------------------------------
+imax 1 number of channels
+jmax 2 number of background minus 1
+kmax * number of nuisance parameters
+-------------------------------------
+shapes	WH	Wcat	DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root	w:crystal_ball_RhoCat_Wcat_WH
+shapes	ZH	Wcat	DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root	w:crystal_ball_RhoCat_Wcat_ZH
+shapes	bkg	Wcat	DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root	w:multipdf_RhoCat_Wcat_bkg
+shapes	data_obs	Wcat	DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root	w:observed_data
+-------------------------------------
+bin	Wcat
+observation	-1
+-------------------------------------
+bin		Wcat	Wcat	Wcat
+process		WH	ZH	bkg
+process		-2	-3	1
+rate		1	1	1
+-------------------------------------
+lumi_13TeV 	lnN 	1.025	1.025	-
+-------------------------------------
+
+pdfindex_RhoCat_Wcat discrete

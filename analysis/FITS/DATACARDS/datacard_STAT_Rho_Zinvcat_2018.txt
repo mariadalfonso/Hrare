@@ -5,7 +5,7 @@ kmax * number of nuisance parameters
 -------------------------------------
 shapes	WH	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:crystal_ball_RhoCat_Zinvcat_WH
 shapes	ZinvH	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:crystal_ball_RhoCat_Zinvcat_ZinvH
-shapes	bkg	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:exp1_RhoCat_Zinvcat_bkg
+shapes	bkg	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:multipdf_RhoCat_Zinvcat_bkg
 shapes	data_obs	Zinvcat	DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root	w:observed_data
 -------------------------------------
 bin	Zinvcat
@@ -16,3 +16,7 @@ process		WH	ZinvH	bkg
 process		-2	-4	1
 rate		1	1	1
 -------------------------------------
+lumi_13TeV 	lnN 	1.025	1.025	-
+-------------------------------------
+
+pdfindex_RhoCat_Zinvcat discrete

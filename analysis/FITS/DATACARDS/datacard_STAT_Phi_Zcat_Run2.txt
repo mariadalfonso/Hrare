@@ -1,0 +1,21 @@
+-------------------------------------
+imax 1 number of channels
+jmax 1 number of background minus 1
+kmax * number of nuisance parameters
+-------------------------------------
+shapes	ZH	Zcat	DATACARDS/workspace_STAT_PhiCat_Zcat_Run2.root	w:crystal_ball_PhiCat_Zcat_ZH
+shapes	bkg	Zcat	DATACARDS/workspace_STAT_PhiCat_Zcat_Run2.root	w:multipdf_PhiCat_Zcat_bkg
+shapes	data_obs	Zcat	DATACARDS/workspace_STAT_PhiCat_Zcat_Run2.root	w:observed_data
+-------------------------------------
+bin	Zcat
+observation	-1
+-------------------------------------
+bin		Zcat	Zcat
+process		ZH	bkg
+process		-3	1
+rate		1	1
+-------------------------------------
+lumi_13TeV 	lnN 	1.025	-
+-------------------------------------
+
+pdfindex_PhiCat_Zcat discrete
