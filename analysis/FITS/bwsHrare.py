@@ -22,17 +22,28 @@ import ROOT
 ROOT.gROOT.SetBatch()
 
 doSyst=False
+MultiPdf=True
 
 ############ CONFIGURABLES ###########
 
-BkgPdf={
-    'Wcat': 'exp1'+opts.whichMeson,
-    'Zcat': 'exp1'+opts.whichMeson,
-    'VBFcat': 'bxg'+opts.whichMeson,
-    'Zinvcat': 'exp1'+opts.whichMeson,
-    'VBFcatlow': 'bxg'+opts.whichMeson,
-    'GFcat': 'bxg'+opts.whichMeson,
-}
+if MultiPdf:
+    BkgPdf={
+        'Wcat': 'multipdf'+opts.whichMeson,
+        'Zcat': 'multipdf'+opts.whichMeson,
+        'VBFcat': 'multipdf'+opts.whichMeson,
+        'Zinvcat': 'multipdf'+opts.whichMeson,
+        'VBFcatlow': 'multipdf'+opts.whichMeson,
+        'GFcat': 'multipdf'+opts.whichMeson,
+    }
+else:
+    BkgPdf={
+        'Wcat': 'exp1'+opts.whichMeson,
+        'Zcat': 'exp1'+opts.whichMeson,
+        'VBFcat': 'bxg'+opts.whichMeson,
+        'Zinvcat': 'exp1'+opts.whichMeson,
+        'VBFcatlow': 'bxg'+opts.whichMeson,
+        'GFcat': 'bxg'+opts.whichMeson,
+    }
 
 SigPdf={
     'Wcat': 'crystal_ball'+opts.whichMeson,
@@ -232,7 +243,10 @@ datacard.write("\n")
 datacard.write("rate\t")
 for cat in category:
     for proc in mcAll:
-        datacard.write("\t1")
+#        datacard.write("\t1")
+        if (proc=='bkg'): datacard.write("\t1")
+        else:
+            datacard.write("\t0.01")
 #	datacard.write("\t1")
 #        if savePdf:
 #	    datacard.write("\t%.0f"%(opts.lumi) )
@@ -241,16 +255,16 @@ for cat in category:
 datacard.write("\n")
 
 ############ SYST ########
-if doSyst:
-    datacard.write("-------------------------------------\n")
-    datacard.write("lumi_13TeV \tlnN ")
-    for cat in category:
-        for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
-            else:
-                datacard.write("\t%.3f"%(1.025) )
-
+datacard.write("-------------------------------------\n")
+datacard.write("lumi_13TeV \tlnN ")
+for cat in category:
+    for proc in mcAll:
+        if (proc=='bkg'): datacard.write("\t-")
+        else:
+            datacard.write("\t%.3f"%(1.025) )
     datacard.write("\n")
+
+if doSyst:
     ##
     for proc in mcAll:
         print("proc",proc)
@@ -267,6 +281,11 @@ if doSyst:
     datacard.write("* autoMCStats 0\n")
 
 datacard.write("-------------------------------------\n")
+
+if MultiPdf:
+    pdfindexSTR='pdfindex'+opts.whichMeson+"_"+opts.whichCat
+    datacard.write("\n")
+    datacard.write("%s discrete\n"%pdfindexSTR)
 
 ############ DONE ########
 w.writeToFile(opts.output)

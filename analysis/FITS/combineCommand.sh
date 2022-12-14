@@ -5,11 +5,13 @@
 
 cardDIR="DATACARDS"
 wsDIR="WS"
-resultFile="resultsOCT12.txt"
+resultDir="limits"
+resultFile="resultsDEC8.txt"
 
 #cardDIR="DATACARDSmva"
 #wsDIR="WSmva"
-#resultFile="resultsOCT12_MVA.txt"
+#resultDir="limitsMVA"
+#resultFile="resultsDEC8_MVA.txt"
 
 ##########
 
@@ -17,7 +19,7 @@ echo $cardDIR
 echo $wsDIR
 
 for meson in "Phi" "Rho";
-#for meson in "Rho";
+
 do
     echo $meson
     
@@ -29,36 +31,46 @@ do
 
     python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=Zinvcat --inputFileSig=$wsDIR/Signal_Zinvcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_Zinvcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\_Zinvcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_Zinvcat_2018.txt
 
-##
+    python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=Wcat --inputFileSig=$wsDIR/Signal_Wcat__$meson\Cat_Run2_workspace.root --inputFileBKG=$wsDIR/Bkg_Wcat__$meson\Cat_Run2_workspace.root --output=$cardDIR/workspace_STAT_$meson\Cat_Wcat_Run2.root --datCardName=$cardDIR/datacard_STAT_$meson\_Wcat_Run2.txt
 
-#python bwsHrare.py --whichCat=Wcat --inputFileSig=$wsDIR/Signal_Wcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_Wcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\Cat_Wcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_Wcat_2018.txt
-
-#python bwsHrare.py --whichCat=Zcat --inputFileSig=$wsDIR/Signal_Zcat__$meson\Cat_2018_workspace.root --inputFileBKG=$wsDIR/Bkg_Zcat__$meson\Cat_2018_workspace.root --output=$cardDIR/workspace_STAT_$meson\Cat_Zcat_2018.root --datCardName=$cardDIR/datacard_STAT_$meson\_Zcat_2018.txt
+    python bwsHrare.py --whichMeson=_$meson\Cat --whichCat=Zcat --inputFileSig=$wsDIR/Signal_Zcat__$meson\Cat_Run2_workspace.root --inputFileBKG=$wsDIR/Bkg_Zcat__$meson\Cat_Run2_workspace.root --output=$cardDIR/workspace_STAT_$meson\Cat_Zcat_Run2.root --datCardName=$cardDIR/datacard_STAT_$meson\_Zcat_Run2.txt
 
 ##########
 done
 
 echo $resultFile
 
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Phi_GFcat_2018.txt  > $resultFile
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Rho_GFcat_2018.txt  >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_GFcat_2018.txt -n PhiGFcat --run expected > $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_GFcat_2018.txt -n RhoGFcat --run expected >> $resultFile
 
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Phi_VBFcatlow_2018.txt  >> $resultFile
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Rho_VBFcatlow_2018.txt  >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_VBFcatlow_2018.txt -n PhiVBFcatlow --run expected >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_VBFcatlow_2018.txt -n RhoVBFcatlow --run expected >> $resultFile
 
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Phi_VBFcat_Run2.txt  >> $resultFile
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Rho_VBFcat_Run2.txt  >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_VBFcat_Run2.txt -n PhiVBFcat --run expected >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_VBFcat_Run2.txt -n RhoVBFcat --run expected >> $resultFile
 
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Phi_Zinvcat_2018.txt >> $resultFile
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Rho_Zinvcat_2018.txt >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_Zinvcat_2018.txt -n PhiZinvcat --run expected >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_Zinvcat_2018.txt -n RhoZinvcat --run expected >> $resultFile
+
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_Wcat_Run2.txt -n PhiWcat --run expected >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_Wcat_Run2.txt -n RhoWcat --run expected >> $resultFile
+
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_Zcat_Run2.txt -n PhiZcat --run expected >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_Zcat_Run2.txt -n RhoZcat --run expected  >> $resultFile
+
+mv higgsCombine*.AsymptoticLimits.mH125.root $resultDir
 
 ##
 
-#combineCards.py Zinvcat=$cardDIR/datacard_STAT_Rho_Zinvcat_2018.txt VBFcat=$cardDIR/datacard_STAT_Rho_VBFcat_Run2.txt VBFcatlow=$cardDIR/datacard_STAT_Rho_VBFcatlow_2018.txt > $cardDIR/datacard_STAT_Rho_comb.txt
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Rho_comb.txt
+cd $cardDIR/
 
-#combineCards.py Zinvcat=$cardDIR/datacard_STAT_Phi_Zinvcat_2018.txt VBFcat=$cardDIR/datacard_STAT_Phi_VBFcat_Run2.txt VBFcatlow=$cardDIR/datacard_STAT_Phi_VBFcatlow_2018.txt > $cardDIR/datacard_STAT_Phi_comb.txt
-combine -M AsymptoticLimits -t -1 $cardDIR/datacard_STAT_Phi_comb.txt
+combineCards.py Wcat=datacard_STAT_Rho_Wcat_Run2.txt Zcat=datacard_STAT_Rho_Zcat_Run2.txt Zinvcat=datacard_STAT_Rho_Zinvcat_2018.txt VBFcat=datacard_STAT_Rho_VBFcat_Run2.txt VBFcatlow=datacard_STAT_Rho_VBFcatlow_2018.txt > $cardDIR/datacard_STAT_Rho_comb.txt
+combineCards.py Wcat=datacard_STAT_Phi_Wcat_Run2.txt Zcat=datacard_STAT_Phi_Zcat_Run2.txt Zinvcat=datacard_STAT_Phi_Zinvcat_2018.txt VBFcat=datacard_STAT_Phi_VBFcat_Run2.txt VBFcatlow=datacard_STAT_Phi_VBFcatlow_2018.txt > $cardDIR/datacard_STAT_Phi_comb.txt
+
+cd ..
+
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Phi_comb.txt -n PhiCombcat --run expected >> $resultFile
+combine -M AsymptoticLimits -m 125 -t -1 $cardDIR/datacard_STAT_Rho_comb.txt -n RhoCombcat --run expected >> $resultFile
 
 exit
 

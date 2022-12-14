@@ -53,22 +53,48 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
 
    resetTree(mytree, category)
 
+MVAbinRho={
+   '_GFcat': 0.2,
+   '_Zinvcat': 0.6,
+   '_VBFcat': 0.4,
+   '_VBFcatlow': 0.5,
+}
+
+MVAbinPhi={
+   '_GFcat': 0.2,
+   '_Zinvcat': 0.7,
+   '_VBFcat': 0.5,
+   '_VBFcatlow': 0.6,
+}
+
 def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
-   year = '_2018'
-#   year = '_all'
+   if mesonCat == '_RhoCat': MVAbin = MVAbinRho
+   if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
+
+   if category =='_VBFcat' or category =='_Wcat' or category =='_Zcat' :
+      year = '_all'
+   else:
+      year = '_2018'
+
    mytree = ROOT.TChain('events')
-   directory1 = '/work/submit/mariadlf/Hrare/OCT12/12016/'
-   directory2 = '/work/submit/mariadlf/Hrare/OCT12/2017/'
-   directory3 = '/work/submit/mariadlf/Hrare/OCT12/2018/'
+
+   directory1 = '/work/submit/mariadlf/Hrare/DEC8/12016/'
+   directory2 = '/work/submit/mariadlf/Hrare/DEC8/22016/'
+   directory3 = '/work/submit/mariadlf/Hrare/DEC8/2017/'
+   directory4 = '/work/submit/mariadlf/Hrare/DEC8/2018/'
 
    if doSignal:
-      if(year == '_2018' or year == '_all'): addSigHisto(mytree, directory3, category, mesonCat, nameSig, '_2018')
-      if(year == '_2017' or year == '_all'): addSigHisto(mytree, directory2, category, mesonCat, nameSig, '_2017')
+      if(year == '_2018' or year == '_all'): addSigHisto(mytree, directory4, category, mesonCat, nameSig, '_2018')
+      if(year == '_2017' or year == '_all'): addSigHisto(mytree, directory3, category, mesonCat, nameSig, '_2017')
+      if(category =='_Wcat' or category =='_Zcat'):
+         if(year == '_22016' or year == '_all'): addSigHisto(mytree, directory2, category, mesonCat, nameSig, '_22016')
       if(year == '_12016' or year == '_all'): addSigHisto(mytree, directory1, category, mesonCat, nameSig, '_12016')
    else:
-      if(year == '_2018' or year == '_all'): mytree = loadTree(mytree, directory3 , category, mesonCat, '_2018', doSignal) # all sigm, BKG , data,
-      if(year == '_2017' or year == '_all'): mytree = loadTree(mytree, directory2 , category, mesonCat, '_2017', doSignal) # all sigm, BKG , data,
+      if(year == '_2018' or year == '_all'): mytree = loadTree(mytree, directory4 , category, mesonCat, '_2018', doSignal) # all sigm, BKG , data,
+      if(year == '_2017' or year == '_all'): mytree = loadTree(mytree, directory3 , category, mesonCat, '_2017', doSignal) # all sigm, BKG , data,
+      if(category =='_Wcat' or category =='_Zcat'):
+         if(year == '_22016' or year == '_all'): mytree = loadTree(mytree, directory2 , category, mesonCat, '_22016', doSignal) # all sigm, BKG , data,
       if(year == '_12016' or year == '_all'): mytree = loadTree(mytree, directory1 , category, mesonCat, '_12016', doSignal) # all sigm, BKG , data,
 
    h = ROOT.TH1F( 'Higgs', '', nbin, low, high )
@@ -78,19 +104,9 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       if abs(item) == 43:
          var = -1
          if item> 0:
-            if(category =='_GFcat'):
-               if ev.MVAdisc[0]>0.0:  var = ev.HCandMass
-            elif category =='_Zinvcat':
-               if ev.MVAdisc[0]>0.6:  var = ev.HCandMass
-            else:
-               if ev.MVAdisc[0]>0.3:  var = ev.HCandMass
+            if ev.MVAdisc[0]>MVAbin[category]:  var = ev.HCandMass
          else:
-            if(category =='_GFcat'):
-               if ev.MVAdisc[0]<0.0:  var = ev.HCandMass
-            elif category =='_Zinvcat':
-               if ev.MVAdisc[0]<0.6:  var = ev.HCandMass
-            else:
-               if ev.MVAdisc[0]<0.3:  var = ev.HCandMass
+            if ev.MVAdisc[0]<MVAbin[category]:  var = ev.HCandMass
 
       if item == 4:
          var = ev.HCandMass
@@ -113,8 +129,12 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          if ev.photon_pt<40 :  continue
          if ev.meson_pt<40 : continue
 
+#      if(category =='_Wcat'):
+#         if (abs(ev.Z_veto-91) < 5): continue # default cutting at +- 10
+
       if(category =='_Wcat'):
-         if (abs(ev.Z_veto-91) < 5): continue
+         if ev.V_mass < 15 : continue
+         if ev.DeepMETResolutionTune_pt<15 :  continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zinvcat'):
@@ -126,7 +146,10 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          if ev.DeepMETResolutionTune_pt<75 :  continue # at skim level is 50
          if abs(ev.dPhiGammaMET)<1. : continue # already applied
          if abs(ev.dPhiMesonMET)<1. : continue # already applied
-         if ev.ptRatioMEThiggs>0.8: continue # already applied
+         if abs(item) == 4:
+            if ev.ptRatioMEThiggs>0.5: continue
+            if abs(ev.dEtaGammaMesonCand)>2: continue
+         if ev.nbtag>0.: continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_VBFcatlow'):
@@ -144,7 +167,10 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          if ev.deltaJetMeson < 1.2 : continue
          if ev.deltaJetPhoton < 1. : continue
          if ev.Y1Y2 > 0. : continue
-         if ev.mJJ < 300. : continue
+         if category =='_VBFcat':
+            if ev.mJJ < 400. : continue
+         else:
+            if ev.mJJ < 300. : continue
          if ev.dEtaJJ < 3. : continue
 #         if ev.dEtaGammaMesonCand > 2. : continue
 
