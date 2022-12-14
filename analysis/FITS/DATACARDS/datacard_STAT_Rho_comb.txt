@@ -1,24 +1,37 @@
-Combination of Zinvcat=DATACARDS/datacard_STAT_Rho_Zinvcat_2018.txt  VBFcat=DATACARDS/datacard_STAT_Rho_VBFcat_Run2.txt  VBFcatlow=DATACARDS/datacard_STAT_Rho_VBFcatlow_2018.txt
-imax 3 number of bins
-jmax 3 number of processes minus 1
-kmax 0 number of nuisance parameters
+Combination of Wcat=datacard_STAT_Rho_Wcat_Run2.txt  Zcat=datacard_STAT_Rho_Zcat_Run2.txt  Zinvcat=datacard_STAT_Rho_Zinvcat_2018.txt  VBFcat=datacard_STAT_Rho_VBFcat_Run2.txt  VBFcatlow=datacard_STAT_Rho_VBFcatlow_2018.txt
+imax 5 number of bins
+jmax 4 number of processes minus 1
+kmax 1 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
 shapes VBFH       VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:crystal_ball_RhoCat_VBFcat_VBFH
-shapes bkg        VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:bxg_RhoCat_VBFcat_bkg
+shapes bkg        VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:multipdf_RhoCat_VBFcat_bkg
 shapes data_obs   VBFcat     DATACARDS/workspace_STAT_Rho_VBFcat_Run2.root w:observed_data
 shapes VBFH       VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:crystal_ball_RhoCat_VBFcatlow_VBFH
-shapes bkg        VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:bxg_RhoCat_VBFcatlow_bkg
+shapes bkg        VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:multipdf_RhoCat_VBFcatlow_bkg
 shapes data_obs   VBFcatlow  DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root w:observed_data
+shapes WH         Wcat       DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root w:crystal_ball_RhoCat_Wcat_WH
+shapes ZH         Wcat       DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root w:crystal_ball_RhoCat_Wcat_ZH
+shapes bkg        Wcat       DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root w:multipdf_RhoCat_Wcat_bkg
+shapes data_obs   Wcat       DATACARDS/workspace_STAT_RhoCat_Wcat_Run2.root w:observed_data
+shapes ZH         Zcat       DATACARDS/workspace_STAT_RhoCat_Zcat_Run2.root w:crystal_ball_RhoCat_Zcat_ZH
+shapes bkg        Zcat       DATACARDS/workspace_STAT_RhoCat_Zcat_Run2.root w:multipdf_RhoCat_Zcat_bkg
+shapes data_obs   Zcat       DATACARDS/workspace_STAT_RhoCat_Zcat_Run2.root w:observed_data
 shapes WH         Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:crystal_ball_RhoCat_Zinvcat_WH
 shapes ZinvH      Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:crystal_ball_RhoCat_Zinvcat_ZinvH
-shapes bkg        Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:exp1_RhoCat_Zinvcat_bkg
+shapes bkg        Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:multipdf_RhoCat_Zinvcat_bkg
 shapes data_obs   Zinvcat    DATACARDS/workspace_STAT_Rho_Zinvcat_2018.root w:observed_data
 ----------------------------------------------------------------------------------------------------------------------------------
-bin          Zinvcat    VBFcat     VBFcatlow
-observation  -1         -1         -1       
+bin          Wcat       Zcat       Zinvcat    VBFcat     VBFcatlow
+observation  -1         -1         -1         -1         -1       
 ----------------------------------------------------------------------------------------------------------------------------------
-bin          Zinvcat    Zinvcat    Zinvcat    VBFcat     VBFcat     VBFcatlow  VBFcatlow
-process      ZinvH      WH         bkg        VBFH       bkg        VBFH       bkg      
-process      -2         -1         1          0          1          0          1        
-rate         1          1          1          1          1          1          1        
+bin                             Wcat       Wcat       Wcat       Zcat       Zcat       Zinvcat    Zinvcat    Zinvcat    VBFcat     VBFcat     VBFcatlow  VBFcatlow
+process                         ZH         WH         bkg        ZH         bkg        ZinvH      WH         bkg        VBFH       bkg        VBFH       bkg      
+process                         -3         -2         1          -3         1          -1         -2         1          0          1          0          1        
+rate                            1          1          1          1          1          1          1          1          1          1          1          1        
 ----------------------------------------------------------------------------------------------------------------------------------
+lumi_13TeV              lnN     1.025      1.025      -          1.025      -          1.025      1.025      -          1.025      -          1.025      -        
+pdfindex_RhoCat_Wcat  discrete
+pdfindex_RhoCat_Zinvcat  discrete
+pdfindex_RhoCat_VBFcat  discrete
+pdfindex_RhoCat_VBFcatlow  discrete
+pdfindex_RhoCat_Zcat  discrete
