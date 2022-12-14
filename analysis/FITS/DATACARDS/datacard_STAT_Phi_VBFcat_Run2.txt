@@ -4,7 +4,7 @@ jmax 1 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
 shapes	VBFH	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:crystal_ball_PhiCat_VBFcat_VBFH
-shapes	bkg	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:bxg_PhiCat_VBFcat_bkg
+shapes	bkg	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:multipdf_PhiCat_VBFcat_bkg
 shapes	data_obs	VBFcat	DATACARDS/workspace_STAT_Phi_VBFcat_Run2.root	w:observed_data
 -------------------------------------
 bin	VBFcat
@@ -13,5 +13,9 @@ observation	-1
 bin		VBFcat	VBFcat
 process		VBFH	bkg
 process		-1	1
-rate		1	1
+rate		0.01	1
 -------------------------------------
+lumi_13TeV 	lnN 	1.025	-
+-------------------------------------
+
+pdfindex_PhiCat_VBFcat discrete

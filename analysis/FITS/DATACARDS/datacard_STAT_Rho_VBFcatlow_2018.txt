@@ -4,7 +4,7 @@ jmax 1 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
 shapes	VBFH	VBFcatlow	DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root	w:crystal_ball_RhoCat_VBFcatlow_VBFH
-shapes	bkg	VBFcatlow	DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root	w:bxg_RhoCat_VBFcatlow_bkg
+shapes	bkg	VBFcatlow	DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root	w:multipdf_RhoCat_VBFcatlow_bkg
 shapes	data_obs	VBFcatlow	DATACARDS/workspace_STAT_Rho_VBFcatlow_2018.root	w:observed_data
 -------------------------------------
 bin	VBFcatlow
@@ -13,5 +13,9 @@ observation	-1
 bin		VBFcatlow	VBFcatlow
 process		VBFH	bkg
 process		-1	1
-rate		1	1
+rate		0.01	1
 -------------------------------------
+lumi_13TeV 	lnN 	1.025	-
+-------------------------------------
+
+pdfindex_RhoCat_VBFcatlow discrete
