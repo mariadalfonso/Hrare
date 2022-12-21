@@ -257,7 +257,7 @@ def  fitBkg(tag , mesonCat, year):
     pdf_exp1_conv_gauss = RooFFTConvPdf('exp1_conv_gauss', 'exp1 (X) gauss', x, pdf_exp1, pdf_gauss)
 
 #   Set #bins to be used for FFT sampling to 10000
-    x.setBins(10000, "cache");
+#    x.setBins(10000, "cache");
     # Construct landau (x) gauss
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern5, pdf_gauss);
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern1, pdf_gauss);
@@ -265,13 +265,15 @@ def  fitBkg(tag , mesonCat, year):
     storedPdfs = RooArgList("store_"+mesonCat+tag)
 
     if tag=='_VBFcatlow':
-        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
+#        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
+        model = pdf_bern2
         model2 = pdf_chebychev2
     elif tag=='_VBFcat':
         model = pdf_bern2
         model2 = pdf_chebychev2
     elif tag=='_GFcat':
-        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern3, pdf_gauss);
+#        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern3, pdf_gauss);
+        model = pdf_bern3
         model2 = pdf_chebychev2
     elif tag=='_Wcat' or tag=='_Zcat' or tag=='_Zinvcat':
         model = pdf_exp1
@@ -301,7 +303,7 @@ def  fitBkg(tag , mesonCat, year):
         BKG_norm = RooRealVar(model.GetName()+ "_normCR", model.GetName()+ "_normCR", norm_range, 0.5*norm_range, 2*norm_range)
     else:
         if doMultiPdf:
-            BKG_norm = RooRealVar("multipdf"+mesonCat+tag+"_bkg"+ "_norm", model.GetName()+ "_norm", norm_range, 0.5*norm_range, 2*norm_range)
+            BKG_norm = RooRealVar("multipdf"+mesonCat+tag+"_bkg"+"_norm",model.GetName()+"_norm", norm_range, 0.5*norm_range, 2*norm_range)
         else:
             BKG_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_range, 0.5*norm_range, 2*norm_range)
 
@@ -382,7 +384,7 @@ def  fitBkg(tag , mesonCat, year):
     w = RooWorkspace("w", "workspace")
 
     if doMultiPdf:
-        pdf_cat = RooCategory("pdfindex"+mesonCat+tag,"c")
+        pdf_cat = RooCategory("pdfindex"+mesonCat+tag,"pdfindex"+mesonCat+tag)
         pdf_bkg = RooMultiPdf("multipdf"+mesonCat+tag+"_bkg","multipdf",pdf_cat,storedPdfs)
         getattr(w,'import')(pdf_bkg)
     else:
