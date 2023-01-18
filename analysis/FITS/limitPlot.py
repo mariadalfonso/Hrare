@@ -28,25 +28,26 @@ if doChekSync:
                ]
 
      limitfiles = [ "limitsGiulio/higgsCombineRhoGFcatPreMVA.AsymptoticLimits.mH125.root"
-                    ,"limits/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsSynch/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
                     ,"limitsGiulio/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVASynch/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
                     ,"limitsGiulio/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVASynch/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
                    ]
 else:
-     ax = range(1,6) #
+     ax = range(1,5) #
+#     ax = range(1,6) #
      labels = [ 'ggH'
                  , 'VBF'
                  , 'VBFlow'
-                 , 'Zinv'
+#                 , 'Zinv'
                  , '1l-2l'
                ]
-     limitfiles = [ "limitsMVA/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root" 
-                    ,"limitsMVA/higgsCombine"+mesonCat+"Zinvcat.AsymptoticLimits.mH125.root"
-                    ,"limits/higgsCombine"+mesonCat+"Wcat.AsymptoticLimits.mH125.root"
+     limitfiles = [ "limitsMVADEC28/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
+#                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"Zinvcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
                    ]
 
 c44 = ROOT.TCanvas("c44","c44",1200,800)
@@ -174,12 +175,12 @@ nae.Draw("p same")
 legend.Draw()
 
 gPad.RedrawAxis()
-tdrstyle.cmsPrel(138000, energy= 13,simOnly=False)
 if doChekSync: tdrstyle.cmsPrel(39540, energy= 13,simOnly=False)
+else: tdrstyle.cmsPrel(138000, energy= 13,simOnly=False)
 c44.Draw()
 
 mySTR=''
-if doChekSync: mySTR="_synch"
+if doChekSync: mySTR="_synchdec20"
 else: mySTR='_final'
 
 c44.SaveAs("limit"+mesonCat+mySTR+".pdf")

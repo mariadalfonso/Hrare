@@ -5,7 +5,7 @@ from prepareFits import *
 gROOT.SetBatch()
 gSystem.Load("libHiggsAnalysisCombinedLimit.so")
 
-blinded=False
+blinded=True
 
 doMultiPdf=True
 doCR=False
@@ -33,15 +33,23 @@ def  fitSig(tag , mesonCat, year):
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
 
-    mcSig = ["WH", "ZH", "VBFH", "ZinvH", "ggH"]
+    mcSig = ["WH", "WHl", "ZH", "ZHl","VBFH", "ZinvH", "ggH"]
     for sig in mcSig:
 
-        # 1l: ZH, WH
+        # 1l-2l: ZH, WH
+        if (sig == "VBFH" and tag == "_Vcat"): continue
+        if (sig == "ggH" and tag == "_Vcat"): continue
+        if (sig == "ZinvH" and tag == "_Vcat"): continue
+        if (sig == "WHl" and tag == "_Vcat"): continue
+        # 1l: ZHl, WH
+        if (sig == "ZH" and tag == "_Wcat"): continue
         if (sig == "VBFH" and tag == "_Wcat"): continue
         if (sig == "ggH" and tag == "_Wcat"): continue
         if (sig == "ZinvH" and tag == "_Wcat"): continue
-        # MET: WH, ZinvH
+        # MET: WHl, ZinvH, (ZHl is very minor)
+        if (sig == "ZHl" and tag == "_Zinvcat"): continue
         if (sig == "ZH" and tag == "_Zinvcat"): continue
+        if (sig == "WH" and tag == "_Zinvcat"): continue
         if (sig == "VBFH" and tag == "_Zinvcat"): continue
         if (sig == "ggH" and tag == "_Zinvcat"): continue
         ##
@@ -52,15 +60,21 @@ def  fitSig(tag , mesonCat, year):
         ## ggh cat: GF and VBF (in principle can all the other 3 categories as well)
         if (sig == "ZH" and tag == "_GFcat"): continue
         if (sig == "WH" and tag == "_GFcat"): continue
+        if (sig == "ZHl" and tag == "_GFcat"): continue
+        if (sig == "WHl" and tag == "_GFcat"): continue
         if (sig == "ZinvH" and tag == "_GFcat"): continue
         ##
         if (sig == "WH" and tag == "_VBFcat"): continue
         if (sig == "ZH" and tag == "_VBFcat"): continue
+        if (sig == "WHl" and tag == "_VBFcat"): continue
+        if (sig == "ZHl" and tag == "_VBFcat"): continue
         if (sig == "ZinvH" and tag == "_VBFcat"): continue
         if (sig == "ggH" and tag == "_VBFcat"): continue
         ##
         if (sig == "WH" and tag == "_VBFcatlow"): continue
         if (sig == "ZH" and tag == "_VBFcatlow"): continue
+        if (sig == "WHl" and tag == "_VBFcatlow"): continue
+        if (sig == "ZHl" and tag == "_VBFcatlow"): continue
         if (sig == "ZinvH" and tag == "_VBFcatlow"): continue
         if (sig == "ggH" and tag == "_VBFcatlow"): continue
 
@@ -206,8 +220,11 @@ def  fitBkg(tag , mesonCat, year):
     chebychev_c2 = RooRealVar('chebychev_c2'+mesonCat+tag, 'chebychev_c2', 0.01, -0.1, 0.1)
     chebychev_c3 = RooRealVar('chebychev_c3'+mesonCat+tag, 'chebychev_c3', 0., -1., 1.) # limit this for the GF
 
-    pdf_chebychev2 = RooChebychev("chebychev"+mesonCat+tag+'_bkg',"chebychev",x,
+    pdf_chebychev2 = RooChebychev("chebychev"+mesonCat+tag, "chebychev2",x,
                                   RooArgList(chebychev_c0,chebychev_c1,chebychev_c2))
+
+    pdf_chebychev3 = RooChebychev("chebychev"+mesonCat+tag,"chebychev3",x,
+                                  RooArgList(chebychev_c0,chebychev_c1,chebychev_c2,chebychev_c3))
 
     # -----------------------------------------------------------------------------
     # GAUS law
@@ -274,8 +291,8 @@ def  fitBkg(tag , mesonCat, year):
     elif tag=='_GFcat':
 #        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern3, pdf_gauss);
         model = pdf_bern3
-        model2 = pdf_chebychev2
-    elif tag=='_Wcat' or tag=='_Zcat' or tag=='_Zinvcat':
+        model2 = pdf_chebychev3
+    elif tag=='_Wcat' or tag=='_Zcat' or tag=='_Zinvcat' or tag=='_Vcat':
         model = pdf_exp1
         model2 = pdf_chebychev2
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_exp3, pdf_gauss);
@@ -457,6 +474,14 @@ if __name__ == "__main__":
 
     fitSig('_Zinvcat','_PhiCat',2018)
     fitBkg('_Zinvcat','_PhiCat',2018)
+
+    fitSig('_Vcat','_RhoCat','Run2')
+    fitBkg('_Vcat','_RhoCat','Run2')
+
+    fitSig('_Vcat','_PhiCat','Run2')
+    fitBkg('_Vcat','_PhiCat','Run2')
+
+    exit()
 
     fitSig('_Wcat','_RhoCat','Run2')
     fitBkg('_Wcat','_RhoCat','Run2')

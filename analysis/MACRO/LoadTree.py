@@ -85,6 +85,10 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') #W-H
       mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') #W+H rho
       mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') #W-H
+      mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') #Z-H phi
+      mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') #Z-H rho
+      mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') #Z-H phi
+      mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') #Z-H rho
       #GJets
 #      mytree.Add(directory+'outname_mc6'+category+mesonCat+year+'.root')  #GJets
 #      mytree.Add(directory+'outname_mc7'+category+mesonCat+year+'.root')  #GJets
@@ -258,9 +262,10 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       if category=='_Wcat': mytree.Add(directory+'outname_mc31'+category+mesonCat+localTime+'.root')  #W0Jet
       if category=='_Wcat': mytree.Add(directory+'outname_mc32'+category+mesonCat+localTime+'.root')  #W1Jet
       if category=='_Wcat': mytree.Add(directory+'outname_mc33'+category+mesonCat+localTime+'.root')  #W2Jet
-      mytree.Add(directory+'outname_mc34'+category+mesonCat+localTime+'.root')  #DY0Jet
-      mytree.Add(directory+'outname_mc35'+category+mesonCat+localTime+'.root')  #DY1Jet
-      mytree.Add(directory+'outname_mc36'+category+mesonCat+localTime+'.root')  #DY2Jet
+#      mytree.Add(directory+'outname_mc34'+category+mesonCat+localTime+'.root')  #DY0Jet
+#      mytree.Add(directory+'outname_mc35'+category+mesonCat+localTime+'.root')  #DY1Jet
+#      mytree.Add(directory+'outname_mc36'+category+mesonCat+localTime+'.root')  #DY2Jet
+      mytree.Add(directory+'outname_mc0'+category+mesonCat+localTime+'.root')  #DY LO
       mytree.Add(directory+'outname_mc47'+category+mesonCat+localTime+'.root')  #TT + GJets
       mytree.Add(directory+'outname_mc4'+category+mesonCat+localTime+'.root')  #tt2l
       if category=='_Wcat': mytree.Add(directory+'outname_mc5'+category+mesonCat+localTime+'.root')  #tt1l
@@ -268,7 +273,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
    else:
       print("ERROR: category not specified")
 
-   resetTree(mytree,category)
+#   resetTree(mytree,category)
 
    return mytree
 
@@ -310,6 +315,8 @@ def resetTree(mytree,category):
 
    if(category =='_Zcat' or category =='_Wcat'):
       mytree.SetBranchStatus('V_mass',1)
+      mytree.SetBranchStatus('LeadingLepton',1)
+      mytree.SetBranchStatus('SubLeadingLepton',1)
 
    if(category =='_Zinvcat'):
       mytree.SetBranchStatus('dPhiGammaMET',1)

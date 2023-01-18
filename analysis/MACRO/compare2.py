@@ -10,17 +10,9 @@ ROOT.gStyle.SetOptFit(1)
 #mesonCat = '_PhiCat'
 mesonCat = '_RhoCat'
 year = '_2018'
-#directory = '/work/submit/mariadlf/Hrare/SEPT24/2018/'
-#directory = '/work/submit/mariadlf/Hrare/OCT4/2018/'
-#directory = '/home/submit/mariadlf/Hrare/analysis/DEC20mesonMass/2018/'
-#directory = '/home/submit/mariadlf/Hrare/analysis/DEC8/2018/'
-directory = '/home/submit/mariadlf/Hrare/analysis/DEC20crPhoton/2018/'
 
-#directory = '/home/submit/mariadlf/Hrare/analysis/AUG23/2018/'
-#directory = '/home/submit/mariadlf/Hrare/analysis/AUG23/2018/'
-#directory = 'JUNETEST/2018/'
-#directory = 'JUNESYNCH/2018/'
-#directory = '/home/submit/mariadlf/AUG10/2018/'
+
+directory = '/home/submit/mariadlf/Hrare/analysis/DEC28/2018/'
 mytreeGF = ROOT.TChain('events')
 mytreeGFfix = ROOT.TChain('events')
 
@@ -34,26 +26,21 @@ mytreeGFfix = ROOT.TChain('events')
 #   mytreeGF.Add(directory+'outname_mc1017_GFcat'+mesonCat+year+'.root')
 #   mytreeGFfix.Add(directory+'outname_mc1052_GFcat'+mesonCat+year+'.root')
 
-mytreeGF.Add(directory+'outname_mc-62_GFcat'+mesonCat+year+'.root')
-mytreeGF.Add(directory+'outname_mc-63_GFcat'+mesonCat+year+'.root')
-mytreeGF.Add(directory+'outname_mc-64_GFcat'+mesonCat+year+'.root')
-stringCat = 'GFcat'
+#mytreeGF.Add(directory+'outname_mc-65_GFcat'+mesonCat+year+'.root')
+#mytreeGF.Add(directory+'outname_mc-66_GFcat'+mesonCat+year+'.root')
+#stringCat = 'GFcat'
 
-#mytreeGF.Add(directory+'outname_mc-62_Zinvcat'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-63_Zinvcat'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-64_Zinvcat'+mesonCat+year+'.root')
+#mytreeGF.Add(directory+'outname_mc-65_Zinvcat'+mesonCat+year+'.root')
+#mytreeGF.Add(directory+'outname_mc-66_Zinvcat'+mesonCat+year+'.root')
 #stringCat = 'Zinvcat'
 
-#mytreeGF.Add(directory+'outname_mc-62_VBFcatlow'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-63_VBFcatlow'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-64_VBFcatlow'+mesonCat+year+'.root')
+#mytreeGF.Add(directory+'outname_mc-65_VBFcatlow'+mesonCat+year+'.root')
+#mytreeGF.Add(directory+'outname_mc-66_VBFcatlow'+mesonCat+year+'.root')
 #stringCat = 'VBFcatlow'
 
-#mytreeGF.Add(directory+'outname_mc-31_VBFcat'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-32_VBFcat'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-33_VBFcat'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-34_VBFcat'+mesonCat+year+'.root')
-#stringCat = 'VBFcat'
+mytreeGF.Add(directory+'outname_mc-65_VBFcat'+mesonCat+year+'.root')
+mytreeGF.Add(directory+'outname_mc-66_VBFcat'+mesonCat+year+'.root')
+stringCat = 'VBFcat'
 
 def projection(doTestMVA, mytree, xmin, xmax, rangeLow, rangeHigh, color ):
 
@@ -77,8 +64,8 @@ if __name__ == "__main__":
    hMH_bin1 = projection(1 , mytreeGF, 100., 170., -1., -0.5, 1)
    hMH_bin2 = projection(1 , mytreeGF, 100., 170., -0.5, 0., 2)
    hMH_bin3 = projection(1 , mytreeGF, 100., 170., 0., 0.5, 3 )
-   hMH_bin4 = projection(1 , mytreeGF, 100., 170., 0.5, 0.75, 4 )
-   hMH_bin5 = projection(1 , mytreeGF, 100., 170., 0.75, 1., 6 )   
+   hMH_bin4 = projection(1 , mytreeGF, 100., 170., 0.5, 1., 4 )
+#   hMH_bin5 = projection(1 , mytreeGF, 100., 170., 0.75, 1., 6 )
 
    c = ROOT.TCanvas("c", "", 600, 600)
    
@@ -88,7 +75,7 @@ if __name__ == "__main__":
    hMH_bin2.DrawNormalized("hist sames")
    hMH_bin3.DrawNormalized("hist sames")
    hMH_bin4.DrawNormalized("hist sames")
-   hMH_bin5.DrawNormalized("hist sames")      
+#   hMH_bin5.DrawNormalized("hist sames")
 
    text = ROOT.TText()
    text.SetTextFont(1)
@@ -103,14 +90,12 @@ if __name__ == "__main__":
    text.SetTextColor(3)
    text.DrawText(140, 0.20, "MVA[0.,0.5]");
    text.SetTextColor(4)
-   text.DrawText(140, 0.21, "MVA[0.5,0.75]");
-   text.SetTextColor(6)
-   text.DrawText(140, 0.22, "MVA[0.75,1.]");      
+   text.DrawText(140, 0.21, "MVA[0.5,1.]");
+#   text.SetTextColor(6)
+#   text.DrawText(140, 0.22, "MVA[0.75,1.]");
 
    text.SetTextColor(1)   
-   text.DrawText(100, 0.24, stringCat);
+   text.DrawText(110, 0.24, stringCat);
 
 
-#   c.SaveAs("MassHiggs_inBinsOfPT_"+stringCat+"_Rho.png")
-   c.SaveAs("MassHiggs_inBinsOfPT_"+stringCat+"_photonCR_Rho.png")
-#   c.SaveAs("MassHiggs_inBinsOfPT_"+stringCat+"_mesonCR_Rho.png")      
+   c.SaveAs("MassHiggs_inBinsOfPT_"+stringCat+"_Rho.png")

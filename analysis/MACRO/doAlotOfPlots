@@ -1,8 +1,8 @@
 python SummaryPlots.py '_GFcat' '_RhoCat'
 python SummaryPlots.py '_GFcat' '_PhiCat'
 
-python SummaryPlots.py '_VBFcatlow' '_PhiCat'
 python SummaryPlots.py '_VBFcatlow' '_RhoCat'
+python SummaryPlots.py '_VBFcatlow' '_PhiCat'
 
 python SummaryPlots.py '_VBFcat' '_RhoCat'
 python SummaryPlots.py '_VBFcat' '_PhiCat'
