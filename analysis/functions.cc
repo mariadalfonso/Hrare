@@ -48,6 +48,7 @@ using Vec_f = ROOT::VecOps::RVec<float>;
 using Vec_i = ROOT::VecOps::RVec<int>;
 using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
+
 using stdVec_i = std::vector<int>;
 using stdVec_b = std::vector<bool>;
 using stdVec_f = std::vector<float>;
@@ -65,12 +66,12 @@ Vec_i indices(const int& size, const int& start = 0) {
 Vec_f NomUpDownVar(const float up, const float down, const float nom, float weight) {
 
   Vec_f res(3, 1);
-  weight *= nom; // update the weight for the nominal value
   res[0] = weight;  // nom
   res[1] = weight*up/nom;  // up
   res[2] = weight*down/nom;  // down
   return res;
 }
+
 
 
 bool isGoodRunLS(const bool isData, const UInt_t run, const UInt_t lumi) {
@@ -112,7 +113,7 @@ Vec_b cleaningMask(Vec_i indices, int size) {
   return mask;
 }
 
-Vec_b cleaningJetFromMeson(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi) {
+Vec_b cleaningJetFromOBJ(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi) {
 
   Vec_b mask(Jeta.size(), true);
   for (unsigned int idx = 0; idx < Jeta.size(); ++idx) {
@@ -121,9 +122,11 @@ Vec_b cleaningJetFromMeson(Vec_f & Jeta, Vec_f & Jphi, float & eta, float & phi)
   return mask;
 }
 
+//####
+
 bool checkMother(const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
-                 int pdgToMatch,
-                 int pdgMotherToMatch
+		 int pdgToMatch,
+		 int pdgMotherToMatch
 		 ) {
 
   int idxMother = -1;
@@ -237,7 +240,7 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
     if(max(meson_trk1_pt[i], meson_trk2_pt[i]) < 20) continue;
 
     PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
-    if((p_meson + p_ph).M()<5.) continue; // object disambiguiation
+    if((p_meson + p_ph).M()<5.) continue; // object disambiguiation, also remove the omega/tau resonances
 
     // save the leading Pt
     float ptCand = p_meson.pt();
@@ -252,7 +255,6 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
   }
 
   return idx;
-
 }
 
 Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, const Vec_f& ch,
@@ -315,32 +317,59 @@ float mt(float pt1, float phi1, float pt2, float phi2) {
 
 
 float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) {
-    PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
-    PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
-    return (p1 + p2).M();
+  PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
+  PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
+  return (p1 + p2).M();
 }
 
-std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& phi, const float& m,
-                               const float& ph_pt, const float& ph_eta, const float& ph_phi) {
+Vec_f Pair12PT(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
+	       const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
 
-  PtEtaPhiMVector p_M(pt, eta, phi, m);
-  PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
+  const float pion_mass_     = 0.139570;
+  Vec_f pair(pt1.size(), true);
 
-  float Minv = (p_M + p_ph).M();
-  float ptPair = (p_M + p_ph).pt();
-
-  std::pair<float, float> pairRECO = std::make_pair(Minv , ptPair);
-  return pairRECO;
-
+  for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
+    PtEtaPhiMVector p_1(pt1[idx], eta1[idx], phi1[idx], pion_mass_);
+    PtEtaPhiMVector p_2(pt2[idx], eta2[idx], phi2[idx], pion_mass_);
+    pair[idx] = (p_1 + p_2).pt();
+  }
+  return pair;
 }
 
+Vec_f Pair12ETA(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
+		const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
 
-float Minv3(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx,
-	    const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
+  const float pion_mass_     = 0.139570;
+  Vec_f pair(pt1.size(), true);
+
+  for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
+    PtEtaPhiMVector p_1(pt1[idx], eta1[idx], phi1[idx], pion_mass_);
+    PtEtaPhiMVector p_2(pt2[idx], eta2[idx], phi2[idx], pion_mass_);
+    pair[idx] = (p_1 + p_2).eta();
+  }
+  return pair;
+}
+
+Vec_f Pair12PHI(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
+		const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
+
+  const float pion_mass_     = 0.139570;
+  Vec_f pair(pt1.size(), true);
+
+  for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
+    PtEtaPhiMVector p_1(pt1[idx], eta1[idx], phi1[idx], pion_mass_);
+    PtEtaPhiMVector p_2(pt2[idx], eta2[idx], phi2[idx], pion_mass_);
+    pair[idx] = (p_1 + p_2).phi();
+  }
+  return pair;
+}
+
+float Minv3(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m,
+	    const float& ph_pt, const float& ph_eta, const float& ph_phi) {
  
-  PtEtaPhiMVector p1(pt[idx[0]], eta[idx[0]], phi[idx[0]], m[idx[0]]);
-  PtEtaPhiMVector p2(pt[idx[1]], eta[idx[1]], phi[idx[1]], m[idx[1]]);
-  PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
+  PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
+  PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
+  PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
   return (p1 + p2 + p_ph).M();
   
 }
@@ -369,29 +398,60 @@ float dEta_MvsPh(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_
   return  ph_eta[0]-(p1 + p2).eta();
 }
 
+std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& phi, const float& m,
+                               const float& ph_pt, const float& ph_eta, const float& ph_phi) {
+
+  PtEtaPhiMVector p_M(pt, eta, phi, m);
+  PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
+
+  float Minv = (p_M + p_ph).M();
+  float ptPair = (p_M + p_ph).pt();
+
+  std::pair<float, float> pairRECO = std::make_pair(Minv , ptPair);
+  return pairRECO;
+
+}
 
 float dR_Constituents(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx) {
   return deltaR(eta[idx[0]], phi[idx[0]], eta[idx[1]], phi[idx[1]]);
 }
 
-float compute_jet_HiggsVars_var(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_mass,
-                                const float ph_pt, const float ph_eta, const float ph_phi,
-                                const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
-                                unsigned int var)
+float compute_HiggsVars_var(const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
+			    const float ph_pt, const float ph_eta, const float ph_phi,
+			    unsigned int var)
 {
 
-  if(jet_pt.size() < 2) return -1;
   // passing only the one that make the Higgs candidate
-
   PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
   PtEtaPhiMVector p_mes(mes_pt, mes_eta, mes_phi, mes_mass);
 
   PtEtaPhiMVector p_Hig = (p_ph + p_mes);
+  float theVar = 0;
+  if     (var == 0) theVar = p_Hig.M();
+  else if(var == 1) theVar = p_Hig.Pt();
+  else if(var == 2) theVar = p_Hig.Phi();
 
+  return theVar;
+
+}
+
+float compute_jet_HiggsVars_var(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_mass, 
+				const float ph_pt, const float ph_eta, const float ph_phi,
+				const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
+				unsigned int var)
+{
+
+  if(jet_pt.size() < 2) return -1;
+  // passing only the one that make the Higgs candidate
+  PtEtaPhiMVector p_ph(ph_pt, ph_eta, ph_phi, 0);
+  PtEtaPhiMVector p_mes(mes_pt, mes_eta, mes_phi, mes_mass);
+
+  PtEtaPhiMVector p_Hig = (p_ph + p_mes);
+  
   PtEtaPhiMVector p_j1(jet_pt[0], jet_eta[0], jet_phi[0], jet_mass[0]);
   PtEtaPhiMVector p_j2(jet_pt[1], jet_eta[1], jet_phi[1], jet_mass[1]);
 
-  if(p_j1.Pt() < p_j1.Pt()) printf("Pt jet reversed!\n");
+  if(p_j1.Pt() < p_j2.Pt()) printf("Pt jet reversed!\n");
 
   float deltaEtaJJ = fabs(p_j1.Eta()-p_j2.Eta());
 
@@ -399,10 +459,10 @@ float compute_jet_HiggsVars_var(const Vec_f& jet_pt, const Vec_f& jet_eta, const
   if     (var == 0) theVar = fabs(p_Hig.Eta()-(p_j1.Eta()+p_j2.Eta())/2.)/deltaEtaJJ; //zeppenfeld variable
   else if(var == 1) theVar = fabs(p_Hig.Eta()-p_j1.Eta());
   else if(var == 2) theVar = fabs(p_Hig.Eta()-p_j2.Eta());
+  else if(var == 3) theVar = (p_Hig + p_j1 + p_j2).Pt();
 
   return theVar;
 
 }
-
 
 #endif
