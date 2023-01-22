@@ -81,9 +81,11 @@ if [ $cat = "isGFtag" ]; then
     fi
 
     if [[ "$isMC" == '-1' ]]; then
-	python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # EGammaB 2018
-	python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # EGammaC 2018
-	python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # EGammaD 2018
+	if [ $year = "2018" ] ; then
+	    python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # EGammaB 2018
+	    python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # EGammaC 2018
+	    python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # EGammaD 2018
+	fi
     fi
 
 fi
@@ -125,11 +127,12 @@ if [ $cat = "isVBFtaglow" ]; then
     fi
 
     if [[ "$isMC" == '-1' ]]; then
-	python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # EGammaB 2018
-	python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # EGammaC 2018
-	python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # EGammaD 2018
+	if [ $year = "2018" ] ; then
+	    python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # EGammaB 2018
+	    python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # EGammaC 2018
+	    python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # EGammaD 2018
+	fi
     fi
-
 fi
 
 if [ $cat = "isVBFtag" ]; then
