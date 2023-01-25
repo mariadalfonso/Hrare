@@ -14,7 +14,7 @@ observation	-1
 bin		GFcat	GFcat	GFcat
 process		ggH	VBFH	bkg
 process		0	-1	1
-rate		1	1	1
+rate		0.01	0.01	1
 -------------------------------------
 lumi_13TeV 	lnN 	1.025	1.025	-
 -------------------------------------

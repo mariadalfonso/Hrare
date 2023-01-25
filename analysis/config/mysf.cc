@@ -1,4 +1,6 @@
 #include "mysf.h"
+#include <ostream>
+#include <iostream>
 
 MyCorrections::MyCorrections(int year) {
 
@@ -7,14 +9,15 @@ MyCorrections::MyCorrections(int year) {
   std::string subDirName = "";
   if(year == 2018)  subDirName += "2018_UL/";
   if(year == 2017)  subDirName += "2017_UL/";
-  if(year == 2016)  subDirName += "2016postVFP_UL/";
+  if(year == 22016)  subDirName += "2016postVFP_UL/";
   if(year == 12016)  subDirName += "2016preVFP_UL/";  
   
   std::string fileNameLUM = dirName+"LUM/"+subDirName+"puWeights.json.gz";
+
   std::string corrNameLUM = "";  
   if(year == 2018) corrNameLUM = "Collisions18_UltraLegacy_goldenJSON";
   if(year == 2017) corrNameLUM = "Collisions17_UltraLegacy_goldenJSON";
-  if(year == 2016 or year == 12016) corrNameLUM = "Collisions16_UltraLegacy_goldenJSON";
+  if(year == 22016 or year == 12016) corrNameLUM = "Collisions16_UltraLegacy_goldenJSON";
   
   auto csetPU = correction::CorrectionSet::from_file(fileNameLUM);
   puSF_ = csetPU->at(corrNameLUM);

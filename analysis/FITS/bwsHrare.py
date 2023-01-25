@@ -21,20 +21,34 @@ sys.argv=[]
 import ROOT
 ROOT.gROOT.SetBatch()
 
-doSyst=False
+doSyst=True
+MultiPdf=True
 
 ############ CONFIGURABLES ###########
 
-BkgPdf={
-    'Wcat': 'exp1'+opts.whichMeson,
-    'Zcat': 'exp1'+opts.whichMeson,
-    'VBFcat': 'bxg'+opts.whichMeson,
-    'Zinvcat': 'exp1'+opts.whichMeson,
-    'VBFcatlow': 'bxg'+opts.whichMeson,
-    'GFcat': 'bxg'+opts.whichMeson,
-}
+if MultiPdf:
+    BkgPdf={
+        'Vcat': 'multipdf'+opts.whichMeson,
+        'Wcat': 'multipdf'+opts.whichMeson,
+        'Zcat': 'multipdf'+opts.whichMeson,
+        'VBFcat': 'multipdf'+opts.whichMeson,
+        'Zinvcat': 'multipdf'+opts.whichMeson,
+        'VBFcatlow': 'multipdf'+opts.whichMeson,
+        'GFcat': 'multipdf'+opts.whichMeson,
+    }
+else:
+    BkgPdf={
+        'Vcat': 'exp1'+opts.whichMeson,
+        'Wcat': 'exp1'+opts.whichMeson,
+        'Zcat': 'exp1'+opts.whichMeson,
+        'VBFcat': 'bxg'+opts.whichMeson,
+        'Zinvcat': 'exp1'+opts.whichMeson,
+        'VBFcatlow': 'bxg'+opts.whichMeson,
+        'GFcat': 'bxg'+opts.whichMeson,
+    }
 
 SigPdf={
+    'Vcat': 'crystal_ball'+opts.whichMeson,
     'Wcat': 'crystal_ball'+opts.whichMeson,
     'Zcat': 'crystal_ball'+opts.whichMeson,
     'VBFcat': 'crystal_ball'+opts.whichMeson,
@@ -49,22 +63,28 @@ ENUM={
     'WH': -2,
     'ZH': -3,
     'ZinvH': -4,
+    'WHl': -5,
+    'ZHl': -6,
 }
 
 QCDscale={
-    'ggH': '-', #??
+    'ggH': '0.961/1.0039',
     'VBFH': '0.997/1.004',
-    'WH': '0.993/1.005',
-    'ZH': '0.993/1.004',
-    'ZinvH': '0.993/1.004',
+    'WH': '0.993/1.006',
+    'ZH': '0.995/1.005',
+    'ZinvH': '0.995/1.005',
+    'WHl': '0.993/1.006',
+    'ZHl': '0.995/1.005',
 }
 
 pdf_Higgs={
-    'ggH': '1.032',
-    'VBFH': '1.021',
-    'WH': '1.021',
-    'ZH': '1.021', #assume the majority is not ggZH
-    'ZinvH': '1.021', #assume the majority is not ggZH
+    'ggH': '0.968/1.032',
+    'VBFH': '0.979/1.021',
+    'WH': '0.98/1.020',
+    'ZH': '0.981/1.019', #assume the majority is not ggZH
+    'ZinvH': '0.981/1.019', #assume the majority is not ggZH
+    'WHl': '0.98/1.020',
+    'ZHl': '0.981/1.019', #assume the majority is not ggZH
 }
 
 lumi={
@@ -94,9 +114,14 @@ if opts.whichCat=='GFcat':
     mcAll = ['ggH','VBFH','bkg']
     category = ['GFcat']
 
+if opts.whichCat=='Vcat':
+    sigAll = ['WH','ZH','ZHl']
+    mcAll = ['WH','ZH','ZHl','bkg']
+    category = ['Vcat']
+
 if opts.whichCat=='Wcat':
-    sigAll = ['WH','ZH']
-    mcAll = ['WH','ZH','bkg']
+    sigAll = ['WH','ZHl']
+    mcAll = ['WH','ZHl','bkg']
     category = ['Wcat']
 
 if opts.whichCat=='Zcat':
@@ -115,8 +140,8 @@ if opts.whichCat=='VBFcatlow':
     category = ['VBFcatlow']
 
 if opts.whichCat=='Zinvcat':
-    sigAll = ['WH','ZinvH']
-    mcAll = ['WH','ZinvH','bkg']
+    sigAll = ['WHl','ZinvH']
+    mcAll = ['WHl','ZinvH','bkg']
     category = ['Zinvcat']
 
 ################### OPEN OUTPUT ############
@@ -232,7 +257,10 @@ datacard.write("\n")
 datacard.write("rate\t")
 for cat in category:
     for proc in mcAll:
-        datacard.write("\t1")
+#        datacard.write("\t1")
+        if (proc=='bkg'): datacard.write("\t1")
+        else:
+            datacard.write("\t0.01")
 #	datacard.write("\t1")
 #        if savePdf:
 #	    datacard.write("\t%.0f"%(opts.lumi) )
@@ -241,32 +269,38 @@ for cat in category:
 datacard.write("\n")
 
 ############ SYST ########
-if doSyst:
-    datacard.write("-------------------------------------\n")
-    datacard.write("lumi_13TeV \tlnN ")
-    for cat in category:
-        for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
-            else:
-                datacard.write("\t%.3f"%(1.025) )
-
+datacard.write("-------------------------------------\n")
+datacard.write("lumi_13TeV \tlnN ")
+for cat in category:
+    for proc in mcAll:
+        if (proc=='bkg'): datacard.write("\t-")
+        else:
+            datacard.write("\t%.3f"%(1.025) )
     datacard.write("\n")
+
+if doSyst:
     ##
     for proc in mcAll:
         print("proc",proc)
         if (proc=='bkg'): continue
         else:
             addSystematics("QCDscale_"+proc, 'lnN' ,QCDscale[proc], proc, category, mcAll, datacard)
-            if (proc=='ggH'):
-                addSystematics("pdf_Higgs_gg", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
-            else: addSystematics("pdf_Higgs_qq", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
+            addSystematics("pdf_Higgs_"+proc, 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
+#            if (proc=='ggH'):
+#                addSystematics("pdf_Higgs_gg", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
+#            else: addSystematics("pdf_Higgs_qq", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
     ##
 
-    ### Add autoMCStats
-    datacard.write("\n")
-    datacard.write("* autoMCStats 0\n")
+#    ### Add autoMCStats
+#    datacard.write("\n")
+#    datacard.write("* autoMCStats 0\n")
 
 datacard.write("-------------------------------------\n")
+
+if MultiPdf:
+    pdfindexSTR='pdfindex'+opts.whichMeson+"_"+opts.whichCat
+    datacard.write("\n")
+    datacard.write("%s discrete\n"%pdfindexSTR)
 
 ############ DONE ########
 w.writeToFile(opts.output)

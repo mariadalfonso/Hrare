@@ -1,0 +1,17 @@
+python SummaryPlots.py '_GFcat' '_RhoCat'
+python SummaryPlots.py '_GFcat' '_PhiCat'
+
+python SummaryPlots.py '_VBFcatlow' '_RhoCat'
+python SummaryPlots.py '_VBFcatlow' '_PhiCat'
+
+python SummaryPlots.py '_VBFcat' '_RhoCat'
+python SummaryPlots.py '_VBFcat' '_PhiCat'
+
+python SummaryPlots.py '_Zinvcat' '_RhoCat'
+python SummaryPlots.py '_Zinvcat' '_PhiCat'
+
+python SummaryPlots.py '_Wcat' '_RhoCat'
+python SummaryPlots.py '_Wcat' '_PhiCat'
+
+python SummaryPlots.py '_Zcat' '_RhoCat'
+python SummaryPlots.py '_Zcat' '_PhiCat'

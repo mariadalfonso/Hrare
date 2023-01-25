@@ -1,13 +1,14 @@
 {
-    "BARRELphotons" : "(Photon_pt>20 and Photon_isScEtaEB and Photon_mvaID_WP90)",
-    "ENDCAPphotons" : "(Photon_pt>20 and Photon_isScEtaEE and Photon_mvaID_WP80)",
+    "BARRELphotons" : "(Photon_pt>30 and Photon_isScEtaEB and Photon_mvaID_WP90)",
+    "ENDCAPphotons" : "(Photon_pt>30 and Photon_isScEtaEE and Photon_mvaID_WP80)",
+    "ENDCAPphotonsLoose" : "(Photon_pt>30 and Photon_isScEtaEE and Photon_mvaID_WP90)",
 
     "GOODMUON" : "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)",
     "LOOSEmuons" : "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)",
-    "GOODELE" : "(Electron_pt>20 and abs(Electron_eta)<2.5 and Electron_mvaFall17V2Iso_WPL and abs(Electron_dxy) < 0.2 && abs(Electron_dz) < 0.5 and ele_mask)",
-    "LOOSEelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and abs(Electron_dz)<0.5 and abs(Electron_dxy) < 0.2 && Electron_mvaFall17V2Iso_WPL and ele_mask)",
+    "GOODELE" : "(Electron_pt>20 and abs(Electron_eta)<2.5 and Electron_mvaFall17V2Iso_WPL and abs(Electron_dxy) < 0.2 and abs(Electron_dz) < 0.5 and ele_mask)",
+    "LOOSEelectrons" : "(Electron_pt>10 and abs(Electron_eta) < 2.5 and abs(Electron_dz)<0.5 and abs(Electron_dxy) < 0.2 and Electron_mvaFall17V2Iso_WPL and ele_mask)",
 
-    "GOODJETS": "(Jet_pt>20 && abs(Jet_eta)<4.7 and (Jet_jetId & 2) and (Jet_puId > 0) and jet_mask and jet_mask2)",
+    "GOODJETS": "(Jet_pt>20 and abs(Jet_eta)<4.7 and (Jet_jetId & 2) and (Jet_puId & 2) and jet_mask and jet_mask2)",
 
     "METFLAG": "(Flag_globalSuperTightHalo2016Filter and Flag_EcalDeadCellTriggerPrimitiveFilter and Flag_eeBadScFilter and Flag_ecalBadCalibFilter and Flag_HBHENoiseIsoFilter and Flag_HBHENoiseFilter)",
 
@@ -15,57 +16,57 @@
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "file": "weightsLargeMassAUG/VBF_phi/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBF_phi/dataset_training_2of3_events__13_vars/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva/VBF_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBF_phi_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "file": "weightsLargeMassAUG/VBF_rho/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBF_rho/dataset_training_2of3_events__13_vars/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva/VBF_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBF_rho_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
 	},
-        {
-            "name": "isGF",
-            "type": "isPhiCat",
-            "file": "weightsLargeMassAUG/ggH_phi/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/training/ggH_phi/dataset_training_2of3_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
-        },
-        {
-            "name": "isGF",
-            "type": "isRhoCat",
-            "file": "weightsLargeMassAUG/ggH_rho/TMVAClassification_BDTG.weights.xml",
-            "org": "/work/submit/kyoon/RareHiggs/test/training/ggH_rho/dataset_training_2of3_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
-        },
+	{
+	    "name": "isGF",
+	    "type": "isPhiCat",
+	    "file": "weights_mva/ggH_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/GF_phi_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	},
+	{
+	    "name": "isGF",
+	    "type": "isRhoCat",
+	    "file": "weights_mva/ggH_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/GF_rho_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isRhoCat",
-	    "file": "weightsLargeMassAUG/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBFlow_rho/dataset_training_1of2_events__17_vars/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBFlow_rho_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isPhiCat",
-	    "file": "weightsLargeMassAUG/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/test/training/VBFlow_phi/dataset_training_1of2_events__17_vars/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBFlow_phi_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
 	},
-       {
-            "name": "isZinv",
-            "type": "isRhoCat",
-            "file": "weightsOCT/Zinv_rho/TMVAClassification_BDTG.weights.xml",
-            "org1": "/work/submit/kyoon/RareHiggs/test/training/Zinv_rho/dataset__MH110-140__training_1of2_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
+	{
+	    "name": "isZinv",
+	    "type": "isRhoCat",
+            "file": "weights_mva/Zinv_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/Zinv_rho_MH100-170/weights/TMVAClassification_BDTG.xml"
 	},
-        {
-            "name": "isZinv",
-            "type": "isPhiCat",
-            "file": "weightsOCT/Zinv_phi/TMVAClassification_BDTG.weights.xml",
-            "org1": "/work/submit/kyoon/RareHiggs/test/training/Zinv_phi/dataset__MH110-140__training_1of2_events__11_vars/weights/TMVAClassification_BDTG.weights.xml"
-        }
+	{
+	    "name": "isZinv",
+	    "type": "isPhiCat",
+	    "file": "weights_mva/Zinv_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/Zinv_phi_MH100-170/weights/TMVAClassification_BDTG.xml"
+	}
     ],
     "mesons": [
 	{
 	    "name": "isZinv",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015)",
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{
@@ -74,21 +75,20 @@
 	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05 * rho_kin_vtx_chi2dof && rho_doca < 0.015)",
 	    "notes":" used for isZinv, isGF"
 	},
-        {
-            "name": "isVBFlow",
-            "type": "isPhiCat",
-            "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)",
-        },
-        {
-            "name": "isVBFlow",
-            "type": "isRhoCat",
-            "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)",
-        },
-
+	{
+	    "name": "isVBFlow",
+	    "type": "isPhiCat",
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9)"
+	},
+	{
+	    "name": "isVBFlow",
+	    "type": "isRhoCat",
+	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
+	},
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)"
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>20 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9)"
 	},
 	{
 	    "name": "isVBF",
@@ -98,12 +98,12 @@
 	{
 	    "name": "VH",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>20 && phi_trk1_pt>5 && phi_trk2_pt>5 && phi_kin_valid && phi_iso > 0.9)"
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>20 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.8)"
 	},
 	{
 	    "name": "VH",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
+	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.8)"
 	},
 	{
 	    "name": "isVBF",
@@ -129,153 +129,12 @@
 	    "file": "Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
 	},
 	{
-	    "year": 2016,
+	    "year": 12016,
 	    "file": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
-	}
-    ],
-    "triggers": [
-	{
-	    "name": "isZinv",
-	    "year": 2018,
-	    "definition": "HLT_Photon35_TwoProngs35"
 	},
 	{
-	    "name": "isVBF",
-	    "year": 2018,
-	    "definition": "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50"
-	},
-	{
-	    "name": "isVBF",
-	    "year": 2017,
-	    "definition": "HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 or HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50 or HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3"
-	},
-	{
-	    "name": "isVBF",
-	    "year": 12016,
-	    "definition": "HLT_Photon75_R9Id90_HE10_Iso40_EBOnly_VBF or HLT_Photon90_R9Id90_HE10_Iso40_EBOnly_VBF or HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_VBF"
-	},
-	{
-	    "name": "oneMU",
-	    "year": 2018,
-	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50)"
-	},
-	{
-	    "name": "diMU",
-	    "year": 2018,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8)"
-	},
-	{
-	    "name": "muEG",
-	    "year": 2018,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)"
-	},
-	{
-	    "name": "diEL",
-	    "year": 2018,
-	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle25_CaloIdL_MW||HLT_DoublePhoton70)"
-	},
-	{
-	    "name": "oneEL",
-	    "year": 2018,
-	    "definition": "(HLT_Ele27_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Ele35_WPTight_Gsf||HLT_Ele115_CaloIdVT_GsfTrkIdT)"
-	},
-	{
-	    "name": "oneMU",
-	    "year": 2016,
-	    "definition": "(HLT_IsoMu24||HLT_IsoTkMu24||HLT_IsoMu22||HLT_IsoTkMu22||HLT_Mu45_eta2p1||HLT_Mu50)"
-	},
-	{
-	    "name": "diMU",
-	    "year": 12016,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL)",
-	    "note": "valid only for HIPM"
-	},
-	{
-	    "name": "diMU",
-	    "year": 2016,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL)"
-	},
-	{
-	    "name": "muEG",
-	    "year": 12016,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)",
-	    "note": "valid only for HIPM"
-	},
-	{
-	    "name": "muEG",
-	    "year": 2016,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)"
-	},
-	{
-	    "name": "oneEL",
-	    "year": 12016,
-	    "definition": "(HLT_Ele25_eta2p1_WPTight_Gsf||HLT_Ele27_eta2p1_WPLoose_Gsf||HLT_Ele27_WPTight_Gsf||HLT_Ele30_WPTight_Gsf||HLT_Ele35_WPLoose_Gsf||HLT_Ele27_WP85_Gsf||HLT_Ele27_WPLoose_Gsf||HLT_Ele105_CaloIdVT_GsfTrkIdT||HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_eta2p1_WPTight_Gsf||HLT_Ele32_eta2p1_WPTight_Gsf||HLT_ECALHT800)"
-	},
-	{
-	    "name": "oneEL",
-	    "year": 2016,
-	    "definition": "(HLT_Ele25_eta2p1_WPTight_Gsf||HLT_Ele27_eta2p1_WPLoose_Gsf||HLT_Ele27_WPTight_Gsf||HLT_Ele105_CaloIdVT_GsfTrkIdT||HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_eta2p1_WPTight_Gsf||HLT_Ele32_eta2p1_WPTight_Gsf||HLT_ECALHT800)"
-	},
-	{
-	    "name": "diEL",
-	    "year": 2016,
-	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf)"
-	},
-	{
-	    "name": "oneMU",
-	    "year": 2017,
-	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50)",
-	    "note": "valid only for CtoF"
-	},
-	{
-	    "name": "diMUcdef",
-	    "year": 2017,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)",
-	    "note": "valid only for CtoF"
-	},
-	{
-	    "name": "diMU",
-	    "year": 2017,
-	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)",
-	    "note": "valid only for B"
-	},
-	{
-	    "name": "muEGcdef",
-	    "year": 2017,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL)",
-	    "note": "valid only for CtoF"
-	},
-	{
-	    "name": "muEG",
-	    "year": 2017,
-	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)",
-	    "note": "valid only for CtoF"
-	},
-	{
-	    "name": "oneELdef",
-	    "year": 2017,
-	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
-	},
-	{
-	    "name": "oneELc",
-	    "year": 2017,
-	    "definition": "(HLT_Ele115_CaloIdVT_GsfTrkIdT||HLT_Ele27_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
-	},
-	{
-	    "name": "oneEL",
-	    "year": 2017,
-	    "definition": "(HLT_Ele27_WPTight_Gsf||HLT_Ele35_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Photon200)"
-	},
-	{
-	    "name": "diELcdef",
-	    "year": 2017,
-	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DiEle27_WPTightCaloOnly_L1DoubleEG||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)",
-	    "note": "valid only for CtoF"
-	},
-	{
-	    "name": "diEL",
-	    "year": 2017,
-	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle33_CaloIdL_MW||HLT_DoublePhoton70)"
-	}
+	    "year": 22016,
+	    "file": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
+	}	
     ]
 }

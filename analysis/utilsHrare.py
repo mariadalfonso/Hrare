@@ -1,15 +1,11 @@
 import ROOT
 import os
 import json
-from subprocess import call,check_output
 import fnmatch
 import glob
-from XRootD import client
-from XRootD.client.flags import DirListFlags
-import subprocess
 
-if "/functions.so" not in ROOT.gSystem.GetLibraries():
-    ROOT.gSystem.CompileMacro("functions.cc","k")
+if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
+    ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.cc","k")
 
 import correctionlib
 correctionlib.register_pyroot_binding()
@@ -54,36 +50,19 @@ def loadJSON(fIn):
             vec.push_back(pair)
             ROOT.jsonMap[int(k)] = vec
 
-def findDataset(name):
-
-    DASclient = "dasgoclient -query '%(query)s'"
-    cmd= DASclient%{'query':'file dataset=%s'%name}
-    print(cmd)
-    check_output(cmd,shell=True)
-    fileList=[ 'root://xrootd-cms.infn.it//'+x for x in check_output(cmd,shell=True).split() ]
-
-    files_ROOT = ROOT.vector('string')()
-    for f in fileList: files_ROOT.push_back(f)
-
-    return files_ROOT
-
 def findDIR(directory):
 
     print(directory)
+    filename = ("{}".format(directory)+"/*.root")
 
     counter = 0
     rootFiles = ROOT.vector('string')()
-    for root, directories, filenames in os.walk(directory):
-        for f in filenames:
 
-            counter+=1
-            filePath = os.path.join(os.path.abspath(root), f)
-            if "failed/" in filePath: continue
-            if "log/" in filePath: continue
-            rootFiles.push_back(filePath)
-#            if counter>100: break
-#            if counter>50: break
-#            if counter>5: break
+    maxFiles = 1000000000
+    for filenames in glob.glob(filename):
+        counter+=1
+        if(counter > maxFiles): break
+        rootFiles.push_back(filenames)
 
     return rootFiles
 
@@ -96,56 +75,18 @@ def readListFromFile(filename):
 
     return rootFiles
 
-
-def findManyClient(basedir, regex):
-
-    rootFiles = ROOT.vector('string')()
-
-    directory = '/store/user/paus/nanohr/D01'
-    fs = client.FileSystem('root://xrootd.cmsaf.mit.edu/')
-    lsst = fs.dirlist(directory,DirListFlags.RECURSIVE)
-#    lsst = fs.dirlist(directory)
-
-    for e in lsst[1]:
-        filePath  = e.name
-        if fnmatch.fnmatch(filePath, regex):
-            filename= 'root://xrootd.cmsaf.mit.edu/'+directory+e.name
-            if "failed/" in filename: continue
-            if "log/" in filename: continue
-            if "tmp_" in filename: continue
-            if ".txt" in filename: continue
-            rootFiles.push_back(filename)
-
-    return rootFiles
-
-def findManyXRDFS(basedir, regex):
-
-    server = "root://xrootd.cmsaf.mit.edu/"
-    print("using ",server)
-    print("regex=",regex)
-    print("basedir=",basedir)
-
-    command = f"xrdfs "+server+" ls -R /store/user/paus/nanohr/D01 | grep "+regex+" | grep '.root'"
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, shell=True)
-    result = proc.stdout.readlines()
-    paths = [server + r.rstrip().decode("utf-8") for r in result]
-    print(paths)
-    print('RESULTS = ',len(result))
-
-    rootFiles = ROOT.vector('string')()
-    for f in paths:
-        rootFiles.push_back(f)
-
-    return rootFiles
-
-
 def findMany(basedir, regex):
 
     if basedir[-1] == "/": basedir = basedir[:-1]
     regex = basedir + "/" + regex
 
+    print("regex=",regex)
+    print("basedir=",basedir)
+
+    counter = 0
+
     rootFiles = ROOT.vector('string')()
+
     for root, directories, filenames in os.walk(basedir):
 
         for f in filenames:
@@ -154,60 +95,84 @@ def findMany(basedir, regex):
             if "failed/" in filePath: continue
             if "log/" in filePath: continue
             if fnmatch.fnmatch(filePath, regex): rootFiles.push_back(filePath)
-
+            if fnmatch.fnmatch(filePath, regex): counter+=1
+            #            if counter>10: break
+            #            if counter>250: break
     return rootFiles
 
-def concatenate(result, tmp1):
-    for f in tmp1:
-        result.push_back(f)
+def getMClist(year, sampleNOW):
 
-def getMClist(year,sampleNOW):
-
-    files = findDIR("{}".format(SwitchSample(sampleNOW)[0]))
-    if sampleNOW==0:
-            files1 = findDIR("{}".format(SwitchSample(1000)[0]))
-            concatenate(files, files1)
+    files = findDIR("{}".format(SwitchSample(sampleNOW,year)[0]))
     return files
 
-def getDATAlist(year,type):
+def getDATAlist(argument,year):
+
+    dirJson = "config"
 
     if(year == 2018):
-        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
+        loadJSON("{}/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt".format(dirJson))
     if(year == 2017):
-        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
-    if(year == 2016 or year == 12016):
-        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
+        loadJSON("{}/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt".format(dirJson))
+    if(year == 22016 or year == 12016):
+        loadJSON("{}/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
 
-    if(year == 2018 and type == -1):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018A*")
-    if(year == 2018 and type == -2):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018B*")
-    if(year == 2018 and type == -3):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018C*")
-    if(year == 2018 and type == -4):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","SingleMuon+Run2018D*")
+    dirT2 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
 
-    if(year == 2018 and type == -31):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018A*")
-    if(year == 2018 and type == -32):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018B*")
-    if(year == 2018 and type == -33):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018C*")
-    if(year == 2018 and type == -34):
-        files = findMany("/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/","EGamma+Run2018D*")
+# FIXME: this build toooo many lists
 
-    return files
+    switch = {
+        -1: (("SingleMuon+Run"+str(year)+"A*"),"SingleMuon"),
+        -2: (("SingleMuon+Run"+str(year)+"B*"),"SingleMuon"),
+        -3: (("SingleMuon+Run"+str(year)+"C*"),"SingleMuon"),
+        -4: (("SingleMuon+Run"+str(year)+"D*"),"SingleMuon"),
+        #
+        -11: (("DoubleMuon+Run"+str(year)+"A*"),"DoubleMuon"),
+        -12: (("DoubleMuon+Run"+str(year)+"B*"),"DoubleMuon"),
+        -13: (("DoubleMuon+Run"+str(year)+"C*"),"DoubleMuon"),
+        -14: (("DoubleMuon+Run"+str(year)+"D*"),"DoubleMuon"),
+        #
+        -21: (("MuonEG+Run"+str(year)+"A*"),"MuonEG"),
+        -22: (("MuonEG+Run"+str(year)+"B*"),"MuonEG"),
+        -23: (("MuonEG+Run"+str(year)+"C*"),"MuonEG"),
+        -24: (("MuonEG+Run"+str(year)+"D*"),"MuonEG"),
+        #
+        -31: (("EGamma+Run"+str(year)+"A*"),"EGamma"),
+        -32: (("EGamma+Run"+str(year)+"B*"),"EGamma"),
+        -33: (("EGamma+Run"+str(year)+"C*"),"EGamma"),
+        -34: (("EGamma+Run"+str(year)+"D*"),"EGamma"),
+        #  SinglePhoton (for the 2017 VBF)
+        -52: (("SinglePhoton+Run"+str(year)+"B*"),"SinglePhoton"),
+        -53: (("SinglePhoton+Run"+str(year)+"C*"),"SinglePhoton"),
+        -54: (("SinglePhoton+Run"+str(year)+"D*"),"SinglePhoton"),
+        -55: (("SinglePhoton+Run"+str(year)+"E*"),"SinglePhoton"),
+        -56: (("SinglePhoton+Run"+str(year)+"F*"),"SinglePhoton"),
+        # Tau
+        -61: (("Tau+Run"+str(year)+"A*"),"Tau"),
+        -62: (("Tau+Run"+str(year)+"B*"),"Tau"),
+        -63: (("Tau+Run"+str(year)+"C*"),"Tau"),
+        -64: (("Tau+Run"+str(year)+"D*"),"Tau"),
+    }
+
+    tmp_pair = switch.get(argument, "regex, PDtype")
+    pair = (findMany(dirT2,tmp_pair[0]),tmp_pair[1])
+
+    return pair
 
 def getSkims(argument,year,category):
 
-    if(year == 2018):
-        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
-    if(year == 2017):
-        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
-    if(year == 2016 or year == 12016):
-        loadJSON("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
+    dirJson = "config"
 
-    dirScratch = "/scratch/submit/mariadlf/Hrare/SKIMS/D01"
+    if(year == 2018):
+        loadJSON("{}/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt".format(dirJson))
+    if(year == 2017):
+        loadJSON("{}/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt".format(dirJson))
+    if(year == 22016 or year == 12016):
+        loadJSON("{}/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
+
+    dirScratch = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01"
+    dirScratch2 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D01"
+    dirScratchSS = "/scratch/submit/cms/mariadlf/Hrare/SStau"
+
     switch = {
         -1: (("SingleMuon+Run"+"A"),"SingleMuon"),
         -2: (("SingleMuon+Run"+"B"),"SingleMuon"),
@@ -225,7 +190,7 @@ def getSkims(argument,year,category):
         -15: (("DoubleMuon+Run"+"E"),"DoubleMuon"),
         -16: (("DoubleMuon+Run"+"F"),"DoubleMuon"),
         -17: (("DoubleMuon+Run"+"G"),"DoubleMuon"),
-        -18: (("DoubleMuon+Run"+"H"),"DoubleMuon"),        ,
+        -18: (("DoubleMuon+Run"+"H"),"DoubleMuon"),
         #
         -21: (("MuonEG+Run"+"A"),"MuonEG"),
         -22: (("MuonEG+Run"+"B"),"MuonEG"),
@@ -248,7 +213,6 @@ def getSkims(argument,year,category):
         -41: (("DoubleEG+Run"+"A"),"DoubleEG"),
         -42: (("DoubleEG+Run"+"B"),"DoubleEG"),
         -43: (("DoubleEG+Run"+"C"),"DoubleEG"),
-        -43: (("DoubleEG+Run"+"C"),"DoubleEG"),
         -44: (("DoubleEG+Run"+"D"),"DoubleEG"),
         -45: (("DoubleEG+Run"+"E"),"DoubleEG"),
         -46: (("DoubleEG+Run"+"F"),"DoubleEG"),
@@ -268,6 +232,8 @@ def getSkims(argument,year,category):
         -62: (("Tau+Run"+"B"),"Tau"),
         -63: (("Tau+Run"+"C"),"Tau"),
         -64: (("Tau+Run"+"D"),"Tau"),
+        -65: (("Tau"+str(year)+"C*"),"Tau"), # SS
+        -66: (("Tau"+str(year)+"D*"),"Tau"), # SS
         #
 #        -71: (("SinglePhoton+Run"+"A"),"SinglePhoton"),
 #        -72: (("SinglePhoton+Run"+"B"),"SinglePhoton"),
@@ -278,87 +244,163 @@ def getSkims(argument,year,category):
 #        -77: (("SinglePhoton+Run"+"G"),"SinglePhoton"),
 #        -78: (("SinglePhoton+Run"+"H"),"SinglePhoton"),
         #
-        -81: (("SinglePhoton+Run"+"B-ver1-HIPM"),"SinglePhoton"),
-        -82: (("SinglePhoton+Run"+"B-ver1-HIPM"),"SinglePhoton"),
-        -83: (("SinglePhoton+Run"+"C-HIPM"),"SinglePhoton"),
-        -84: (("SinglePhoton+Run"+"D-HIPM"),"SinglePhoton"),
-        -85: (("SinglePhoton+Run"+"E-HIPM"),"SinglePhoton"),
-        -86: (("SinglePhoton+Run"+"F-HIPM"),"SinglePhoton"),
     }
+
+    print(category)
+
+    if(year == 12016):
+        switch = {
+            -1: (("SingleMuon+Run"+"B-ver1"),"SingleMuon"),
+            -2: (("SingleMuon+Run"+"B-ver2"),"SingleMuon"),
+            -3: (("SingleMuon+Run"+"C"),"SingleMuon"),
+            -4: (("SingleMuon+Run"+"D"),"SingleMuon"),
+            -5: (("SingleMuon+Run"+"E"),"SingleMuon"),
+            -6: (("SingleMuon+Run"+"F"),"SingleMuon"),
+
+            -11: (("DoubleMuon+Run"+"B-ver1"),"DoubleMuon"),
+            -12: (("DoubleMuon+Run"+"B-ver2"),"DoubleMuon"),
+            -13: (("DoubleMuon+Run"+"C"),"DoubleMuon"),
+            -14: (("DoubleMuon+Run"+"D"),"DoubleMuon"),
+            -15: (("DoubleMuon+Run"+"E"),"DoubleMuon"),
+            -16: (("DoubleMuon+Run"+"F"),"DoubleMuon"),
+
+            -21: (("MuonEG+Run"+"B-ver1"),"MuonEG"),
+            -22: (("MuonEG+Run"+"B-ver2"),"MuonEG"),
+            -23: (("MuonEG+Run"+"C"),"MuonEG"),
+            -24: (("MuonEG+Run"+"D"),"MuonEG"),
+            -25: (("MuonEG+Run"+"E"),"MuonEG"),
+            -26: (("MuonEG+Run"+"F"),"MuonEG"),
+
+            -41: (("DoubleEG+Run"+"B-ver1"),"DoubleEG"),
+            -42: (("DoubleEG+Run"+"B-ver2"),"DoubleEG"),
+            -43: (("DoubleEG+Run"+"C"),"DoubleEG"),
+            -44: (("DoubleEG+Run"+"D"),"DoubleEG"),
+            -45: (("DoubleEG+Run"+"E"),"DoubleEG"),
+            -46: (("DoubleEG+Run"+"F"),"DoubleEG"),
+
+            -51: (("SingleElectron+Run"+"B-ver1"),"SingleElectron"),
+            -52: (("SingleElectron+Run"+"B-ver2"),"SingleElectron"),
+            -53: (("SingleElectron+Run"+"C"),"SingleElectron"),
+            -54: (("SingleElectron+Run"+"D"),"SingleElectron"),
+            -55: (("SingleElectron+Run"+"E"),"SingleElectron"),
+            -56: (("SingleElectron+Run"+"F"),"SingleElectron"),
+
+            -81: (("SinglePhoton+Run"+"B-ver1-HIPM"),"SinglePhoton"),
+            -82: (("SinglePhoton+Run"+"B-ver2-HIPM"),"SinglePhoton"),
+            -83: (("SinglePhoton+Run"+"C-HIPM"),"SinglePhoton"),
+            -84: (("SinglePhoton+Run"+"D-HIPM"),"SinglePhoton"),
+            -85: (("SinglePhoton+Run"+"E-HIPM"),"SinglePhoton"),
+            -86: (("SinglePhoton+Run"+"F-HIPM"),"SinglePhoton"),
+        }
 
     tmp_pair = switch.get(argument, "regex, PDtype")
     finalDir = dirScratch+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
+    if (category=="VH"): finalDir = dirScratch2+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
+    if (category=="VBF" and (argument == -62 or argument == -63 or argument == -64) ): finalDir = dirScratch+"/"+"Zinv"+"/"+str(year)+"/"+tmp_pair[0]
+    if (argument == -65 or argument == -66): finalDir = dirScratchSS+"/"+tmp_pair[0]
+    print(finalDir)
     pair = (findDIR(finalDir),tmp_pair[1])
     return pair
 
-
 def SwitchSample(argument,year):
 
+    #https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
     # cross section from  https://cms-gen-dev.cern.ch/xsdb
+
+    ####----------  relevant disks
     dirT2 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
-    dirLocal = "/work/submit/mariadlf/Hrare/D01/2018/"
+    dirGluster = "/data/submit/cms/store/user/mariadlf/nano/D01/"
+    dirScratch = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01/"
+    ####----------
+    dirLocal = "/work/submit/mariadlf/Hrare/OCT14/"
+    dirLocalNEW = "/work/submit/mariadlf/Hrare/D01/2018/"
+    dirLocalD01 = "/data/submit/mariadlf/HrareSIG/D01/2018/"
+    dirLocalTEST = "/work/submit/mariadlf/Hrare/TEST/2018/"
+    dirLocalTEST2 = "/work/submit/mariadlf/Hrare/TESTtrackFIX/2018/"
 
     campaign = ""
     if(year == 2018): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
     if(year == 2017): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
-    if(year == 2016): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
+    if(year == 22016): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
     if(year == 12016): campaign = "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*"
+
+    campaignFIX = ""
+    if(year == 2018): campaignFIX = "RunIISummer20UL18MiniAODv2-4cores5k_106X_upgrade2018_realistic_v16_L1v1*"
+    if(year == 2017): campaignFIX = "RunIISummer20UL17MiniAODv2-4cores5k_106X_mc2017_realistic_v9*"
+    if(year == 22016): campaignFIX = "RunIISummer20UL16MiniAODv2-4cores5k_106X_mcRun2_asymptotic_v17*"
+    if(year == 12016): campaignFIX = "RunIISummer20UL16MiniAODAPVv2-4cores5k_106X_mcRun2_asymptotic_preVFP_v11*"
 
     switch = {
         ## SIGNAL
-        1010: (dirT2+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7*0.49), #NNLO
-        1011: (dirT2+"WplusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1012: (dirT2+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1013: (dirT2+"ZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1014: (dirT2+"ggZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1015: (dirT2+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.6 - 24.5)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1016: (dirT2+"ggZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.5*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1017: (dirT2+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,46870*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1010: (dirGluster+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7*0.49), #NNLO
+        1011: (dirGluster+"WplusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1012: (dirGluster+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1013: (dirGluster+"ZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1014: (dirGluster+"ggZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1015: (dirGluster+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1016: (dirGluster+"ggZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1017: (dirGluster+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         #
-        1020: (dirT2+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1021: (dirT2+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1022: (dirT2+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1023: (dirT2+"ZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1024: (dirT2+"ggZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1025: (dirT2+"ZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.6 - 24.5)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1026: (dirT2+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.5), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1027: (dirT2+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        ##
+        1020: (dirGluster+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1021: (dirGluster+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1022: (dirGluster+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1023: (dirGluster+"ZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1024: (dirGluster+"ggZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1025: (dirGluster+"ZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1026: (dirGluster+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1027: (dirGluster+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        #
+        1018: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
+        #
         1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
-        ## SM-BKG
-        0: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,6067*1000), #NNLO
-        1: (dirT2+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 51.1*1000), #LO
-        2: (dirT2+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 191.0*1000), #LO
-        3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,53870.0*1000), #LO
+        # TESTS
+        1050: (dirLocalTEST+"ggh-hrhogamma-powheg"+"/NANOAOD_01",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1051: (dirLocalTEST2+"ggh-hrhogamma-powheg"+"/NANOAOD_01",48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1052: (dirLocalTEST2+"ggh-hphigamma-powheg"+"/NANOAOD_01",48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        16: (dirLocal+"ZLLphigamma_pythia8_genFix",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+#        10: (dirLocalNEW+"zh-hphigamma-powheg",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+###### new set
+#        13: (dirLocalNEW+"zh_Phigamma",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+#        14: (dirLocalNEW+"zh_Rhogamma",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+#        15: (dirLocalNEW+"zh_Omegagamma",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+#        16: (dirLocalNEW+"zh_KLKSgamma",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+#        1000: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,6067*1000), #NNLO
+        0: (dirGluster+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,6067*1000), #NNLO (LO was 5398.0)
+#        0: (dirT2+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,6067*1000), #NNLO (LO was 5398.0)
+        1: (dirGluster+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 51.1*1000), #LO
+        2: (dirGluster+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 191.3*1000), #LO
+        #        2: (dirT2+"WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 412.7*1000), #LO
+        3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,61526.7*1000), #NNLO (LO was 53870.0)
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+"+campaign,365.3452*1000), #NNLO
-        #
+        ##
         6: (dirT2+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
         7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
         8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
         9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
-        10: (dirT2+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
-        11: (dirT2+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX,8644.0*1000*1.26), #LO *1.26
-        12: (dirT2+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,2183.0*1000*1.26), #LO *1.26
-        13: (dirT2+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
-        14: (dirT2+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
-        #
+        10: (dirGluster+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
+        11: (dirGluster+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX,8644.0*1000*1.26), #LO *1.26
+        12: (dirGluster+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,2183.0*1000*1.26), #LO *1.26
+        13: (dirGluster+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
+        14: (dirGluster+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
+        ####
         15: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
-        #
+        ####
         20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,6447000.0*1000*1.26), #LO *1.26
         21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1988000.0*1000*1.26), #LO *1.26
         22: (dirT2+"QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,367500.0*1000*1.26), #LO *1.26
         23: (dirT2+"QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,66590.0*1000*1.26), #LO *1.26
         24: (dirT2+"QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,16620.0*1000*1.26), #LO *1.26
         25: (dirT2+"QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1104.0*1000*1.26), #LO *1.26
-        #
+
         31: (dirT2+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,53330.0*1000), #LO
-        32: (dirT2+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8875.0*1000), #LO
-        33: (dirT2+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,3338.0*1000), #LO
-        34: (dirT2+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,5129.0*1000), #LO
-        35: (dirT2+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,951.5*1000), #LO
-        36: (dirT2+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,361.4*1000), #LO
-        #
+        32: (dirGluster+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8875.0*1000), #LO
+        33: (dirGluster+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,3338.0*1000), #LO
+
+        34: (dirGluster+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,5129.0*1000), #LO
+        35: (dirGluster+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,951.5*1000), #LO
+        36: (dirGluster+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,361.4*1000), #LO
+
         37: (dirT2+"Z1JetsToNuNu_M-50_LHEFilterPtZ-50To150_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,579.9*1000),
         38: (dirT2+"Z1JetsToNuNu_M-50_LHEFilterPtZ-150To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,17.42*1000),
         39: (dirT2+"Z1JetsToNuNu_M-50_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,1.987*1000),
@@ -367,39 +409,55 @@ def SwitchSample(argument,year):
         42: (dirT2+"Z2JetsToNuNu_M-50_LHEFilterPtZ-150To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,30*1000),
         43: (dirT2+"Z2JetsToNuNu_M-50_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.98*1000),
         44: (dirT2+"Z2JetsToNuNu_M-50_LHEFilterPtZ-400ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,0.8165*1000),
-        #
+
         45: (dirT2+"WGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8.635*1000),
         46: (dirT2+"ZGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.144*1000),
         47: (dirT2+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
         48: (dirT2+"ZGTo2NuG_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,30.11*1000),
-    }
-    return switch.get(argument, "BKGdefault, xsecDefault")
 
+    }
+
+    return switch.get(argument, "BKGdefault, xsecDefault")
 
 def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv):
 
     TRIGGER=''
     if(year == 2018 and isVBF):
         if (PDType== "EGamma"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
-        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
+        elif (PDType== "Tau"): TRIGGER="{0} and not {1}".format(getTriggerFromJson(overall, "isZinv", year),getTriggerFromJson(overall, "isVBF", year))
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBFor", year)   # MC seems the same
     if(year == 2018 and isZinv):
-        if (PDType== "TAU"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)
-        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)     # MC seems the same
-    if(year == 2017 and isVBF and PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+        if (PDType== "Tau"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)    # MC seems the same
+    if(year == 2017 and isVBF):
+        if (PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
+    if((year == 12016 or year == 22016) and isVBF):
+        if (PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
 
     if(year == 2018 and (isW or isZ)):
-
-        if(PDType == "MuonEG"): TRIGGER = "{0}".format(getTriggerFromJson(overall, "muEG", year))
-        elif (PDType == "DoubleMuon"): TRIGGER = "{0} and not {1}".format(getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
-        elif (PDType == "SingleMuon"): TRIGGER = "{0} and not {1} and not {2}".format(getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
-        elif (PDType == "EGamma"): TRIGGER = "({0} or {1}) and not {2} and not {3} and not {4}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+        if (PDType == "DoubleMuon"): TRIGGER = "{0}".format(getTriggerFromJson(overall, "diMU", year))
+        elif (PDType == "SingleMuon"): TRIGGER = "{0} and not {1}".format(getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
+        elif (PDType == "EGamma"): TRIGGER = "({0} or {1}) and not {2} and not {3}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
+        elif(PDType == "MuonEG"): TRIGGER = "{0} and not {1} and not {2} and not {3}".format(getTriggerFromJson(overall, "muG", year),getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
         elif(year == 2018):
-            TRIGGER = "{0} or {1} or {2} or {3} or {4}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muEG", year))
+            TRIGGER = "{0} or {1} or {2} or {3} or {4}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muG", year))
+        else:
+            print("PROBLEM with triggers!!!")
+
+    if((year == 2017 or year == 22016 or year == 12016) and (isW or isZ)):
+        if (PDType == "DoubleMuon"): TRIGGER = "{0}".format(getTriggerFromJson(overall, "diMU", year))
+        elif (PDType == "SingleMuon"): TRIGGER = "{0} and not {1}".format(getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
+        elif (PDType == "DoubleEG"): TRIGGER = "{0} and not {1} and not {2}".format(getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
+        elif (PDType == "SingleElectron"): TRIGGER = "{0} and not {1} and not {2} and not {3}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
+        elif(PDType == "MuonEG"): TRIGGER = "{0} and not {1} and not {2} and not {3}".format(getTriggerFromJson(overall, "muG", year),getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year))
+        elif(year == 2017 or year == 22016 or year == 12016):
+            TRIGGER = "{0} or {1} or {2} or {3} or {4}".format(getTriggerFromJson(overall, "oneEL", year),getTriggerFromJson(overall, "diEL", year),getTriggerFromJson(overall, "oneMU", year),getTriggerFromJson(overall, "diMU", year),getTriggerFromJson(overall, "muG", year))
         else:
             print("PROBLEM with triggers!!!")
 
     return TRIGGER
-
 
 def computeWeigths(df, files, sampleNOW, year, isMC):
 
@@ -413,38 +471,10 @@ def computeWeigths(df, files, sampleNOW, year, isMC):
         genEventSumWeight = rdf.Sum("genEventSumw").GetValue()
         genEventSumNoWeight = rdf.Sum("genEventCount").GetValue()
 
-        ## this is what we want to do:    lum*xsec/sumGenWeight
         weight = (SwitchSample(sampleNOW,year)[1] / genEventSumWeight)
-#        weightApprox = (SwitchSample(sampleNOW,year)[1] / genEventSumNoWeight)
-#        print('weight',weight )
-#        print('weightApprox',weightApprox)
+
         lumiEq = (genEventSumNoWeight / SwitchSample(sampleNOW,year)[1])
         print("lumi equivalent fb %s" %lumiEq)
 
         return weight
 
-def plot(h,filename,doLogX,color):
-
-   ROOT.gStyle.SetOptStat(1);
-   ROOT.gStyle.SetTextFont(42)
-   c = ROOT.TCanvas("c", "", 800, 700)
-   if doLogX: c.SetLogx();
-#  c.SetLogy()
-
-   h.SetTitle("")
-   h.GetXaxis().SetTitleSize(0.04)
-   h.GetYaxis().SetTitleSize(0.04)
-   h.SetLineColor(color)
-
-   h.Draw()
-
-   label = ROOT.TLatex(); label.SetNDC(True)
-   label.DrawLatex(0.175, 0.740, "#eta")
-   label.DrawLatex(0.205, 0.775, "#rho,#omega")
-   label.DrawLatex(0.270, 0.740, "#phi")
-   label.SetTextSize(0.040); label.DrawLatex(0.100, 0.920, "#bf{CMS Simulation}")
-   label.SetTextSize(0.030); label.DrawLatex(0.630, 0.920, "#sqrt{s} = 13 TeV, L_{int} = X fb^{-1}")
-
-   print("saving file: {} ".format(filename))
-
-   c.SaveAs(filename)

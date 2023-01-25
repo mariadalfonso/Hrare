@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-//g++ $(correction config --cflags --ldflags) mysf.cc -shared -fPIC -o mysf.so 
+//g++ $(correction config --cflags --ldflags) mysf.cc -shared -fPIC -o mysf.so
+//g++ $(correction config --cflags --ldflags --rpath) mysf.cc -shared -fPIC -o mysf.so
+//g++ $(correction config --cflags --ldflags --rpath) demo.cc -o demo
 
 class MyCorrections {
 public:
@@ -13,6 +15,6 @@ public:
   
 private:
   correction::Correction::Ref puSF_;
-  correction::Correction::Ref photonSF_;  
+  correction::Correction::Ref photonSF_;
 
 };

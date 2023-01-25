@@ -13,7 +13,7 @@ observation	-1
 bin		VBFcat	VBFcat
 process		VBFH	bkg
 process		-1	1
-rate		1	1
+rate		0.01	1
 -------------------------------------
 lumi_13TeV 	lnN 	1.025	-
 -------------------------------------
