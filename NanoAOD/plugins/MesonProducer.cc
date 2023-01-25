@@ -895,21 +895,21 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	  
 	  // PhiToKK (1020) [ also Look for DsToPhiPi Ds (1968./27)]
 	  auto phiCand = getPhiToKK(iEvent, pfCand1, pfCand2);
-	  if (phiCand.numberOfDaughters() > 0){
+	  if (phiCand.numberOfDaughters() > 0 and phiCand.pt() > 5 ){
 	    phiCand.addUserFloat( "doca", tt_doca);
 	    phis->push_back(phiCand);
 	  }
 
 	  // RhoToPiPi (750)
 	  auto rhoCand = getRhosToPiPi(iEvent, pfCand1, pfCand2);
-	  if (rhoCand.numberOfDaughters() > 0){
+	  if (rhoCand.numberOfDaughters() > 0 and rhoCand.pt() > 5 ){
 	    rhoCand.addUserFloat( "doca", tt_doca);
 	    rhos->push_back(rhoCand);
 	  }
 
 	  // OmegaToPiPi (782)
 	  auto omegaCand = getOmegasToPiPiPi0(iEvent, pfCand1, pfCand2);
-	  if (omegaCand.numberOfDaughters() > 0){
+	  if (omegaCand.numberOfDaughters() > 0 and omegaCand.pt() > 5 ){
 	    omegaCand.addUserFloat( "doca", tt_doca);
 	    omegas->push_back(omegaCand);
 	  }
