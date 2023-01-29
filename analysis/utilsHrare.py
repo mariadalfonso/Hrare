@@ -350,6 +350,8 @@ def SwitchSample(argument,year):
         1026: (dirGluster+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1027: (dirGluster+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         #
+        1037: (dirLocalNEW+"ggh-homegagamma-powheg"+"/NANOAOD_01",46870*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
+        #
         1018: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #
         1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
@@ -357,7 +359,7 @@ def SwitchSample(argument,year):
         1050: (dirLocalTEST+"ggh-hrhogamma-powheg"+"/NANOAOD_01",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1051: (dirLocalTEST2+"ggh-hrhogamma-powheg"+"/NANOAOD_01",48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1052: (dirLocalTEST2+"ggh-hphigamma-powheg"+"/NANOAOD_01",48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        16: (dirLocal+"ZLLphigamma_pythia8_genFix",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+        216: (dirLocal+"ZLLphigamma_pythia8_genFix",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
 #        10: (dirLocalNEW+"zh-hphigamma-powheg",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
 ###### new set
 #        13: (dirLocalNEW+"zh_Phigamma",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
@@ -374,17 +376,19 @@ def SwitchSample(argument,year):
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+"+campaign,365.3452*1000), #NNLO
         ##
-        6: (dirT2+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
-        7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
-        8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
-        9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
+        9: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
+        ##
         10: (dirGluster+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
         11: (dirGluster+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX,8644.0*1000*1.26), #LO *1.26
         12: (dirGluster+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,2183.0*1000*1.26), #LO *1.26
         13: (dirGluster+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
         14: (dirGluster+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
-        ####
-        15: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
+        #
+        15: (dirGluster+"GJets_DR-0p4_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,10000.0*1000*1.26), #LO *1.26  --> placeholder
+        16: (dirGluster+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
+        17: (dirGluster+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
+        18: (dirGluster+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
+        19: (dirGluster+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
         ####
         20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,6447000.0*1000*1.26), #LO *1.26
         21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1988000.0*1000*1.26), #LO *1.26
