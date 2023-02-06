@@ -26,6 +26,31 @@ MyCorrections::MyCorrections(int year) {
   auto csetPH = correction::CorrectionSet::from_file(fileNamePH);
   photonSF_ = csetPH->at("UL-Photon-ID-SF");
 
+  std::string fileNameELE = dirName+"EGM/"+subDirName+"electron.json.gz";
+  auto csetELE = correction::CorrectionSet::from_file(fileNameELE);
+  electronSF_ = csetELE->at("UL-Electron-ID-SF");
+
+  std::string fileNameJEC = dirName+"JME/"+subDirName+"jet_jerc.json.gz";
+  auto csetJEC = correction::CorrectionSet::from_file(fileNameJEC);
+
+  std::string tagName = "";
+  if(year == 2018) tagName = "Summer19UL18_V5_MC_L1L2L3Res_AK4PFchs";
+  if(year == 2017) tagName = "Summer19UL17_V5_MC_L1L2L3Res_AK4PFchs";
+  if(year == 22016) tagName = "Summer19UL16_V5_MC_L1L2L3Res_AK4PFchs";
+  if(year == 12016) tagName = "Summer19UL16APV_V5_MC_L1L2L3Res_AK4PFchs";
+
+  JEC_ = csetJEC->compound().at(tagName);
+
+};
+
+double MyCorrections::eval_jetCORR(
+    double double1, double double2, double double3, double double4) {
+  return JEC_->evaluate({double1, double2, double3, double4});
+};
+
+double MyCorrections::eval_electronSF(
+    std::string str1, std::string str2,  std::string str3, double double1, double double2) {
+  return electronSF_->evaluate({str1, str2, str3, double1, double2});
 };
 
 double MyCorrections::eval_photonSF(
