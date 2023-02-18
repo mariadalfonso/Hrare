@@ -1017,3 +1017,8 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/FF364BC2-D32A-F043-9E01-B5D607639F25.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/FF486DEA-2063-8549-9BC2-F62E6A5D44CB.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/FF80628E-42CC-3D43-B556-B6F61883D3DA.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/21AD6736-A7B2-FA4E-BC1E-C042F92A89D0.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/431A843E-6889-E64E-BB18-E021AA2E103F.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/B6E6EF8B-FB43-4649-8172-10453512053B.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/C44A9371-CC38-B543-931E-C89D2A2CDF55.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/CACC9A46-8D80-BE40-A8E1-8B7655B9CC3A.root

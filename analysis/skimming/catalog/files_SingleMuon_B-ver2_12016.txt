@@ -983,3 +983,4 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver2
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/FEEBD650-AF26-D646-865C-68398742CCD9.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/FF24CE98-E99A-7D47-84BE-E6EA34F202F8.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/FFDB57D6-5656-4446-A2F5-016C36320AE7.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/69163D31-1211-7148-A414-8DCB8CA98CE5.root

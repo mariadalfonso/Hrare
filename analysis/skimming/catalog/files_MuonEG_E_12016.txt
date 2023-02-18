@@ -210,3 +210,4 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/MuonEG+Run2016E-HIPM_UL2
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/MuonEG+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/FC80307D-97B9-4E4E-9843-1D401E003ABB.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/MuonEG+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/FE6378EA-D017-5240-B778-6483F83AF818.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/MuonEG+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/FF852464-8FE2-EB4C-AC30-B1A719E3576F.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D01/MuonEG+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/B27550A5-704A-CC41-9DC5-49B18354869B.root

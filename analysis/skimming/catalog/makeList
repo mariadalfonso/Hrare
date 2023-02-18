@@ -1,7 +1,134 @@
-ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018A-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_A_2018.txt
+#!/bin/sh
 
-ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_B_2018.txt
+### EGAMMA 2018
 
-ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_C_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018A-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_EGamma_A_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_EGamma_B_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_EGamma_C_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018D-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_EGamma_D_2018.txt
 
-ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/EGamma+Run2018D-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Egamma_D_2018.txt
+## PHOTONS and TAU
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2017F-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_F_2017.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_B-ver1-HIPM_2016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_B-ver2-HIPM_2016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2016C-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_C-HIPM_2016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2016D-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_D-HIPM_2016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_E-HIPM_2016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SinglePhoton+Run2016F-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SinglePhoton_F-HIPM_2016.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/Tau+Run2018B-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Tau_B_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Tau_C_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/Tau+Run2018D-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_Tau_D_2018.txt
+
+### DOUBLE ELECTRON
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2017B-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_B_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2017C-UL2017_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_C_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2017D-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_D_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2017E-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_E_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2017F-UL2017_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_F_2017.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_B-ver1_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v3+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_B-ver2_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016C-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_C_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016D-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_D_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016E-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_E_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016F-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_F_12016.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016F-UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_F_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016G-UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_G_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleEG+Run2016H-UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleEG_H_22016.txt
+
+### SINGLE ELECTRON
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2017B-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_B_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2017C-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_C_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2017D-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_D_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2017E-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_E_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2017F-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\
+/'/g > files_SingleElectron_F_2017.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_B-ver1_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_B-ver2_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016C-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_C_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016D-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_D_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016E-HIPM_UL2016_MiniAODv2-v5+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_E_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016F-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_F_12016.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016F-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_F_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016G-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_G_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleElectron+Run2016H-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleElectron_H_22016.txt
+
+### SINGLE MUON
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2018A-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_A_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2018B-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_B_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2018C-UL2018_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_C_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2018D-UL2018_MiniAODv2-v3+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_D_2018.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2017B-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_B_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2017C-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_C_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2017D-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_D_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2017E-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_E_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2017F-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_F_2017.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_B-ver1_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_B-ver2_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016C-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_C_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016D-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_D_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_E_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016F-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_F_12016.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016F-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_F_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016G-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_G_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/SingleMuon+Run2016H-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_SingleMuon_H_22016.txt
+
+### DOUBLE MUON
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2018A-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_A_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_B_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_C_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2018D-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_D_2018.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2017B-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_B_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2017C-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_C_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2017D-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_D_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2017E-UL2017_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_E_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2017F-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_F_2017.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_B-ver1_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_B-ver2_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016C-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_C_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016D-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_D_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016E-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_E_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016F-HIPM_UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_F_12016.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016F-UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_F_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016G-UL2016_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_G_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/DoubleMuon+Run2016H-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_DoubleMuon_H_22016.txt
+
+### MUON EG
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2018A-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_A_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_B_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2018C-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_C_2018.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2018D-UL2018_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_D_2018.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2017B-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_B_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2017C-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_C_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2017D-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_D_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2017E-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_E_2017.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2017F-UL2017_MiniAODv2-v1+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_F_2017.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016B-ver1_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_B-ver1_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016B-ver2_HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_B-ver2_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016C-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_C_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016D-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_D_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016E-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_E_12016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016F-HIPM_UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_F_12016.txt
+
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016F-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_F_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016G-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_G_22016.txt
+ls /mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/MuonEG+Run2016H-UL2016_MiniAODv2-v2+MINIAOD/*root | sed -e s/'\/mnt\/T2_US_MIT\/hadoop\/cms\/'/'root:\/\/xrootd.cmsaf.mit.edu\/\/'/g > files_MuonEG_H_22016.txt
