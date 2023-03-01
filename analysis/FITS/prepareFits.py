@@ -66,16 +66,16 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
    resetTree(mytree, category)
 
 MVAbinRho={
-   '_GFcat': 0.2,
+   '_GFcat': 0.5,
    '_Zinvcat': 0.6,
-   '_VBFcat': 0.4,
-   '_VBFcatlow': 0.5,
+   '_VBFcat': 0.8,
+   '_VBFcatlow': 0.8,
 }
 
 MVAbinPhi={
-   '_GFcat': 0.2,
+   '_GFcat': 0.4,
    '_Zinvcat': 0.7,
-   '_VBFcat': 0.5,
+   '_VBFcat': 0.6,
    '_VBFcatlow': 0.6,
 }
 
@@ -91,15 +91,13 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    mytree = ROOT.TChain('events')
 
-   directory1 = '/work/submit/mariadlf/Hrare/DEC28/12016/'
-   directory2 = '/work/submit/mariadlf/Hrare/DEC28/22016/'
-   directory3 = '/work/submit/mariadlf/Hrare/DEC28/2017/'
-   directory4 = '/work/submit/mariadlf/Hrare/DEC28/2018/'
-   if(category =='_Wcat' or category =='_Zcat'):
-      directory1 = '/work/submit/mariadlf/Hrare/JAN11/12016/'
-      directory2 = '/work/submit/mariadlf/Hrare/JAN11/22016/'
-      directory3 = '/work/submit/mariadlf/Hrare/JAN11/2017/'
-      directory4 = '/work/submit/mariadlf/Hrare/JAN11/2018/'
+   dirWORK_='/work/submit/mariadlf/Hrare/DEC28/'
+   dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/FEB24/'
+
+   directory1 = dirLOCAL_+'12016/'
+   directory2 = dirLOCAL_+'22016/'
+   directory3 = dirLOCAL_+'2017/'
+   directory4 = dirLOCAL_+'2018/'
 
    if doSignal:
       if(year == '_2018' or year == '_all'): addSigHisto(mytree, directory4, category, mesonCat, nameSig, '_2018')
@@ -166,7 +164,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
       if(category =='_Wcat'):
          if ev.V_mass < 15 : continue
-         if ev.DeepMETResolutionTune_pt<15 :  continue
+         if ev.DeepMETResolutionTune_pt<20 :  continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zinvcat'):
@@ -232,6 +230,10 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          wei = ev.w
          if ev.mc<0:   # only DATA
             h.Fill( var, wei )
+#            if (var>100 and var < 170):
+#               mystr=str(ev.run)+":"+str(ev.luminosityBlock)+":"+str(ev.event)+"\n"
+#               with open("example_VBFcatlow_RhoCat_2018_mHwindow.txt", "a") as f:
+#                  f.write(mystr)
 
       #Loop over tree done
 #   if ev.mc>=0:

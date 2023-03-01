@@ -15,6 +15,11 @@ def loadCorrectionSet(year):
     ROOT.gInterpreter.Declare('#include "config/mysf.h"')
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
 
+def getSkimsFromJson(overall, type ):
+
+    for selection in overall:
+        if selection['type'] == type : return selection['PRESELECTION']
+
 def getTriggerFromJson(overall, type, year ):
 
     for trigger in overall:
@@ -372,7 +377,7 @@ def SwitchSample(argument,year):
         1: (dirGluster+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 51.1*1000), #LO
         2: (dirGluster+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 191.3*1000), #LO
         #        2: (dirT2+"WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 412.7*1000), #LO
-        3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,61526.7*1000), #NNLO (LO was 53870.0)
+        3: (dirGluster+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,61526.7*1000), #NNLO (LO was 53870.0)
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+"+campaign,365.3452*1000), #NNLO
         ##
@@ -384,7 +389,7 @@ def SwitchSample(argument,year):
         13: (dirGluster+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
         14: (dirGluster+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
         #
-        15: (dirGluster+"GJets_DR-0p4_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,10000.0*1000*1.26), #LO *1.26  --> placeholder
+        15: (dirGluster+"GJets_DR-0p4_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,15750.0*1000*1.26), #LO *1.26
         16: (dirGluster+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
         17: (dirGluster+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
         18: (dirGluster+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
@@ -416,7 +421,7 @@ def SwitchSample(argument,year):
 
         45: (dirT2+"WGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8.635*1000),
         46: (dirT2+"ZGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.144*1000),
-        47: (dirT2+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
+        47: (dirGluster+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
         48: (dirT2+"ZGTo2NuG_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,30.11*1000),
 
     }

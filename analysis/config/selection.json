@@ -2,6 +2,7 @@
     "BARRELphotons" : "(Photon_pt>30 and Photon_isScEtaEB and Photon_mvaID_WP90)",
     "ENDCAPphotons" : "(Photon_pt>30 and Photon_isScEtaEE and Photon_mvaID_WP80)",
     "ENDCAPphotonsLoose" : "(Photon_pt>30 and Photon_isScEtaEE and Photon_mvaID_WP90)",
+    "photonsLOOSE" : "(Photon_pt>20 and (Photon_isScEtaEB or Photon_isScEtaEE) and Photon_mvaID_WP90)",
 
     "GOODMUON" : "(Muon_pt>20 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05)",
     "LOOSEmuons" : "(Muon_pt>10 and abs(Muon_eta)<2.4 and Muon_isGlobal and Muon_isTracker and Muon_pfRelIso04_all < 0.25 and abs(Muon_dz)<0.10 and abs(Muon_dxy) < 0.05 and Muon_looseId)",
@@ -16,38 +17,38 @@
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "file": "weights_mva/VBF_phi/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBF_phi_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva_feb13/VBF_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB13/VBF_phi_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva/VBF_rho/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBF_rho_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva_feb13/VBF_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB13/VBF_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isPhiCat",
-	    "file": "weights_mva/ggH_phi/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/GF_phi_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva_feb13/ggH_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB23/GF_phi_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva/ggH_rho/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/GF_rho_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva_feb13/ggH_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB23/GF_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isRhoCat",
-	    "file": "weights_mva/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBFlow_rho_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva_feb13/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB06/VBFlow_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isPhiCat",
-	    "file": "weights_mva/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/NOV18/VBFlow_phi_MH100-170/weights/TMVAClassification_BDTG.weights.xml"
+	    "file": "weights_mva_feb13/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB06/VBFlow_phi_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isZinv",
@@ -66,24 +67,24 @@
 	{
 	    "name": "isZinv",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015)",
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015 and abs(phi_kin_eta)<2.1)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{
 	    "name": "isZinv",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05 * rho_kin_vtx_chi2dof && rho_doca < 0.015)",
+	    "definition": "(abs(rho_kin_mass-0.77)<0.150 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05 * rho_kin_vtx_chi2dof && rho_doca < 0.015 and abs(rho_kin_eta)<2.1)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9)"
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 and abs(phi_kin_eta)<2.1)"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
+	    "definition": "(abs(rho_kin_mass-0.77)<0.150 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 and abs(rho_kin_eta)<2.1)"
 	},
 	{
 	    "name": "isVBF",
@@ -103,9 +104,43 @@
 	{
 	    "name": "VH",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<2*0.07 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.8)"
+	    "definition": "(abs(rho_kin_mass-0.77)<0.150 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.8)"
 	},
 	{
+	    "START": "======================================================================================================",
+	    "name": "isZinv",
+	    "type": "isPhiCatMassSB",
+	    "definition": "(abs(phi_kin_mass-1.02)>3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015 and abs(phi_kin_eta)<2.1)",
+	    "notes":" used for isZinv, isGF"
+	},
+	{
+	    "name": "isZinv",
+	    "type": "isRhoCatMassSB",
+	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05 * rho_kin_vtx_chi2dof && rho_doca < 0.015 and abs(rho_kin_eta)<2.1)",
+	    "notes":" used for isZinv, isGF"
+	},
+	{
+	    "name": "isVBFlow",
+	    "type": "isPhiCatMassSB",
+	    "definition": "(abs(phi_kin_mass-1.02)>3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 and abs(phi_kin_eta)<2.1)"
+	},
+	{
+	    "name": "isVBFlow",
+	    "type": "isRhoCatMassSB",
+	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 and abs(rho_kin_eta)<2.1)"
+	},
+	{
+	    "name": "isVBF",
+	    "type": "isPhiCatMassSB",
+	    "definition": "(abs(phi_kin_mass-1.02)>3*0.004 && phi_kin_pt>20 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9)"
+	},
+	{
+	    "name": "isVBF",
+	    "type": "isRhoCatMassSB",
+	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_pt>20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9)"
+	},
+	{
+	    "START": "======================================================================================================",
 	    "name": "isVBF",
 	    "type": "isKsCat",
 	    "definition": "(abs(ks_kin_mass-0.498)<0.05 && ks_kin_pt>5 && ks_trk1_pt>5 && ks_trk2_pt>5 && ks_kin_valid)"
@@ -115,7 +150,13 @@
 	    "type": "isJPsiCat",
 	    "definition": "(abs(Jpsi_kin_mass-0.498)<0.05 && Jpsi_kin_pt>5  && Jpsi_kin_valid && Jpsi_iso > 0.9 && Jpsi_kin_vtx_prob > 0.05 && Jpsi_doca < 0.015 )",
 	    "note": "(Jpsi_muon1_isMediumMuon && Jpsi_muon2_isMediumMuon) && (Jpsi_muon1_isTightMuon or Jpsi_muon2_isTightMuon)"
-	}
+	},
+	{
+            "name": "isZinv",
+            "type": "isOmegaCat",
+            "definition": "(abs(omega_threemass-0.782)<3*0.008 && omega_kin_mass<(0.77-0.07) && omega_kin_pt>38 && omega_trk1_pt>15 && omega_trk2_pt>5 && omega_kin_valid && omega_iso > 0.9 && omega_kin_vtx_prob > 0.05 * omega_kin_vtx_chi2dof && omega_doca < 0.015 && omega_Nphotons>0)",
+            "notes":" used for isGF"
+        }
     ],
     "JSON" : "isGoodRunLS(isData, run, luminosityBlock)",
 

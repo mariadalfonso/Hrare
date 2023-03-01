@@ -43,11 +43,11 @@ else:
 #                 , 'Zinv'
                  , '1l-2l'
                ]
-     limitfiles = [ "limitsMVADEC28/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
+     limitfiles = [ "limitsMVA/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVA/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVA/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
 #                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"Zinvcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
+                    ,"limitsMVA/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
                    ]
 
 c44 = ROOT.TCanvas("c44","c44",1200,800)

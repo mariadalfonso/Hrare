@@ -82,7 +82,6 @@ CLEAN_JetMes = "{}".format("Sum(goodMeson)>0 ? std::min(deltaR(Jet_eta[goodJets]
 
 CLEAN_JetPH = "{}".format("Sum(goodPhotons)>0 ? std::min(deltaR(Jet_eta[goodJets][0], Jet_phi[goodJets][0], goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]]),deltaR(Jet_eta[goodJets][1], Jet_phi[goodJets][1], goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]])):-999")
 
-
 with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
@@ -115,7 +114,7 @@ def selectionTAG(df):
     if isZ:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25") # iso same as the loose
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
-                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP90 and Electron_pt>25") # medium
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP90") # medium
                  .Define("looseMu","{}".format(LOOSEmuons))
                  .Define("looseEle","{}".format(LOOSEelectrons))
                  .Filter("Sum(looseEle)+Sum(looseMu)==2", "at least two muons or electrons, and no extra loose leptons")
@@ -141,7 +140,7 @@ def selectionTAG(df):
     if isW:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_tightId and Muon_pfRelIso04_all < 0.15") ## tight
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
-                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP80 and Electron_pt>25") ## tight
+                 .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP80 and Electron_pt>30") ## tight
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
                  .Filter("(Sum(goodMuons)+Sum(goodElectrons))==1 and (Sum(vetoEle)+Sum(vetoMu))==1","one lepton")
@@ -242,7 +241,7 @@ def selectionTAG(df):
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
                  #                 .Define("trigger","{}".format(TRIGGER))
                  #                 .Filter("trigger>0", "pass triggers")
-                 .Filter("DeepMETResolutionTune_pt<75","DeepMETResolutionTune_pt<75")
+                 #.Filter("DeepMETResolutionTune_pt<75","DeepMETResolutionTune_pt<75") # not doing Zinv as nominal
                  .Define("goodJets","{}".format(GOODJETS))
                  .Define("nGoodJets","Sum(goodJets)*1.0f")
                  .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
@@ -255,9 +254,9 @@ def dfGammaMeson(df,PDType):
     TRIGGER=pickTRG(TRIGGERS,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
 
     GOODphotons = ""
-    if(isGF): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
+    if(isGF): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isVBF): GOODphotons = "{} and Photon_pt>75 and Photon_electronVeto".format(BARRELphotons) #90
-    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
+    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isZinv): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isW or isZ): GOODphotons = "({0} or {1}) and (Photon_pixelSeed == false)".format(BARRELphotons,ENDCAPphotonsLoose) #90-90
     print("PHOTONS = ", GOODphotons)
@@ -357,9 +356,10 @@ def dfHiggsCand(df):
 #               .DefinePerSample("photon_dEsigmaUp",'rdfsampleinfo_.Contains("+Run") ? 0.0f : (1.f+Photon_dEsigmaUp[goodPhotons[index_pair[1]]])')
 #               .DefinePerSample("photon_dEsigmaDown",'rdfsampleinfo_.Contains("+Run") ? 0.0f : (1.f+Photon_dEsigmaDown[goodPhotons[index_pair[1]]])')
 #               .Vary("photon_pt", "ROOT::RVecF{photon_pt*photon_dEsigmaDown,photon_pt*photon_dEsigmaUp}", variationTags=["dn","up"], variationName = "PhotonSYST")
-	       .Define("HCandMass", "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
-               .Define("HCandPT",   "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],1)")
-               .Define("HCandPHI",   "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodPhotons_pt[index_pair[1]],goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],2)")
+               ##
+               .Define("HCandMass", "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
+               .Define("HCandPT",   "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],1)")
+               .Define("HCandPHI",   "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],2)")
                .Define("dPhiGammaMesonCand","abs(deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]]))")
                .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
                .Define("sigmaHCandMass_Rel2","(goodPhotons_energyErr[index_pair[1]]*goodPhotons_energyErr[index_pair[1]])/(goodPhotons_pt[index_pair[1]]*goodPhotons_pt[index_pair[1]]) + (goodMeson_massErr[index_pair[0]]*goodMeson_massErr[index_pair[0]])/(goodMeson_mass[index_pair[0]]*goodMeson_mass[index_pair[0]])")
@@ -387,10 +387,14 @@ def dfwithSYST(df,year):
                       ##
                       .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w)")
                       ##
-                      .Define("idx_nom_up_down", "indices(3)")
                       ##
+                      .Define("idx_nom_up_down", "indices(3)")
                       .Redefine("w", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom")
                       )
+
+    if isW or isZ:
+        dfFinal_withSF.Define("SFelectron_ID_Nom",'corr_sf.eval_electronSF("{0}", "sf", "{1}", Electron_eta[goodElectrons][0], Electron_pt[goodElectrons][0])'.format(photonIDyear,"wp90")).Define("SFelectron_ID_Up",'corr_sf.eval_electronSF("{0}", "sfup", "{1}", Electron_eta[goodElectrons][0], Electron_pt[goodElectrons][0])'.format(photonIDyear,"wp90")).Define("SFelectron_ID_Dn",'corr_sf.eval_electronSF("{0}", "sfdown", "{1}", Electron_eta[goodElectrons][0], Electron_pt[goodElectrons][0])'.format(photonIDyear,"wp90")).Define("eleID_weights", "NomUpDownVar(SFelectron_ID_Nom, SFelectron_ID_Up, SFelectron_ID_Dn,w)")
+
     return dfFinal_withSF
 
 def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
@@ -433,7 +437,7 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
 
     NVar = "0"
     if(isGF): NVar = "14"
-    if(isVBF): NVar = "12"
+    if(isVBF): NVar = "13"
     if(isVBFlow): NVar = "13"
     if(isZinv): NVar = "10"
     print('NVAR=',NVar)
@@ -526,7 +530,8 @@ def analysis(df,year,mc,sumw,isData,PDType):
             "goodPhotons_mvaID",
             "goodPhotons_energyErr",
             #
-#            "triggerAna",
+            "triggerAna",
+            #
             "SoftActivityJetNjets5",
             "DeepMETResolutionTune_pt",
             "DeepMETResolutionTune_phi",
@@ -555,6 +560,14 @@ def analysis(df,year,mc,sumw,isData,PDType):
                 "SFpu_Nom",
                 "SFpu_Up",
                 "SFpu_Dn",
+        ]:
+            branchList.push_back(branchName)
+
+    if (doSyst and isData == "false" and (isW or isZ)):
+        for branchName in [
+                "SFelectron_ID_Nom",
+                "SFelectron_ID_Up",
+                "SFelectron_ID_Dn",
         ]:
             branchList.push_back(branchName)
 
@@ -693,7 +706,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
 #            "Phi_kin_vtx_chi2dof":   {"name":"phi_kin_vtx_chi2dof","title":"Phi vtx_chi2dof;m_{k^{+}k^{-}} (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":5.0},
         }
 
-        outputFileHisto = "JAN22syst/{0}/histoname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
+        outputFileHisto = "TEST/{0}/histoname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
         print(outputFileHisto)
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
 
@@ -707,10 +720,10 @@ def analysis(df,year,mc,sumw,isData,PDType):
 
             ## to use the SYST that change the variable
             hx = ROOT.RDF.Experimental.VariationsFor(h1d);
-            hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn");
-            histos.append(hx["PhotonSYST:dn"])
-            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up");
-            histos.append(hx["PhotonSYST:up"])
+            hx["JetSYST:dn"].SetName(hists[h]["name"]+":JetSYST:dn");
+            histos.append(hx["JetSYST:dn"])
+            hx["JetSYST:up"].SetName(hists[h]["name"]+":JetSYST:up");
+            histos.append(hx["JetSYST:up"])
 
             ## those that change the weights only
             # 2D is for nom, up, down
@@ -726,7 +739,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
 #        evtcounts.append(evtcount)
 #        ROOT.ROOT.RDF.RunGraphs(evtcounts)
 
-        outputFileHisto = "OCT31/{0}/SYSThistooutname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
+        outputFileHisto = "TEST/{0}/SYSThistooutname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM,year)
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
 
         for h in histos:
