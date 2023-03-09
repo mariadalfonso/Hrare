@@ -278,18 +278,58 @@ for cat in category:
             datacard.write("\t%.3f"%(1.025) )
     datacard.write("\n")
 
+
 if doSyst:
-    ##
+    datacard.write("CMS_photonID \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                datacard.write("\t%.3f"%(1.01) )
+        datacard.write("\n")
+
+    datacard.write("CMS_prefiring \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                datacard.write("\t%.3f"%(1.005) )
+        datacard.write("\n")
+
+    datacard.write("CMS_pileup  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                datacard.write("\t%.3f"%(1.01) )
+        datacard.write("\n")
+
     for proc in mcAll:
         print("proc",proc)
         if (proc=='bkg'): continue
         else:
+            # theo
             addSystematics("QCDscale_"+proc, 'lnN' ,QCDscale[proc], proc, category, mcAll, datacard)
             addSystematics("pdf_Higgs_"+proc, 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
 #            if (proc=='ggH'):
 #                addSystematics("pdf_Higgs_gg", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
 #            else: addSystematics("pdf_Higgs_qq", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
-    ##
+
+if opts.whichCat=='Vcat' and doSyst:
+    datacard.write("CMS_eff_e  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                datacard.write("\t%.3f"%(1.02) )
+        datacard.write("\n")
+    datacard.write("CMS_eff_m  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                datacard.write("\t%.3f"%(1.01) )
+        datacard.write("\n")
 
 #    ### Add autoMCStats
 #    datacard.write("\n")

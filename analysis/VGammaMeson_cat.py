@@ -257,7 +257,7 @@ def dfGammaMeson(df,PDType):
     if(isGF): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isVBF): GOODphotons = "{} and Photon_pt>75 and Photon_electronVeto".format(BARRELphotons) #90
     if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
-    if(isZinv): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
+    if(isZinv): GOODphotons = "({0} or {1}) and Photon_pt>38 and abs(Photon_eta)<2.1 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isW or isZ): GOODphotons = "({0} or {1}) and (Photon_pixelSeed == false)".format(BARRELphotons,ENDCAPphotonsLoose) #90-90
     print("PHOTONS = ", GOODphotons)
 
@@ -401,7 +401,7 @@ def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
 
     lumi = 1.
     weight = "{0}".format(1.)
-    if mc>0: weight = "{0}*genWeight*{1}".format(lumi,sumw)
+    if mc>=0: weight = "{0}*genWeight*{1}".format(lumi,sumw)
 
     lumiIntegrated = 1.
     print('isData = ',isData)
@@ -436,7 +436,7 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
     print(MVAweights)
 
     NVar = "0"
-    if(isGF): NVar = "14"
+    if(isGF): NVar = "12"
     if(isVBF): NVar = "13"
     if(isVBFlow): NVar = "13"
     if(isZinv): NVar = "10"
@@ -456,8 +456,8 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
     dfWithMVA = (df.Define("HCandPT__div_sqrtHCandMass", "(HCandMass>0) ? HCandPT/sqrt(HCandMass): 0.f")
                .Define("HCandPT__div_HCandMass", "(HCandMass>0) ? HCandPT/HCandMass: 0.f")
                #"goodPhotons_pt__div_HCandPT"
-               .Define("photon_pt__div_HCandPT", "(index_pair[1]!= -1 && HCandPT>0 ) ? goodPhotons_pt[index_pair[1]]/HCandPT: 0.f")
-               .Define("photon_pt__div_HCandMass", "(index_pair[1]!= -1 && HCandMass>0) ? goodPhotons_pt[index_pair[1]]/HCandMass: 0.f")
+               .Define("photon_pt__div_HCandPT", "(index_pair[1]!= -1 && HCandPT>0 ) ? photon_pt/HCandPT: 0.f")
+               .Define("photon_pt__div_HCandMass", "(index_pair[1]!= -1 && HCandMass>0) ? photon_pt/HCandMass: 0.f")
                #"goodPhotons_eta"
                .Define("photon_eta","(index_pair[1]!= -1) ? goodPhotons_eta[index_pair[1]]: 0.f")
                #"goodPhotons_mvaID"

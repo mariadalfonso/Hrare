@@ -24,7 +24,7 @@ canvasFits.Divide(2,1)
 
 canvasPull = TCanvas("pull", "pull", 800, 800)
 
-def  checkBias(tag , mesonCat, year):
+def  checkBias(tag , mesonCat, year, myBRvalue):
 
     # -----------------------------------------------------------------------------
     # SIGNAL law
@@ -75,10 +75,14 @@ def  checkBias(tag , mesonCat, year):
     # ---------------------------------------------------------------------------------
     # chebychev law
 
-    chebychev_c0 = RooRealVar('chebychev_c0'+mesonCat+tag, 'chebychev_c0', 1.0, -2, 10.)
+    chebychev_c0 = RooRealVar('chebychev_c0'+mesonCat+tag, 'chebychev_c0', 0., -2, 10.)
     chebychev_c1 = RooRealVar('chebychev_c1'+mesonCat+tag, 'chebychev_c1', 0.4, -1., 1.)
     chebychev_c2 = RooRealVar('chebychev_c2'+mesonCat+tag, 'chebychev_c2', 0.01, -0.1, 0.1)
     chebychev_c3 = RooRealVar('chebychev_c3'+mesonCat+tag, 'chebychev_c3', 0., -1., 1.) # limit this for the GF
+#    chebychev_c0 = RooRealVar('chebychev_c0'+mesonCat+tag, 'chebychev_c0', 1.0, -2, 10.)
+#    chebychev_c1 = RooRealVar('chebychev_c1'+mesonCat+tag, 'chebychev_c1', 0.4, -1., 1.)
+#    chebychev_c2 = RooRealVar('chebychev_c2'+mesonCat+tag, 'chebychev_c2', 0.01, -0.1, 0.1)
+#    chebychev_c3 = RooRealVar('chebychev_c3'+mesonCat+tag, 'chebychev_c3', 0., -1., 1.) # limit this for the GF
 
     pdf_chebychev1 = RooChebychev("chebychev1"+mesonCat+tag, "chebychev1",x,
                                   RooArgList(chebychev_c0,chebychev_c1))
@@ -186,11 +190,11 @@ def  checkBias(tag , mesonCat, year):
     canvasCorr .SaveAs("~/public_html/Hrare/BIAS/corrSig.png")   
     
     Ns_ = ROOT.RooRealVar("Ns_","xsec*lumi*BRmeson",Ns) # intial is 1
-    B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",10.,5.,15.) #
-    if tag=='_VBFcatlow' or tag=='_VBFcat':
-        B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",10.,1.,19.)
+    B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue,-3.,3.) #
+    if tag=='_VBFcat' or tag=='_VBFcatlow':
+        B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue,-10.,10.) #
     Nsig_ggH = ROOT.RooFormulaVar("Nsig_ggH","@0*@1",ROOT.RooArgList(Ns_,B_R_))
-    B_R_const = ROOT.RooRealVar("B_R_","branching_ratio",10.) #
+    B_R_const = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue) #
     Nsig_ggH_const = ROOT.RooFormulaVar("Nsig_ggH","@0*@1",ROOT.RooArgList(Ns_,B_R_const))
     print('-------------------------------')
     print('INTEGRAL SIGNALG injected : ',Nsig_ggH.evaluate())
@@ -250,7 +254,7 @@ def  checkBias(tag , mesonCat, year):
     print('RooMCStudy set up')
 
     # Generate and fit 100 experiments of ntot events each
-    mcstudy.generateAndFit(1000,ntot,kTRUE)
+    mcstudy.generateAndFit(5000,ntot,kTRUE)
     print('gen and fit done')
 
     # -----------------------------------------------------------------------------
@@ -368,7 +372,7 @@ def  checkBias(tag , mesonCat, year):
     BRpull_frame.Draw()
 
     multicanvas.cd(11)    
-    BRpar_frame = mcstudy.plotParam(B_R_, ROOT.RooFit.Range(5.,15.), ROOT.RooFit.Bins(20), ROOT.RooFit.FitGauss(1))
+    BRpar_frame = mcstudy.plotParam(B_R_, ROOT.RooFit.Range(-5.,5.), ROOT.RooFit.Bins(200), ROOT.RooFit.FitGauss(1))
 #    BRpar_frame = mcstudy.plotParam(B_R_, ROOT.RooFit.Range(0.9,1.1), ROOT.RooFit.Bins(20), ROOT.RooFit.FitGauss(1))
     BRpar_frame.SetTitle(mesonCat+tag)
     BRpar_frame.SetTitleOffset(1.5,"y")
@@ -382,19 +386,19 @@ def  checkBias(tag , mesonCat, year):
 
     canvasPull.cd()
     BRpull_frame.Draw()
-    canvasPull.SaveAs("~/public_html/Hrare/BIAS/pull_toy"+mesonCat+tag+".png");
+    latex2 = TLatex()
+    latex2.SetTextSize(0.04)
+    latex2.DrawLatex(-3 ,0.7*BRpull_frame.GetMaximum(), "BR="+str(myBRvalue))
+
+    canvasPull.SaveAs("~/public_html/Hrare/BIAS/pull_toy"+mesonCat+tag+"BR"+str(myBRvalue)+".png")
 
 
 if __name__ == "__main__":
 
-    checkBias('_VBFcat','_RhoCat',2018)
-    checkBias('_VBFcat','_PhiCat',2018)
+    checkBias('_VBFcat','_PhiCat',2018, 0.001)
+    checkBias('_VBFcatlow','_PhiCat',2018, 0.001)
+    checkBias('_GFcat','_PhiCat',2018, 0.001)
 
-    checkBias('_VBFcatlow','_RhoCat',2018)
-    checkBias('_VBFcatlow','_PhiCat',2018)
-
-    checkBias('_GFcat','_PhiCat',2018)
-    checkBias('_GFcat','_RhoCat',2018)
-
-
-
+    checkBias('_VBFcat','_RhoCat',2018, 0.001)
+    checkBias('_VBFcatlow','_RhoCat',2018, 0.001)
+    checkBias('_GFcat','_RhoCat',2018, 0.001)

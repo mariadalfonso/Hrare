@@ -35,7 +35,7 @@
 	{
 	    "name": "isGF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_feb13/ggH_phi/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva_feb13/ggH_rho/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB23/GF_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{

@@ -36,7 +36,6 @@
 #include <limits>
 #include <map>
 
-
 #include <ROOT/RVec.hxx>
 #include <ROOT/RVec.hxx>
 #include <ROOT/RDataFrame.hxx>
@@ -63,12 +62,12 @@ Vec_i indices(const int& size, const int& start = 0) {
 }
 
 
-Vec_f NomUpDownVar(const float up, const float down, const float nom, float weight) {
+Vec_f NomUpDownVar(const float nom, const float up, const float down, float weight) {
 
   Vec_f res(3, 1);
-  res[0] = weight;  // nom
-  res[1] = weight*up/nom;  // up
-  res[2] = weight*down/nom;  // down
+  res[0] = weight;  // nom - already mutliplied for the Nom
+  res[1] = (nom!=0) ? weight*up/nom : weight;  // up
+  res[2] = (nom!=0) ? weight*down/nom : weight;  // down
   return res;
 }
 

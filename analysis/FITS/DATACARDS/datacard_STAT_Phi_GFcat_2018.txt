@@ -3,10 +3,10 @@ imax 1 number of channels
 jmax 2 number of background minus 1
 kmax * number of nuisance parameters
 -------------------------------------
-shapes	ggH	GFcat	DATACARDS/workspace_STAT_Phi_GFcat_2018.root	w:crystal_ball_PhiCat_GFcat_ggH
-shapes	VBFH	GFcat	DATACARDS/workspace_STAT_Phi_GFcat_2018.root	w:crystal_ball_PhiCat_GFcat_VBFH
-shapes	bkg	GFcat	DATACARDS/workspace_STAT_Phi_GFcat_2018.root	w:multipdf_PhiCat_GFcat_bkg
-shapes	data_obs	GFcat	DATACARDS/workspace_STAT_Phi_GFcat_2018.root	w:observed_data
+shapes	ggH	GFcat	DATACARDSmva_MARCH9/workspace_STAT_Phi_GFcat_2018.root	w:crystal_ball_PhiCat_GFcat_ggH
+shapes	VBFH	GFcat	DATACARDSmva_MARCH9/workspace_STAT_Phi_GFcat_2018.root	w:crystal_ball_PhiCat_GFcat_VBFH
+shapes	bkg	GFcat	DATACARDSmva_MARCH9/workspace_STAT_Phi_GFcat_2018.root	w:multipdf_PhiCat_GFcat_bkg
+shapes	data_obs	GFcat	DATACARDSmva_MARCH9/workspace_STAT_Phi_GFcat_2018.root	w:observed_data
 -------------------------------------
 bin	GFcat
 observation	-1
@@ -17,6 +17,13 @@ process		0	-1	1
 rate		0.01	0.01	1
 -------------------------------------
 lumi_13TeV 	lnN 	1.025	1.025	-
+CMS_photonID 	lnN 	1.010	1.010	-
+CMS_prefiring 	lnN 	1.005	1.005	-
+CMS_pileup  	lnN 	1.010	1.010	-
+QCDscale_ggH 	lnN	0.961/1.0039	-	-
+pdf_Higgs_ggH 	lnN	0.968/1.032	-	-
+QCDscale_VBFH 	lnN	-	0.997/1.004	-
+pdf_Higgs_VBFH 	lnN	-	0.979/1.021	-
 -------------------------------------
 
 pdfindex_PhiCat_GFcat discrete

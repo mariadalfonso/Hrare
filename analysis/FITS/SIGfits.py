@@ -18,6 +18,7 @@ if histoEnum == 43 and doCR: workspaceName = 'WSmvaCR'
 
 xlowRange = 100.
 xhighRange = 170.
+#xhighRange = 150.
 
 x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
 
@@ -96,7 +97,7 @@ def  fitSig(tag , mesonCat, year):
         cb_alphaL = RooRealVar('cb_alphaL'+mesonCat+tag+'_'+sig, 'cb_alphaL', 0., 5.)
         cb_alphaR = RooRealVar('cb_alphaR'+mesonCat+tag+'_'+sig, 'cb_alphaR', 0., 5.)
         cb_nL = RooRealVar('cb_nL'+mesonCat+tag+'_'+sig, 'cb_nL', 0., 30.)
-        cb_nR = RooRealVar('cb_nR'+mesonCat+tag+'_'+sig, 'cb_nR', 0., 5.)
+        cb_nR = RooRealVar('cb_nR'+mesonCat+tag+'_'+sig, 'cb_nR', 0., 15.)
 
         pdf_crystalball = RooDoubleCBFast('crystal_ball'+mesonCat+tag+'_'+sig, 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
         model = pdf_crystalball
@@ -191,7 +192,7 @@ def  fitBkg(tag , mesonCat, year):
 
     # -----------------------------------------------------------------------------
     # BERN law
-    bern_c0 = RooRealVar('bern_c0'+mesonCat+tag, 'bern_c0', 0.2, 0., 0.5)
+    bern_c0 = RooRealVar('bern_c0'+mesonCat+tag, 'bern_c0', 0.5, 0., 1.)
     bern_c1 = RooRealVar('bern_c1'+mesonCat+tag, 'bern_c1', 0.1, 0., 1.)
     bern_c2 = RooRealVar('bern_c2'+mesonCat+tag, 'bern_c2', 0.1, 0., 1.)
     bern_c3 = RooRealVar('bern_c3'+mesonCat+tag, 'bern_c3', 0.01, 0., 0.1) # limit this for the GF
@@ -473,6 +474,7 @@ def makePlot():
 
 if __name__ == "__main__":
 
+
 #    with open("example_VBFcatlow_RhoCat_2018_mHwindow.txt", "w") as f:
 #        f.write("Events used in VBFcatlow RhoCat 2018 \n")
 #        f.write("run:luminosityBlock:event \n")
@@ -495,11 +497,13 @@ if __name__ == "__main__":
     if not blinded: fitSig('_VBFcatlow','_PhiCat',2018)
     fitBkg('_VBFcatlow','_PhiCat',2018)
 
-    if not blinded: fitSig('_Vcat','_RhoCat','Run2')
-    fitBkg('_Vcat','_RhoCat','Run2')
+    if histoEnum == 4:
 
-    if not blinded: fitSig('_Vcat','_PhiCat','Run2')
-    fitBkg('_Vcat','_PhiCat','Run2')
+        if not blinded: fitSig('_Vcat','_RhoCat','Run2')
+        fitBkg('_Vcat','_RhoCat','Run2')
+
+        if not blinded: fitSig('_Vcat','_PhiCat','Run2')
+        fitBkg('_Vcat','_PhiCat','Run2')
 
     exit()
 

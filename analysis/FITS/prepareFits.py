@@ -93,11 +93,14 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    dirWORK_='/work/submit/mariadlf/Hrare/DEC28/'
    dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/FEB24/'
+   dirLOCALfix_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/MAR8/'
 
    directory1 = dirLOCAL_+'12016/'
    directory2 = dirLOCAL_+'22016/'
    directory3 = dirLOCAL_+'2017/'
    directory4 = dirLOCAL_+'2018/'
+
+   if category == '_GFcat' and mesonCat == '_RhoCat' : directory4 = dirLOCALfix_+'2018/'
 
    if doSignal:
       if(year == '_2018' or year == '_all'): addSigHisto(mytree, directory4, category, mesonCat, nameSig, '_2018')
