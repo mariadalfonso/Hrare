@@ -5,6 +5,7 @@ import math
 import sys
 
 from LoadTree import loadTree
+from prepareHisto import getHisto, MVAbinRho, MVAbinPhi
 
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch()
@@ -17,20 +18,16 @@ mesonCat = sys.argv[2]
 year = '_2018'
 #year = '_all'
 
-#dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/FEB24CR/'
-dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/FEB24/'
+dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/MAR11/'
 
 if (category=='_Zinvcat'): directory4 = '/work/submit/mariadlf/Hrare/DEC28/2018/'
-
 if (category=='_GFcat'): directory4 = dirLOCAL_+'2018/'
 if (category=='_VBFcatlow'): directory4 = dirLOCAL_+'2018/'
-
 if (category=='_VBFcat'):
    directory4 = dirLOCAL_+'2018/'
    directory3 = dirLOCAL_+'2017/'
    directory1 = dirLOCAL_+'12016/'
    year = '_all'
-
 if (category=='_Zcat' or category=='_Wcat'):
    directory4 = dirLOCAL_+'2018/'
    directory3 = dirLOCAL_+'2017/'
@@ -81,24 +78,9 @@ lumis={
     '_Run2': 138.,      #19.52 + 7.7 + 59.70
 }
 
-MVAbinRho={
-#   '_GFcat': 0.0,
-   '_GFcat': 0.5,
-   '_Zinvcat': 0.6,
-   '_VBFcat': 0.8,
-   '_VBFcatlow': 0.8,
-}
-
-MVAbinPhi={
-#   '_GFcat': 0.0,
-   '_GFcat': 0.4,
-   '_Zinvcat': 0.7,
-   '_VBFcat': 0.6,
-   '_VBFcatlow': 0.6,
-}
-
 if mesonCat=='_PhiCat': MVAbin = MVAbinPhi
 if mesonCat=='_RhoCat': MVAbin = MVAbinRho
+
 
 def deltaPhi(phi1,phi2):
    result = phi1 - phi2
@@ -134,327 +116,37 @@ def plot(item, nbin, low, high, doLog):
 
    if BTheo==0.1: doLog=False # this is both for the meson mass SB and the signal region
 
-   hZinv = ROOT.TH1F( 'hZinv', 'This is the distribution', nbin, low, high)
-   hDY = ROOT.TH1F( 'hDY', 'This is the distribution', nbin, low, high)
-   hZG = ROOT.TH1F( 'hZG', 'This is the distribution', nbin, low, high)
-   hW = ROOT.TH1F( 'hW', 'This is the distribution', nbin, low, high)
-   hWG = ROOT.TH1F( 'hWG', 'This is the distribution', nbin, low, high)
-   hTTG = ROOT.TH1F( 'hTTG', 'This is the distribution', nbin, low, high)
-   hTT12L = ROOT.TH1F( 'hTT12L', 'This is the distribution', nbin, low, high)
-   hGJet = ROOT.TH1F( 'hGJet', 'This is the distribution', nbin, low, high)
-   hVBFGJet = ROOT.TH1F( 'hVBFGJet', 'This is the distribution', nbin, low, high)
-   hJet = ROOT.TH1F( 'hJet', 'This is the distribution', nbin, low, high)
-   hVBFH = ROOT.TH1F( 'hVBFH', 'This is the distribution', nbin, low, high)
-   hggH = ROOT.TH1F( 'hggH', 'This is the distribution', nbin, low, high)
-   hZH = ROOT.TH1F( 'hZH', 'This is the distribution', nbin, low, high)
-   hZinvH = ROOT.TH1F( 'hZinvH', 'This is the distribution', nbin, low, high)
-   hWH = ROOT.TH1F( 'hWH', 'This is the distribution', nbin, low, high)
-   hData = ROOT.TH1F( 'hData', '', nbin, low, high)
+   listHisto = getHisto(mytree, category, mesonCat, item, nbin, low, high)
 
-   print(item)
+   print(listHisto)
+   for obj in listHisto:
+      if obj.name == 'hData': hData = obj.hOBJ
+      #
+      if obj.name == 'hZinvH': hZinvH = obj.hOBJ
+      if obj.name == 'hZH': hZH = obj.hOBJ
+      if obj.name == 'hWH': hWH = obj.hOBJ
+      if obj.name == 'hTTH': hTTH = obj.hOBJ
+      if obj.name == 'hVBFH': hVBFH = obj.hOBJ
+      if obj.name == 'hggH': hggH = obj.hOBJ
+      #
+      if obj.name == 'hZG': hZG = obj.hOBJ
+      if obj.name == 'hDY': hDY = obj.hOBJ
+      if obj.name == 'hWG': hWG = obj.hOBJ
+      if obj.name == 'hW': hW = obj.hOBJ
+      if obj.name == 'hTT12L': hTT12L = obj.hOBJ
+      if obj.name == 'hTTG': hTTG = obj.hOBJ
+      if obj.name == 'hGJet': hGJet = obj.hOBJ
+      if obj.name == 'hVBFGJet': hVBFGJet = obj.hOBJ
+      if obj.name == 'hJet': hJet = obj.hOBJ
+      if obj.name == 'hZinv': hZinv = obj.hOBJ
 
-   for ev in mytree:
-
-      inMass = False
-      idxMeson = 0
-#      inMass = (abs(ev.HCandMass - 125)<30)
-      idxMeson = ev.index_pair[0]
-      idxPh = ev.index_pair[1]
-#      idxPh = 1
-#      idxPh = 0
-
-      ## CHECK EE, EB, BB
-
-#      photonEta = abs(ev.goodPhotons_eta[idxPh])
-#      mesonEta = max(abs(ev.goodMeson_trk1_eta[idxMeson]),abs(ev.goodMeson_trk2_eta[idxMeson]))
-#      if mesonEta < 1.4: mesString = 'barrel'
-#      if mesonEta >= 1.4: mesString = 'endcap'
-
-#      if abs(ev.goodMeson_trk1_eta[idxMeson]) >= 1.4: continue
-#      mesString = 'barrel'
-
-#      if(photonEta < 1.4 and mesonEta<1.4): string = 'BB'
-#      elif(photonEta > 1.4 and mesonEta>1.4): string = 'EE'
-#      elif(photonEta < 1.4 or mesonEta<1.4): string = 'EB'
-
-      ## OPTIMIZED PHASE SPACE
-      if(category =='_Zcat' or category =='_Wcat'):
-#         if ev.goodPhotons_pt[idxPh]<40 :  continue
-#         if ev.goodMeson_pt[idxMeson]<40 : continue
-         if ev.photon_pt<40 :  continue
-         if ev.meson_pt<40 : continue
-
-      if(category =='_Wcat'):
-         if ev.DeepMETResolutionTune_pt<15 :  continue
-         if ev.V_mass<15 :  continue
-
-#      if(category =='_Zcat' or category =='_Wcat'):
-#         if ev.isMuorEle!=1: continue; # 1 is diMu and 2 is diEle
-#         if ev.isMuorEle!=2: continue; # 1 is diMu and 2 is diEle
-
-      ## OPTIMIZED PHASE SPACE
-      if(category =='_Zinvcat'):
-         if ev.photon_pt<40 :  continue
-         if ev.meson_pt<40 : continue
-#         if min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson]) < 10: continue
-         if item !=13:
-            if ev.DeepMETResolutionTune_pt<75 :  continue
-#            if ev.DeepMETResolutionTune_pt<50 :  continue
-#         if abs(ev.dPhiGammaMET)<1. : continue # already applied
-#         if abs(ev.dPhiMesonMET)<1. : continue # already applied
-         if item !=22:
-            if ev.ptRatioMEThiggs>0.5: continue
-         if item !=91:
-            if abs(ev.dEtaGammaMesonCand)>2: continue
-         if item !=113:
-            if ev.nbtag>0: continue
-
-#         isHEM = ev.DeepMETResolutionTune_phi < -0.9 and ev.DeepMETResolutionTune_phi > -1.6
-#         if not isHEM: continue
-
-# HEM
-#         isHEM = (ev.goodPhotons_eta[idxPh]< -1.39 and ev.goodPhotons_phi[idxPh]>= -1.6 and ev.goodPhotons_phi[idxPh]< -0.9)
-#         if not isHEM: continue
-#         if ev.run > 319077: continue
-
-      ## OPTIMIZED PHASE SPACE
-#      if(category =='_VBFcatlow'):
-#         if ev.goodPhotons_pt[idxPh]<40 :  continue # already applied
-#         if ev.goodPhotons_pt[idxPh]>75 :  continue # already applied
-#         if ev.goodMeson_pt[idxMeson]<40 : continue
-
-      ## OPTIMIZED PHASE SPACE
-      if(category =='_VBFcatlow' or category =='_VBFcat'):
-         if ev.jet1Pt < 30 : continue
-         if ev.jet2Pt < 20 : continue
-#         if ev.deltaJetMeson < 1.2 : continue
-#         if ev.deltaJetPhoton < 1. : continue
-         if category =='_VBFcat':
-            if ev.mJJ < 400. : continue
-         else:
-            if ev.mJJ < 300. : continue
-#         if ev.dEtaJJ < 3. : continue # already applied
-
-#      ## OPTIMIZED PHASE SPACE
-      if(category =='_GFcat'):
-         if ev.photon_pt<40 :  continue
-         if ev.meson_pt<40 : continue
-
-      if item == 1 :
-         var = ev.V_mass
-      if item == 114 :
-         var = ev.Visr_mass
-      if item == 115 :
-         var = ev.LeadingLepton
-      if item == 116 :
-         var = ev.SubLeadingLepton
-      if item == 42 :
-         var = ev.MVAdisc[0]
-      if item == 43:
-         var = -1
-         if ev.MVAdisc[0]>MVAbin[category]:  var = ev.HCandMass
-
-      if item == 4 :
-         var = ev.HCandMass
-         #         var = ev.HGenMas
-      if item == 41 :
-         var = ev.HCandPT
-## Photon plots
-      if item == 5 :
-         var = ev.goodPhotons_pt[idxPh]
-      if item == 6 :
-         var = ev.goodPhotons_eta[idxPh]
-      if item == 205 :
-         var = ev.nPhotonsVeto
-      if item == 206 :
-         var = ev.goodPhotons_hoe[idxPh]
-      if item == 207 :
-         var = ev.goodPhotons_r9[idxPh]
-      if item == 208 :
-         #         var = ev.goodPhotons_pfRelIso03_all[idxPh]
-         var = ev.goodPhotons_pfRelIso03_chg[idxPh]
-      if item == 209 :
-         var = ev.goodPhotons_sieie[idxPh]
-      if item == 101 :
-         var = ev.goodPhotons_pixelSeed[idxPh]
-## KS plots
-      if item == 102 :
-         var = ev.goodKs_mass[idxMeson]
-      if item == 103 :
-         var = ev.goodKs_pt[idxMeson]
-      if item == 107 :
-         var = ev.goodKs_lxy[idxMeson]
-## Meson plots
-      if item == 2 :
-         var = ev.goodMeson_mass[idxMeson]
-      if item == 3 :
-         var = ev.goodMeson_pt[idxMeson]
-      if item == 30 :
-         #leading
-         var = max(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson])/ev.goodMeson_pt[idxMeson]
-      if item == 29 :
-         #subleading
-         var = min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson])/ev.goodMeson_pt[idxMeson]
-      if item == 31 :
-         #leading
-         var = max(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson])
-      if item == 32 :
-         #subleading
-         var = min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson])
-      if item == 33 :
-         var = ev.goodMeson_trk1_eta[idxMeson]
-      if item == 34 :
-         var = ev.goodMeson_trk2_eta[idxMeson]
-      if item == 35 :
-         var = ev.goodMeson_iso[idxMeson]
-      if item == 16 :
-         var = abs(ev.goodMeson_DR[idxMeson])
-      if item == 10 :
-         var = (abs(ev.goodMeson_DR[idxMeson])*ev.goodMeson_pt[idxMeson])/(2*ev.goodMeson_mass[idxMeson])
-      if item == 7 :
-         var = ev.goodMeson_sipPV[idxMeson]
-      if item == 8 :
-         var = ev.goodMeson_doca_prob[idxMeson]
-      if item == 9 :
-         var = ev.goodMeson_vtx_prob[idxMeson]/ev.goodMeson_vtx_chi2dof[idxMeson]
-      if item == 18 :
-         var = ev.goodMeson_vtx_chi2dof[idxMeson]
-      if item == 21 :
-#         var = ev.goodMeson_massErr[idxMeson]/ev.goodMeson_mass[idxMeson]
-         var = ev.goodMeson_massErr[idxMeson]
-## event like
-      if item == 11 :
-         var = ev.SoftActivityJetNjets5
-      if item == 12 :
-         if(category =='_VBFcat' or category =='_VBFcatlow' or category =='_GFcat' or category =='_Zinvcat'): var = ev.nGoodJets
-         else: var = ev.nJet
-      if item == 113 :
-         if(category =='_Zinvcat'): var = ev.nbtag
-      if item == 50 :
-         var = ev.deltaLepMeson
-      if item == 51 :
-         var = ev.deltaJetMeson
-      if item == 52 :
-         var = ev.deltaJetPhoton
-      if item == 53 :
-         var = ev.zepVar
-      if item == 54 :
-         var = ev.detaHigJet1
-      if item == 55 :
-         var = ev.detaHigJet2
-      if item == 56 :
-         var = ev.jet1hfsigmaPhiPhi
-      if item == 57 :
-         var = ev.jet1hfsigmaEtaEta
-      if item == 58 :
-         var = ev.jet2hfsigmaPhiPhi
-      if item == 59 :
-         var = ev.jet2hfsigmaEtaEta
-      if item == 13 :
-#         var = ev.MET_pt
-         var = ev.DeepMETResolutionTune_pt
-      if item == 36 :
-#         var = ev.MET_pt
-         var = ev.DeepMETResolutionTune_phi
-      if item == 37 :
-#         var = ev.MET_pt
-         var = ev.HCandPHI
-      if item == 14 :
-         var = abs(ev.dPhiGammaMET)
-      if item == 15 :
-         var = abs(ev.dPhiMesonMET)
-      if item == 17 :
-         var = ev.mJJ
-      if item == 19 :
-         var = ev.dEtaJJ
-      if item == 20 :
-         var = ev.Y1Y2
-      if item == 22:
-         var = ev.ptRatioMEThiggs
-      if item == 23:
-         var = ev.jet1Pt
-      if item == 24:
-         var = ev.jet2Pt
-      if item == 231:
-         var = ev.jet1Eta
-      if item == 241:
-         var = ev.jet2Eta
-      if item == 90:
-         var = ev.dPhiGammaMesonCand
-      if item == 91:
-         var = ev.dEtaGammaMesonCand
-      if item == 95:
-         var = ev.PV_npvsGood
-
-# Fill histograms.
-
-      if ev.mc >= 0 : wei = ev.w * ev.lumiIntegrated
-#      if(category=='_VBFcat' or category=='_Wcat' or category=='_Zcat'): wei = ev.w * ev.lumiIntegrated
-#      if ev.mc==0:
-      if (ev.mc>=37 and ev.mc<=44):
-         hZinv.Fill( var, wei )
-      if (ev.mc==34 or ev.mc==35 or ev.mc==36 or ev.mc==0):
-#      if (ev.mc==34 or ev.mc==35 or ev.mc==36):
-         hDY.Fill( var, wei )
-      if ev.mc==1 or ev.mc==46 or ev.mc==48: #Zll,Zhad,Znn + Photon
-         hZG.Fill( var, wei )
-      if ev.mc==2 or ev.mc==45: #Wln,Whad + Photon
-         hWG.Fill( var, wei )
-      if (ev.mc==31 or ev.mc==32 or ev.mc==33 or ev.mc==3): # W fakes
-         hW.Fill( var, wei)
-###
-      if ev.mc==47:
-         hTTG.Fill( var, wei )
-      if (ev.mc==4 or ev.mc==5):
-         hTT12L.Fill( var, wei)
-      if ((ev.mc==15 or ev.mc==16 or ev.mc==17 or ev.mc==18 or ev.mc==19) or (ev.mc==10 or ev.mc==11 or ev.mc==12 or ev.mc==13 or ev.mc==14)):
-         hGJet.Fill( var, wei)
-      if ev.mc==9: #VBF-EWK
-         hVBFGJet.Fill( var, wei)
-      if (ev.mc==20 or ev.mc==21 or ev.mc==22 or ev.mc==23 or ev.mc==24 or ev.mc==25):
-         hJet.Fill( var, wei)
-###
-      if ev.mc==1013 or ev.mc==1023 or ev.mc==1014 or ev.mc==1024:
-         hZH.Fill( var, wei)
-      if ev.mc==1015 or ev.mc==1025 or ev.mc==1016 or ev.mc==1026:
-         hZinvH.Fill( var, wei)
-      if ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022:
-         hWH.Fill( var, wei)
-      if ev.mc==1010 or ev.mc==1020:
-         hVBFH.Fill( var, wei)
-      if ev.mc==1017 or ev.mc==1027:
-         hggH.Fill( var, wei)
-      if ev.mc<0:
-#      if (ev.mc>=37 and ev.mc<=44):
-         if 'CR' in dirLOCAL_:
-            hData.Fill( var )
-         else:
-            if ((item==4 or item==43) and var>115 and var<135) : continue
-            if item==42:
-               if var>MVAbin[category]: continue
-            hData.Fill( var )
 
    hZinvH.Scale(BTheo)
    hZH.Scale(BTheo)
+   hTTH.Scale(BTheo)
    hVBFH.Scale(BTheo)
    hggH.Scale(BTheo)
    hWH.Scale(BTheo)
-
-   redDark = (191, 34, 41)
-#   redMed = (255, 40, 0)
-   redMed = (237, 41, 57)
-#   redMed = (220,0,5)
-#   redLight = (255,61,65)
-   redLight = (255,82,82)
-   orange = (255, 204, 153)
-   orangeDark = (255,150,79)
-   gray = (136,139,141)
-   azure = (100, 192, 232)
-   azureDark = (96, 147, 172)
-   green = (144, 238, 144)
-   greenDark = (98, 172, 141)
-   gold = (212 ,175, 55)
-   violet = (181 ,100, 227)
 
    c, pad1, pad2 = createCanvasPads(doLog)
 
@@ -464,29 +156,25 @@ def plot(item, nbin, low, high, doLog):
    for h in [hZG, hDY, hTT12L, hTTG, hWG, hW, hGJet]:
       BKGstack.Add(h)
 
-   for h, color in zip([hZG, hDY, hTT12L, hWG, hW, hTTG, hGJet, hVBFGJet, hJet, hZinv, hZH, hWH, hVBFH, hZinvH, hggH], [azure, azureDark, gray, green, greenDark, gray, orange, orangeDark, gold, violet, redMed, redDark, redLight, redMed, redDark]):
-#   for h, color in zip([hZH, hWH, hVBFH, hZinvH, hggH], [redDark, redMed, redLight, redDark, redDark]):
-      h.SetLineWidth(1)
-      h.SetLineColor(1)
-      h.SetFillColor(ROOT.TColor.GetColor(*color))
+   for h in [hZG, hDY, hTT12L, hWG, hW, hTTG, hGJet, hVBFGJet, hJet, hZinv, hZH, hWH, hTTH, hVBFH, hZinvH, hggH]:
 #      print('lumi',lumis[year])
 #      if not category == '_VBFcat': h.Scale(lumis[year])
 #      if not category == '_VBFcat': h.Scale(lumis[year])
       stack.Add(h)
    if item==4 or item==43:
       if BTheo==1. and doLog:
-         stack.SetMaximum(10*max(hWH.GetMaximum(),hZH.GetMaximum(), hVBFH.GetMaximum(), hZinvH.GetMaximum(), hggH.GetMaximum()))
+         stack.SetMaximum(10*max(hWH.GetMaximum(),hZH.GetMaximum(), hTTH.GetMaximum(), hVBFH.GetMaximum(), hZinvH.GetMaximum(), hggH.GetMaximum()))
          if category == '_GFcat' and mesonCat == '_PhiCat': stack.SetMinimum(1)
          if category == '_VBFcat' and mesonCat == '_PhiCat': stack.SetMinimum(1)
          if category == '_VBFcatlow' and mesonCat == '_PhiCat': stack.SetMinimum(1)
       else:
-         stack.SetMaximum(2*max(hData.GetMaximum(), hWH.GetMaximum(),hZH.GetMaximum(), hVBFH.GetMaximum(), hZinvH.GetMaximum(), hggH.GetMaximum()))
+         stack.SetMaximum(2*max(hData.GetMaximum(), hWH.GetMaximum(),hZH.GetMaximum(), hTTH.GetMaximum(), hVBFH.GetMaximum(), hZinvH.GetMaximum(), hggH.GetMaximum()))
 
    if item==42 or item==14 or item==15 or item==22: stack.SetMaximum(2*max(hData.GetMaximum(), hWH.GetMaximum(),hZH.GetMaximum(), hVBFH.GetMaximum(), hZinvH.GetMaximum()))
    if item==102: stack.SetMaximum(10*max(hWG.GetMaximum(),hZG.GetMaximum(), hGJet.GetMaximum()))
    if item==1 or item==101 or item==51 or item==52 or item==23 or item==24 or item==12 or item==41: stack.SetMaximum(2*max(hData.GetMaximum(), hWH.GetMaximum(),hZH.GetMaximum(), hVBFH.GetMaximum(), hZinvH.GetMaximum(), hggH.GetMaximum()))
    if item==2 and category == '_GFcat': stack.SetMaximum(30000)     #Meson Mass
-   if item==17 and mesonCat == '_RhoCat': stack.SetMaximum(4000)    # MJJ
+   if item==17 and mesonCat == '_RhoCat': stack.SetMaximum(5000)    # MJJ
    if item==17 and mesonCat == '_PhiCat': stack.SetMaximum(600)    # MJJ
    if item==2 and (category == '_VBFcat' or category == '_VBFcatlow') : stack.SetMaximum(2000)
    if item==9 and (category == '_VBFcat' or category == '_VBFcatlow' and category == '_GFcat') : stack.SetMaximum(2*max(hData.GetMaximum(),hGJet.GetMaximum()))
@@ -499,9 +187,9 @@ def plot(item, nbin, low, high, doLog):
 
    pad1.cd()
    # Draw data first
-   if hData: hData.SetMarkerStyle(20)
-   if hData: hData.SetMarkerSize(1.2)
-   if hData: hData.SetLineWidth(2)
+#   if hData: hData.SetMarkerStyle(20)
+#   if hData: hData.SetMarkerSize(1.2)
+#   if hData: hData.SetLineWidth(2)
    if hData: hData.SetLineColor(ROOT.kBlack)
    if item==35: hData.GetXaxis().SetTitle("meson Isolation")
    if item==9: hData.GetXaxis().SetTitle("vertex compatibility")
@@ -561,6 +249,7 @@ def plot(item, nbin, low, high, doLog):
       if item==207: stack.GetXaxis().SetTitle("r9")
       if item==208: stack.GetXaxis().SetTitle("pfRelIso")
       if item==209: stack.GetXaxis().SetTitle("#sigma_{i#eta i#eta}")
+      if item==210: stack.GetXaxis().SetTitle("photon MVA-id")
       if item==22: stack.GetXaxis().SetTitle("|p_{T}^{miss}-p_{T}^{H_{#rho#gamma}}|/p_{T}^{H_{#rho#gamma}}")
       if item==14: stack.GetXaxis().SetTitle("#Delta #phi (p_{T}^{miss},#gamma)")
       if item==15: stack.GetXaxis().SetTitle("Delta #phi (p_{T}^{miss},meson)")
@@ -587,6 +276,9 @@ def plot(item, nbin, low, high, doLog):
       pad2.cd()
       ratio = hData.Clone("dataratio")
       mcTOT = BKGstack.GetStack().Last()
+      print("ALL mcTOT integral(): ",mcTOT.Integral())
+      print("ALL data integral(): ",hData.Integral())
+
       ratio.Divide(mcTOT)
       ratio.GetYaxis().SetTitle("data/MC")
       ratio.GetYaxis().SetRangeUser(0.5,1.5)
@@ -652,6 +344,11 @@ def plot(item, nbin, low, high, doLog):
          legend.AddEntry(hWH, "WH(#gamma#phi) SM x 10^{4}", "f")
       else:
          legend.AddEntry(hWH, "WH(#gamma#phi)", "f")
+   if hTTH and hTTH.Integral()>0 and mesonCat == "_PhiCat":
+      if BTheo!=1.:
+         legend.AddEntry(hTTH, "ttH(#gamma#phi) SM x 10^{4}", "f")
+      else:
+         legend.AddEntry(hTTH, "ttH(#gamma#phi)", "f")
    ######
    if hZinvH and hZinvH.Integral()>0 and mesonCat == "_RhoCat":
       if BTheo!=1.:
@@ -668,6 +365,11 @@ def plot(item, nbin, low, high, doLog):
          legend.AddEntry(hWH, "WH(#gamma#rho) SM x 10^{4}", "f")
       else:
          legend.AddEntry(hWH, "WH(#gamma#rho)", "f")
+   if hTTH and hTTH.Integral()>0 and mesonCat == "_RhoCat":
+      if BTheo!=1.:
+         legend.AddEntry(hTTH, "ttH(#gamma#rho) SM x 10^{4}", "f")
+      else:
+         legend.AddEntry(hTTH, "ttH(#gamma#rho)", "f")
    ######
    if hVBFH and mesonCat == "_PhiCat" and hVBFH.Integral()>0:
       if BTheo!=1.:
@@ -831,6 +533,7 @@ def plot(item, nbin, low, high, doLog):
    if item==18: plotString = "chi2dof"
    if item==21: plotString = "massErr"
 
+   if item==39: plotString = "MesonCandidate_TrkPtRel_"
    if item==29: plotString = "MesonCandidate_Trk1Pt_norm"
    if item==30: plotString = "MesonCandidate_Trk2Pt_norm"
    if item==31: plotString = "MesonCandidate_Trk1Pt"
@@ -845,8 +548,8 @@ def plot(item, nbin, low, high, doLog):
    if item==207: plotString = "Photon_r9"
    if item==208: plotString = "Photon_relIso"
    if item==209: plotString = "Photons_sieie"
+   if item==210: plotString = "Photons_mvaID"
    if item==101: plotString = "Photons_pixelSeed"
-
 
    if item==11: plotString = "SoftActivityJetNjets5"
    if item==12: plotString = "nJet"
@@ -876,6 +579,7 @@ def plot(item, nbin, low, high, doLog):
    if item==36: plotString = "METphi"
    if item==37: plotString = "HiggsPHI"
    if item==22: plotString = "ptRatio"
+   if item==50: plotString = "dRLepMes"
 
    ##
    if item==90: plotString = "dPhiPHMes"
@@ -912,8 +616,9 @@ def plotPhoton():
 #   plot(101, 10, 0. , 10., False) # Photon pixel seed
    plot(206, 100, 0. , 0.1, True) # ph h/e
    plot(207, 60, 0.5 , 1.1, False) # ph
-#   plot(208, 100, 0. , 0.1, True) # ph relIso all
+   plot(208, 100, 0. , 0.1, True) # ph relIso all
 #   plot(209, 100, 0. , 0.1, False) # ph sieta sieta
+   plot(210, 100, 0. , 1., True) # ph mvaID
 
    plot(5, 30, 0. , 150., False) # Photon_pt
    plot(6, 20, -5. , 5., False) # Photon_eta
@@ -936,6 +641,7 @@ def plotMeson():
 
 #   plot(29, 100, 0. , 1., True) # pt_trk1_norm min
 #   plot(30, 100, 0. , 1., True) # pt_trk2_norm max
+   plot(39, 100, 0. , 1., True) # pt_trk_rel
 
    plot(33, 30, -3. , 3., False) # meson_trk1_eta
    plot(34, 30, -3. , 3., False) # meson_trk2_eta
@@ -946,15 +652,12 @@ def plotMeson():
    if mesonCat == '_PhiCat': plot(16, 50, 0. , 0.05, False) # DRtk12
    if mesonCat == '_RhoCat': plot(16, 50, 0. , 0.1, False) # DRtk12
 
-   plot(35, 120, 0. , 1.2, True) # meson_iso
+   plot(35, 60, 0.6 , 1.2, True) # meson_iso
 
    plot(7, 100, 0. , 10., True) # phi_lxy
    plot(9, 30, 0. , 1.5, False) # phi_VTXprob
 #   plot(8, 100, 0. , 0.1, True) # phi_doca
 #   plot(18, 100, 0. , 1., False) # vtx_chi2dof
-
-#   if(category =='_Wcat' or category =='_Zcat'):
-#      plot(50, 100, 0. , 10., False) # minDR (Lepton,Meson)
 
 #   plot(21, 100, 0. , 0.1, True) # massErr meson
 
@@ -973,6 +676,7 @@ def plotWZlep():
       plot(13, 40, 0. , 200., False) # MET_pt
       plot(14, 20, 0. , 3.14, False) # dPhiMETmeson
       plot(15, 20, 0. , 3.14, False) # dPhiMETphoton
+      plot(50, 100, 0. , 10., False) # minDR (Lepton,Meson)
 
 def plotZinv():
 
@@ -1029,9 +733,7 @@ if __name__ == "__main__":
    plotMeson()
    plotWZlep()
    plotPhoton()
-   plotMeson()
    plotVBF()
-
 #   plotZinv()
 
    exit()

@@ -12,8 +12,8 @@ doCR=False
 #histoEnum = 43
 histoEnum = 4
 
-workspaceName = 'WS'
-if histoEnum == 43: workspaceName = 'WSmva'
+workspaceName = 'WS_MARCH20'
+if histoEnum == 43: workspaceName = 'WSmva_MARCH20'
 if histoEnum == 43 and doCR: workspaceName = 'WSmvaCR'
 
 xlowRange = 100.
@@ -34,15 +34,15 @@ def  fitSig(tag , mesonCat, year):
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
 
-    mcSig = ["WH", "WHl", "ZH", "ZHl","VBFH", "ZinvH", "ggH"]
+    mcSig = ["WH", "WHl", "ZH", "ZHl", "TTH", "VBFH", "ZinvH", "ggH"]
     for sig in mcSig:
 
-        # 1l-2l: ZH, WH
+        # 1l-2l: ZH, WH, TTH
         if (sig == "VBFH" and tag == "_Vcat"): continue
         if (sig == "ggH" and tag == "_Vcat"): continue
         if (sig == "ZinvH" and tag == "_Vcat"): continue
         if (sig == "WHl" and tag == "_Vcat"): continue
-        # 1l: ZHl, WH
+        # 1l: ZHl, WH, TTH
         if (sig == "ZH" and tag == "_Wcat"): continue
         if (sig == "VBFH" and tag == "_Wcat"): continue
         if (sig == "ggH" and tag == "_Wcat"): continue
@@ -53,17 +53,20 @@ def  fitSig(tag , mesonCat, year):
         if (sig == "WH" and tag == "_Zinvcat"): continue
         if (sig == "VBFH" and tag == "_Zinvcat"): continue
         if (sig == "ggH" and tag == "_Zinvcat"): continue
+        if (sig == "TTH" and tag == "_Zinvcat"): continue
         ##
         if (sig == "WH" and tag == "_Zcat"): continue
         if (sig == "VBFH" and tag == "_Zcat"): continue
         if (sig == "ggH" and tag == "_Zcat"): continue
         if (sig == "ZinvH" and tag == "_Zcat"): continue
+        if (sig == "TTH" and tag == "_Zcat"): continue
         ## ggh cat: GF and VBF (in principle can all the other 3 categories as well)
         if (sig == "ZH" and tag == "_GFcat"): continue
         if (sig == "WH" and tag == "_GFcat"): continue
         if (sig == "ZHl" and tag == "_GFcat"): continue
         if (sig == "WHl" and tag == "_GFcat"): continue
         if (sig == "ZinvH" and tag == "_GFcat"): continue
+        if (sig == "TTH" and tag == "_GFcat"): continue
         ##
         if (sig == "WH" and tag == "_VBFcat"): continue
         if (sig == "ZH" and tag == "_VBFcat"): continue
@@ -71,6 +74,7 @@ def  fitSig(tag , mesonCat, year):
         if (sig == "ZHl" and tag == "_VBFcat"): continue
         if (sig == "ZinvH" and tag == "_VBFcat"): continue
         if (sig == "ggH" and tag == "_VBFcat"): continue
+        if (sig == "TTH" and tag == "_VBFcat"): continue
         ##
         if (sig == "WH" and tag == "_VBFcatlow"): continue
         if (sig == "ZH" and tag == "_VBFcatlow"): continue
@@ -78,6 +82,7 @@ def  fitSig(tag , mesonCat, year):
         if (sig == "ZHl" and tag == "_VBFcatlow"): continue
         if (sig == "ZinvH" and tag == "_VBFcatlow"): continue
         if (sig == "ggH" and tag == "_VBFcatlow"): continue
+        if (sig == "TTH" and tag == "_VBFcatlow"): continue
 
         print(tag, ' ', sig)
 
@@ -396,6 +401,9 @@ def  fitBkg(tag , mesonCat, year):
 
     offsetY = 0.60*data_full.GetMaximum()
     if tag == '_GFcat': offsetY = 0
+    if (tag == '_VBFcat' or tag == '_VBFcatlow') and mesonCat == '_RhoCat' and histoEnum == 4: offsetY = 0
+    if (tag == '_VBFcat' or tag == '_VBFcatlow') and mesonCat == '_PhiCat' and histoEnum == 4: offsetY = 0.80*data_full.GetMaximum()
+    if (tag == '_VBFcat') and histoEnum == 43: offsetY = 0.90*data_full.GetMaximum()
     latex = TLatex()
     latex.SetTextColor(kRed)
     latex.SetTextSize(0.04)
@@ -474,7 +482,6 @@ def makePlot():
 
 if __name__ == "__main__":
 
-
 #    with open("example_VBFcatlow_RhoCat_2018_mHwindow.txt", "w") as f:
 #        f.write("Events used in VBFcatlow RhoCat 2018 \n")
 #        f.write("run:luminosityBlock:event \n")
@@ -485,18 +492,19 @@ if __name__ == "__main__":
     if not blinded: fitSig('_GFcat','_PhiCat',2018)
     fitBkg('_GFcat','_PhiCat',2018)
 
-    if not blinded: fitSig('_VBFcat','_RhoCat','Run2')
-    fitBkg('_VBFcat','_RhoCat','Run2')
-
-    if not blinded: fitSig('_VBFcat','_PhiCat','Run2')
-    fitBkg('_VBFcat','_PhiCat','Run2')
-
     if not blinded: fitSig('_VBFcatlow','_RhoCat',2018)
     fitBkg('_VBFcatlow','_RhoCat',2018)
 
     if not blinded: fitSig('_VBFcatlow','_PhiCat',2018)
     fitBkg('_VBFcatlow','_PhiCat',2018)
 
+    if not blinded: fitSig('_VBFcat','_RhoCat','Run2')
+    fitBkg('_VBFcat','_RhoCat','Run2')
+
+    if not blinded: fitSig('_VBFcat','_PhiCat','Run2')
+    fitBkg('_VBFcat','_PhiCat','Run2')
+
+    '''
     if histoEnum == 4:
 
         if not blinded: fitSig('_Vcat','_RhoCat','Run2')
@@ -504,6 +512,7 @@ if __name__ == "__main__":
 
         if not blinded: fitSig('_Vcat','_PhiCat','Run2')
         fitBkg('_Vcat','_PhiCat','Run2')
+    '''
 
     exit()
 

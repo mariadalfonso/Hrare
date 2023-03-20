@@ -67,13 +67,13 @@
 	{
 	    "name": "isZinv",
 	    "type": "isPhiCat",
-	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && phi_kin_vtx_prob > 0.05 * phi_kin_vtx_chi2dof && phi_doca < 0.015 and abs(phi_kin_eta)<2.1)",
+	    "definition": "(abs(phi_kin_mass-1.02)<3*0.004 && phi_kin_pt>38 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && abs(phi_kin_eta)<2.1)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{
 	    "name": "isZinv",
 	    "type": "isRhoCat",
-	    "definition": "(abs(rho_kin_mass-0.77)<0.150 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && rho_kin_vtx_prob > 0.05 * rho_kin_vtx_chi2dof && rho_doca < 0.015 and abs(rho_kin_eta)<2.1)",
+	    "definition": "(abs(rho_kin_mass-0.77)<0.150 && rho_kin_pt>38 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && abs(rho_kin_eta)<2.1)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{

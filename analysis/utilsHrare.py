@@ -300,7 +300,7 @@ def getSkims(argument,year,category):
 
     tmp_pair = switch.get(argument, "regex, PDtype")
     finalDir = dirScratch+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
-    if (category=="VH"): finalDir = dirScratch2+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
+    if (category=="VH" or category=="VBF"): finalDir = dirScratch2+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
     if (category=="VBF" and (argument == -62 or argument == -63 or argument == -64) ): finalDir = dirScratch+"/"+"Zinv"+"/"+str(year)+"/"+tmp_pair[0]
     if (argument == -65 or argument == -66): finalDir = dirScratchSS+"/"+tmp_pair[0]
     print(finalDir)
@@ -345,6 +345,7 @@ def SwitchSample(argument,year):
         1015: (dirGluster+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1016: (dirGluster+"ggZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1017: (dirGluster+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1018: (dirGluster+"TTHtoPhiG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2*0.49),
         #
         1020: (dirGluster+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1021: (dirGluster+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
@@ -354,10 +355,11 @@ def SwitchSample(argument,year):
         1025: (dirGluster+"ZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1026: (dirGluster+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1027: (dirGluster+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1028: (dirGluster+"TTHtoRhoG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2),
         #
         1037: (dirLocalNEW+"ggh-homegagamma-powheg"+"/NANOAOD_01",46870*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
         #
-        1018: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
+        1019: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #
         1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
         # TESTS

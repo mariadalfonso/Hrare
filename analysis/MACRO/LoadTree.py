@@ -252,6 +252,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       if category=='_Wcat': mytree.Add(directory+'outname_mc1012'+category+mesonCat+localTime+'.root') #W-H
       if category=='_Wcat': mytree.Add(directory+'outname_mc1021'+category+mesonCat+localTime+'.root') #W+H rho
       if category=='_Wcat': mytree.Add(directory+'outname_mc1022'+category+mesonCat+localTime+'.root') #W-H
+      if category=='_Wcat': mytree.Add(directory+'outname_mc1028'+category+mesonCat+localTime+'.root') #tt-H
       mytree.Add(directory+'outname_mc1013'+category+mesonCat+localTime+'.root') #Z-H phi
       mytree.Add(directory+'outname_mc1023'+category+mesonCat+localTime+'.root') #Z-H rho
       mytree.Add(directory+'outname_mc1014'+category+mesonCat+localTime+'.root') #Z-H phi
@@ -283,6 +284,7 @@ def resetTree(mytree,category):
 
    mytree.SetBranchStatus('*',0)
    mytree.SetBranchStatus('w',1)
+   mytree.SetBranchStatus('w_allSF',1)
    mytree.SetBranchStatus('lumiIntegrated',1)
    mytree.SetBranchStatus('mc',1)
 
@@ -316,10 +318,10 @@ def resetTree(mytree,category):
 
    if(category =='_Zcat' or category =='_Wcat'):
       mytree.SetBranchStatus('V_mass',1)
-      mytree.SetBranchStatus('LeadingLepton',1)
+      mytree.SetBranchStatus('LeadingLeptonPt',1)
 
    if(category =='_Zcat'):
-      mytree.SetBranchStatus('SubLeadingLepton',1)
+      mytree.SetBranchStatus('SubLeadingLeptonPt',1)
 
    if(category =='_Zinvcat'):
       mytree.SetBranchStatus('dPhiGammaMET',1)

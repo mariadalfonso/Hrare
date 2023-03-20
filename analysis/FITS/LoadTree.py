@@ -25,6 +25,7 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
    elif category=='_VBFcat':
       if directory.find("2018")!=-1:
          if doSignal:
+            ## can load the 1027 and 1017 ggH signal MC
             mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2018.root') #VBFH -- rho
             mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2018.root') #VBFH -- phi
          else:
@@ -262,6 +263,7 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
    else:
       print("ERROR: category not specified")
 
+   # note: there is another call for the signal
    resetTree(mytree,category)
 
    return mytree
@@ -270,6 +272,7 @@ def resetTree(mytree,category):
 
    mytree.SetBranchStatus('*',0)
    mytree.SetBranchStatus('w',1)
+   mytree.SetBranchStatus('w_allSF',1)
    mytree.SetBranchStatus('lumiIntegrated',1)
    mytree.SetBranchStatus('mc',1)
    mytree.SetBranchStatus('run',1)
@@ -280,6 +283,8 @@ def resetTree(mytree,category):
    mytree.SetBranchStatus('photon_pt',1)
    mytree.SetBranchStatus('meson_pt',1)
    mytree.SetBranchStatus('index_pair',1)
+
+   mytree.SetBranchStatus('nPhotonsVeto',1)
 
    if(category =='_GFcat' or category =='_Zinvcat' or category =='_VBFcat' or category =='_VBFcatlow'):
       mytree.SetBranchStatus('MVAdisc',1)

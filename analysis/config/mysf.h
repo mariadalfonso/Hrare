@@ -16,6 +16,7 @@ public:
   double eval_jetVeto   (std::string str1, double pt, double eta);
   double eval_puSF      (double NumTrueInteractions, std::string weights);
   double eval_photonSF  (std::string year, std::string valType, std::string workingPoint, double eta, double pt);
+  double eval_photonPixVetoSF  (std::string year, std::string valType, std::string workingPoint, double eta, double pt);
   double eval_electronSF(std::string year, std::string valType, std::string workingPoint, double eta, double pt);
   double eval_muonTRKSF (std::string year, std::string valType, double eta, double pt);
   double eval_muonIDSF  (std::string year, std::string valType, double eta, double pt, std::string workingPoint);
@@ -24,6 +25,7 @@ public:
 private:
   correction::Correction::Ref puSF_;
   correction::Correction::Ref photonSF_;
+  correction::Correction::Ref photonPixVetoSF_;
   correction::Correction::Ref electronSF_;
   correction::Correction::Ref muonTRKSF_;
   correction::Correction::Ref muonIDMSF_;

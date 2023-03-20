@@ -27,6 +27,7 @@ MyCorrections::MyCorrections(int year) {
   std::string fileNamePH = dirName+"EGM/"+subDirName+"photon.json.gz";
   auto csetPH = correction::CorrectionSet::from_file(fileNamePH);
   photonSF_ = csetPH->at("UL-Photon-ID-SF");
+  photonPixVetoSF_ = csetPH->at("UL-Photon-PixVeto-SF");
 
   std::string fileNameELE = dirName+"EGM/"+subDirName+"electron.json.gz";
   auto csetELE = correction::CorrectionSet::from_file(fileNameELE);
@@ -44,17 +45,19 @@ MyCorrections::MyCorrections(int year) {
   auto csetJEC = correction::CorrectionSet::from_file(fileNameJEC);
 
   std::string tagName = "Summer19"+dataName+"_V5_MC_L1L2L3Res_AK4PFchs";
+  if(year == 22016 or year == 12016) tagName = "Summer19"+dataName+"_V7_MC_L1L2L3Res_AK4PFchs";
   JEC_ = csetJEC->compound().at(tagName);
 
   std::string tagNameUnc = "Summer19"+dataName+"_V5_MC_Total_AK4PFchs";
+  if(year == 22016 or year == 12016) tagNameUnc = "Summer19"+dataName+"_V7_MC_Total_AK4PFchs";
   jesUnc_ = csetJEC->at(tagNameUnc);
 
   std::string tagNameR = "Summer19"+dataName+"_JRV2_MC_PtResolution_AK4PFchs";
-  if(year == 22016 or year == 12016) tagNameR = "Summer20"+dataName+"_JRV3_PtResolution_AK4PFchs";
-  std::cout << "print string: " << tagNameR << std::endl;
+  if(year == 22016 or year == 12016) tagNameR = "Summer20"+dataName+"_JRV3_MC_PtResolution_AK4PFchs";
   JER_ = csetJEC->at(tagNameR);
+
   std::string tagNameRsf = "Summer19"+dataName+"_JRV2_MC_ScaleFactor_AK4PFchs";
-  if(year == 22016 or year == 12016) tagNameRsf = "Summer20"+dataName+"_JRV3_ScaleFactor_AK4PFchs";
+  if(year == 22016 or year == 12016) tagNameRsf = "Summer20"+dataName+"_JRV3_MC_ScaleFactor_AK4PFchs";
   JERsf_ = csetJEC->at(tagNameRsf);
 
   /*
@@ -106,6 +109,12 @@ double MyCorrections::eval_photonSF(
   return photonSF_->evaluate({year, valType, workingPoint, eta, pt});
 };
 
+double MyCorrections::eval_photonPixVetoSF(
+    std::string year, std::string valType,  std::string workingPoint, double eta, double pt) {
+  pt = std::max(pt,20.001);
+  return photonPixVetoSF_->evaluate({year, valType, workingPoint, eta, pt});
+};
+
 double MyCorrections::eval_muonTRKSF(std::string year, std::string valType, double eta, double pt) {
   eta = std::min(std::abs(eta),2.399);
   pt = std::max(pt,15.001);
@@ -121,7 +130,7 @@ double MyCorrections::eval_muonIDSF(std::string year, std::string valType, doubl
   } else if (workingPoint=="M") {
     return muonIDMSF_->evaluate({year, eta, pt, valType});
   }
-  return 0;
+  return 1.;
 };
 
 double MyCorrections::eval_muonISOSF(std::string year, std::string valType, double eta, double pt, std::string workingPoint) {
@@ -133,7 +142,7 @@ double MyCorrections::eval_muonISOSF(std::string year, std::string valType, doub
   } else if (workingPoint=="L") {
     return muonISOLSF_->evaluate({year, eta, pt, valType});
   }
-  return 0;
+  return 1.;
 };
 
 double MyCorrections::eval_puSF(
