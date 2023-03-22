@@ -8,6 +8,9 @@ gSystem.Load("libHiggsAnalysisCombinedLimit.so")
 xlowRange = 100.
 xhighRange = 170.
 
+histoEnum = 43
+#histoEnum = 4
+
 #Define the observable --------------------------
 x = ROOT.RooRealVar("mH", "mH", xlowRange, xhighRange, "GeV")
 x.setRange("full", xlowRange, xhighRange)
@@ -50,7 +53,7 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     # -----------------------------------------------------------------------------
     # BERN law
 
-    bern_c0 = RooRealVar('bern_c0'+mesonCat+tag, 'bern_c0', 0.2, 0., 0.5)
+    bern_c0 = RooRealVar('bern_c0'+mesonCat+tag, 'bern_c0', 0.5, 0., 1.)
     bern_c1 = RooRealVar('bern_c1'+mesonCat+tag, 'bern_c1', 0.1, 0., 1.)
     bern_c2 = RooRealVar('bern_c2'+mesonCat+tag, 'bern_c2', 0.1, 0., 1.)
     bern_c3 = RooRealVar('bern_c3'+mesonCat+tag, 'bern_c3', 0.01, 0., 0.1) # limit this for the GF
@@ -102,7 +105,7 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     print('-------------------------------')
 
     ## BKG
-    dataBKG_full = getHisto(43, int(xhighRange - xlowRange), xlowRange , xhighRange , True, tag, mesonCat, False, -1 )
+    dataBKG_full = getHisto(histoEnum, int(xhighRange - xlowRange), xlowRange , xhighRange , True, tag, mesonCat, False, -1 )
     dataBKG = RooDataHist('datahist'+mesonCat+tag, 'data', RooArgList(x), dataBKG_full)
 
     N = dataBKG_full.Integral(dataBKG_full.FindBin(xlowRange), dataBKG_full.FindBin(xhighRange))
@@ -114,9 +117,12 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     if tag=='_GFcat':
         pdf1 = pdf_chebychev3
         pdf2 = pdf_bern3
-    elif tag=='_VBFcat' or tag=='_VBFcatlow':
+    elif tag=='_VBFcatlow':
         pdf1 = pdf_bern1
         pdf2 = pdf_chebychev1
+    elif tag=='_VBFcat':
+        pdf1 = pdf_bern2
+        pdf2 = pdf_chebychev2
 
     fitresult1 = pdf1.fitTo(dataBKG,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"),RooFit.Save(kTRUE),RooFit.Minos(kTRUE))
     fitresult2 = pdf2.fitTo(dataBKG,RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.Range("full"),RooFit.Save(kTRUE),RooFit.Minos(kTRUE))
@@ -152,7 +158,7 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     if tag=='_GFcat': name = "ggH"
     elif tag=='_VBFcat' or tag=='_VBFcatlow': name = "VBFH"
 
-    dataSIG_full = getHisto(43 , int(xhighRange - xlowRange), xlowRange, xhighRange, True, tag, mesonCat, True, name)
+    dataSIG_full = getHisto(histoEnum , int(xhighRange - xlowRange), xlowRange, xhighRange, True, tag, mesonCat, True, name)
     Ns = dataSIG_full.Integral(dataSIG_full.FindBin(xlowRange), dataSIG_full.FindBin(xhighRange)) * 1./1000
     print('-------------------------------')
     print('INTEGRAL SIGNALG : ',Ns)
@@ -188,11 +194,24 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     hcorr.GetYaxis().SetTitleOffset(1.4)
     hcorr.Draw('colz')
     canvasCorr .SaveAs("~/public_html/Hrare/BIAS/corrSig.png")   
-    
+
     Ns_ = ROOT.RooRealVar("Ns_","xsec*lumi*BRmeson",Ns) # intial is 1
     B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue,-3.,3.) #
-    if tag=='_VBFcat' or tag=='_VBFcatlow':
-        B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue,-10.,10.) #
+
+    if tag=='_VBFcatlow':
+        binMin=-20.
+        binMax=20.
+
+    if tag=='_VBFcat':
+        binMin=-15.
+        binMax=15.
+
+    if tag=='_GFcat':
+        binMin=-10.
+        binMax=10.
+
+    B_R_ = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue,binMin,binMax) #
+
     Nsig_ggH = ROOT.RooFormulaVar("Nsig_ggH","@0*@1",ROOT.RooArgList(Ns_,B_R_))
     B_R_const = ROOT.RooRealVar("B_R_","branching_ratio",myBRvalue) #
     Nsig_ggH_const = ROOT.RooFormulaVar("Nsig_ggH","@0*@1",ROOT.RooArgList(Ns_,B_R_const))
@@ -364,7 +383,7 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     multicanvas.SaveAs("~/public_html/Hrare/BIAS/toy1"+mesonCat+tag+".png")
 
     multicanvas.cd(12)
-    BRpull_frame = mcstudy.plotPull(B_R_, ROOT.RooFit.Range(-5,5), ROOT.RooFit.Bins(100), ROOT.RooFit.FitGauss(1))
+    BRpull_frame = mcstudy.plotPull(B_R_, ROOT.RooFit.Range(-5.,5.), ROOT.RooFit.Bins(100), ROOT.RooFit.FitGauss(1))
     BRpull_frame.SetTitle("")
     BRpull_frame.SetTitleOffset(1.5,"y")
     BRpull_frame.SetXTitle("Gen: "+genPDF.GetTitle()+" Vs Fit: "+fitPDF.GetTitle())
@@ -372,7 +391,7 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     BRpull_frame.Draw()
 
     multicanvas.cd(11)    
-    BRpar_frame = mcstudy.plotParam(B_R_, ROOT.RooFit.Range(-5.,5.), ROOT.RooFit.Bins(200), ROOT.RooFit.FitGauss(1))
+    BRpar_frame = mcstudy.plotParam(B_R_, ROOT.RooFit.Range(binMin,binMax), ROOT.RooFit.Bins(200), ROOT.RooFit.FitGauss(1))
 #    BRpar_frame = mcstudy.plotParam(B_R_, ROOT.RooFit.Range(0.9,1.1), ROOT.RooFit.Bins(20), ROOT.RooFit.FitGauss(1))
     BRpar_frame.SetTitle(mesonCat+tag)
     BRpar_frame.SetTitleOffset(1.5,"y")

@@ -117,7 +117,7 @@ double MyCorrections::eval_photonPixVetoSF(
 
 double MyCorrections::eval_muonTRKSF(std::string year, std::string valType, double eta, double pt) {
   eta = std::min(std::abs(eta),2.399);
-  pt = std::max(pt,15.001);
+  pt = std::max(pt,20.001);
   return muonTRKSF_->evaluate({year, eta, pt, valType});
 };
 

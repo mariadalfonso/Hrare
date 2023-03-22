@@ -17,23 +17,35 @@ doChekSync=False
 mesonCat='Phi'
 #mesonCat='Rho'
 
+dir_ = '/work/submit/mariadlf/cards_march20/'
+
 if doChekSync:
-     ax = range(1,7) #
-     labels = [ 'ggH(TO) noMVA Rho'
-                , 'ggH(MIT) noMVA Rho'
-                , 'ggH(TO) w/ MVA Rho'
-                , 'ggH(MIT) w/ MVA Rho'
-                , 'ggH(TO) w/ MVA Phi'
-                , 'ggH(MIT) w/ MVA Phi'
+     ax = range(1,5) #
+     labels = [ 'ggH(TO) noMVA'
+                , 'ggH(MIT) noMVA'
+                , 'ggH(TO) w/ MVA'
+                , 'ggH(MIT) w/ MVA'
+#                , 'ggH(TO) w/ MVA Phi'
+#                , 'ggH(MIT) w/ MVA Phi'
                ]
 
-     limitfiles = [ "limitsGiulio/higgsCombineRhoGFcatPreMVA.AsymptoticLimits.mH125.root"
-                    ,"limitsSynch/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsGiulio/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVASynch/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsGiulio/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVASynch/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
-                   ]
+     if mesonCat=='Rho': limitfiles = [ dir_+"230319_RhoGammaLimit/higgsCombineRhoGFpreselection.AsymptoticLimits.mH125.root"
+                                        ,dir_+"DATACARDS_MARCH20/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
+                                        ,dir_+"230319_RhoGammaLimit/higgsCombineRhoGFcat_Comb.AsymptoticLimits.mH125.root"
+                                        ,dir_+"DATACARDSmva_MARCH20/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
+                                        ##                    ,"limitsGiulio/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                        ##                    ,"limitsMVASynch/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                       ]
+
+     if mesonCat=='Phi': limitfiles = [ dir_+"230319_PhiGammaLimit/higgsCombinePhiGFpreselection.AsymptoticLimits.mH125.root"
+                                        ,dir_+"DATACARDS_MARCH20/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                        ,dir_+"230319_PhiGammaLimit/higgsCombinePhiGFcat_Comb.AsymptoticLimits.mH125.root"
+                                        ,dir_+"DATACARDSmva_MARCH20/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                        ##                    ,"limitsGiulio/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                        ##                    ,"limitsMVASynch/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                       ]
+
+
 else:
      ax = range(1,5) #
 #     ax = range(1,6) #
@@ -43,11 +55,11 @@ else:
 #                 , 'Zinv'
                  , '1l-2l'
                ]
-     limitfiles = [ "limitsMVA/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
+     limitfiles = [ "DATACARDSmva_MARCH11/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
+                    ,"DATACARDSmva_MARCH11/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
+                    ,"DATACARDSmva_MARCH11/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
 #                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"Zinvcat.AsymptoticLimits.mH125.root"
-                    ,"limitsMVA/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
+                    ,"DATACARDS_MARCH11/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
                    ]
 
 c44 = ROOT.TCanvas("c44","c44",1200,800)
@@ -153,6 +165,8 @@ dummyHistogram.GetYaxis().SetTitle("95% CL upper limit on #sigma #times B(H#righ
 if doChekSync: dummyHistogram.GetYaxis().SetTitle("95% CL upper limit on #sigma #times B(H#rightarrow Meson #gamma) x 10^-2")
 dummyHistogram.GetYaxis().SetTitleSize(0.04)
 dummyHistogram.GetYaxis().SetTitleOffset(1.8)
+if doChekSync and mesonCat=='Rho' : dummyHistogram.SetTitle("Rho")
+if doChekSync and mesonCat=='Phi' : dummyHistogram.SetTitle("Phi")
 
 
 xax = dummyHistogram.GetXaxis()
@@ -180,7 +194,7 @@ else: tdrstyle.cmsPrel(138000, energy= 13,simOnly=False)
 c44.Draw()
 
 mySTR=''
-if doChekSync: mySTR="_synchdec20"
+if doChekSync: mySTR="_synchMarch20"
 else: mySTR='_final'
 
 c44.SaveAs("limit"+mesonCat+mySTR+".pdf")

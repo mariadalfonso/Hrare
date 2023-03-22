@@ -257,7 +257,7 @@ def selectionTAG(df):
                  .Define("goodJets","{}".format(GOODJETS))
                  .Define("nGoodJets","Sum(goodJets)*1.0f")
                  .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
-                 .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and Jet_pt[goodJets][0]<30) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]>0) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]<1 and abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])<3 )","0 or 1 jets (pt20, |eta|<4.7) or >=2 with dEta<3")
+                 .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and Jet_pt[goodJets][0]<30) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]>0) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]<0 and abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])<3 )","0 or 1 jets (pt20, |eta|<4.7) or >=2 with dEta<3")
                  )
         return dftag
 
@@ -472,15 +472,16 @@ def dfwithSYST(df,year):
                       #                      .Define("SFphoton_PixVeto_Dn",'corr_sf.eval_photonPixVetoSF("{0}", "sfdown", "{1}" , goodPhotons_eta[index_pair[1]], photon_pt)'.format(photonIDyear,"MVA"))
                       .Define("SFphoton_PixVeto_Nom","1.f")
                       ##
+                      ## c=a*b Dc = aDa + b*db + DaDb
                       .Define("SFmeson1_reco_Nom",'corr_sf.eval_muonTRKSF("{0}", "sf", goodMeson_trk1_eta[index_pair[0]], goodMeson_trk1_pt[index_pair[0]])'.format(muonIDyear))
-                      .Define("SFmeson1_reco_Up",'corr_sf.eval_muonTRKSF("{0}", "systup", goodMeson_trk1_eta[index_pair[0]], goodMeson_trk1_pt[index_pair[0]])'.format(muonIDyear))
-                      .Define("SFmeson1_reco_Dn",'corr_sf.eval_muonTRKSF("{0}", "systdown", goodMeson_trk1_eta[index_pair[0]], goodMeson_trk1_pt[index_pair[0]])'.format(muonIDyear))
+                      .Define("meson1_reco_DeltaUp",'abs(SFmeson1_reco_Nom-corr_sf.eval_muonTRKSF("{0}", "systup", goodMeson_trk1_eta[index_pair[0]], goodMeson_trk1_pt[index_pair[0]]))'.format(muonIDyear))
+                      .Define("meson1_reco_DeltaDn",'abs(SFmeson1_reco_Nom-corr_sf.eval_muonTRKSF("{0}", "systdown", goodMeson_trk1_eta[index_pair[0]], goodMeson_trk1_pt[index_pair[0]]))'.format(muonIDyear))
                       .Define("SFmeson2_reco_Nom",'corr_sf.eval_muonTRKSF("{0}", "sf", goodMeson_trk2_eta[index_pair[0]], goodMeson_trk2_pt[index_pair[0]])'.format(muonIDyear))
-                      .Define("SFmeson2_reco_Up",'corr_sf.eval_muonTRKSF("{0}", "systup", goodMeson_trk2_eta[index_pair[0]], goodMeson_trk2_pt[index_pair[0]])'.format(muonIDyear))
-                      .Define("SFmeson2_reco_Dn",'corr_sf.eval_muonTRKSF("{0}", "systdown", goodMeson_trk2_eta[index_pair[0]], goodMeson_trk2_pt[index_pair[0]])'.format(muonIDyear))
-                      .Define("SFmeson_reco_Nom", "SFmeson1_reco_Nom*SFmeson2_reco_Nom")
-                      .Define("SFmeson_reco_Up", "SFmeson_reco_Nom+abs(SFmeson1_reco_Up-SFmeson1_reco_Nom)+abs(SFmeson2_reco_Up-SFmeson2_reco_Nom)")
-                      .Define("SFmeson_reco_Dn", "SFmeson_reco_Nom+abs(SFmeson1_reco_Dn-SFmeson1_reco_Nom)+abs(SFmeson2_reco_Dn-SFmeson2_reco_Nom)")
+                      .Define("meson2_reco_DeltaUp",'abs(SFmeson2_reco_Nom-corr_sf.eval_muonTRKSF("{0}", "systup", goodMeson_trk2_eta[index_pair[0]], goodMeson_trk2_pt[index_pair[0]]))'.format(muonIDyear))
+                      .Define("meson2_reco_DeltaDn",'abs(SFmeson2_reco_Nom-corr_sf.eval_muonTRKSF("{0}", "systdown", goodMeson_trk2_eta[index_pair[0]], goodMeson_trk2_pt[index_pair[0]]))'.format(muonIDyear))
+                      .Define("SFmeson_reco_Nom","SFmeson1_reco_Nom*SFmeson2_reco_Nom")
+                      .Define("SFmeson_reco_Up","SFmeson_reco_Nom+SFmeson1_reco_Nom*meson2_reco_DeltaUp+SFmeson2_reco_Nom*meson1_reco_DeltaUp")
+                      .Define("SFmeson_reco_Dn","SFmeson_reco_Nom-SFmeson1_reco_Nom*meson2_reco_DeltaDn-SFmeson2_reco_Nom*meson1_reco_DeltaDn")
                       ##
                       .Define("SFpu_Nom",'corr_sf.eval_puSF(Pileup_nTrueInt,"nominal")')
                       .Define("SFpu_Up",'corr_sf.eval_puSF(Pileup_nTrueInt,"up")')
@@ -489,7 +490,6 @@ def dfwithSYST(df,year):
                       .Define("idx_nom_up_down", "indices(3)")
                       #
                       )
-
 
     if isZ or isW:
         dfFinal_withSF_2 = (dfFinal_withSF
@@ -834,7 +834,9 @@ def analysis(df,year,mc,sumw,isData,PDType):
 
     if doTrigger:
         dfCom = dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv)
-        dfFINAL = dfGammaMeson(dfCom,PDType)
+        dfOBJ = dfGammaMeson(dfCom,PDType)
+        dfbase = dfHiggsCand(dfOBJ)
+        dfFINAL = selectionTAG(dfbase)
     else:
         dfCom = dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv)
         dfOBJ = dfGammaMeson(dfCom,PDType)
@@ -853,7 +855,15 @@ def analysis(df,year,mc,sumw,isData,PDType):
 
     if doTrigger:
         for branchName in [
-                "goodPhotons_pt",
+                "HCandMass",
+                "meson_pt",
+                "photon_pt",
+                #
+                "mJJ",
+                "nGoodJets",
+                "dEtaJJ",
+                "dPhiJJ",
+                "Y1Y2",
                 #
                 "w",
                 "wraw",
@@ -952,6 +962,14 @@ def analysis(df,year,mc,sumw,isData,PDType):
                 histos.append(dfFINAL.Histo2D(model2d_muoID, hists[h]["name"], "idx_nom_up_down", "muoID_weights"))
                 model2d_muoISO = (hists[h]["name"]+":muoISO", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
                 histos.append(dfFINAL.Histo2D(model2d_muoISO, hists[h]["name"], "idx_nom_up_down", "muoISO_weights"))
+            if isZ:
+                model2d_muo2ID = (hists[h]["name"]+":muo2ID", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+                histos.append(dfFINAL.Histo2D(model2d_muo2ID, hists[h]["name"], "idx_nom_up_down", "muo2ID_weights"))
+                model2d_muo2ISO = (hists[h]["name"]+":muo2ISO", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+                histos.append(dfFINAL.Histo2D(model2d_muo2ISO, hists[h]["name"], "idx_nom_up_down", "muo2ISO_weights"))
+#                model2d_ele2ID = (hists[h]["name"]+":ele2ID", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+#                histos.append(dfFINAL.Histo2D(model2d_ele2ID, hists[h]["name"], "idx_nom_up_down", "ele2ID_weights"))
+
 
 #        evtcounts = []
 #        evtcount = dfFINAL.Count()

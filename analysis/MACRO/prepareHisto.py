@@ -395,7 +395,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
          hggH.Fill( var, wei)
       if ev.mc<0:
 #      if (ev.mc>=37 and ev.mc<=44):
-         if False:
+         if False: # temporary for the CR
 #         if 'CR' in dirLOCAL_:
             hData.Fill( var )
          else:

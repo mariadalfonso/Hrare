@@ -233,7 +233,7 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
     ptWrongMax = wrong_meson_pt[j];
   }
 
-  // loop over all the phiCand
+  // loop over all the phi/rho Cand
   for (unsigned int i=0; i<meson_pt.size(); i++) {
 
     if(max(meson_trk1_pt[i], meson_trk2_pt[i]) < 20) continue;
@@ -244,9 +244,9 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
     // save the leading Pt
     float ptCand = p_meson.pt();
 
-    if(ptCandMax < ptWrongMax) continue; // we want the leading meson to the of the right flavor
     if( ptCand < ptCandMax ) continue;
     ptCandMax=ptCand;
+    if(ptCandMax < ptWrongMax) continue; // we want the leading meson to the of the right flavor
     Minv = (p_meson + p_ph).M();
     ptHiggs = (p_meson + p_ph).pt();
     idx[0] = i;
