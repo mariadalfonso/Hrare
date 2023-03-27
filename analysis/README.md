@@ -15,6 +15,9 @@ python3 -m pip install dask-jobqueue
 ## run distributed test
 python testdist.py
 
+## test standalone xrootd
+python testXROOTD.py
+
 ## set up VOMS
 voms-proxy-init  --voms cms -valid 198:0
 
