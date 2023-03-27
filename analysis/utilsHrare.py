@@ -3,6 +3,7 @@ import os
 import json
 import fnmatch
 import glob
+from XRootD import client
 
 if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.cc","k")
@@ -55,20 +56,34 @@ def loadJSON(fIn):
             vec.push_back(pair)
             ROOT.jsonMap[int(k)] = vec
 
-def findDIR(directory):
+def findDIR(directory,useXROOTD=False):
 
     print(directory)
-    filename = ("{}".format(directory)+"/*.root")
-
     counter = 0
     rootFiles = ROOT.vector('string')()
-
     maxFiles = 1000000000
-    for filenames in glob.glob(filename):
-        counter+=1
-        if(counter > maxFiles): break
-        rootFiles.push_back(filenames)
 
+    if(useXROOTD == True and "/data/submit/cms" in directory):
+        print(directory)
+        fs = client.FileSystem('root://submit50.mit.edu/')
+        lsst = fs.dirlist(directory.replace("/data/submit/cms",""))
+        for e in lsst[1]:
+            filePath = os.path.join(directory.replace("/data/submit/cms","root://submit50.mit.edu/"),e.name)
+            if "failed/" in filePath: continue
+            if "log/" in filePath: continue
+            if ".txt" in filePath: continue
+            counter+=1
+            if(counter > maxFiles): break
+            rootFiles.push_back(filePath)
+    else:
+
+        filename = ("{}".format(directory)+"/*.root")
+        for filenames in glob.glob(filename):
+            counter+=1
+            if(counter > maxFiles): break
+            rootFiles.push_back(filenames)
+
+    print(len(rootFiles))
     return rootFiles
 
 def readListFromFile(filename):
@@ -425,7 +440,6 @@ def SwitchSample(argument,year):
         46: (dirT2+"ZGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.144*1000),
         47: (dirGluster+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
         48: (dirT2+"ZGTo2NuG_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,30.11*1000),
-
     }
 
     return switch.get(argument, "BKGdefault, xsecDefault")
