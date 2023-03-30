@@ -2,6 +2,7 @@ import ROOT
 import json
 import os
 from XRootD import client
+import glob
 
 def findDIR(directory,useXROOTD=False):
 
@@ -23,7 +24,6 @@ def findDIR(directory,useXROOTD=False):
             if(counter > maxFiles): break
             rootFiles.push_back(filePath)
     else:
-
         filename = ("{}".format(directory)+"/*.root")
         for filenames in glob.glob(filename):
             counter+=1
@@ -34,7 +34,6 @@ def findDIR(directory,useXROOTD=False):
     return rootFiles
 
 
-doINTERACTIVE=True
 useXROOTD=True
 
 ROOT.ROOT.EnableImplicitMT()
