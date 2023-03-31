@@ -6,7 +6,7 @@ from datetime import datetime
 from utilsHrare import pickTRG,findDIR
 
 doINTERACTIVE=False
-useXROOTD=True
+useXROOTD=False
 
 if doINTERACTIVE:
     ROOT.ROOT.EnableImplicitMT()
@@ -16,9 +16,8 @@ if doINTERACTIVE:
     
 else:
     RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
-    from dask.distributed import Client
     import pkg_resources
-    from utilsDask import cluster
+    from utilsDask import client_
 
     import correctionlib
     # do I really need this pyroot_binding since I'm importing the libraries with pkg_resources
@@ -51,9 +50,7 @@ GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Pho
 
 TRIGGER=pickTRG(TRIGGERS,year,"NULL",True,False,False,False)
 
-# In a Python script the Dask client needs to be initalized in a context
-# Jupyter notebooks / Python session don't need this
-if __name__ == "__main__":
+def analysis():
 
     now = datetime.now()
     print('==> start: ',now)
@@ -63,8 +60,7 @@ if __name__ == "__main__":
     if doINTERACTIVE:
         dfINI = RDataFrame("Events", files)
     else:
-        client = Client(cluster)
-        dfINI = RDataFrame("Events", files, daskclient=client)
+        dfINI = RDataFrame("Events", files, daskclient=client_)
         #user code (not sure I need the .json files since those strings are already looked up)
         dfINI._headnode.backend.distribute_shared_libraries("functions_cc.so")
         dfINI._headnode.backend.distribute_shared_libraries("functions_cc_ACLiC_dict_rdict.pcm")
@@ -89,44 +85,73 @@ if __name__ == "__main__":
           .Define("goodPhotons", "{}".format(GOODphotons))
           .Define("nGoodPhotons","Sum(goodPhotons)*1.0f")
           .Filter("Sum(goodPhotons)>0", "At least one good Photon")
-          .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
-          .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
+          .Define("goodPhotons_pt", "Photon_pt[goodPhotons][0]")
+          .Define("goodPhotons_eta", "Photon_eta[goodPhotons][0]")
 #          ##
-#          .Define("SFphoton_ID_Nom",'corr_sf.eval_photonSF("{0}", "sf", "{1}", goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
-#          .Define("SFphoton_ID_Up",'corr_sf.eval_photonSF("{0}", "sfup", "{1}" , goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
-#          .Define("SFphoton_ID_Dn",'corr_sf.eval_photonSF("{0}", "sfdown", "{1}" , goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
-          .Define("SFphoton_ID_Nom",'mySFfun().eval_photonSF("{0}", "sf", "{1}", goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
-          .Define("SFphoton_ID_Up",'mySFfun().eval_photonSF("{0}", "sfup", "{1}" , goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
-          .Define("SFphoton_ID_Dn",'mySFfun().eval_photonSF("{0}", "sfdown", "{1}" , goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
+          .Define("SFphoton_ID_Nom",'corr_sf.eval_photonSF("{0}", "sf", "{1}", goodPhotons_eta, goodPhotons_pt)'.format(year,"wp90"))
+          .Define("SFphoton_ID_Up",'corr_sf.eval_photonSF("{0}", "sfup", "{1}" , goodPhotons_eta, goodPhotons_pt)'.format(year,"wp90"))
+          .Define("SFphoton_ID_Dn",'corr_sf.eval_photonSF("{0}", "sfdown", "{1}" , goodPhotons_eta, goodPhotons_pt)'.format(year,"wp90"))
+#          .Define("SFphoton_ID_Nom",'mySFfun().eval_photonSF("{0}", "sf", "{1}", goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
+#          .Define("SFphoton_ID_Up",'mySFfun().eval_photonSF("{0}", "sfup", "{1}" , goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
+#          .Define("SFphoton_ID_Dn",'mySFfun().eval_photonSF("{0}", "sfdown", "{1}" , goodPhotons_eta[0], goodPhotons_pt[0])'.format(year,"wp90"))
           .Define("idx_nom_up_down", "indices(3)")
           .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w)")
           )
 
-    branchList = ROOT.vector('string')()
-
-    for branchName in [
-            "goodPhotons_pt",
-            "Muon_pt",
-            "PV_npvsGood",
-            "run",
-            "luminosityBlock",
-            "event",
-            "SFphoton_ID_Nom",
-    ]:
-        branchList.push_back(branchName)
-
-    snapshotOptions = ROOT.RDF.RSnapshotOptions()
-    snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
-    snapshot_tdf = df.Snapshot("events", "DASKlogs/output.root", branchList, snapshotOptions)
-
     ptsum = df.Sum("Muon_pt")
-
     res = ptsum.GetValue()
-
     print('sum of muons = ',res)
 
-    if not doINTERACTIVE: cluster.close()
+    if False:
+        print("writing plots")
+        hists = {
+            "goodPhotons_pt":  {"name":"goodPhotons_pt","title":"Photon PT; pt_{#gamma} (GeV);N_{Events}","bin":200,"xmin":0,"xmax":200}
+        }
+
+        histos = []
+        for h in hists:
+
+            # 1D is for nom only
+            model = (hists[h]["name"], hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
+            h1d = df.Histo1D(model, hists[h]["name"], "w")
+            histos.append(h1d)
+
+            ## those that change the weights only
+            # 2D is for nom, up, down
+            model2d_phoID = (hists[h]["name"]+":phoID", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+            histos.append(df.Histo2D(model2d_phoID, hists[h]["name"], "idx_nom_up_down", "phoID_weights"))
+
+            outputFileHisto = "DASKlogs/histoOUTname.root".format(year)
+            myfile = ROOT.TFile(outputFileHisto,"RECREATE")
+
+            for h in histos:
+                h.Write()
+            myfile.Close()
+            myfile.Write()
+
+    if False:
+        branchList = ROOT.vector('string')()
+
+        for branchName in [
+                "goodPhotons_pt",
+                "Muon_pt",
+                "PV_npvsGood",
+                "run",
+                "luminosityBlock",
+                "event",
+                "SFphoton_ID_Nom",
+        ]:
+            branchList.push_back(branchName)
+
+            snapshotOptions = ROOT.RDF.RSnapshotOptions()
+            snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
+            snapshot_tdf = df.Snapshot("events", "DASKlogs/output.root", branchList, snapshotOptions)
 
     now = datetime.now()
     print('==> ends: ',now)
-    exit()
+
+# In a Python script the Dask client needs to be initalized in a context
+# Jupyter notebooks / Python session don't need this
+if __name__ == "__main__":
+
+    analysis()

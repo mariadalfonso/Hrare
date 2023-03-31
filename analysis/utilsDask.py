@@ -19,16 +19,17 @@ import time
 slurm_env = [
      'export XRD_RUNFORKHANDLER=1',
      'export XRD_STREAMTIMEOUT=10',
-     'source {os.getenv("HOME")}/.bashrc',
-     'conda activate myenv',
-     'export X509_USER_PROXY={os.getenv("HOME")}/x509up_u146312'
+     f'source {os.getenv("HOME")}/.bashrc',
+     f'conda activate myenv',
+     f'export X509_USER_PROXY={os.getenv("HOME")}/x509up_u146312'
 ]
 
 extra_args=[
      "--output=DASKlogs/dask_job_output_%j.out",
      "--error=DASKlogs/dask_job_output_%j.err",
-     "--partition=submit",
-     "--clusters=submit",
+#     "--partition=submit",
+#     "--partition=submit-gpu1080",
+#     "--clusters=submit",
 ]
 
 from dask_jobqueue import SLURMCluster
@@ -36,9 +37,9 @@ from distributed import Client
 from dask.distributed import performance_report
 
 cluster = SLURMCluster(
-        queue='all',
-        project="Hrare_Slurm",
-        cores=8,
+#        queue='all',
+#        project="Hrare_Slurm",
+        cores=1,
         memory='2GB',
 #        #retries=10,
 #        walltime='00:30:00',
@@ -53,7 +54,7 @@ cluster = SLURMCluster(
 
 cluster.adapt(maximum_jobs=30)
 cluster.scale(10)
-client = Client(cluster)
+client_ = Client(cluster)
 
-print(client)
-#print(cluster.job_script())
+print(client_)
+print(cluster.job_script())
