@@ -3,6 +3,7 @@ import os
 import json
 import fnmatch
 import glob
+from XRootD import client
 
 if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.cc","k")
@@ -14,6 +15,11 @@ def loadCorrectionSet(year):
     ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.Declare('#include "config/mysf.h"')
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
+
+def getSkimsFromJson(overall, type ):
+
+    for selection in overall:
+        if selection['type'] == type : return selection['PRESELECTION']
 
 def getTriggerFromJson(overall, type, year ):
 
@@ -50,20 +56,34 @@ def loadJSON(fIn):
             vec.push_back(pair)
             ROOT.jsonMap[int(k)] = vec
 
-def findDIR(directory):
+def findDIR(directory,useXROOTD=False):
 
     print(directory)
-    filename = ("{}".format(directory)+"/*.root")
-
     counter = 0
     rootFiles = ROOT.vector('string')()
-
     maxFiles = 1000000000
-    for filenames in glob.glob(filename):
-        counter+=1
-        if(counter > maxFiles): break
-        rootFiles.push_back(filenames)
 
+    if(useXROOTD == True and "/data/submit/cms" in directory):
+        print(directory)
+        fs = client.FileSystem('root://submit50.mit.edu/')
+        lsst = fs.dirlist(directory.replace("/data/submit/cms",""))
+        for e in lsst[1]:
+            filePath = os.path.join(directory.replace("/data/submit/cms","root://submit50.mit.edu/"),e.name)
+            if "failed/" in filePath: continue
+            if "log/" in filePath: continue
+            if ".txt" in filePath: continue
+            counter+=1
+            if(counter > maxFiles): break
+            rootFiles.push_back(filePath)
+    else:
+
+        filename = ("{}".format(directory)+"/*.root")
+        for filenames in glob.glob(filename):
+            counter+=1
+            if(counter > maxFiles): break
+            rootFiles.push_back(filenames)
+
+    print(len(rootFiles))
     return rootFiles
 
 def readListFromFile(filename):
@@ -295,7 +315,7 @@ def getSkims(argument,year,category):
 
     tmp_pair = switch.get(argument, "regex, PDtype")
     finalDir = dirScratch+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
-    if (category=="VH"): finalDir = dirScratch2+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
+    if (category=="VH" or category=="VBF"): finalDir = dirScratch2+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
     if (category=="VBF" and (argument == -62 or argument == -63 or argument == -64) ): finalDir = dirScratch+"/"+"Zinv"+"/"+str(year)+"/"+tmp_pair[0]
     if (argument == -65 or argument == -66): finalDir = dirScratchSS+"/"+tmp_pair[0]
     print(finalDir)
@@ -340,6 +360,7 @@ def SwitchSample(argument,year):
         1015: (dirGluster+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1016: (dirGluster+"ggZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1017: (dirGluster+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1018: (dirGluster+"TTHtoPhiG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2*0.49),
         #
         1020: (dirGluster+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1021: (dirGluster+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
@@ -349,15 +370,18 @@ def SwitchSample(argument,year):
         1025: (dirGluster+"ZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1026: (dirGluster+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1027: (dirGluster+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1028: (dirGluster+"TTHtoRhoG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2),
         #
-        1018: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
+        1037: (dirLocalNEW+"ggh-homegagamma-powheg"+"/NANOAOD_01",46870*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
+        #
+        1019: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #
         1030: (dirT2+"ZH_HToJPsiG_JPsiToMuMu_TuneCP5_13TeV-madgraph-pythia8+"+campaign,6067*1000), #check xSEC
         # TESTS
         1050: (dirLocalTEST+"ggh-hrhogamma-powheg"+"/NANOAOD_01",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1051: (dirLocalTEST2+"ggh-hrhogamma-powheg"+"/NANOAOD_01",48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1052: (dirLocalTEST2+"ggh-hphigamma-powheg"+"/NANOAOD_01",48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        16: (dirLocal+"ZLLphigamma_pythia8_genFix",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
+        216: (dirLocal+"ZLLphigamma_pythia8_genFix",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
 #        10: (dirLocalNEW+"zh-hphigamma-powheg",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
 ###### new set
 #        13: (dirLocalNEW+"zh_Phigamma",0.10*1000), #xsec=1pb * 0.101 (Zll) * BR(Hphigamma)=1
@@ -370,21 +394,23 @@ def SwitchSample(argument,year):
         1: (dirGluster+"ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 51.1*1000), #LO
         2: (dirGluster+"WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign, 191.3*1000), #LO
         #        2: (dirT2+"WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM", 412.7*1000), #LO
-        3: (dirT2+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,61526.7*1000), #NNLO (LO was 53870.0)
+        3: (dirGluster+"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,61526.7*1000), #NNLO (LO was 53870.0)
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+"+campaign,365.3452*1000), #NNLO
         ##
-        6: (dirT2+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
-        7: (dirT2+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
-        8: (dirT2+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
-        9: (dirT2+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
+        9: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
+        ##
         10: (dirGluster+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
         11: (dirGluster+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX,8644.0*1000*1.26), #LO *1.26
         12: (dirGluster+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,2183.0*1000*1.26), #LO *1.26
         13: (dirGluster+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
         14: (dirGluster+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
-        ####
-        15: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
+        #
+        15: (dirGluster+"GJets_DR-0p4_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,15750.0*1000*1.26), #LO *1.26
+        16: (dirGluster+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
+        17: (dirGluster+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
+        18: (dirGluster+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
+        19: (dirGluster+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
         ####
         20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,6447000.0*1000*1.26), #LO *1.26
         21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1988000.0*1000*1.26), #LO *1.26
@@ -412,9 +438,8 @@ def SwitchSample(argument,year):
 
         45: (dirT2+"WGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8.635*1000),
         46: (dirT2+"ZGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.144*1000),
-        47: (dirT2+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
+        47: (dirGluster+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
         48: (dirT2+"ZGTo2NuG_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,30.11*1000),
-
     }
 
     return switch.get(argument, "BKGdefault, xsecDefault")

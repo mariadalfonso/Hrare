@@ -28,6 +28,7 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
    if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
    if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z (lostL)
    if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') # Z (lostL)
+   if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1018'+category+mesonCat+year+'.root') # ttH
    if(category =='_Zcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z
    if(category =='_Zcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') # Z
    if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1015'+category+mesonCat+year+'.root') # Zinv
@@ -36,6 +37,7 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
    if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
    if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011_Wcat'+mesonCat+year+'.root') # Wp
    if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012_Wcat'+mesonCat+year+'.root') # Wm
+   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1018_Wcat'+mesonCat+year+'.root') # ttH
    if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1013_Wcat'+mesonCat+year+'.root') # Z (lostL)
    if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1014_Wcat'+mesonCat+year+'.root') # Z (lostL)
    if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013_Zcat'+mesonCat+year+'.root') # Z
@@ -49,6 +51,7 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
    if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Wm
    if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z (lostL)
    if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') # Z (lostL)
+   if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1028'+category+mesonCat+year+'.root') # ttH
    if(category =='_Zcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z
    if(category =='_Zcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') # Z
    if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1025'+category+mesonCat+year+'.root') # Zinv
@@ -57,6 +60,7 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
    if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
    if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021_Wcat'+mesonCat+year+'.root') # Wp
    if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022_Wcat'+mesonCat+year+'.root') # Wm
+   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1028_Wcat'+mesonCat+year+'.root') # ttH
    if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1023_Wcat'+mesonCat+year+'.root') # Z (lostL)
    if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1024_Wcat'+mesonCat+year+'.root') # Z (lostL)
    if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023_Zcat'+mesonCat+year+'.root') # Z
@@ -66,16 +70,16 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
    resetTree(mytree, category)
 
 MVAbinRho={
-   '_GFcat': 0.2,
+   '_GFcat': 0.5,
    '_Zinvcat': 0.6,
-   '_VBFcat': 0.4,
-   '_VBFcatlow': 0.5,
+   '_VBFcat': 0.8,
+   '_VBFcatlow': 0.8,
 }
 
 MVAbinPhi={
-   '_GFcat': 0.2,
+   '_GFcat': 0.4,
    '_Zinvcat': 0.7,
-   '_VBFcat': 0.5,
+   '_VBFcat': 0.6,
    '_VBFcatlow': 0.6,
 }
 
@@ -91,15 +95,14 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    mytree = ROOT.TChain('events')
 
-   directory1 = '/work/submit/mariadlf/Hrare/DEC28/12016/'
-   directory2 = '/work/submit/mariadlf/Hrare/DEC28/22016/'
-   directory3 = '/work/submit/mariadlf/Hrare/DEC28/2017/'
-   directory4 = '/work/submit/mariadlf/Hrare/DEC28/2018/'
-   if(category =='_Wcat' or category =='_Zcat'):
-      directory1 = '/work/submit/mariadlf/Hrare/JAN11/12016/'
-      directory2 = '/work/submit/mariadlf/Hrare/JAN11/22016/'
-      directory3 = '/work/submit/mariadlf/Hrare/JAN11/2017/'
-      directory4 = '/work/submit/mariadlf/Hrare/JAN11/2018/'
+   dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/MAR11/'
+   if category =='_GFcat':
+      dirLOCAL_='/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/MAR18/'
+
+   directory1 = dirLOCAL_+'12016/'
+   directory2 = dirLOCAL_+'22016/'
+   directory3 = dirLOCAL_+'2017/'
+   directory4 = dirLOCAL_+'2018/'
 
    if doSignal:
       if(year == '_2018' or year == '_all'): addSigHisto(mytree, directory4, category, mesonCat, nameSig, '_2018')
@@ -131,6 +134,9 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    h = ROOT.TH1F( 'Higgs', '', nbin, low, high )
 
+   PH_ptCut = 40
+   MES_ptCut = 40
+
    for ev in mytree:
 
       if abs(item) == 43:
@@ -155,25 +161,27 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 #      if mesonCat == '_PhiCat' and abs(ev.goodMeson_mass[idxMeson]-1.02) > 3.*0.004: continue # 3. sigma # already applied
 
       ## OPTIMIZED PHASE SPACE
-      if(category =='_Zcat' or category =='_Wcat'):
+      if(category =='_Zcat' or category =='_Wcat' or category =='_Vcat'):
 #         if ev.goodPhotons_pt[idxPh]<40 :  continue
 #         if ev.goodMeson_pt[idxMeson]<40 : continue
-         if ev.photon_pt<40 :  continue
-         if ev.meson_pt<40 : continue
+         if ev.photon_pt<PH_ptCut :  continue
+         if ev.meson_pt<MES_ptCut : continue
 
 #      if(category =='_Wcat'):
 #         if (abs(ev.Z_veto-91) < 5): continue # default cutting at +- 10
 
-      if(category =='_Wcat'):
-         if ev.V_mass < 15 : continue
-         if ev.DeepMETResolutionTune_pt<15 :  continue
+      ## ALREADY applied for Vcat in MARCH11
+#      if(category =='_Wcat'):
+#         if ev.V_mass < 15 : continue
+#         if ev.DeepMETResolutionTune_pt<15 :  continue
+#         if ev.deltaLepMeson<0.5 :  continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zinvcat'):
 #         if ev.goodPhotons_pt[idxPh]<40 :  continue
 #         if ev.goodMeson_pt[idxMeson]<40 : continue
-         if ev.photon_pt<40 :  continue
-         if ev.meson_pt<40 : continue
+         if ev.photon_pt<PH_ptCut :  continue
+         if ev.meson_pt<MES_ptCut : continue
 #         if min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson]) < 10: continue
          if ev.DeepMETResolutionTune_pt<75 :  continue # at skim level is 50
          if abs(ev.dPhiGammaMET)<1. : continue # already applied
@@ -188,9 +196,9 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 #         if ev.goodPhotons_pt[idxPh]<40 :  continue # already applied
 #         if ev.goodPhotons_pt[idxPh]>75 :  continue # already applied
 #         if ev.goodMeson_pt[idxMeson]<40 : continue
-         if ev.photon_pt<40 :  continue # already applied
+         if ev.photon_pt<PH_ptCut :  continue # already applied
          if ev.photon_pt>75 :  continue # already applied
-         if ev.meson_pt<40 : continue
+         if ev.meson_pt<MES_ptCut : continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_VBFcat' or category =='_VBFcatlow'):
@@ -210,17 +218,21 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       if(category =='_GFcat'):
 #         if ev.goodPhotons_pt[idxPh]<40 :  continue
 #         if ev.goodMeson_pt[idxMeson]<40 : continue
-         if ev.photon_pt<40 :  continue
-         if ev.meson_pt<40 : continue
+         if ev.photon_pt<PH_ptCut :  continue
+         if ev.meson_pt<MES_ptCut : continue
 #         if ev.nGoodJets < 2: continue
 #         if ev.nGoodPhotons > 1: continue
+#         if ev.nPhotonsVeto>1: continue (COMMENT FOR NOW)
 
       # Fill histograms
       if (doSignal) :
-         wei = ev.w * ev.lumiIntegrated
+#         wei = ev.w * ev.lumiIntegrated
+         wei = ev.w_allSF * ev.lumiIntegrated
          if ((nameSig=='WH' or nameSig=='WHl') and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022)): #W
             h.Fill( var, wei )
          if ((nameSig=='ZH' or nameSig=='ZHl') and (ev.mc==1013 or ev.mc==1023 or ev.mc==1014 or ev.mc==1024)): #Z
+            h.Fill( var, wei )
+         if ((nameSig=='TTH') and (ev.mc==1018 or ev.mc==1028)): #TTH
             h.Fill( var, wei )
          if ((nameSig=='VBFH' or nameSig=='VBFHlow') and (ev.mc==1010 or ev.mc==1020)): #VBF
             h.Fill( var, wei )
@@ -232,6 +244,10 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          wei = ev.w
          if ev.mc<0:   # only DATA
             h.Fill( var, wei )
+#            if (var>100 and var < 170):
+#               mystr=str(ev.run)+":"+str(ev.luminosityBlock)+":"+str(ev.event)+"\n"
+#               with open("example_VBFcatlow_RhoCat_2018_mHwindow.txt", "a") as f:
+#                  f.write(mystr)
 
       #Loop over tree done
 #   if ev.mc>=0:

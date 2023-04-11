@@ -7,21 +7,24 @@ import math
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
-from utilsHrare import findManyXRDFS, findManyClient, readListFromFile
+sys.path.insert(0, '/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis')
+
+#from utilsHrare import findManyXRDFS, findManyClient, readListFromFile
+from utilsHrare import readListFromFile
 from utilsHrare import pickTRG, getSkimsFromJson
 
-with open("config/selection.json") as jsonFile:
+with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/selection.json") as jsonFile:
 #with open("selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
-with open("config/trigger.json") as trgJsonFile:
+with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/trigger.json") as trgJsonFile:
     trgObject = json.load(trgJsonFile)
     trgJsonFile.close()
 
 overall = trgObject['triggers']
 
-with open("config/skimDB.json") as jsonFile:
+with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/skimDB.json") as jsonFile:
 #with open("skimDB.json") as jsonFile:
     skimObject = json.load(jsonFile)
     jsonFile.close()
@@ -76,7 +79,7 @@ if __name__ == "__main__":
         if skimType== "VH": isW=True
         if skimType== "VH": isZ=True
 
-        checkFile = "skimming/catalog/files_"+str(PDType)+"_"+str(era)+"_"+str(year)+".txt"
+        checkFile = "catalog/files_"+str(PDType)+"_"+str(era)+"_"+str(year)+".txt"
         print("checkFile",checkFile)
         print("whichFile",whichFile)
 

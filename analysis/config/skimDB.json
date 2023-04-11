@@ -5,7 +5,7 @@
 	    "PDType": "EGamma",
 	    "year" : 2018,
 	    "era" : "RunA",
-            "PRESELECTION" : "(trigger>0 and nPhoton>0 and (nElectron>0 or nMuon>0))"
+	    "PRESELECTION" : "(trigger>0 and nPhoton>0 and (nElectron>0 or nMuon>0))"
 	},
         {
 	    "type": "VBF",
@@ -13,6 +13,13 @@
 	    "year" : 2018,
 	    "era" : "RunA",
             "PRESELECTION" : "(trigger>0 and nPhoton>0)"
+	},
+        {
+	    "type": "Zinv",
+	    "PDType": "Tau",
+	    "year" : 2018,
+	    "era" : "RunA",
+	    "PRESELECTION" : "(trigger>0 and nPhoton>0)"
 	}
     ]
 }

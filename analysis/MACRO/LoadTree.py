@@ -24,7 +24,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       mytree.Add(directory+'outname_mc-62'+category+mesonCat+year+'.root')  #DATA
       mytree.Add(directory+'outname_mc-63'+category+mesonCat+year+'.root')  #DATA
       mytree.Add(directory+'outname_mc-64'+category+mesonCat+year+'.root')  #DATA
-      if category=='_VBFcatlow': mytree.Add(directory+'outname_mc15'+category+mesonCat+year+'.root')  #VBF GJets
+      if category=='_VBFcatlow': mytree.Add(directory+'outname_mc9'+category+mesonCat+year+'.root')  #VBF GJets
 #      if category=='_VBFcatlow': mytree.Add(directory+'outname_mc45'+category+mesonCat+year+'.root')  #W + GJets
 #      if category=='_GFcat': mytree.Add(directory+'outname_mc45'+category+mesonCat+year+'.root')  #W + GJets
 #      if category=='_GFcat': mytree.Add(directory+'outname_mc46'+category+mesonCat+year+'.root')  #W + GJets
@@ -66,7 +66,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       mytree.Add(directory+'outname_mc12'+category+mesonCat+localTime+'.root')  #GJets
       mytree.Add(directory+'outname_mc13'+category+mesonCat+localTime+'.root')  #GJets
       mytree.Add(directory+'outname_mc14'+category+mesonCat+localTime+'.root')  #GJets
-      mytree.Add(directory+'outname_mc15'+category+mesonCat+localTime+'.root')  # VBF GJets
+      mytree.Add(directory+'outname_mc9'+category+mesonCat+localTime+'.root')  # VBF GJets
 #      mytree.Add(directory+'outname_mc45'+category+mesonCat+localTime+'.root')  # W + GJets
 #      mytree.Add(directory+'outname_mc46'+category+mesonCat+localTime+'.root')  # Z + GJets
 #      mytree.Add(directory+'outname_mc47'+category+mesonCat+localTime+'.root')  # TT + GJets
@@ -252,20 +252,22 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       if category=='_Wcat': mytree.Add(directory+'outname_mc1012'+category+mesonCat+localTime+'.root') #W-H
       if category=='_Wcat': mytree.Add(directory+'outname_mc1021'+category+mesonCat+localTime+'.root') #W+H rho
       if category=='_Wcat': mytree.Add(directory+'outname_mc1022'+category+mesonCat+localTime+'.root') #W-H
+      if category=='_Wcat': mytree.Add(directory+'outname_mc1028'+category+mesonCat+localTime+'.root') #tt-H
       mytree.Add(directory+'outname_mc1013'+category+mesonCat+localTime+'.root') #Z-H phi
       mytree.Add(directory+'outname_mc1023'+category+mesonCat+localTime+'.root') #Z-H rho
       mytree.Add(directory+'outname_mc1014'+category+mesonCat+localTime+'.root') #Z-H phi
       mytree.Add(directory+'outname_mc1024'+category+mesonCat+localTime+'.root') #Z-H rho
       ##
       mytree.Add(directory+'outname_mc1'+category+mesonCat+localTime+'.root')  #ZG
+      mytree.Add(directory+'outname_mc0'+category+mesonCat+localTime+'.root')  #DY LO
       if category=='_Wcat': mytree.Add(directory+'outname_mc2'+category+mesonCat+localTime+'.root')  #WG
-      if category=='_Wcat': mytree.Add(directory+'outname_mc31'+category+mesonCat+localTime+'.root')  #W0Jet
-      if category=='_Wcat': mytree.Add(directory+'outname_mc32'+category+mesonCat+localTime+'.root')  #W1Jet
-      if category=='_Wcat': mytree.Add(directory+'outname_mc33'+category+mesonCat+localTime+'.root')  #W2Jet
+      if category=='_Wcat': mytree.Add(directory+'outname_mc3'+category+mesonCat+localTime+'.root')  #WJets LO
+#      if category=='_Wcat': mytree.Add(directory+'outname_mc31'+category+mesonCat+localTime+'.root')  #W0Jet
+#      if category=='_Wcat': mytree.Add(directory+'outname_mc32'+category+mesonCat+localTime+'.root')  #W1Jet
+#      if category=='_Wcat': mytree.Add(directory+'outname_mc33'+category+mesonCat+localTime+'.root')  #W2Jet
 #      mytree.Add(directory+'outname_mc34'+category+mesonCat+localTime+'.root')  #DY0Jet
 #      mytree.Add(directory+'outname_mc35'+category+mesonCat+localTime+'.root')  #DY1Jet
 #      mytree.Add(directory+'outname_mc36'+category+mesonCat+localTime+'.root')  #DY2Jet
-      mytree.Add(directory+'outname_mc0'+category+mesonCat+localTime+'.root')  #DY LO
       mytree.Add(directory+'outname_mc47'+category+mesonCat+localTime+'.root')  #TT + GJets
       mytree.Add(directory+'outname_mc4'+category+mesonCat+localTime+'.root')  #tt2l
       if category=='_Wcat': mytree.Add(directory+'outname_mc5'+category+mesonCat+localTime+'.root')  #tt1l
@@ -282,6 +284,7 @@ def resetTree(mytree,category):
 
    mytree.SetBranchStatus('*',0)
    mytree.SetBranchStatus('w',1)
+   mytree.SetBranchStatus('w_allSF',1)
    mytree.SetBranchStatus('lumiIntegrated',1)
    mytree.SetBranchStatus('mc',1)
 
@@ -315,8 +318,10 @@ def resetTree(mytree,category):
 
    if(category =='_Zcat' or category =='_Wcat'):
       mytree.SetBranchStatus('V_mass',1)
-      mytree.SetBranchStatus('LeadingLepton',1)
-      mytree.SetBranchStatus('SubLeadingLepton',1)
+      mytree.SetBranchStatus('LeadingLeptonPt',1)
+
+   if(category =='_Zcat'):
+      mytree.SetBranchStatus('SubLeadingLeptonPt',1)
 
    if(category =='_Zinvcat'):
       mytree.SetBranchStatus('dPhiGammaMET',1)

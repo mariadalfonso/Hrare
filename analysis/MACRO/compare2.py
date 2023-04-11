@@ -5,14 +5,15 @@ import math
 
 ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetOptFit(1)
-#ROOT.SetBatch()
+ROOT.gROOT.SetBatch()
 
 #mesonCat = '_PhiCat'
 mesonCat = '_RhoCat'
 year = '_2018'
 
 
-directory = '/home/submit/mariadlf/Hrare/analysis/DEC28/2018/'
+#directory = '/home/submit/mariadlf/Hrare/analysis/DEC28/2018/'
+directory = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/FEB24/2018/'
 mytreeGF = ROOT.TChain('events')
 mytreeGFfix = ROOT.TChain('events')
 
@@ -34,13 +35,13 @@ mytreeGFfix = ROOT.TChain('events')
 #mytreeGF.Add(directory+'outname_mc-66_Zinvcat'+mesonCat+year+'.root')
 #stringCat = 'Zinvcat'
 
-#mytreeGF.Add(directory+'outname_mc-65_VBFcatlow'+mesonCat+year+'.root')
-#mytreeGF.Add(directory+'outname_mc-66_VBFcatlow'+mesonCat+year+'.root')
-#stringCat = 'VBFcatlow'
+mytreeGF.Add(directory+'outname_mc-65_VBFcatlow'+mesonCat+year+'.root')
+mytreeGF.Add(directory+'outname_mc-66_VBFcatlow'+mesonCat+year+'.root')
+stringCat = 'VBFcatlow'
 
-mytreeGF.Add(directory+'outname_mc-65_VBFcat'+mesonCat+year+'.root')
-mytreeGF.Add(directory+'outname_mc-66_VBFcat'+mesonCat+year+'.root')
-stringCat = 'VBFcat'
+#mytreeGF.Add(directory+'outname_mc-65_VBFcat'+mesonCat+year+'.root')
+#mytreeGF.Add(directory+'outname_mc-66_VBFcat'+mesonCat+year+'.root')
+#stringCat = 'VBFcat'
 
 def projection(doTestMVA, mytree, xmin, xmax, rangeLow, rangeHigh, color ):
 
