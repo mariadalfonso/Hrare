@@ -259,6 +259,10 @@ private:
 		     const pat::PackedCandidate& pfCand2
 		  );
   pat::CompositeCandidate
+  getK0StarToKPi(const edm::Event& iEvent,
+		 const pat::PackedCandidate& kaonCand,
+		 const pat::PackedCandidate& pion);
+  pat::CompositeCandidate
   getD0ToKPi(const edm::Event& iEvent,
 	     const pat::PackedCandidate& kaonCand,
 	     const pat::PackedCandidate& pion);
@@ -303,7 +307,7 @@ private:
   computeCandIsolation(	const pat::PackedCandidate& pfCand1,
 			const pat::PackedCandidate& pfCand2,
 			unsigned int primaryVertexIndex,
-			float minPt=0.9, float dR=0.7,
+			float minPt=0.9, float dR=0.7, int particleType=0,
 			std::vector<const pat::PackedCandidate*> ignoreTracks =
 			std::vector<const pat::PackedCandidate*>());
 
@@ -378,6 +382,12 @@ private:
   double maxD0PreselectMass_;
   double minD0Mass_;
   double maxD0Mass_;
+  double minD0StarMass_;
+  double maxD0StarMass_;
+  double minK0StarPreselectMass_;
+  double maxK0StarPreselectMass_;
+  double minK0StarMass_;
+  double maxK0StarMass_;
   double minLambdaPreselectMass_;
   double maxLambdaPreselectMass_;
   double minLambdaMass_;
@@ -427,6 +437,12 @@ minD0PreselectMass_(     iConfig.getParameter<double>( "minD0PreselectMass" ) ),
 maxD0PreselectMass_(     iConfig.getParameter<double>( "maxD0PreselectMass" ) ),
 minD0Mass_(     iConfig.getParameter<double>( "minD0Mass" ) ),
 maxD0Mass_(     iConfig.getParameter<double>( "maxD0Mass" ) ),
+minD0StarMass_(     iConfig.getParameter<double>( "minD0StarMass" ) ),
+maxD0StarMass_(     iConfig.getParameter<double>( "maxD0StarMass" ) ),
+minK0StarPreselectMass_(     iConfig.getParameter<double>( "minK0StarPreselectMass" ) ),
+maxK0StarPreselectMass_(     iConfig.getParameter<double>( "maxK0StarPreselectMass" ) ),
+minK0StarMass_(     iConfig.getParameter<double>( "minK0StarMass" ) ),
+maxK0StarMass_(     iConfig.getParameter<double>( "maxK0StarMass" ) ),
 minLambdaPreselectMass_(     iConfig.getParameter<double>( "minLambdaPreselectMass" ) ),
 maxLambdaPreselectMass_(     iConfig.getParameter<double>( "maxLambdaPreselectMass" ) ),
 minLambdaMass_(     iConfig.getParameter<double>( "minLambdaMass" ) ),
@@ -440,6 +456,7 @@ minVtxProb_( iConfig.getParameter<double>( "minVtxProb" ) )
 {
     produces<pat::CompositeCandidateCollection>("Ks");
     produces<pat::CompositeCandidateCollection>("D0");
+    produces<pat::CompositeCandidateCollection>("K0Star");
     produces<pat::CompositeCandidateCollection>("Phi");
     produces<pat::CompositeCandidateCollection>("Lambda");
     produces<pat::CompositeCandidateCollection>("Rho");
@@ -668,7 +685,10 @@ MesonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
     pvIndex = displacement3D.pvIndex;
   }
 
-  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
+  // 0 is charged Isolation; 22 is photon, -1 is neuHad
+  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3,0)); //minPt and DR=0.3 as for muons
+  v0Cand.addUserFloat( "isoPho", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3,22)); //minPt and DR=0.3 as for muons
+  v0Cand.addUserFloat( "isoNeuHad", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3,-1)); //minPt and DR=0.3 as for muons
 
   if( vtxFit.valid() ) {
 
@@ -871,6 +891,7 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Output collection
     auto kss  = std::make_unique<pat::CompositeCandidateCollection>();
     auto d0s  = std::make_unique<pat::CompositeCandidateCollection>();
+    auto k0Stars = std::make_unique<pat::CompositeCandidateCollection>();
     auto phis = std::make_unique<pat::CompositeCandidateCollection>();
     auto lambdas = std::make_unique<pat::CompositeCandidateCollection>();
     auto rhos = std::make_unique<pat::CompositeCandidateCollection>();
@@ -893,6 +914,9 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	  if ( maxTwoTrackDOCA_>0 and tt_doca > maxTwoTrackDOCA_ )
 	    continue;
 	  
+	  // $$$$$$$$$$
+	  // $$$$$$ BELOW diTrack
+
 	  // PhiToKK (1020) [ also Look for DsToPhiPi Ds (1968./27)]
 	  auto phiCand = getPhiToKK(iEvent, pfCand1, pfCand2);
 	  if (phiCand.numberOfDaughters() > 0 and phiCand.pt() > 5 ){
@@ -907,11 +931,38 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	    rhos->push_back(rhoCand);
 	  }
 
-	  // OmegaToPiPi (782)
+	  // K0starToKPi (892)
+	  auto k0StarCand1 = getK0StarToKPi(iEvent, pfCand1, pfCand2);
+	  if (k0StarCand1.numberOfDaughters() > 0 and k0StarCand1.pt() > 5){
+	    k0StarCand1.addUserFloat( "doca", tt_doca);
+	    k0Stars->push_back(k0StarCand1);
+	  }
+	  auto k0StarCand2 = getK0StarToKPi(iEvent, pfCand2, pfCand1);
+	  if (k0StarCand2.numberOfDaughters() > 0 and k0StarCand2.pt() > 5){
+	    k0StarCand2.addUserFloat( "doca", tt_doca);
+	    k0Stars->push_back(k0StarCand2);
+	  }
+
+	  // $$$$$$$$$$
+	  // $$$$$$ BELOW diTrack + pi0/gammas
+
+	  // OmegaToPiPiPi0 (782)
 	  auto omegaCand = getOmegasToPiPiPi0(iEvent, pfCand1, pfCand2);
 	  if (omegaCand.numberOfDaughters() > 0 and omegaCand.pt() > 5 ){
 	    omegaCand.addUserFloat( "doca", tt_doca);
 	    omegas->push_back(omegaCand);
+	  }
+
+	  // D0ToKPi (1864) D0*ToD0Gammas (2007)
+	  auto d0Cand1 = getD0ToKPi(iEvent, pfCand1, pfCand2);
+	  if (d0Cand1.numberOfDaughters() > 0 and d0Cand1.pt() > 5){
+	    d0Cand1.addUserFloat( "doca", tt_doca);
+	    d0s->push_back(d0Cand1);
+	  }
+	  auto d0Cand2 = getD0ToKPi(iEvent, pfCand2, pfCand1);
+	  if (d0Cand2.numberOfDaughters() > 0 and d0Cand2.pt() > 5){
+	    d0Cand2.addUserFloat( "doca", tt_doca);
+	    d0s->push_back(d0Cand2);
 	  }
 
 	  // Look for V0s built from displaced tracks
@@ -924,18 +975,6 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	  if (ksCand.numberOfDaughters() > 0){
 	    ksCand.addUserFloat( "doca", tt_doca);
 	    kss->push_back(ksCand);
-	  }
-
-	  // D0ToKPi (1864)
-	  auto d0Cand1 = getD0ToKPi(iEvent, pfCand1, pfCand2);
-	  if (d0Cand1.numberOfDaughters() > 0){
-	    d0Cand1.addUserFloat( "doca", tt_doca);
-	    d0s->push_back(d0Cand1);
-	  }
-	  auto d0Cand2 = getD0ToKPi(iEvent, pfCand2, pfCand1);
-	  if (d0Cand2.numberOfDaughters() > 0){
-	    d0Cand2.addUserFloat( "doca", tt_doca);
-	    d0s->push_back(d0Cand2);
 	  }
 	  
 	  // LambdaToPPi (1520)
@@ -958,6 +997,7 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     
     iEvent.put(std::move(kss), "Ks");
     iEvent.put(std::move(d0s), "D0");
+    iEvent.put(std::move(k0Stars), "K0Star");
     iEvent.put(std::move(phis), "Phi");
     iEvent.put(std::move(lambdas), "Lambda");
     iEvent.put(std::move(rhos), "Rho");
@@ -1051,6 +1091,8 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
 				  const pat::PackedCandidate& ipfCand1,
 				  const pat::PackedCandidate& ipfCand2)
 {
+  float signalCone_ = 0.01; // to collect the pi0
+
   pat::CompositeCandidate omegasCand;
   pat::PackedCandidate pfCand1(ipfCand1);
   pfCand1.setMass(pion_mass_);
@@ -1084,7 +1126,8 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
 
   // look for a Photon
   const pat::PackedCandidate* omega_photon(nullptr);
-  float mass3 = 0.;
+  float massOmegaFullCand = 0.;
+  float ptOmegaFullCand = 0.;
   int nPhotons = 0;
 
   const auto & vtx_point = omegasVtxFit.refitVertex->vertexState().position();
@@ -1096,7 +1139,7 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
     if (abs(iphoton.pdgId()) !=22) continue; // otherwise some "KL" enters
     if (iphoton.pt() < 5. ) continue;
-    if (deltaR(pfCand1, iphoton) > 0.05 && deltaR(pfCand2, iphoton) > 0.05) continue; // photon should be collimated
+    if (deltaR(pfCand1, iphoton) > signalCone_ && deltaR(pfCand2, iphoton) > signalCone_) continue; // photon should be collimated
 
     iphoton.setVertex(math::XYZPoint(vtx_point.x(), vtx_point.y(), vtx_point.z()));
 
@@ -1112,7 +1155,8 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
     if ( omegaFullCand.mass() > minRhosPreselectMass_ and
 	 omegaFullCand.mass() < maxRhosPreselectMass_ ) {
       omega_photon = &iphoton;
-      mass3 = omegaFullCand.mass();
+      massOmegaFullCand = omegaFullCand.mass();
+      ptOmegaFullCand = omegaFullCand.pt();
     }
   }
 
@@ -1122,7 +1166,8 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
     omegasCand.addUserFloat( "photon_phi", omega_photon->phi() );
     omegasCand.addUserInt( "photon_pdgId", omega_photon->pdgId() );
     omegasCand.addUserInt( "Nphotons", nPhotons );
-    omegasCand.addUserFloat( "3body_mass", mass3 );
+    omegasCand.addUserFloat( "3body_mass", massOmegaFullCand );
+    omegasCand.addUserFloat( "3body_pt", ptOmegaFullCand );
   } else {
     omegasCand.addUserFloat( "photon_pt", -1. );
     omegasCand.addUserFloat( "photon_eta", 0. );
@@ -1130,18 +1175,60 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
     omegasCand.addUserInt( "photon_pdgId", 0. );
     omegasCand.addUserInt( "Nphotons", -1. );
     omegasCand.addUserFloat( "3body_mass", 0. );
+    omegasCand.addUserFloat( "3body_pt", 0. );
   }
 
   return omegasCand;
 
 }
 
+pat::CompositeCandidate
+MesonProducer::getK0StarToKPi(const edm::Event& iEvent,
+			      const pat::PackedCandidate& ikaon,
+			      const pat::PackedCandidate& ipion)
+{
+  pat::CompositeCandidate Cand;
+  pat::PackedCandidate kaon(ikaon);
+  kaon.setMass(kaon_mass_);
+  pat::PackedCandidate pion(ipion);
+  pion.setMass(pion_mass_);
+  Cand.addDaughter( kaon , "kaon" );
+  Cand.addDaughter( pion , "pion" );
+  AddFourMomenta addP4;
+  addP4.set( Cand );
+
+  if ( Cand.mass() < minK0StarPreselectMass_ or Cand.mass() > maxK0StarPreselectMass_ )
+    return pat::CompositeCandidate();
+
+  Cand.addUserFloat( "kaon_pt",  kaon.pt() );
+  Cand.addUserFloat( "kaon_eta", kaon.eta() );
+  Cand.addUserFloat( "kaon_phi", kaon.phi() );
+  Cand.addUserFloat( "pion_pt",  pion.pt() );
+  Cand.addUserFloat( "pion_eta", pion.eta() );
+  Cand.addUserFloat( "pion_phi", pion.phi() );
+  Cand.addUserFloat( "kaon_sip", trackImpactParameterSignificance(kaon) );
+  Cand.addUserFloat( "pion_sip", trackImpactParameterSignificance(pion) );
+  //  d0Cand.addUserInt( "kaon_mu_index", match_to_muon(kaon, *muonHandle_));
+  //  d0Cand.addUserInt( "pion_mu_index", match_to_muon(pion, *muonHandle_));
+
+  auto candVtxFit = fillInfo(Cand, iEvent, kaon, pion, "kaon", "pion");
+
+  if ( not candVtxFit.valid()  or
+       candVtxFit.vtxProb() < minVtxProb_ or
+       candVtxFit.mass() < minK0StarMass_ or
+       candVtxFit.mass() > maxK0StarMass_ ) return pat::CompositeCandidate();
+  //       candVtxFit.lxy > maxLxy_ or
+  //       candVtxFit.sigLxy < minSigLxy_ ) return pat::CompositeCandidate();
+
+  return Cand;
+}
 
 pat::CompositeCandidate
 MesonProducer::getD0ToKPi(const edm::Event& iEvent,
 		       const pat::PackedCandidate& ikaon,
 		       const pat::PackedCandidate& ipion)
 {
+  float signalCone_ = 0.05; // to collect the pi0
   pat::CompositeCandidate d0Cand;
   pat::PackedCandidate kaon(ikaon);
   kaon.setMass(kaon_mass_);
@@ -1171,12 +1258,67 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
   if ( not d0VtxFit.valid()  or 
        d0VtxFit.vtxProb() < minVtxProb_ or
        d0VtxFit.mass() < minD0Mass_ or  
-       d0VtxFit.mass() > maxD0Mass_ or
-       d0VtxFit.lxy > maxLxy_ or 
-       d0VtxFit.sigLxy < minSigLxy_ ) return pat::CompositeCandidate();
+       d0VtxFit.mass() > maxD0Mass_ ) return pat::CompositeCandidate();
+  //       d0VtxFit.lxy > maxLxy_ or
+  //       d0VtxFit.sigLxy < minSigLxy_ ) return pat::CompositeCandidate();
+
+  // look for a Photon
+  const pat::PackedCandidate* d0Star_photon(nullptr);
+  float massd0Star = 0.;
+  float ptd0Star = 0.;
+  int nPhotons = 0;
+
+  const auto & vtx_point = d0VtxFit.refitVertex->vertexState().position();
+
+  for (unsigned int k=0; k < pfCandHandle_->size(); ++k){
+    auto iphoton(pfCandHandle_->at(k));
+
+    if (iphoton.charge() != 0 ) continue;
+    if (iphoton.mass() > 1 ) continue; // some uninitialized mass
+    if (abs(iphoton.pdgId()) !=22) continue; // otherwise some "KL" enters
+    if (iphoton.pt() < 5. ) continue;
+    if (deltaR(kaon, iphoton) > signalCone_ && deltaR(pion, iphoton) > signalCone_) continue; // photon should be collimated
+
+    iphoton.setVertex(math::XYZPoint(vtx_point.x(), vtx_point.y(), vtx_point.z()));
+
+    pat::CompositeCandidate d0StarCand;
+    pat::PackedCandidate photon(iphoton);
+    photon.setMass(0.);
+    d0StarCand.addDaughter( kaon , "kaon" );
+    d0StarCand.addDaughter( pion , "pion" );
+    d0StarCand.addDaughter( photon , "photon" );
+    addP4.set( d0StarCand);
+    nPhotons++;
+
+    if ( d0StarCand.mass() > minD0StarMass_ and
+	 d0StarCand.mass() < maxD0StarMass_ ) {
+      d0Star_photon = &iphoton;
+      massd0Star = d0StarCand.mass();
+      ptd0Star = d0StarCand.pt();
+    }
+  }
+
+  if (d0Star_photon){
+    d0Cand.addUserFloat( "d0Star_photon_pt", d0Star_photon->pt() );
+    d0Cand.addUserFloat( "d0Star_photon_eta", d0Star_photon->eta() );
+    d0Cand.addUserFloat( "d0Star_photon_phi", d0Star_photon->phi() );
+    d0Cand.addUserInt( "d0Star_photon_pdgId", d0Star_photon->pdgId() );
+    d0Cand.addUserInt( "d0Star_Nphotons", nPhotons );
+    d0Cand.addUserFloat( "d0Star_3body_mass", massd0Star );
+    d0Cand.addUserFloat( "d0Star_3body_pt", ptd0Star );
+  } else {
+    d0Cand.addUserFloat( "d0Star_photon_pt", -1. );
+    d0Cand.addUserFloat( "d0Star_photon_eta", 0. );
+    d0Cand.addUserFloat( "d0Star_photon_phi", 0. );
+    d0Cand.addUserInt( "d0Star_photon_pdgId", 0. );
+    d0Cand.addUserInt( "d0Star_Nphotons", -1. );
+    d0Cand.addUserFloat( "d0Star_3body_mass", -1 );
+    d0Cand.addUserFloat( "d0Star_3body_pt", 0. );
+  }
 
   return d0Cand;
 }
+
 
 pat::CompositeCandidate
 MesonProducer::getPhiToKK(const edm::Event& iEvent,
@@ -1477,7 +1619,7 @@ DisplacementInformationIn3D
 float
 MesonProducer::computeCandIsolation(const pat::PackedCandidate& pfCand1, const pat::PackedCandidate& pfCand2, 
 				    unsigned int primaryVertexIndex,
-				    float minPt, float dR,
+				    float minPt, float dR, int particleType,
 				    std::vector<const pat::PackedCandidate*> ignoreTracks)
 {
     float sumPt(0);
@@ -1491,9 +1633,16 @@ MesonProducer::computeCandIsolation(const pat::PackedCandidate& pfCand1, const p
 	}
       }
       if (ignore_track) continue;
-      if (deltaR(pfCand1, pfCandIso) < 0.01 || deltaR(pfCand2, pfCandIso) < 0.01) continue;
-      if (pfCandIso.charge() == 0 ) continue;
-      if (!pfCandIso.hasTrackDetails()) continue;
+
+      if (deltaR(pfCand1, pfCandIso) < 0.001 || deltaR(pfCand2, pfCandIso) < 0.001) continue;
+      if (particleType==0) {
+	if (pfCandIso.charge() == 0 ) continue; // for chargedIsolation
+	if (!pfCandIso.hasTrackDetails()) continue;
+      } else if (particleType==22) {
+	if (pfCandIso.charge() != 0 ) continue; // for neutralIsolation  MARIA
+      } else {
+	if (pfCandIso.charge() != 0 ) continue; // for neutralIsolation  MARIA
+      }
       if (pfCandIso.pt()<minPt) continue;
       if (pfCandIso.vertexRef().key()!=primaryVertexIndex) continue;
       if (deltaR(b_p4, pfCandIso) > dR) continue;

@@ -33,24 +33,30 @@ V0prod = cms.EDProducer(
     maxKsMass  = cms.double(0.55),
     minKsPreselectMass = cms.double(0.4),
     maxKsPreselectMass = cms.double(0.6),
-    minPhiMass  = cms.double(1.00), # rho true mass 1020
+    minPhiMass  = cms.double(1.00), # phi true mass 1020 (width = 0.004)
     maxPhiMass  = cms.double(1.04),
     minPhiPreselectMass = cms.double(0.9),
     maxPhiPreselectMass = cms.double(1.1),
-    minRhosPreselectMass = cms.double(0.4),
-    maxRhosPreselectMass = cms.double(1.1),
-    minRhosMass = cms.double(0.5), # rho true mass 770
-    maxRhosMass = cms.double(1.),
-    minOmegasPreselectMass = cms.double(0.3),
-    maxOmegasPreselectMass = cms.double(1.65),
+    minRhosPreselectMass = cms.double(0.320),
+    maxRhosPreselectMass = cms.double(1.220),
+    minRhosMass = cms.double(0.320), # rho true mass 770 (width = 150) (3 sigma)
+    maxRhosMass = cms.double(1.220),
+    minOmegasPreselectMass = cms.double(0.3), # to preselect the two charged pi (omega true mass 782, width is 8 or PhiMass = 1.02)
+    maxOmegasPreselectMass = cms.double(1.1),
     minDsMass  = cms.double(1.91),
     maxDsMass  = cms.double(2.03),
     minDsPreselectMass = cms.double(1.8),
     maxDsPreselectMass = cms.double(2.1),
-    minD0Mass  = cms.double(1.8),
-    maxD0Mass  = cms.double(1.9),
+    minD0Mass  = cms.double(1.75), # D0Mass true mass 1864 (width = 50)
+    maxD0Mass  = cms.double(1.95),
     minD0PreselectMass = cms.double(1.6),
-    maxD0PreselectMass = cms.double(2.0),
+    maxD0PreselectMass = cms.double(2.1),
+    minD0StarMass  = cms.double(1.9), # D0Mass true mass 2007
+    maxD0StarMass  = cms.double(2.1),
+    minK0StarMass  = cms.double(0.64), # K0Star true mass 892 (width = 50)
+    maxK0StarMass  = cms.double(1.15),
+    minK0StarPreselectMass = cms.double(0.64),
+    maxK0StarPreselectMass = cms.double(1.15),
     minLambdaMass  = cms.double(1.05),
     maxLambdaMass  = cms.double(1.15),
     minLambdaPreselectMass = cms.double(1.0),
@@ -72,6 +78,8 @@ KsVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
     iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
+    isoPho       = Var("userFloat('isoPho')",          float, doc = "photon isolation (pt/(pt+sum))"),
+    isoNeuHad    = Var("userFloat('isoNeuHad')",       float, doc = "neutral Hadron isolation (pt/(pt+sum))"),
     bestVtx_X    = Var("userFloat('bestVtx_X')",       float, doc = "best vtx x"),
     bestVtx_Y    = Var("userFloat('bestVtx_Y')",       float, doc = "best vtx y"),
     bestVtx_Z    = Var("userFloat('bestVtx_Z')",       float, doc = "best vtx z"),
@@ -155,7 +163,6 @@ RhosMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     extension=cms.bool(False),
     variables = KsVariablesMC # for now same variables rho, k to pipi
 )
-
 
 # Omega ToPiPi + Pi0
 OmegasVariables = merge_psets(
@@ -241,7 +248,7 @@ PhiVariablesMC = merge_psets(
         ),
 )
 
-PhiTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+PhiTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0prod","Phi"),
     cut=cms.string(""),
     name=cms.string("phi"),
@@ -251,7 +258,7 @@ PhiTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     variables = PhiVariables
 )
 
-PhiMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+PhiMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0prodMC","Phi"),
     cut=cms.string(""),
     name=cms.string("phi"),
@@ -263,11 +270,12 @@ PhiMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
 
 
 # D0ToKPi
-
-D0Variables = cms.PSet(
+D0Variables_ = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
     iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
+    isoPho       = Var("userFloat('isoPho')",          float, doc = "photon isolation (pt/(pt+sum))"),
+    isoNeuHad    = Var("userFloat('isoNeuHad')",       float, doc = "neutral Hadron isolation (pt/(pt+sum))"),
     bestVtx_X    = Var("userFloat('bestVtx_X')",       float, doc = "best vtx x"),
     bestVtx_Y    = Var("userFloat('bestVtx_Y')",       float, doc = "best vtx y"),
     bestVtx_Z    = Var("userFloat('bestVtx_Z')",       float, doc = "best vtx z"),
@@ -297,6 +305,34 @@ D0Variables = cms.PSet(
     kin_sipPV    = Var("userFloat('kin_sipPV')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in 3D wrt PV"),
 )
 
+D0Variables = merge_psets(
+    D0Variables_,
+    cms.PSet(
+        d0Star_photon_pt   = Var("userFloat('d0Star_photon_pt')",      float, doc = "D0*ToD0Gammas: photon pt"),
+        d0Star_photon_eta  = Var("userFloat('d0Star_photon_eta')",     float, doc = "D0*ToD0Gammas: photon eta"),
+        d0Star_photon_phi  = Var("userFloat('d0Star_photon_phi')",     float, doc = "D0*ToD0Gammas: photon phi"),
+        d0Star_Nphotons    = Var("userInt('d0Star_Nphotons')",       float, doc = "D0*ToD0Gammas: N photons"),
+        d0Star_3body_mass  = Var("userFloat('d0Star_3body_mass')",     float, doc = "D0*ToD0Gammas: 3body_mass"),
+        d0Star_3body_pt  = Var("userFloat('d0Star_3body_pt')",     float, doc = "D0*ToD0Gammas: 3body_pt"),
+    ),
+)
+
+
+D0VariablesMC_ = merge_psets(
+    D0Variables_,
+    cms.PSet(
+        gen_kaon_pdgId  = Var("userInt(  'gen_kaon_pdgId')",    int,   doc = "Gen match: first track pdg Id"),
+        gen_kaon_mpdgId = Var("userInt(  'gen_kaon_mpdgId')",   int,   doc = "Gen match: first track mother pdg Id"),
+        gen_kaon_pt     = Var("userFloat('gen_kaon_pt')",     float,   doc = "Gen match: first track pt"),
+        gen_pion_pdgId  = Var("userInt(  'gen_pion_pdgId')",    int,   doc = "Gen match: second track pdg Id"),
+        gen_pion_mpdgId = Var("userInt(  'gen_pion_mpdgId')",   int,   doc = "Gen match: second track mother pdg Id"),
+        gen_pion_pt     = Var("userFloat('gen_pion_pt')",     float,   doc = "Gen match: second track pt"),
+        gen_pdgId       = Var("userInt(  'gen_pdgId')",         int,   doc = "Gen match: ditrack pdg Id"),
+        gen_mass        = Var("userFloat('gen_mass')",        float,   doc = "Gen match: ditrack mass"),
+        gen_pt          = Var("userFloat('gen_pt')",          float,   doc = "Gen match: ditrack pt"),
+        ),
+)
+
 D0VariablesMC = merge_psets(
     D0Variables,
     cms.PSet(
@@ -312,7 +348,7 @@ D0VariablesMC = merge_psets(
         ),
 )
 
-D0Table=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+D0Table=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0prod","D0"),
     cut=cms.string(""),
     name=cms.string("d0"),
@@ -322,7 +358,7 @@ D0Table=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     variables = D0Variables
 )
 
-D0McTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
+D0McTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0prodMC","D0"),
     cut=cms.string(""),
     name=cms.string("d0"),
@@ -332,12 +368,34 @@ D0McTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     variables = D0VariablesMC
 )
 
-# LambdaToPPi
+# K0StarToKPi
+K0StarTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prod","K0Star"),
+    cut=cms.string(""),
+    name=cms.string("K0Star"),
+    doc=cms.string("K0Star Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = D0Variables_
+)
 
+K0StarMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
+    src=cms.InputTag("V0prodMC","K0Star"),
+    cut=cms.string(""),
+    name=cms.string("K0Star"),
+    doc=cms.string("K0Star Variables"),
+    singleton=cms.bool(False),
+    extension=cms.bool(False),
+    variables = D0VariablesMC_
+)
+
+# LambdaToPPi
 LambdaVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
     iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
+    isoPho       = Var("userFloat('isoPho')",          float, doc = "photon isolation (pt/(pt+sum))"),
+    isoNeuHad    = Var("userFloat('isoNeuHad')",       float, doc = "neutral Hadron isolation (pt/(pt+sum))"),
     bestVtx_X    = Var("userFloat('bestVtx_X')",       float, doc = "best vtx x"),
     bestVtx_Y    = Var("userFloat('bestVtx_Y')",       float, doc = "best vtx y"),
     bestVtx_Z    = Var("userFloat('bestVtx_Z')",       float, doc = "best vtx z"),
@@ -405,5 +463,5 @@ LambdaMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
 
 V0Sequence   = cms.Sequence(V0prod)
 V0McSequence = cms.Sequence(V0prodMC)
-V0Tables     = cms.Sequence(KsTable + RhosTable + OmegasTable + PhiTable + D0Table + LambdaTable)
-V0McTables   = cms.Sequence(KsMcTable + RhosMcTable + OmegasMcTable + PhiMcTable + D0McTable + LambdaMcTable)
+V0Tables     = cms.Sequence(KsTable + RhosTable + OmegasTable + PhiTable + D0Table + K0StarTable + LambdaTable)
+V0McTables   = cms.Sequence(KsMcTable + RhosMcTable + OmegasMcTable + PhiMcTable + D0McTable + K0StarMcTable + LambdaMcTable)
