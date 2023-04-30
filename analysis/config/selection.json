@@ -154,9 +154,21 @@
 	{
             "name": "isZinv",
             "type": "isOmegaCat",
-            "definition": "(abs(omega_threemass-0.782)<3*0.008 && omega_kin_mass<(0.77-0.07) && omega_kin_pt>38 && omega_trk1_pt>15 && omega_trk2_pt>5 && omega_kin_valid && omega_iso > 0.9 && omega_kin_vtx_prob > 0.05 * omega_kin_vtx_chi2dof && omega_doca < 0.015 && omega_Nphotons>0)",
+            "definition": "(abs(omega_threemass-0.782)<3*0.008 && omega_kin_mass<(0.77-0.07) && omega_kin_pt>38 && omega_trk1_pt>5 && omega_trk2_pt>5 && omega_kin_valid && omega_iso > 0.9 && omega_Nphotons>0)",
             "notes":" used for isGF"
-        }
+        },
+	{
+            "name": "isZinv",
+            "type": "isK0StarCat",
+            "definition": "(abs(K0Star_kin_mass-0.892)<3*0.050 && K0Star_kin_pt>38 && K0Star_pion_pt>5 && K0Star_kaon_pt>5 && K0Star_kin_valid && K0Star_iso > 0.9 && K0Star_kin_vtx_prob > 0.05 * K0Star_kin_vtx_chi2dof)",
+            "notes":" used for isGF"
+        },
+	{
+            "name": "isZinv",
+            "type": "isD0StarCat",
+            "definition": "abs(d0_d0Star_3body_mass-2.007)<30*0.02 && d0_d0Star_3body_pt>38 && abs(d0_kin_mass-1.864)<5*0.05 && d0_pion_pt>5 && d0_kaon_pt>5 && d0_kin_valid && d0_iso > 0.9",
+            "notes":" used for isGF"
+	}
     ],
     "JSON" : "isGoodRunLS(isData, run, luminosityBlock)",
 

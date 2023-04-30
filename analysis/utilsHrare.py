@@ -334,6 +334,7 @@ def SwitchSample(argument,year):
     ####----------
     dirLocal = "/work/submit/mariadlf/Hrare/OCT14/"
     dirLocalNEW = "/work/submit/mariadlf/Hrare/D01/2018/"
+    dirLocalNEW2 = "/work/submit/mariadlf/Hrare/D02/2018/"
     dirLocalD01 = "/data/submit/mariadlf/HrareSIG/D01/2018/"
     dirLocalTEST = "/work/submit/mariadlf/Hrare/TEST/2018/"
     dirLocalTEST2 = "/work/submit/mariadlf/Hrare/TESTtrackFIX/2018/"
@@ -372,7 +373,9 @@ def SwitchSample(argument,year):
         1027: (dirGluster+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1028: (dirGluster+"TTHtoRhoG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2),
         #
-        1037: (dirLocalNEW+"ggh-homegagamma-powheg"+"/NANOAOD_01",46870*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
+        1037: (dirLocalNEW2+"ggh-homegagamma-powheg"+"/NANOAOD_02",46870*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
+        1038: (dirLocalNEW2+"ggh-hK0Stargamma-powheg_2"+"/NANOAOD_02",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HkstaraGamma)=1
+        1039: (dirLocalNEW2+"ggh-hD0Stargamma-powheg"+"/NANOAOD_02",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HkstaraGamma)=1
         #
         1019: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #
@@ -420,12 +423,12 @@ def SwitchSample(argument,year):
         25: (dirT2+"QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1104.0*1000*1.26), #LO *1.26
 
         31: (dirT2+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,53330.0*1000), #LO
-        32: (dirGluster+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8875.0*1000), #LO
-        33: (dirGluster+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,3338.0*1000), #LO
+        32: (dirT2+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,8875.0*1000), #LO
+        33: (dirT2+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,3338.0*1000), #LO
 
-        34: (dirGluster+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,5129.0*1000), #LO
-        35: (dirGluster+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,951.5*1000), #LO
-        36: (dirGluster+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,361.4*1000), #LO
+        34: (dirT2+"DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,5129.0*1000), #LO
+        35: (dirT2+"DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,951.5*1000), #LO
+        36: (dirT2+"DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,361.4*1000), #LO
 
         37: (dirT2+"Z1JetsToNuNu_M-50_LHEFilterPtZ-50To150_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,579.9*1000),
         38: (dirT2+"Z1JetsToNuNu_M-50_LHEFilterPtZ-150To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,17.42*1000),
@@ -440,6 +443,20 @@ def SwitchSample(argument,year):
         46: (dirT2+"ZGammaToJJGamma_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.144*1000),
         47: (dirGluster+"TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8+"+campaign,3.757*1000),
         48: (dirT2+"ZGTo2NuG_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,30.11*1000),
+
+        ##
+        49: (dirT2+"WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,11.09*1000),
+        #50: (dirT2+"WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,51.65*1000),
+        51: (dirT2+"WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,9.119*1000),
+        #52: (dirT2+"WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia+"+campaign,3.414*1000),
+        #53: (dirT2+"WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,5.213*1000),
+        #54: (dirT2+"WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,6.419*1000),
+        #55: (dirT2+"ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8+"+campaign,0.9738*1000),
+        #56: (dirT2+"ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,4.545*1000),
+        #57: (dirT2+"ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8+"+campaign,3.676*1000),
+        #58: (dirT2+"ZZTo4L_TuneCP5_13TeV_powheg_pythia8+"+campaign,1.325*1000),
+        #WWTo4Q_4f
+        #ZZTo4Q_5f
     }
 
     return switch.get(argument, "BKGdefault, xsecDefault")
