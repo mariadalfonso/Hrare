@@ -12,6 +12,24 @@ def nanoAOD_customizeMesons(process):
 
     process.genParticleTable.src = "prunedGenParticles"
 
+    if triggerObjectTable.selections[1].id.value()==22:
+        process.triggerObjectTable.selections[1].name=cms.string("Photon")
+        process.triggerObjectTable.selections[1].sel=cms.string("type(92) && pt > 20 && coll('hltEgammaCandidates')")
+        process.triggerObjectTable.selections[1].qualityBits=cms.string(
+            "filter('hltEG33L1EG26HEFilter') + " \
+            "2*filter('hltEG50HEFilter') + " \
+            "4*filter('hltEG75HEFilter') + " \
+            "8*filter('hltEG90HEFilter') + " \
+            "16*filter('hltEG120HEFilter') + " \
+            "32*filter('hltEG150HEFilter') + " \
+            "64*filter('hltEG175HEFilter') + " \
+            "128*filter('hltEG200HEFilter') + " \
+            "256*filter('hltHtEcal800') + " \
+            "512*filter('hltEG110EBTightIDTightIsoTrackIsoFilter') + " \
+            "1024*filter('hltEG120EBTightIDTightIsoTrackIsoFilter')+ " \
+            "2048*filter('hltMu17Photon30IsoCaloIdPhotonlegTrackIsoFilter')")
+        process.triggerObjectTable.selections[1].qualityBitsDoc = cms.string("Single Photon filters: 1 = hltEG33L1EG26HEFilter, 2 = hltEG50HEFilter, 4 = hltEG75HEFilter, 8 = hltEG90HEFilter, 16 = hltEG120HEFilter, 32 = hltEG150HEFilter, 64 = hltEG175HEFilter, 128 = hltEG200HEFilter, 256 = hltHtEcal800, 512 = hltEG110EBTightIDTightIsoTrackIsoFilter, 1024 = hltEG120EBTightIDTightIsoTrackIsoFilter, 2048 = 1mu-1photon")
+
     # Data 
 #    process.nanoSequence   = cms.Sequence(process.slimmedMuons + process.nanoSequence + process.V0Sequence + process.V0ForMuonFakeTables)
     process.nanoSequence   = cms.Sequence(process.nanoSequence + process.V0Sequence + process.V0Tables + process.DiMuProdSequence + process.DiMuTables )
