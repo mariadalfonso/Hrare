@@ -1091,7 +1091,7 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
 				  const pat::PackedCandidate& ipfCand1,
 				  const pat::PackedCandidate& ipfCand2)
 {
-  float signalCone_ = 0.01; // to collect the pi0
+  float signalCone_ = 0.05; // to collect the pi0
 
   pat::CompositeCandidate omegasCand;
   pat::PackedCandidate pfCand1(ipfCand1);
@@ -1125,12 +1125,18 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
        ) return pat::CompositeCandidate();
 
   // look for a Photon
-  const pat::PackedCandidate* omega_photon(nullptr);
+  const pat::PackedCandidate* omega_photon1(nullptr);
+  // const pat::PackedCandidate* omega_photon2(nullptr);
   float massOmegaFullCand = 0.;
   float ptOmegaFullCand = 0.;
+  float etaOmegaFullCand = -99.;
+  float phiOmegaFullCand = -99.;
   int nPhotons = 0;
 
   const auto & vtx_point = omegasVtxFit.refitVertex->vertexState().position();
+  pat::CompositeCandidate omegaFullCand;
+  omegaFullCand.addDaughter( pfCand1 , "trk1" );
+  omegaFullCand.addDaughter( pfCand2 , "trk2" );
 
   for (unsigned int k=0; k < pfCandHandle_->size(); ++k){
     auto iphoton(pfCandHandle_->at(k));
@@ -1139,45 +1145,49 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
     if (abs(iphoton.pdgId()) !=22) continue; // otherwise some "KL" enters
     if (iphoton.pt() < 5. ) continue;
-    if (deltaR(pfCand1, iphoton) > signalCone_ && deltaR(pfCand2, iphoton) > signalCone_) continue; // photon should be collimated
+    if (deltaR((pfCand1.p4()+pfCand2.p4()),iphoton.p4()) > signalCone_) continue; // photon should be collimated
 
-    iphoton.setVertex(math::XYZPoint(vtx_point.x(), vtx_point.y(), vtx_point.z()));
-
-    pat::CompositeCandidate omegaFullCand;
     pat::PackedCandidate photon(iphoton);
     photon.setMass(0.);
-    omegaFullCand.addDaughter( pfCand1 , "trk1" );
-    omegaFullCand.addDaughter( pfCand2 , "trk2" );
-    omegaFullCand.addDaughter( photon , "photon" );
-    addP4.set( omegaFullCand);
+    photon.setVertex(math::XYZPoint(vtx_point.x(), vtx_point.y(), vtx_point.z()));
+
     nPhotons++;
 
+    if (nPhotons==1) {
+      omegaFullCand.addDaughter( photon , "photon" );
+      omega_photon1 = &iphoton;
+    }
+    if (nPhotons==2) {
+      omegaFullCand.addDaughter( photon , "photon2" );
+      //      omega_photon2 = &iphoton;
+    }
+
+    addP4.set( omegaFullCand);
     if ( omegaFullCand.mass() > minRhosPreselectMass_ and
 	 omegaFullCand.mass() < maxRhosPreselectMass_ ) {
-      omega_photon = &iphoton;
       massOmegaFullCand = omegaFullCand.mass();
       ptOmegaFullCand = omegaFullCand.pt();
+      etaOmegaFullCand = omegaFullCand.eta();
+      phiOmegaFullCand = omegaFullCand.phi();
     }
   }
 
-  if (omega_photon){
-    omegasCand.addUserFloat( "photon_pt", omega_photon->pt() );
-    omegasCand.addUserFloat( "photon_eta", omega_photon->eta() );
-    omegasCand.addUserFloat( "photon_phi", omega_photon->phi() );
-    omegasCand.addUserInt( "photon_pdgId", omega_photon->pdgId() );
-    omegasCand.addUserInt( "Nphotons", nPhotons );
-    omegasCand.addUserFloat( "3body_mass", massOmegaFullCand );
-    omegasCand.addUserFloat( "3body_pt", ptOmegaFullCand );
+  omegasCand.addUserInt( "Nphotons", nPhotons );
+  omegasCand.addUserFloat( "3body_mass", massOmegaFullCand );
+  omegasCand.addUserFloat( "3body_pt", ptOmegaFullCand );
+  omegasCand.addUserFloat( "3body_eta", etaOmegaFullCand );
+  omegasCand.addUserFloat( "3body_phi", phiOmegaFullCand );
+  if (omega_photon1){
+    omegasCand.addUserFloat( "photon_pt", omega_photon1->pt() );
+    omegasCand.addUserFloat( "photon_eta", omega_photon1->eta() );
+    omegasCand.addUserFloat( "photon_phi", omega_photon1->phi() );
+    omegasCand.addUserInt( "photon_pdgId", omega_photon1->pdgId() );
   } else {
     omegasCand.addUserFloat( "photon_pt", -1. );
     omegasCand.addUserFloat( "photon_eta", 0. );
     omegasCand.addUserFloat( "photon_phi", 0. );
     omegasCand.addUserInt( "photon_pdgId", 0. );
-    omegasCand.addUserInt( "Nphotons", -1. );
-    omegasCand.addUserFloat( "3body_mass", 0. );
-    omegasCand.addUserFloat( "3body_pt", 0. );
   }
-
   return omegasCand;
 
 }
@@ -1245,9 +1255,11 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
   d0Cand.addUserFloat( "kaon_pt",  kaon.pt() );
   d0Cand.addUserFloat( "kaon_eta", kaon.eta() );
   d0Cand.addUserFloat( "kaon_phi", kaon.phi() );
+  d0Cand.addUserFloat( "kaon_charge", kaon.charge() );
   d0Cand.addUserFloat( "pion_pt",  pion.pt() );
   d0Cand.addUserFloat( "pion_eta", pion.eta() );
   d0Cand.addUserFloat( "pion_phi", pion.phi() );
+  d0Cand.addUserFloat( "pion_charge", pion.charge() );
   d0Cand.addUserFloat( "kaon_sip", trackImpactParameterSignificance(kaon) );
   d0Cand.addUserFloat( "pion_sip", trackImpactParameterSignificance(pion) );
   //  d0Cand.addUserInt( "kaon_mu_index", match_to_muon(kaon, *muonHandle_));
@@ -1266,6 +1278,8 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
   const pat::PackedCandidate* d0Star_photon(nullptr);
   float massd0Star = 0.;
   float ptd0Star = 0.;
+  float etad0Star = -99.;
+  float phid0Star = -99.;
   int nPhotons = 0;
 
   const auto & vtx_point = d0VtxFit.refitVertex->vertexState().position();
@@ -1277,7 +1291,7 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
     if (abs(iphoton.pdgId()) !=22) continue; // otherwise some "KL" enters
     if (iphoton.pt() < 5. ) continue;
-    if (deltaR(kaon, iphoton) > signalCone_ && deltaR(pion, iphoton) > signalCone_) continue; // photon should be collimated
+    if (deltaR((kaon.p4()+pion.p4()),iphoton.p4()) > signalCone_) continue; // photon should be collimated
 
     iphoton.setVertex(math::XYZPoint(vtx_point.x(), vtx_point.y(), vtx_point.z()));
 
@@ -1295,6 +1309,8 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
       d0Star_photon = &iphoton;
       massd0Star = d0StarCand.mass();
       ptd0Star = d0StarCand.pt();
+      etad0Star = d0StarCand.eta();
+      phid0Star = d0StarCand.phi();
     }
   }
 
@@ -1306,6 +1322,8 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
     d0Cand.addUserInt( "d0Star_Nphotons", nPhotons );
     d0Cand.addUserFloat( "d0Star_3body_mass", massd0Star );
     d0Cand.addUserFloat( "d0Star_3body_pt", ptd0Star );
+    d0Cand.addUserFloat( "d0Star_3body_eta", etad0Star );
+    d0Cand.addUserFloat( "d0Star_3body_phi", phid0Star );
   } else {
     d0Cand.addUserFloat( "d0Star_photon_pt", -1. );
     d0Cand.addUserFloat( "d0Star_photon_eta", 0. );
@@ -1314,6 +1332,8 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
     d0Cand.addUserInt( "d0Star_Nphotons", -1. );
     d0Cand.addUserFloat( "d0Star_3body_mass", -1 );
     d0Cand.addUserFloat( "d0Star_3body_pt", 0. );
+    d0Cand.addUserFloat( "d0Star_3body_eta", -99 );
+    d0Cand.addUserFloat( "d0Star_3body_phi", -99 );
   }
 
   return d0Cand;

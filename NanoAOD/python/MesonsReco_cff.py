@@ -173,7 +173,10 @@ OmegasVariables = merge_psets(
         photon_phi    = Var("userFloat('photon_phi')",   float,   doc = " phi of the photon proxy of pi0"),
         photon_pdgId  = Var("userInt('photon_pdgId')",   int,     doc = " pdgId of the photon proxy of pi0"),
         Nphotons      = Var("userInt('Nphotons')",       int,     doc = " numbers of the photon proxy of pi0"),
-        threemass     = Var("userFloat('3body_mass')",   float,   doc = "mass of 3 pions"),
+        Nbody_mass     = Var("userFloat('3body_mass')",   float,   doc = "mass of 3 pions"),
+        Nbody_momentum = Var("userFloat('3body_pt')",     float,   doc = "momentum of 3 pions"),
+        Nbody_eta     = Var("userFloat('3body_eta')",     float,   doc = "eta of 3 pions"),
+        Nbody_phi     = Var("userFloat('3body_phi')",     float,   doc = "phi of 3 pions"),
     )
 )
 
@@ -185,7 +188,10 @@ OmegasVariablesMC = merge_psets(
         photon_phi    = Var("userFloat('photon_phi')",  float,   doc = " phi of the photon proxy of pi0"),
         photon_pdgId  = Var("userInt('photon_pdgId')",  int,     doc = " pdgId of the photon proxy of pi0"),
         Nphotons      = Var("userInt('Nphotons')",      int,     doc = " numbers of the photon proxy of pi0"),
-        threemass     = Var("userFloat('3body_mass')",  float,   doc = "mass of 3 pions"),
+        Nbody_mass     = Var("userFloat('3body_mass')",  float,   doc = "mass of 3 pions"),
+        Nbody_momentum = Var("userFloat('3body_pt')",    float,   doc = "momentum of 3 pions"),
+        Nbody_eta     = Var("userFloat('3body_eta')",     float,   doc = "eta of 3 pions"),
+        Nbody_phi     = Var("userFloat('3body_phi')",     float,   doc = "phi of 3 pions"),
     )
 )
 
@@ -283,10 +289,12 @@ D0Variables_ = cms.PSet(
     kaon_pt      = Var("userFloat('kaon_pt')",         float, doc = "Kaon pt"),
     kaon_eta     = Var("userFloat('kaon_eta')",        float, doc = "Kaon eta"),
     kaon_phi     = Var("userFloat('kaon_phi')",        float, doc = "Kaon phi"),
+#    kaon_charge  = Var("userFloat('kaon_charge')",     float, doc = "Kaon charge"),
 #    kaon_mu_index = Var("userInt('kaon_mu_index')",      int, doc = "Matched muon index for track 1"),
     pion_pt      = Var("userFloat('pion_pt')",         float, doc = "Pion pt"),
     pion_eta     = Var("userFloat('pion_eta')",        float, doc = "Pion eta"),
     pion_phi     = Var("userFloat('pion_phi')",        float, doc = "Pion phi"),
+#    pion_charge  = Var("userFloat('pion_charge')",     float, doc = "Pion charge"),
 #    pion_mu_index = Var("userInt('pion_mu_index')",      int, doc = "Matched muon index for track 2"),
     kaon_sip     = Var("userFloat('kaon_sip')",        float, doc = "Kaon 2D impact parameter significance wrt Beam Spot"),
     pion_sip     = Var("userFloat('pion_sip')",        float, doc = "Pion 2D impact parameter significance wrt Beam Spot"),
@@ -314,6 +322,8 @@ D0Variables = merge_psets(
         d0Star_Nphotons    = Var("userInt('d0Star_Nphotons')",       float, doc = "D0*ToD0Gammas: N photons"),
         d0Star_3body_mass  = Var("userFloat('d0Star_3body_mass')",     float, doc = "D0*ToD0Gammas: 3body_mass"),
         d0Star_3body_pt  = Var("userFloat('d0Star_3body_pt')",     float, doc = "D0*ToD0Gammas: 3body_pt"),
+        d0Star_3body_eta  = Var("userFloat('d0Star_3body_eta')",     float, doc = "D0*ToD0Gammas: 3body_eta"),
+        d0Star_3body_phi  = Var("userFloat('d0Star_3body_phi')",     float, doc = "D0*ToD0Gammas: 3body_phi"),
     ),
 )
 
