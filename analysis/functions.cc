@@ -141,6 +141,12 @@ bool checkMother(const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
     }
   }
 
+  if(pdgMotherToMatch==423 and pdgToMatch==421) {
+    for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+      if(genPart_pdgId[i]==423 and genPart_genPartIdxMother[i]==idxMother) { idxIntermediate = i; }
+    }
+  }
+
   int idxMatch = -1.;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
@@ -162,6 +168,7 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
 		   int pdgToMatch,
 		   int pdgMotherToMatch
 		   ) {
+
   int idxMother = -1;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
@@ -175,16 +182,23 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
     }
   }
 
+  if(pdgMotherToMatch==423 and pdgToMatch==421) {
+    for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+      if(genPart_pdgId[i]==423 and genPart_genPartIdxMother[i]==idxMother) { idxIntermediate = i; }
+    }
+  }
+
   int idxMatch = -1;
   float etaGen = 999.;
   float phiGen = 999.;
   // loop over all the genPartCand
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
-    if(pdgToMatch==310  and abs(genPart_pdgId[i])==pdgToMatch) {
+    // 310 is K0s (fromPhi) 421 is D0 (from D0Star)
+    if((pdgToMatch==310 or pdgToMatch==421) and abs(genPart_pdgId[i])==pdgToMatch) {
       if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxIntermediate ) {
 	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
-    } else if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113  or abs(genPart_pdgId[i])==443) {
+    } else if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113 or abs(genPart_pdgId[i])==223 or abs(genPart_pdgId[i])==443 or abs(genPart_pdgId[i])==313) {
       if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
 	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
@@ -193,7 +207,8 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
 
   Vec_i idx(2, -1); // initialize with -1 a vector of size 2
 
-  idx[1] = idxMatch; // index of the genPart (-1 if not found gen cand)
+  if (pdgToMatch==421) idx[1] = idxIntermediate; // save D0Star instead of D0(no real mass)
+  else idx[1] = idxMatch; // index of the genPart (-1 if not found gen cand)
 
   // loop over all the recoCand
   for (unsigned int i=0; i<reco_pt.size(); i++) {
@@ -254,6 +269,17 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
   }
 
   return idx;
+}
+
+int topology(float eta1, float eta2) {
+
+  int topology = 0;
+  if (abs(eta1)<1.4 and abs(eta2)<1.4) topology = 1; // this is BB
+  if (abs(eta1)<1.4 and abs(eta2)>1.4) topology = 2; // this is BE
+  if (abs(eta1)>1.4 and abs(eta2)<1.4) topology = 3; // this is EB
+  if (abs(eta1)>1.4 and abs(eta2)>1.4) topology = 4; // this is EE
+
+  return topology;
 }
 
 Vec_i mesonCand(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, const Vec_f& ch,

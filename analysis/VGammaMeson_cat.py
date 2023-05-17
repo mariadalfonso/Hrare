@@ -417,6 +417,7 @@ def dfHiggsCand(df):
                .Define("dPhiGammaMesonCand","abs(deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]]))")
                .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
                .Define("sigmaHCandMass_Rel2","(goodPhotons_energyErr[index_pair[1]]*goodPhotons_energyErr[index_pair[1]])/(goodPhotons_pt[index_pair[1]]*goodPhotons_pt[index_pair[1]]) + (goodMeson_massErr[index_pair[0]]*goodMeson_massErr[index_pair[0]])/(goodMeson_mass[index_pair[0]]*goodMeson_mass[index_pair[0]])")
+               .Define("classify","topology(goodPhotons_eta[index_pair[1]], goodMeson_eta[index_pair[0]])")
                )
 
     return dfFinal
@@ -667,7 +668,7 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
                .Define("dEtaGammaMesonCand__div_HCandMass","(HCandMass>0) ? dEtaGammaMesonCand/HCandMass: 0.f")
                # both GGH and VBF
                .Define("dEtaGammaMesonCand__div_sqrtHCandMass","(HCandMass>0) ? dEtaGammaMesonCand/sqrt(HCandMass): 0.f")
-               .Define("MVAdisc", ROOT.computeModel, ROOT.model.GetVariableNames())
+               .Define("MVAdisc", ROOT.computeModel, list(variables))
                )
 
     return dfWithMVA
@@ -699,6 +700,7 @@ def DefineContent(branchList,isData):
             "DeepMETResolutionTune_phi",
             "dPhiGammaMesonCand",
             "dEtaGammaMesonCand",
+            "classify",
             #
             "triggerAna",
             #

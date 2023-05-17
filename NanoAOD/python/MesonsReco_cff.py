@@ -33,8 +33,8 @@ V0prod = cms.EDProducer(
     maxKsMass  = cms.double(0.55),
     minKsPreselectMass = cms.double(0.4),
     maxKsPreselectMass = cms.double(0.6),
-    minPhiMass  = cms.double(1.00), # phi true mass 1020 (width = 0.004)
-    maxPhiMass  = cms.double(1.04),
+    minPhiMass  = cms.double(0.96), # phi true mass 1020 (width = 0.004)
+    maxPhiMass  = cms.double(1.08),
     minPhiPreselectMass = cms.double(0.9),
     maxPhiPreselectMass = cms.double(1.1),
     minRhosPreselectMass = cms.double(0.320),

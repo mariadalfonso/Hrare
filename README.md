@@ -6,7 +6,7 @@ cd CMSSW_10_6_27/src/
 
 cmsenv
 
-git clone git@github.com:mariadalfonso/Hrare.git --branch main
+git clone git@github.com:mariadalfonso/Hrare.git --branch D02
 
 # nanoV9 GT and campaigns for data and MC
 
