@@ -86,11 +86,11 @@ CLEAN_JetMes = "{}".format("Sum(goodMeson)>0 ? std::min(deltaR(Jet_eta[goodJets]
 
 CLEAN_JetPH = "{}".format("Sum(goodPhotons)>0 ? std::min(deltaR(Jet_eta[goodJets][0], Jet_phi[goodJets][0], goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]]),deltaR(Jet_eta[goodJets][1], Jet_phi[goodJets][1], goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]])):-999")
 
-with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/selection.json") as jsonFile:
+with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
-with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/trigger.json") as trgJsonFile:
+with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/trigger.json") as trgJsonFile:
     trgObject = json.load(trgJsonFile)
     trgJsonFile.close()
 
@@ -189,7 +189,9 @@ def selectionTAG(df):
 #        if year == 2018 or year == 2017: PUjetID = "(((Jet_puId & 1) and abs(Jet_eta)>2.75) or ((Jet_puId & 2) and abs(Jet_eta)<=2.75))"
 #        if year == 2016 or year == 12016: PUjetID = "(((Jet_puId & 4) and abs(Jet_eta)>2.75 or ((Jet_puId & 2) and abs(Jet_eta)<=2.75))"
 
-        dftag = (df.Define("goodJets","{}".format(GOODJETS)+" and {}".format(PUjetID))
+        dftag = (df.Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)')
+                 .Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
+                 .Define("goodJets","{}".format(GOODJETS)+" and {}".format(PUjetID))
                  .Define("nGoodJets","Sum(goodJets)*1.0f").Filter("Sum(goodJets)>1","two jets for VBF")
                  .Define("mJJ","Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])")
                  .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
@@ -254,6 +256,8 @@ def selectionTAG(df):
                  #                 .Define("trigger","{}".format(TRIGGER))
                  #                 .Filter("trigger>0", "pass triggers")
                  #.Filter("DeepMETResolutionTune_pt<75","DeepMETResolutionTune_pt<75") # not doing Zinv as nominal
+                 .Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)')
+                 .Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
                  .Define("goodJets","{}".format(GOODJETS))
                  .Define("nGoodJets","Sum(goodJets)*1.0f")
                  .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
@@ -546,6 +550,8 @@ def dfwithSYST(df,year):
                        .Define("eleID_weights", "NomUpDownVar(SFelectron_ID_Nom, SFelectron_ID_Up, SFelectron_ID_Dn, w_allSF)")
                        .Define("eleReco_weights", "NomUpDownVar(SFelectron_reco_Nom, SFelectron_reco_Up, SFelectron_reco_Dn, w_allSF)")
                        #
+                       .Define("PS_isr_weights", "NomUpDownVar(1., PSWeight[0], PSWeight[2], w_allSF)")
+                       .Define("PS_fsr_weights", "NomUpDownVar(1., PSWeight[1], PSWeight[3], w_allSF)")
                        .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w_allSF)")
                        .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
                        .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w_allSF)")
@@ -553,20 +559,24 @@ def dfwithSYST(df,year):
                        )
 
     elif isW: dfFinal = (dfFinal_withSF_2
-                              .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom*SFelectron_ID_Nom*SFelectron_reco_Nom*SFmuon_ID_Nom*SFmuon_ISO_Nom")
-                              .Define("muoID_weights", "NomUpDownVar(SFmuon_ID_Nom, SFmuon_ID_Up, SFmuon_ID_Dn, w_allSF)")
-                              .Define("muoISO_weights", "NomUpDownVar(SFmuon_ISO_Nom, SFmuon_ISO_Up, SFmuon_ISO_Dn, w_allSF)")
-                              .Define("eleID_weights", "NomUpDownVar(SFelectron_ID_Nom, SFelectron_ID_Up, SFelectron_ID_Dn, w_allSF)")
-                              .Define("eleReco_weights", "NomUpDownVar(SFelectron_reco_Nom, SFelectron_reco_Up, SFelectron_reco_Dn, w_allSF)")
-                            #
-                              .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w_allSF)")
-                              .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
-                              .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w_allSF)")
-                              .Define("mesonRECO_weights", "NomUpDownVar(SFmeson_reco_Nom, SFmeson_reco_Up, SFmeson_reco_Dn, w_allSF)")
-                              )
+                         .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom*SFelectron_ID_Nom*SFelectron_reco_Nom*SFmuon_ID_Nom*SFmuon_ISO_Nom")
+                         .Define("muoID_weights", "NomUpDownVar(SFmuon_ID_Nom, SFmuon_ID_Up, SFmuon_ID_Dn, w_allSF)")
+                         .Define("muoISO_weights", "NomUpDownVar(SFmuon_ISO_Nom, SFmuon_ISO_Up, SFmuon_ISO_Dn, w_allSF)")
+                         .Define("eleID_weights", "NomUpDownVar(SFelectron_ID_Nom, SFelectron_ID_Up, SFelectron_ID_Dn, w_allSF)")
+                         .Define("eleReco_weights", "NomUpDownVar(SFelectron_reco_Nom, SFelectron_reco_Up, SFelectron_reco_Dn, w_allSF)")
+                         #
+                         .Define("PS_isr_weights", "NomUpDownVar(1., PSWeight[0], PSWeight[2], w_allSF)")
+                         .Define("PS_fsr_weights", "NomUpDownVar(1., PSWeight[1], PSWeight[3], w_allSF)")
+                         .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w_allSF)")
+                         .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
+                         .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w_allSF)")
+                         .Define("mesonRECO_weights", "NomUpDownVar(SFmeson_reco_Nom, SFmeson_reco_Up, SFmeson_reco_Dn, w_allSF)")
+                         )
     else: dfFinal = (dfFinal_withSF
                      .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom")
                      .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w_allSF)")
+                     .Define("PS_isr_weights", "NomUpDownVar(1., PSWeight[0], PSWeight[2], w_allSF)")
+                     .Define("PS_fsr_weights", "NomUpDownVar(1., PSWeight[1], PSWeight[3], w_allSF)")
                      .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
                      .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w_allSF)")
                      .Define("mesonRECO_weights", "NomUpDownVar(SFmeson_reco_Nom, SFmeson_reco_Up, SFmeson_reco_Dn, w_allSF)")
@@ -899,7 +909,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isGF: catTag = "GFcat"
 
     if True:
-        outputFile = "MAR18/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+        outputFile = "MAY25/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         print(outputFile)
         snapshotOptions = ROOT.RDF.RSnapshotOptions()
         snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
@@ -939,11 +949,19 @@ def analysis(df,year,mc,sumw,isData,PDType):
 #            histos.append(h1d_noSF)
 
             ## to use the SYST that change the variable
-            hx = ROOT.RDF.Experimental.VariationsFor(h1d);
-            hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn");
+            hx = ROOT.RDF.Experimental.VariationsFor(h1d)
+            hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn")
             histos.append(hx["PhotonSYST:dn"])
-            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up");
+            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up")
             histos.append(hx["PhotonSYST:up"])
+
+            if isGF or isVBF or isVBFlow:
+                ## to use the SYST that change the variable
+                hx = ROOT.RDF.Experimental.VariationsFor(h1d)
+                hx["JetSYST:dn"].SetName(hists[h]["name"]+":JetSYST:dn")
+                histos.append(hx["JetSYST:dn"])
+                hx["JetSYST:up"].SetName(hists[h]["name"]+":JetSYST:up")
+                histos.append(hx["JetSYST:up"])
 
             ## those that change the weights only
             # 2D is for nom, up, down
@@ -971,14 +989,17 @@ def analysis(df,year,mc,sumw,isData,PDType):
                 histos.append(dfFINAL.Histo2D(model2d_muo2ISO, hists[h]["name"], "idx_nom_up_down", "muo2ISO_weights"))
 #                model2d_ele2ID = (hists[h]["name"]+":ele2ID", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
 #                histos.append(dfFINAL.Histo2D(model2d_ele2ID, hists[h]["name"], "idx_nom_up_down", "ele2ID_weights"))
-
+            model2d_PSwei = (hists[h]["name"]+":PSisr", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+            histos.append(dfFINAL.Histo2D(model2d_PSwei, hists[h]["name"], "idx_nom_up_down", "PS_isr_weights"))
+            model2d_PSwei = (hists[h]["name"]+":PSfsr", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+            histos.append(dfFINAL.Histo2D(model2d_PSwei, hists[h]["name"], "idx_nom_up_down", "PS_fsr_weights"))
 
 #        evtcounts = []
 #        evtcount = dfFINAL.Count()
 #        evtcounts.append(evtcount)
 #        ROOT.ROOT.RDF.RunGraphs(evtcounts)
 
-        outputFileHisto = "TEST/{0}/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
+        outputFileHisto = "SYSTstudies/{0}/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
         print(outputFileHisto)
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
 
