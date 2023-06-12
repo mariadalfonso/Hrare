@@ -5,12 +5,12 @@ from prepareFits import *
 gROOT.SetBatch()
 gSystem.Load("libHiggsAnalysisCombinedLimit.so")
 
-blinded=True
+blinded=False
 
 doMultiPdf=True
 doCR=False
-#histoEnum = 43
-histoEnum = 4
+histoEnum = 43
+#histoEnum = 4
 
 workspaceName = 'WS_MARCH20'
 if histoEnum == 43: workspaceName = 'WSmva_MARCH20'
@@ -22,7 +22,7 @@ xhighRange = 170.
 
 x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
 
-x.setRange("full", xlowRange  , xhighRange)
+x.setRange("full", xlowRange, xhighRange)
 x.setRange("left", xlowRange, 115)
 x.setRange("right", 135, xhighRange)
 
@@ -87,11 +87,7 @@ def  fitSig(tag , mesonCat, year):
         print(tag, ' ', sig)
 
         foo = -1 * histoEnum if doCR else histoEnum
-        data_full = getHisto(foo , 200*10, 0. , 200., True, tag, mesonCat, True, sig)
-
-        x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
-
-        x.setRange("full", xlowRange, xhighRange)
+        data_full = getHisto(foo, int(xhighRange - xlowRange)*10, xlowRange, xhighRange, True, tag, mesonCat, True, sig)
 
         data = RooDataHist('datahist'+tag+'_'+sig, 'data', RooArgList(x), data_full)
 
@@ -144,7 +140,10 @@ def  fitSig(tag , mesonCat, year):
 
         # -----------------------------------------------------------------------------
 
-        norm_SR = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
+        binLow = data_full.GetBin(1) #contains the first bin with low-edge
+        binUp = data_full.GetBin(int(xhighRange-xlowRange)*10)  # second to last bin contains the upper-edge
+
+        norm_SR = data_full.Integral(binLow, binUp)
         if doCR:
             Sig_norm = RooRealVar(model.GetName()+ "_normCR", model.GetName()+ "_normCR", norm_SR) # no range means contants
         else:
@@ -190,7 +189,7 @@ def  fitBkg(tag , mesonCat, year):
     if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
 
     foo = -1 * histoEnum if doCR else histoEnum
-    data_full = getHisto(foo, 250, 0. , 250., True, tag, mesonCat, False, -1 )
+    data_full = getHisto(foo, int(xhighRange - xlowRange), xlowRange, xhighRange, True, tag, mesonCat, False, -1 )
     data = RooDataHist('datahist'+mesonCat+tag, 'data', RooArgList(x), data_full)
 
     blindedData = data.reduce(RooFit.CutRange("left,right"))
@@ -332,7 +331,17 @@ def  fitBkg(tag , mesonCat, year):
 
     # -----------------------------------------------------------------------------
 
-    norm_range = data_full.Integral(data_full.FindBin(xlowRange), data_full.FindBin(xhighRange))
+
+    binLow = data_full.GetBin(1) #contains the first bin with low-edge
+    binUp = data_full.GetBin(int(xhighRange-xlowRange))  # second to last bin contains the upper-edge
+
+    norm_range = data_full.Integral( binLow, binUp )
+    print("--------------------------")
+    print("NORM BKG",norm_range)
+    print(' binX1 = ',data_full.GetXaxis().GetBinLowEdge(binLow)," - ",data_full.GetXaxis().GetBinUpEdge(binLow))
+    print(' binX2 = ',data_full.GetXaxis().GetBinLowEdge(binUp)," - ",data_full.GetXaxis().GetBinUpEdge(binUp))
+    print("--------------------------")
+
     if doCR:
         BKG_norm = RooRealVar(model.GetName()+ "_normCR", model.GetName()+ "_normCR", norm_range, 0.5*norm_range, 2*norm_range)
     else:

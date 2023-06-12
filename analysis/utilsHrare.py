@@ -5,8 +5,8 @@ import fnmatch
 import glob
 from XRootD import client
 
-if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
-    ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/functions.cc","k")
+if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
+    ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.cc","k")
 
 import correctionlib
 correctionlib.register_pyroot_binding()
@@ -15,6 +15,17 @@ def loadCorrectionSet(year):
     ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.Declare('#include "config/mysf.h"')
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
+    ROOT.gInterpreter.Declare('''
+        #ifndef MYFUN
+        #define MYFUN
+        Vec_f computeJECuncertainties(MyCorrections corrSFs, Vec_f jet_pt, Vec_f jet_eta){
+        Vec_f new_jet_delta(jet_pt.size(), 1.0);
+        int type = 0;
+        for (unsigned int idx = 0; idx < jet_pt.size(); ++idx) new_jet_delta[idx] = corrSFs.eval_jesUnc(jet_eta[idx], jet_pt[idx], type );
+        return new_jet_delta;
+        }
+        #endif
+        ''')
 
 def getSkimsFromJson(overall, type ):
 

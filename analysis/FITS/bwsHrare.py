@@ -280,6 +280,15 @@ for cat in category:
 
 
 if doSyst:
+    datacard.write("CMS_trackingEff  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.05) )
+                if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.03) )
+        datacard.write("\n")
+
     datacard.write("CMS_photonID \tlnN ")
     for cat in category:
         for proc in mcAll:
@@ -314,6 +323,55 @@ if doSyst:
 #            if (proc=='ggH'):
 #                addSystematics("pdf_Higgs_gg", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
 #            else: addSystematics("pdf_Higgs_qq", 'lnN' ,pdf_Higgs[proc], proc, category, mcAll, datacard)
+
+if opts.whichCat=='GFcat' and doSyst:
+    datacard.write("CMS_jes  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if(proc=='ggH'): datacard.write("\t0.99/1.01")
+                if(proc=='VBFH'): datacard.write("\t0.97/1.03")
+        datacard.write("\n")
+    datacard.write("CMS_isr \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if(proc=='ggH'): datacard.write("\t0.97/1.03")
+                if(proc=='VBFH'): datacard.write("\t0.995/1.005")
+        datacard.write("\n")
+    datacard.write("CMS_fsr \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if(proc=='ggH'): datacard.write("\t0.99/1.01")
+                if(proc=='VBFH'): datacard.write("\t0.985/1.015")
+        datacard.write("\n")
+
+if (opts.whichCat=='VBFcat' or opts.whichCat=='VBFcatlow') and doSyst:
+    datacard.write("CMS_jes  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if(proc=='VBFH'): datacard.write("\t0.97/1.03")
+        datacard.write("\n")
+    datacard.write("CMS_isr \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if(proc=='VBFH'): datacard.write("\t0.995/1.005")
+        datacard.write("\n")
+    datacard.write("CMS_fsr \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if(proc=='VBFH'): datacard.write("\t0.99/1.01")
+        datacard.write("\n")
 
 if opts.whichCat=='Vcat' and doSyst:
     datacard.write("CMS_eff_e  \tlnN ")

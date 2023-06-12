@@ -31,7 +31,11 @@ if __name__ == "__main__":
   isW=False
   isZ=False
 
-  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1017_GFcat_PhiCat_2018_wSF.root","READ")
+#  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1027_GFcat_RhoCat_2018_wSF.root","READ")
+#  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1020_GFcat_RhoCat_2018_wSF.root","READ")
+  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1020_VBFcat_RhoCat_2018_wSF.root","READ")
+
+#  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1017_GFcat_PhiCat_2018_wSF.root","READ")
 #  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1027_GFcat_RhoCat_2018_wSF.root","READ")
 
 #  inFile = ROOT.TFile.Open("../TEST/2018/histoname_mc1020_VBFcat_RhoCat_2018_wSF.root","READ")
@@ -59,6 +63,9 @@ if __name__ == "__main__":
 
   dumpSF(inFile, "HCandMass",True,-1)
 
+  dumpSF(inFile, "HCandMass:JetSYST:dn",True,-1)
+  dumpSF(inFile, "HCandMass:JetSYST:up",True,-1)
+  print('---------------------------------')
   dumpSF(inFile, "HCandMass:PhotonSYST:dn",True,-1)
   dumpSF(inFile, "HCandMass:PhotonSYST:up",True,-1)    
   print('---------------------------------')
@@ -77,9 +84,20 @@ if __name__ == "__main__":
   dumpSF(inFile, "HCandMass:phoID",False,1)
   dumpSF(inFile, "HCandMass:phoID",False,2)
   print('---------------------------------')
+  #
   hNom=dumpSF(inFile, "HCandMass:mesonRECO",False,0)
   hUp=dumpSF(inFile, "HCandMass:mesonRECO",False,1)
   hDn=dumpSF(inFile, "HCandMass:mesonRECO",False,2)
+  print('---------------------------------')
+  #
+  hNom=dumpSF(inFile, "HCandMass:PSisr",False,0)
+  hUp=dumpSF(inFile, "HCandMass:PSisr",False,1)
+  hDn=dumpSF(inFile, "HCandMass:PSisr",False,2)
+  print('---------------------------------')
+  #
+  hNom=dumpSF(inFile, "HCandMass:PSfsr",False,0)
+  hUp=dumpSF(inFile, "HCandMass:PSfsr",False,1)
+  hDn=dumpSF(inFile, "HCandMass:PSfsr",False,2)
   print('---------------------------------')
 
   canvas = ROOT.TCanvas("canvas", "canvas", 800, 800)

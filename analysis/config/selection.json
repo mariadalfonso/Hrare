@@ -17,37 +17,37 @@
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "file": "weights_mva_feb13/VBF_phi/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva/VBF_phi/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB13/VBF_phi_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_feb13/VBF_rho/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva/VBF_rho/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB13/VBF_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isPhiCat",
-	    "file": "weights_mva_feb13/ggH_phi/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva/ggH_phi/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB23/GF_phi_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_feb13/ggH_rho/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva/ggH_rho/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB23/GF_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_feb13/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva/VBFlow_rho/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB06/VBFlow_rho_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isPhiCat",
-	    "file": "weights_mva_feb13/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
+	    "file": "weights_mva/VBFlow_phi/TMVAClassification_BDTG.weights.xml",
 	    "org": "/work/submit/kyoon/RareHiggs/test/MVAoutput/2023/FEB06/VBFlow_phi_mvas/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
