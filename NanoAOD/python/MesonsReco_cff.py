@@ -171,12 +171,11 @@ OmegasVariables = merge_psets(
         photon_pt     = Var("userFloat('photon_pt')",    float,   doc = " pt of the photon proxy of pi0"),
         photon_eta    = Var("userFloat('photon_eta')",   float,   doc = " eta of the photon proxy of pi0"),
         photon_phi    = Var("userFloat('photon_phi')",   float,   doc = " phi of the photon proxy of pi0"),
-        photon_pdgId  = Var("userInt('photon_pdgId')",   int,     doc = " pdgId of the photon proxy of pi0"),
         Nphotons      = Var("userInt('Nphotons')",       int,     doc = " numbers of the photon proxy of pi0"),
-        Nbody_mass     = Var("userFloat('3body_mass')",   float,   doc = "mass of 3 pions"),
-        Nbody_momentum = Var("userFloat('3body_pt')",     float,   doc = "momentum of 3 pions"),
-        Nbody_eta     = Var("userFloat('3body_eta')",     float,   doc = "eta of 3 pions"),
-        Nbody_phi     = Var("userFloat('3body_phi')",     float,   doc = "phi of 3 pions"),
+        Nbody_mass    = Var("userFloat('Nbody_mass')",   float,   doc = "mass of 3 pions"),
+        Nbody_pt      = Var("userFloat('Nbody_pt')",     float,   doc = "momentum of 3 pions"),
+        Nbody_eta     = Var("userFloat('Nbody_eta')",     float,   doc = "eta of 3 pions"),
+        Nbody_phi     = Var("userFloat('Nbody_phi')",     float,   doc = "phi of 3 pions"),
     )
 )
 
@@ -186,12 +185,11 @@ OmegasVariablesMC = merge_psets(
         photon_pt     = Var("userFloat('photon_pt')",   float,   doc = " pt of the photon proxy of pi0"),
         photon_eta    = Var("userFloat('photon_eta')",  float,   doc = " eta of the photon proxy of pi0"),
         photon_phi    = Var("userFloat('photon_phi')",  float,   doc = " phi of the photon proxy of pi0"),
-        photon_pdgId  = Var("userInt('photon_pdgId')",  int,     doc = " pdgId of the photon proxy of pi0"),
         Nphotons      = Var("userInt('Nphotons')",      int,     doc = " numbers of the photon proxy of pi0"),
-        Nbody_mass     = Var("userFloat('3body_mass')",  float,   doc = "mass of 3 pions"),
-        Nbody_momentum = Var("userFloat('3body_pt')",    float,   doc = "momentum of 3 pions"),
-        Nbody_eta     = Var("userFloat('3body_eta')",     float,   doc = "eta of 3 pions"),
-        Nbody_phi     = Var("userFloat('3body_phi')",     float,   doc = "phi of 3 pions"),
+        Nbody_mass    = Var("userFloat('Nbody_mass')",  float,   doc = "mass of 3 pions"),
+        Nbody_pt      = Var("userFloat('Nbody_pt')",    float,   doc = "momentum of 3 pions"),
+        Nbody_eta     = Var("userFloat('Nbody_eta')",     float,   doc = "eta of 3 pions"),
+        Nbody_phi     = Var("userFloat('Nbody_phi')",     float,   doc = "phi of 3 pions"),
     )
 )
 
@@ -320,10 +318,10 @@ D0Variables = merge_psets(
         d0Star_photon_eta  = Var("userFloat('d0Star_photon_eta')",     float, doc = "D0*ToD0Gammas: photon eta"),
         d0Star_photon_phi  = Var("userFloat('d0Star_photon_phi')",     float, doc = "D0*ToD0Gammas: photon phi"),
         d0Star_Nphotons    = Var("userInt('d0Star_Nphotons')",       float, doc = "D0*ToD0Gammas: N photons"),
-        d0Star_3body_mass  = Var("userFloat('d0Star_3body_mass')",     float, doc = "D0*ToD0Gammas: 3body_mass"),
-        d0Star_3body_pt  = Var("userFloat('d0Star_3body_pt')",     float, doc = "D0*ToD0Gammas: 3body_pt"),
-        d0Star_3body_eta  = Var("userFloat('d0Star_3body_eta')",     float, doc = "D0*ToD0Gammas: 3body_eta"),
-        d0Star_3body_phi  = Var("userFloat('d0Star_3body_phi')",     float, doc = "D0*ToD0Gammas: 3body_phi"),
+        d0Star_Nbody_mass  = Var("userFloat('d0Star_Nbody_mass')",     float, doc = "D0*ToD0Gammas: Nbody_mass"),
+        d0Star_Nbody_pt  = Var("userFloat('d0Star_Nbody_pt')",     float, doc = "D0*ToD0Gammas: Nbody_momentum"),
+        d0Star_Nbody_eta  = Var("userFloat('d0Star_Nbody_eta')",     float, doc = "D0*ToD0Gammas: Nbody_eta"),
+        d0Star_Nbody_phi  = Var("userFloat('d0Star_Nbody_phi')",     float, doc = "D0*ToD0Gammas: Nbody_phi"),
     ),
 )
 
