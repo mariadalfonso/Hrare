@@ -55,12 +55,22 @@ using stdVec_f = std::vector<float>;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
+
+Vec_f getMaximum(Vec_f v1, Vec_f v2){
+	Vec_f output = {};
+	if (!v1.empty() && !v2.empty() && v1.size() == v2.size()){
+		for (unsigned int i = 0; i < v1.size(); i++){
+			output.push_back(max(v1[i], v2[i]));
+		}
+	}
+	return output;
+}
+
 Vec_i indices(const int& size, const int& start = 0) {
     Vec_i res(size, 0);
     std::iota(std::begin(res), std::end(res), start);
     return res;
 }
-
 
 Vec_f NomUpDownVar(const float nom, const float up, const float down, float weight) {
 
@@ -195,18 +205,20 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
   for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
     // 310 is K0s (fromPhi) 421 is D0 (from D0Star)
     if((pdgToMatch==310 or pdgToMatch==421) and abs(genPart_pdgId[i])==pdgToMatch) {
-      if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxIntermediate ) {
+      if(abs(genPart_pdgId[i]) == pdgToMatch && genPart_genPartIdxMother[i] == idxIntermediate ) {
 	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
     } else if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113 or abs(genPart_pdgId[i])==223 or abs(genPart_pdgId[i])==443 or abs(genPart_pdgId[i])==313) {
-      if(genPart_pdgId[i] == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
+      if(abs(genPart_pdgId[i]) == pdgToMatch && genPart_genPartIdxMother[i] == idxMother ) {
 	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
       }
     }
   }
 
   Vec_i idx(2, -1); // initialize with -1 a vector of size 2
-
+  // idx[0] for the RECO index 
+  // idx[1] for the GEN index
+  
   if (pdgToMatch==421) idx[1] = idxIntermediate; // save D0Star instead of D0(no real mass)
   else idx[1] = idxMatch; // index of the genPart (-1 if not found gen cand)
 
@@ -217,6 +229,39 @@ Vec_i genMatchRECO(const Vec_f& reco_pt, const Vec_f& reco_eta, const Vec_f& rec
     if(idxMatch<0) continue; // no good Match
     if(deltaR(etaGen,phiGen,p_reco.eta(),p_reco.phi())>0.01) continue;
     idx[0] = i;
+  }
+
+  return idx;
+
+}
+
+Vec_i genMatch(const float& reco_pt, const float& reco_eta, const float& reco_phi, const float& reco_mass,
+	       const Vec_f& genPart_eta, const Vec_f& genPart_phi,
+	       const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
+	       int pdgToMatch
+	       //		   int pdgMotherToMatch
+	       ) {
+
+  // examine the recoCand
+  PtEtaPhiMVector p_reco(reco_pt, reco_eta, reco_phi, reco_mass);
+  Vec_i idx(1, -1); // initialize with -1 a vector of size 1
+  // idx[1] for the GEN index
+  
+  int idxMatch = -1;
+  float etaGen = 999.;
+  float phiGen = 999.;
+  // loop over all the genPartCand
+  for (unsigned int i=0; i<genPart_pdgId.size(); i++) {
+    // 310 is K0s (fromPhi) 421 is D0 (from D0Star)
+    //    if(genPart_pdgId[i]==22 or abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113 or abs(genPart_pdgId[i])==223 or abs(genPart_pdgId[i])==443 or abs(genPart_pdgId[i])==313) {
+    if(abs(genPart_pdgId[i])==333 or abs(genPart_pdgId[i])==113 or abs(genPart_pdgId[i])==223 or abs(genPart_pdgId[i])==443 or abs(genPart_pdgId[i])==313) {      
+      if(abs(genPart_pdgId[i]) == pdgToMatch ) {
+	idxMatch=i;  etaGen=genPart_eta[i]; phiGen=genPart_phi[i];
+	if(deltaR(etaGen,phiGen,p_reco.eta(),p_reco.phi())<0.05) {    
+	  idx[0] = idxMatch; // index of the genPart (-1 if not found gen cand)
+	}
+      }
+    }
   }
 
   return idx;

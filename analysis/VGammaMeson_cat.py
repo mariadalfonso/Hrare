@@ -8,7 +8,7 @@ from utilsHrare import getMClist, getDATAlist, getSkims
 from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson
 from utilsHrare import loadCorrectionSet
 
-doSyst = True
+doSyst = False
 doMVA = True
 if sys.argv[1]=='isZtag': doMVA = False
 if sys.argv[1]=='isWtag': doMVA = False
@@ -115,7 +115,7 @@ mesons = jsonObject['mesons']
 #$$$$
 #$$$$
 
-def selectionTAG(df):
+def selectionTAG(df, doSyst, isData):
 
     if isZ:
         dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25") # iso same as the loose
@@ -158,7 +158,7 @@ def selectionTAG(df):
                  .Define("Z_veto", "Sum(goodElectrons)==1 ? Minv2(Electron_pt[goodElectrons][0], Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], Electron_mass[goodElectrons][0], photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first: -1")
                  .Filter("abs(Z_veto-91) > 10","kill the Z recontructed as gamma + electron")
                  .Filter("DeepMETResolutionTune_pt>15","MET>15")
-                 .Filter("V_mass>15","MT>15")
+#                 .Filter("V_mass>15","MT>15")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
 #                 .Filter("trigger>0 and Mu1_hasTriggerMatch and Muon_pt[goodMuons][0]>26","pass trigger")
@@ -189,9 +189,11 @@ def selectionTAG(df):
 #        if year == 2018 or year == 2017: PUjetID = "(((Jet_puId & 1) and abs(Jet_eta)>2.75) or ((Jet_puId & 2) and abs(Jet_eta)<=2.75))"
 #        if year == 2016 or year == 12016: PUjetID = "(((Jet_puId & 4) and abs(Jet_eta)>2.75 or ((Jet_puId & 2) and abs(Jet_eta)<=2.75))"
 
-        dftag = (df.Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)')
-                 .Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
-                 .Define("goodJets","{}".format(GOODJETS)+" and {}".format(PUjetID))
+
+        if (doSyst and isData == "false"):
+            df = df.Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)').Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
+
+        dftag = (df.Define("goodJets","{}".format(GOODJETS)+" and {}".format(PUjetID))
                  .Define("nGoodJets","Sum(goodJets)*1.0f").Filter("Sum(goodJets)>1","two jets for VBF")
                  .Define("mJJ","Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets])")
                  .Define("dEtaJJ","abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])")
@@ -249,6 +251,10 @@ def selectionTAG(df):
         return dftag
 
     if isGF:
+
+        if (doSyst and isData == "false"):
+            df = df.Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)').Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
+
         dftag = (df.Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
                  .Define("vetoMu","{}".format(LOOSEmuons))
@@ -256,8 +262,6 @@ def selectionTAG(df):
                  #                 .Define("trigger","{}".format(TRIGGER))
                  #                 .Filter("trigger>0", "pass triggers")
                  #.Filter("DeepMETResolutionTune_pt<75","DeepMETResolutionTune_pt<75") # not doing Zinv as nominal
-                 .Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)')
-                 .Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
                  .Define("goodJets","{}".format(GOODJETS))
                  .Define("nGoodJets","Sum(goodJets)*1.0f")
                  .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
@@ -301,7 +305,7 @@ def dfGammaMeson(df,PDType):
              )
     return dfOBJ
 
-def dfHiggsCand(df):
+def dfHiggsCand(df,isData):
 
     GOODPHI = ""
     if doMesonMassSB:
@@ -345,10 +349,10 @@ def dfHiggsCand(df):
                   .Define("goodMeson_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "phi_kin_vtx_prob[goodMeson]")
                   .Define("goodMeson_sipPV", "phi_kin_sipPV[goodMeson]")
-#                  .Define("goodMeson_bestVtx_idx", "phi_bestVtx_idx[goodMeson]")
-#                  .Define("goodMeson_bestVtx_X", "phi_bestVtx_X[goodMeson]")
-#                  .Define("goodMeson_bestVtx_Y", "phi_bestVtx_Y[goodMeson]")
-#                  .Define("goodMeson_bestVtx_Z", "phi_bestVtx_Z[goodMeson]")
+                  .Define("goodMeson_bestVtx_idx", "phi_bestVtx_idx[goodMeson]")
+                  .Define("goodMeson_bestVtx_X", "phi_bestVtx_X[goodMeson]")
+                  .Define("goodMeson_bestVtx_Y", "phi_bestVtx_Y[goodMeson]")
+                  .Define("goodMeson_bestVtx_Z", "phi_bestVtx_Z[goodMeson]")
                   .Define("goodMeson_massErr", "phi_kin_massErr[goodMeson]")
                   .Define("goodMeson_trk1_pt", "phi_trk1_pt[goodMeson]")
                   .Define("goodMeson_trk2_pt", "phi_trk2_pt[goodMeson]")
@@ -371,10 +375,10 @@ def dfHiggsCand(df):
                   .Define("goodMeson_vtx_chi2dof", "rho_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "rho_kin_vtx_prob[goodMeson]")
                   .Define("goodMeson_sipPV", "rho_kin_sipPV[goodMeson]")
-#                  .Define("goodMeson_bestVtx_idx", "rho_bestVtx_idx[goodMeson]")
-#                  .Define("goodMeson_bestVtx_X", "rho_bestVtx_X[goodMeson]")
-#                  .Define("goodMeson_bestVtx_Y", "rho_bestVtx_Y[goodMeson]")
-#                  .Define("goodMeson_bestVtx_Z", "rho_bestVtx_Z[goodMeson]")
+                  .Define("goodMeson_bestVtx_idx", "rho_bestVtx_idx[goodMeson]")
+                  .Define("goodMeson_bestVtx_X", "rho_bestVtx_X[goodMeson]")
+                  .Define("goodMeson_bestVtx_Y", "rho_bestVtx_Y[goodMeson]")
+                  .Define("goodMeson_bestVtx_Z", "rho_bestVtx_Z[goodMeson]")
                   .Define("goodMeson_massErr", "rho_kin_massErr[goodMeson]")
                   .Define("goodMeson_trk1_pt", "rho_trk1_pt[goodMeson]")
                   .Define("goodMeson_trk2_pt", "rho_trk2_pt[goodMeson]")
@@ -397,10 +401,10 @@ def dfHiggsCand(df):
                   .Define("goodMeson_vtx_chi2dof", "omega_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "omega_kin_vtx_prob[goodMeson]")
                   .Define("goodMeson_sipPV", "omega_kin_sipPV[goodMeson]")
-#                  .Define("goodMeson_bestVtx_idx", "omega_bestVtx_idx[goodMeson]")
-#                  .Define("goodMeson_bestVtx_X", "omega_bestVtx_X[goodMeson]")
-#                  .Define("goodMeson_bestVtx_Y", "omega_bestVtx_Y[goodMeson]")
-#                  .Define("goodMeson_bestVtx_Z", "omega_bestVtx_Z[goodMeson]")
+                  .Define("goodMeson_bestVtx_idx", "omega_bestVtx_idx[goodMeson]")
+                  .Define("goodMeson_bestVtx_X", "omega_bestVtx_X[goodMeson]")
+                  .Define("goodMeson_bestVtx_Y", "omega_bestVtx_Y[goodMeson]")
+                  .Define("goodMeson_bestVtx_Z", "omega_bestVtx_Z[goodMeson]")
                   .Define("goodMeson_massErr", "omega_kin_massErr[goodMeson]")
                   .Define("goodMeson_trk1_pt", "omega_trk1_pt[goodMeson]")
                   .Define("goodMeson_trk2_pt", "omega_trk2_pt[goodMeson]")
@@ -410,6 +414,11 @@ def dfHiggsCand(df):
                   .Define("wrongMeson","({}".format(GOODRHO)+")")
                   .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? rho_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
                   )
+
+    genMatchPDFNum='-1'
+    if isPhiCat=="true": genMatchPDFNum='333'
+    if isRhoCat=="true": genMatchPDFNum='113'
+    if isOmegaCat=="true": genMatchPDFNum='223'
 
     dfFinal = (dfbase.Define("index_pair","HiggsCandFromRECO(goodMeson_pt, goodMeson_eta, goodMeson_phi, goodMeson_mass, goodMeson_trk1_pt, goodMeson_trk2_pt, wrongMeson_pt, goodPhotons_pt, goodPhotons_eta, goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
                .Define("jet_mask2", "cleaningJetFromOBJ(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
@@ -423,6 +432,10 @@ def dfHiggsCand(df):
                .Define("sigmaHCandMass_Rel2","(goodPhotons_energyErr[index_pair[1]]*goodPhotons_energyErr[index_pair[1]])/(goodPhotons_pt[index_pair[1]]*goodPhotons_pt[index_pair[1]]) + (goodMeson_massErr[index_pair[0]]*goodMeson_massErr[index_pair[0]])/(goodMeson_mass[index_pair[0]]*goodMeson_mass[index_pair[0]])")
                .Define("classify","topology(goodPhotons_eta[index_pair[1]], goodMeson_eta[index_pair[0]])")
                )
+
+    if (isData == "false"):
+#        dfFinal = dfFinal.Define("indexMatch","genMatch(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],GenPart_eta,GenPart_phi,GenPart_pdgId,GenPart_genPartIdxMother,{0})".format(genMatchPDFNum))
+        dfFinal = dfFinal.Define("indexMatch","-1.")
 
     return dfFinal
 
@@ -726,6 +739,12 @@ def DefineContent(branchList,isData):
     ]:
         branchList.push_back(branchName)
 
+    if (isData == "false"):
+        for branchName in [
+            "indexMatch",
+        ]:
+            branchList.push_back(branchName)
+
     if (doSyst and isData == "false"):
         for branchName in [
                 "L1PreFiringWeight_Nom",
@@ -765,6 +784,10 @@ def DefineContent(branchList,isData):
             "goodMeson_vtx_chi2dof",
             "goodMeson_vtx_prob",
             "goodMeson_sipPV",
+            "goodMeson_bestVtx_Z",
+            "goodMeson_bestVtx_X",
+            "goodMeson_bestVtx_Y",
+            "goodMeson_bestVtx_idx",
     ]:
         branchList.push_back(branchName)
 
@@ -847,13 +870,13 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if doTrigger:
         dfCom = dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv)
         dfOBJ = dfGammaMeson(dfCom,PDType)
-        dfbase = dfHiggsCand(dfOBJ)
-        dfFINAL = selectionTAG(dfbase)
+        dfbase = dfHiggsCand(dfOBJ,isData)
+        dfFINAL = selectionTAG(dfbase,doSyst,isData)
     else:
         dfCom = dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv)
         dfOBJ = dfGammaMeson(dfCom,PDType)
-        dfbase = dfHiggsCand(dfOBJ)
-        dfcandtag = selectionTAG(dfbase)
+        dfbase = dfHiggsCand(dfOBJ,isData)
+        dfcandtag = selectionTAG(dfbase,doSyst,isData)
         if (doSyst and isData == "false"):
             dfpreFINAL = dfwithSYST(dfcandtag,year)
         else:
@@ -909,7 +932,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isGF: catTag = "GFcat"
 
     if True:
-        outputFile = "MAY25/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+        outputFile = "JUN20/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         print(outputFile)
         snapshotOptions = ROOT.RDF.RSnapshotOptions()
         snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4

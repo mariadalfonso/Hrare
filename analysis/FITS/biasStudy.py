@@ -37,8 +37,8 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     cb_sigma = RooRealVar('cb_sigma'+mesonCat+tag, 'cb_sigma', 0., 3.)
     cb_alphaL = RooRealVar('cb_alphaL'+mesonCat+tag, 'cb_alphaL', 0., 5.)
     cb_alphaR = RooRealVar('cb_alphaR'+mesonCat+tag, 'cb_alphaR', 0., 5.)
-    cb_nL = RooRealVar('cb_nL'+mesonCat+tag, 'cb_nL', 0., 30.)
-    cb_nR = RooRealVar('cb_nR'+mesonCat+tag, 'cb_nR', 0., 15.)
+    cb_nL = RooRealVar('cb_nL'+mesonCat+tag, 'cb_nL', 0., 15.)
+    cb_nR = RooRealVar('cb_nR'+mesonCat+tag, 'cb_nR', 0., 30.)
 
     pdf_crystalball = RooDoubleCBFast('crystal_ball'+mesonCat+tag+'_'+"ggH", 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
 
@@ -46,8 +46,8 @@ def  checkBias(tag , mesonCat, year, myBRvalue):
     cb_sigma_2 = RooRealVar('cb_sigma_2'+mesonCat+tag, 'cb_sigma_2', 0., 3.)
     cb_alphaL_2 = RooRealVar('cb_alphaL_2'+mesonCat+tag, 'cb_alphaL_2', 0., 5.)
     cb_alphaR_2 = RooRealVar('cb_alphaR_2'+mesonCat+tag, 'cb_alphaR_2', 0., 5.)
-    cb_nL_2 = RooRealVar('cb_nL_2'+mesonCat+tag, 'cb_nL_2', 0., 30.)
-    cb_nR_2 = RooRealVar('cb_nR_2'+mesonCat+tag, 'cb_nR_2', 0., 15.)
+    cb_nL_2 = RooRealVar('cb_nL_2'+mesonCat+tag, 'cb_nL_2', 0., 15.)
+    cb_nR_2 = RooRealVar('cb_nR_2'+mesonCat+tag, 'cb_nR_2', 0., 30.)
     pdf_crystalball2 = RooDoubleCBFast('crystal_ball2'+mesonCat+tag+'_'+"ggH", 'crystal_ball2', x, cb_mu_2, cb_sigma_2, cb_alphaL_2, cb_nL_2, cb_alphaR_2, cb_nR_2)
 
     # -----------------------------------------------------------------------------

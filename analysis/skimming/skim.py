@@ -7,24 +7,26 @@ import math
 ROOT.ROOT.EnableImplicitMT()
 ROOT.ROOT.EnableThreadSafety()
 
-sys.path.insert(0, '/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis')
+
+myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis'
+sys.path.insert(0, myDir)
 
 #from utilsHrare import findManyXRDFS, findManyClient, readListFromFile
 from utilsHrare import readListFromFile
 from utilsHrare import pickTRG, getSkimsFromJson
 
-with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/selection.json") as jsonFile:
+with open(myDir+"/config/selection.json") as jsonFile:
 #with open("selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
-with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/trigger.json") as trgJsonFile:
+with open(myDir+"/config/trigger.json") as trgJsonFile:
     trgObject = json.load(trgJsonFile)
     trgJsonFile.close()
 
 overall = trgObject['triggers']
 
-with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27/src/Hrare/analysis/config/skimDB.json") as jsonFile:
+with open(myDir+"/config/skimDB.json") as jsonFile:
 #with open("skimDB.json") as jsonFile:
     skimObject = json.load(jsonFile)
     jsonFile.close()
@@ -40,9 +42,10 @@ def groupFiles(fIns, group):
         a = i*filesPerGroup
         b = (i+1)*filesPerGroup
         subFiles = fIns[a:b]
-#        print(subFiles)
+        #print(subFiles)
         ret.append(subFiles)
-    
+        #ret.append([r.rstrip() for r in subFiles])
+
     return ret
 
 if __name__ == "__main__":
@@ -86,8 +89,8 @@ if __name__ == "__main__":
         if checkFile!=whichFile:
             print("FILE MISMATCH")
 
-        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D01/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
-        fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D01/"
+        fOutDir = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D02/"+skimType+"/"+str(year)+"/"+PDType+"+Run"+era
+        fInDir = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D02/"
 #        fInDir = "xrdfs root://xrootd.cmsaf.mit.edu ls /store/user/paus/nanohr/D01"
         datasetExp = ("/"+str(PDType)+"+Run"+str(year)+str(era)+"*")
         files = readListFromFile(whichFile)
@@ -107,11 +110,12 @@ if __name__ == "__main__":
             passJob = whichJob == -1 or whichJob == i
             if(passJob == False): continue
 
-            fOutName = "%s/output_%s_%d_%d.root" % (fOutDir, PDType, year, i)
+            fOutName = "%s/output_%s%s_%d_%d.root" % (fOutDir, PDType, era, year, i)
             print("Create %s" % fOutName)
             print("input file %s"  % group)
 
-            regexToDrop = "^(?!.*omega).*$"
-            rdf = ROOT.ROOT.RDataFrame("Events", group).Define("trigger","{}".format(TRIGGER)).Filter("{}".format(PRESELECTION)).Snapshot("Events", fOutName, regexToDrop)
+            #regexToDrop = "^(?!.*omega).*$"
+            #rdf = ROOT.ROOT.RDataFrame("Events", group).Define("trigger","{}".format(TRIGGER)).Filter("{}".format(PRESELECTION)).Snapshot("Events", fOutName, regexToDrop)
+            rdf = ROOT.ROOT.RDataFrame("Events", group).Define("trigger","{}".format(TRIGGER)).Filter("{}".format(PRESELECTION)).Snapshot("Events", fOutName)
 
             del rdf

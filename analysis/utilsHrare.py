@@ -102,7 +102,7 @@ def readListFromFile(filename):
     rootFiles = ROOT.vector('string')()
     with open(filename, "r") as f:
         for item in f:
-            rootFiles.push_back(item)
+            rootFiles.push_back(item.rstrip())
 
     return rootFiles
 
@@ -203,6 +203,8 @@ def getSkims(argument,year,category):
     dirScratch = "/scratch/submit/cms/mariadlf/Hrare/SKIMS/D01"
     dirScratch2 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D01"
     dirScratchSS = "/scratch/submit/cms/mariadlf/Hrare/SStau"
+
+    dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D02"
 
     switch = {
         -1: (("SingleMuon+Run"+"A"),"SingleMuon"),
@@ -329,6 +331,9 @@ def getSkims(argument,year,category):
     if (category=="VH" or category=="VBF"): finalDir = dirScratch2+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
     if (category=="VBF" and (argument == -62 or argument == -63 or argument == -64) ): finalDir = dirScratch+"/"+"Zinv"+"/"+str(year)+"/"+tmp_pair[0]
     if (argument == -65 or argument == -66): finalDir = dirScratchSS+"/"+tmp_pair[0]
+    #temporary
+    if ((argument == -62 or argument == -63 or argument == -64) ): finalDir = dirScratch02+"/"+"Zinv"+"/"+str(year)+"/"+tmp_pair[0]
+    if (category=="VBF"): finalDir = dirScratch02+"/"+category+"/"+str(year)+"/"+tmp_pair[0]
     print(finalDir)
     pair = (findDIR(finalDir),tmp_pair[1])
     return pair
@@ -350,6 +355,11 @@ def SwitchSample(argument,year):
     dirLocalTEST = "/work/submit/mariadlf/Hrare/TEST/2018/"
     dirLocalTEST2 = "/work/submit/mariadlf/Hrare/TESTtrackFIX/2018/"
 
+    ####----------
+    dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D02/"
+    dirGluster02 = "/data/submit/cms/store/user/mariadlf/nano/D02/"
+    dirT202 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D02/"
+
     campaign = ""
     if(year == 2018): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
     if(year == 2017): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
@@ -364,29 +374,32 @@ def SwitchSample(argument,year):
 
     switch = {
         ## SIGNAL
-        1010: (dirGluster+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7*0.49), #NNLO
-        1011: (dirGluster+"WplusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1012: (dirGluster+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1013: (dirGluster+"ZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1014: (dirGluster+"ggZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1010: (dirGluster02+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7*0.49), #NNLO
+        1011: (dirGluster02+"WplusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1012: (dirGluster02+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1013: (dirGluster02+"ZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1014: (dirGluster02+"ggZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1015: (dirGluster+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1016: (dirGluster+"ggZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1017: (dirGluster+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1018: (dirGluster+"TTHtoPhiG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2*0.49),
+        1017: (dirGluster02+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580*0.49), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1018: (dirGluster02+"TTHtoPhiG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2*0.49),
         #
-        1020: (dirGluster+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1021: (dirGluster+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1022: (dirGluster+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1023: (dirGluster+"ZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1024: (dirGluster+"ggZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1020: (dirGluster02+"VBF_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7), # xsec = 4pb * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1021: (dirGluster02+"WplusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26), #xsec = 3*9.426E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1022: (dirGluster02+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83), #xsec = 3*5.983E-02 (Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1023: (dirGluster02+"ZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1024: (dirGluster02+"ggZH_ZToLL_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1025: (dirGluster+"ZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
         1026: (dirGluster+"ggZH_ZToNuNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,24.57), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1027: (dirGluster+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
-        1028: (dirGluster+"TTHtoRhoG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2),
+        1027: (dirGluster02+"GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(Hrhogamma)=1 BR(rho->pipi)=1
+        1028: (dirGluster02+"TTHtoRhoG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2),
         #
-        1037: (dirLocalNEW2+"ggh-homegagamma-powheg"+"/NANOAOD_02",46870*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
-        1038: (dirLocalNEW2+"ggh-hK0Stargamma-powheg_2"+"/NANOAOD_02",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HkstaraGamma)=1
-        1039: (dirLocalNEW2+"ggh-hD0Stargamma-powheg"+"/NANOAOD_02",46870), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HkstaraGamma)=1
+        1037: (dirLocalNEW2+"ggh-hK0Stargamma-powheg_2"+"/NANOAOD_02",48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HkstaraGamma)=1
+        #
+        1038: (dirLocalNEW2+"ggh-homegagamma-powheg"+"/NANOAOD_03_test3",48580*0.892), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HomegaGamma)=1 BR(omega->pipipi0)=89.2
+        1039: (dirLocalNEW2+"ggh-hphipipipi0gamma-powheg"+"/NANOAOD_03_test4",48580*0.153),
+        1040: (dirLocalNEW2+"ggh-hD0StarKmRhoPgamma-powheg"+"/NANOAOD_03_test3",48580*0.11),
+        1041: (dirLocalNEW2+"ggh-hD0Stargamma-powheg"+"/NANOAOD_03_test3",48580*0.0389),
         #
         1019: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #
@@ -412,19 +425,19 @@ def SwitchSample(argument,year):
         4: (dirT2+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8+"+campaign,88.2*1000), #NNLO
         5: (dirT2+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8+"+campaign,365.3452*1000), #NNLO
         ##
-        9: (dirT2+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
+        9: (dirGluster02+"VBFGamma_5f_TuneCP5_DipoleRecoil_13TeV-madgraph-pythia8+"+campaign,21.09*1000), #LO
         ##
-        10: (dirGluster+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
-        11: (dirGluster+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX,8644.0*1000*1.26), #LO *1.26
-        12: (dirGluster+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,2183.0*1000*1.26), #LO *1.26
-        13: (dirGluster+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
-        14: (dirGluster+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
+        10: (dirGluster02+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,18540.0*1000*1.26), #LO *1.26
+        11: (dirGluster02+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX,8644.0*1000*1.26), #LO *1.26
+        12: (dirGluster02+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,2183.0*1000*1.26), #LO *1.26
+        13: (dirGluster02+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,260.2*1000*1.26), #LO *1.26
+        14: (dirGluster02+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,86.58*1000*1.26), #LO *1.26
         #
-        15: (dirGluster+"GJets_DR-0p4_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,15750.0*1000*1.26), #LO *1.26
-        16: (dirGluster+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
-        17: (dirGluster+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
-        18: (dirGluster+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
-        19: (dirGluster+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
+        15: (dirGluster02+"GJets_DR-0p4_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,15750.0*1000*1.26), #LO *1.26
+        16: (dirGluster02+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,5034*1000*1.26), #LO *1.26
+        17: (dirGluster02+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,1129*1000*1.26), #LO *1.26
+        18: (dirGluster02+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,126.2*1000*1.26), #LO *1.26
+        19: (dirGluster02+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaign,41.31*1000*1.26), #LO *1.26
         ####
         20: (dirT2+"QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,6447000.0*1000*1.26), #LO *1.26
         21: (dirT2+"QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8+"+campaign,1988000.0*1000*1.26), #LO *1.26
