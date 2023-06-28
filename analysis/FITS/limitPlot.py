@@ -13,11 +13,12 @@ from math import sin
 from array import array
 
 
-doChekSync=False
-mesonCat='Phi'
-#mesonCat='Rho'
+doChekSync=True
+#mesonCat='Phi'
+mesonCat='Rho'
 
-dir_ = '/work/submit/mariadlf/cards_march20/'
+dirTO_ = '/work/submit/mariadlf/cards_JUNE22/'
+dirMIT_ = '/work/submit/mariadlf/cards_JUNE26/'
 
 if doChekSync:
      ax = range(1,5) #
@@ -29,18 +30,18 @@ if doChekSync:
 #                , 'ggH(MIT) w/ MVA Phi'
                ]
 
-     if mesonCat=='Rho': limitfiles = [ dir_+"230319_RhoGammaLimit/higgsCombineRhoGFpreselection.AsymptoticLimits.mH125.root"
-                                        ,dir_+"DATACARDS_MARCH20/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
-                                        ,dir_+"230319_RhoGammaLimit/higgsCombineRhoGFcat_Comb.AsymptoticLimits.mH125.root"
-                                        ,dir_+"DATACARDSmva_MARCH20/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
+     if mesonCat=='Rho': limitfiles = [ dirTO_+"230622_Rho/higgsCombineRhoGFpreselection.AsymptoticLimits.mH125.root"
+                                        ,dirMIT_+"workspaces_JUNE22_40_40/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
+                                        ,dirTO_+"230622_Rho/higgsCombineRhoGFcat_Comb.AsymptoticLimits.mH125.root"
+                                        ,dirMIT_+"workspaces_MVA_JUNE22_40_40/higgsCombineRhoGFcat.AsymptoticLimits.mH125.root"
                                         ##                    ,"limitsGiulio/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
                                         ##                    ,"limitsMVASynch/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
                                        ]
 
-     if mesonCat=='Phi': limitfiles = [ dir_+"230319_PhiGammaLimit/higgsCombinePhiGFpreselection.AsymptoticLimits.mH125.root"
-                                        ,dir_+"DATACARDS_MARCH20/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
-                                        ,dir_+"230319_PhiGammaLimit/higgsCombinePhiGFcat_Comb.AsymptoticLimits.mH125.root"
-                                        ,dir_+"DATACARDSmva_MARCH20/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+     if mesonCat=='Phi': limitfiles = [ dirTO_+"230622_Phi/higgsCombinePhiGFpreselection.AsymptoticLimits.mH125.root"
+                                        ,dirMIT_+"workspaces_JUNE22_40_40/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
+                                        ,dirTO_+"230622_Phi/higgsCombinePhiGFcat_Comb.AsymptoticLimits.mH125.root"
+                                        ,dirMIT_+"workspaces_MVA_JUNE22_40_40/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
                                         ##                    ,"limitsGiulio/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
                                         ##                    ,"limitsMVASynch/higgsCombinePhiGFcat.AsymptoticLimits.mH125.root"
                                        ]
@@ -193,8 +194,13 @@ if doChekSync: tdrstyle.cmsPrel(39540, energy= 13,simOnly=False)
 else: tdrstyle.cmsPrel(138000, energy= 13,simOnly=False)
 c44.Draw()
 
+latex = ROOT.TLatex()
+latex.SetTextSize(0.04)
+if mesonCat=='Rho': latex.DrawLatex(2, 0.85*dummyHistogram.GetMaximum(), "Rho")
+if mesonCat=='Phi': latex.DrawLatex(2, 0.85*dummyHistogram.GetMaximum(), "Phi")
+
 mySTR=''
-if doChekSync: mySTR="_synchMarch20"
+if doChekSync: mySTR="_synchJune22"
 else: mySTR='_final'
 
 c44.SaveAs("limit"+mesonCat+mySTR+".pdf")

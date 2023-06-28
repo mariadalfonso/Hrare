@@ -162,7 +162,11 @@ datacard.write("kmax * number of nuisance parameters\n")
 datacard.write("-------------------------------------\n")
 
 ########################## IMPORT DATA #############
-w.factory("mh[100,250]"); # RooRealVar
+if opts.whichCat=='Vcat':
+    w.factory("mh[100,150]"); # RooRealVar
+else:
+    w.factory("mh[100,170]"); # RooRealVar
+
 mh=w.var("mh")
 arglist_obs = ROOT.RooArgList(mh)
 argset_obs = ROOT.RooArgSet(mh)
