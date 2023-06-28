@@ -10,6 +10,12 @@ def nanoAOD_customizeMesons(process):
     # remove: slow and unused
     (run2_nanoAOD_106Xv1 | run2_nanoAOD_106Xv2).toReplaceWith(process.nanoSequenceMC, process.nanoSequenceMC.copyAndExclude([btagWeightTable]))
 
+    (run2_nanoAOD_106Xv1 | run2_nanoAOD_106Xv2).toModify(photonTable.variables,
+                                                         x_calo = Var("superCluster().seed().position().x()",float,doc="photon supercluster position on calorimeter, x coordinate (cm)",precision=10),
+                                                         y_calo = Var("superCluster().seed().position().y()",float,doc="photon supercluster position on calorimeter, y coordinate (cm)",precision=10),
+                                                         z_calo = Var("superCluster().seed().position().z()",float,doc="photon supercluster position on calorimeter, z coordinate (cm)",precision=10),
+                                                         )
+
     process.genParticleTable.src = "prunedGenParticles"
 
     if triggerObjectTable.selections[1].id.value()==22:
