@@ -164,6 +164,8 @@ datacard.write("-------------------------------------\n")
 ########################## IMPORT DATA #############
 if opts.whichCat=='Vcat':
     w.factory("mh[100,150]"); # RooRealVar
+elif opts.whichCat=='GFcat':
+    w.factory("mh[110,160]"); # RooRealVar
 else:
     w.factory("mh[100,170]"); # RooRealVar
 
@@ -291,6 +293,7 @@ if doSyst:
             else:
                 if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.05) )
                 if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.03) )
+                if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.05) )
         datacard.write("\n")
 
     datacard.write("CMS_photonID \tlnN ")

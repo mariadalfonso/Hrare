@@ -12,13 +12,21 @@ doCR=False
 histoEnum = 43
 #histoEnum = 4
 
-workspaceName = 'WS_JUNE22'
-if histoEnum == 43: workspaceName = 'WSmva_JUNE22'
+workspaceName = 'WS_JUL12'
+if histoEnum == 43: workspaceName = 'WSmva_JUL12'
 if histoEnum == 43 and doCR: workspaceName = 'WSmvaCR'
 
-xlowRange = 100.
-xhighRange = 170.
+## for GF
+xlowRange = 110.
+xhighRange = 160.
+
+## for Vcat
+#xlowRange = 100.
 #xhighRange = 150.
+
+## VBF VBFcat
+#xlowRange = 100.
+#xhighRange = 170.
 
 x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
 
@@ -30,6 +38,7 @@ def  fitSig(tag , mesonCat, year):
 
     if mesonCat == '_RhoCat': MVAbin = MVAbinRho
     if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
+    if mesonCat == '_K0StarCat': MVAbin = MVAbinRho
 
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
@@ -93,7 +102,7 @@ def  fitSig(tag , mesonCat, year):
 
         # -----------------------------------------------------------------------------
 
-        cb_mu = RooRealVar('cb_mu'+mesonCat+tag+'_'+sig, 'cb_mu', 125., 125-5. , 125+5.)
+        cb_mu = RooRealVar('cb_mu'+mesonCat+tag+'_'+sig, 'cb_mu', 125., 125-10. , 125+10.)
         cb_sigma = RooRealVar('cb_sigma'+mesonCat+tag+'_'+sig, 'cb_sigma', 0., 3.)
         cb_alphaL = RooRealVar('cb_alphaL'+mesonCat+tag+'_'+sig, 'cb_alphaL', 0., 5.)
         cb_alphaR = RooRealVar('cb_alphaR'+mesonCat+tag+'_'+sig, 'cb_alphaR', 0., 5.)
@@ -187,12 +196,21 @@ def  fitBkg(tag , mesonCat, year):
 
     if mesonCat == '_RhoCat': MVAbin = MVAbinRho
     if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
+    if mesonCat == '_K0StarCat': MVAbin = MVAbinRho
+
+    x.setBins(int(115-xlowRange), "left")
+    x.setBins(int(xhighRange-135), "right")
 
     foo = -1 * histoEnum if doCR else histoEnum
     data_full = getHisto(foo, int(xhighRange - xlowRange), xlowRange, xhighRange, True, tag, mesonCat, False, -1 )
     data = RooDataHist('datahist'+mesonCat+tag, 'data', RooArgList(x), data_full)
-
     blindedData = data.reduce(RooFit.CutRange("left,right"))
+
+    data_reduced_Manual = data_full.Clone()
+    for k in range(115, 135):
+        data_reduced_Manual.SetBinContent(data_reduced_Manual.FindBin(k),0)
+        data_reduced_Manual.SetBinError(data_reduced_Manual.FindBin(k),0.)
+    data_reduced = RooDataHist('datahistReduce'+mesonCat+tag, 'dataReduced', RooArgList(x), data_reduced_Manual)
 
     # -----------------------------------------------------------------------------
     # BERN law
@@ -375,11 +393,16 @@ def  fitBkg(tag , mesonCat, year):
     # Plot only the blinded data, and then plot the PDF over the full range as well as both sidebands
 
     if blinded:
-        blindedData.plotOn(plotFrameWithNormRange)
+        data_reduced.plotOn(plotFrameWithNormRange,RooFit.MarkerColor(kWhite),RooFit.LineColor(kWhite))
+
         model.plotOn(plotFrameWithNormRange, RooFit.Components(model.GetName()), RooFit.LineColor(kRed), RooFit.Range("left"), RooFit.NormRange("left,right"))
         model.plotOn(plotFrameWithNormRange, RooFit.Components(model.GetName()), RooFit.LineColor(kRed), RooFit.Range("right"), RooFit.NormRange("left,right"))
         model2.plotOn(plotFrameWithNormRange, RooFit.Components(model2.GetName()), RooFit.LineColor(kBlue), RooFit.Range("left"), RooFit.NormRange("left,right"))
         model2.plotOn(plotFrameWithNormRange, RooFit.Components(model2.GetName()), RooFit.LineColor(kBlue), RooFit.Range("right"), RooFit.NormRange("left,right"))
+
+        data_reduced.plotOn(plotFrameWithNormRange, RooFit.Binning("left"))
+        data_reduced.plotOn(plotFrameWithNormRange, RooFit.Binning("right"))
+
     else:
         data.plotOn(plotFrameWithNormRange)
 #        model.plotOn(plotFrameWithNormRange, RooFit.Range("full"), RooFit.NormRange("full"), RooFit.LineColor(2), RooFit.LineStyle(10))
@@ -416,9 +439,9 @@ def  fitBkg(tag , mesonCat, year):
     latex = TLatex()
     latex.SetTextColor(kRed)
     latex.SetTextSize(0.04)
-    latex.DrawLatex(110 ,offsetY + 0.10*data_full.GetMaximum(), model.GetName())
+    latex.DrawLatex(111 ,offsetY + 0.10*data_full.GetMaximum(), model.GetName())
     latex.SetTextColor(kBlue)
-    latex.DrawLatex(110 ,offsetY + 0.20*data_full.GetMaximum(), model2.GetName())
+    latex.DrawLatex(111 ,offsetY + 0.20*data_full.GetMaximum(), model2.GetName())
 
     canvas.Draw()
 
@@ -501,17 +524,28 @@ if __name__ == "__main__":
     if not blinded: fitSig('_GFcat','_PhiCat',2018)
     fitBkg('_GFcat','_PhiCat',2018)
 
+    if not blinded: fitSig('_GFcat','_K0StarCat',2018)
+    fitBkg('_GFcat','_K0StarCat',2018)
+
+    '''
     if not blinded: fitSig('_VBFcatlow','_RhoCat',2018)
     fitBkg('_VBFcatlow','_RhoCat',2018)
 
     if not blinded: fitSig('_VBFcatlow','_PhiCat',2018)
     fitBkg('_VBFcatlow','_PhiCat',2018)
 
+    if not blinded: fitSig('_VBFcatlow','_K0StarCat',2018)
+    fitBkg('_VBFcatlow','_K0StarCat',2018)
+
     if not blinded: fitSig('_VBFcat','_RhoCat','Run2')
     fitBkg('_VBFcat','_RhoCat','Run2')
 
     if not blinded: fitSig('_VBFcat','_PhiCat','Run2')
     fitBkg('_VBFcat','_PhiCat','Run2')
+
+    if not blinded: fitSig('_VBFcat','_K0StarCat','Run2')
+    fitBkg('_VBFcat','_K0StarCat','Run2')
+    '''
 
     '''
     if histoEnum == 4:

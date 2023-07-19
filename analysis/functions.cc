@@ -47,7 +47,6 @@ using Vec_f = ROOT::VecOps::RVec<float>;
 using Vec_i = ROOT::VecOps::RVec<int>;
 using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
-
 using stdVec_i = std::vector<int>;
 using stdVec_b = std::vector<bool>;
 using stdVec_f = std::vector<float>;
@@ -55,6 +54,47 @@ using stdVec_f = std::vector<float>;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
+float massTheo = 0.892;
+
+Vec_b cleaningPair(const ULong64_t event, const UInt_t nK0Star,
+		   Vec_f K0Star_kaon_phi, Vec_f K0Star_kaon_eta , Vec_f K0Star_kaon_pt,
+		   Vec_f K0Star_pion_phi, Vec_f K0Star_pion_eta , Vec_f K0Star_pion_pt,
+		   Vec_f K0Star_kin_mass) {
+  std::vector<std::pair<unsigned int, unsigned int>> idxPair;
+
+  // at least one combination
+  if (nK0Star > 1) {
+    // find the pairs
+    for (unsigned int i = 0; i < nK0Star ; i++){
+      for (unsigned int j = i+1; j < nK0Star ; j++){
+	if (K0Star_kaon_eta[j]==K0Star_pion_eta[i] && K0Star_kaon_eta[i]==K0Star_pion_eta[j]) {
+	  // found i and j that are the same
+	  idxPair.push_back({i,j});
+	}
+      }
+    }
+  }
+
+  // Result vector to store selected elements, pick one element from each pair
+  std::vector<unsigned int> selectedElements;
+  for (const auto& pair : idxPair) {
+    if (abs(K0Star_kin_mass[pair.first] - massTheo) < abs(K0Star_kin_mass[pair.second]-massTheo)) {
+      selectedElements.push_back(pair.second);
+    } else {
+      selectedElements.push_back(pair.first);
+    }
+  }
+
+  Vec_b mask(nK0Star, true);
+  for (unsigned int idx = 0; idx < nK0Star; ++idx) {
+    for (unsigned int iSel = 0; iSel < selectedElements.size(); ++iSel) {
+      if(idx == selectedElements[iSel]) mask[idx] = false;
+    }
+  }
+
+  return mask;
+
+}
 
 Vec_f getMaximum(Vec_f v1, Vec_f v2){
 	Vec_f output = {};
@@ -269,9 +309,9 @@ Vec_i genMatch(const float& reco_pt, const float& reco_eta, const float& reco_ph
 }
 
 stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
-			const Vec_f& meson_trk1_pt, const Vec_f& meson_trk2_pt,
-			const Vec_f& wrong_meson_pt,
-			const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
+			   const Vec_f& meson_trk1_pt, const Vec_f& meson_trk2_pt,
+			   const Vec_f& wrong_meson_pt, const Vec_f& wrong_meson2_pt,
+			   const Vec_f& ph_pt, const Vec_f& ph_eta, const Vec_f& ph_phi) {
 
   float Minv = -1;
   float ptHiggs = -1;
@@ -293,13 +333,19 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
     ptWrongMax = wrong_meson_pt[j];
   }
 
+  float ptWrong2Max=0;
+  for (unsigned int j=0; j<wrong_meson2_pt.size(); j++) {
+    if(wrong_meson2_pt[j] <  ptWrong2Max) continue;
+    ptWrong2Max = wrong_meson2_pt[j];
+  }
+
   // loop over all the phi/rho Cand
   for (unsigned int i=0; i<meson_pt.size(); i++) {
 
     if(max(meson_trk1_pt[i], meson_trk2_pt[i]) < 20) continue;
 
     PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
-    if((p_meson + p_ph).M()<5.) continue; // object disambiguiation, also remove the omega/tau resonances
+    if((p_meson + p_ph).M()<5.) continue; // object disambiguation, also remove the omega/tau resonances
 
     // save the leading Pt
     float ptCand = p_meson.pt();
@@ -307,6 +353,7 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
     if( ptCand < ptCandMax ) continue;
     ptCandMax=ptCand;
     if(ptCandMax < ptWrongMax) continue; // we want the leading meson to the of the right flavor
+    if(ptCandMax < ptWrong2Max) continue; // we want the leading meson to the of the right flavor
     Minv = (p_meson + p_ph).M();
     ptHiggs = (p_meson + p_ph).pt();
     idx[0] = i;
@@ -534,5 +581,171 @@ float compute_jet_HiggsVars_var(const Vec_f& jet_pt, const Vec_f& jet_eta, const
   return theVar;
 
 }
+
+// functions for polarization reweighting
+
+// Get four vectors
+Vec_d getHPhiKaonFourVectors(const Vec_i& genPart_pdgId, Vec_i& genPart_genPartIdxMother,
+        const Vec_d& genPart_pt,
+        const Vec_d& genPart_eta,
+        const Vec_d& genPart_phi,
+        const Vec_d& genPart_mass) {
+
+  int idxHiggsfromKPlus = -1;
+  int idxHiggsfromKMinus = -1;
+  int idxPhifromKPlus = -1;
+  int idxPhifromKMinus = -1;
+  int idxKPlus = -1;
+  int idxKMinus = -1;
+  for (int i=genPart_pdgId.size(); i>=0; i--) {
+    if (genPart_pdgId[i]==321 &&
+        genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+        genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]] == 25) {
+          idxKPlus = i;
+          idxPhifromKPlus = genPart_genPartIdxMother[i];
+          idxHiggsfromKPlus = genPart_genPartIdxMother[genPart_genPartIdxMother[i]];
+          break;
+        }
+  }
+  for (int i=genPart_pdgId.size(); i>=0; i--) {
+    if (genPart_pdgId[i]==-321 &&
+        genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+        genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]] == 25) {
+          idxKMinus = i;
+          idxPhifromKMinus = genPart_genPartIdxMother[i];
+          idxHiggsfromKMinus = genPart_genPartIdxMother[genPart_genPartIdxMother[i]];
+          break;
+        }
+  }
+
+  bool foundMother = (idxKPlus!=-1 && idxKMinus!=-1 &&
+                      idxPhifromKPlus!=-1 && idxPhifromKPlus==idxPhifromKMinus &&
+                      idxHiggsfromKPlus!=-1 && idxHiggsfromKPlus==idxHiggsfromKMinus);
+
+  Vec_f res(8, 0.);
+
+  if (foundMother) {
+    int idxPhi = idxPhifromKPlus;
+    PtEtaPhiMVector p_kplus(genPart_pt[idxKPlus], genPart_eta[idxKPlus],
+                            genPart_phi[idxKPlus], genPart_mass[idxKPlus]);
+    PtEtaPhiMVector p_kminus(genPart_pt[idxKMinus], genPart_eta[idxKMinus],
+                             genPart_phi[idxKMinus], genPart_mass[idxKMinus]);
+    PtEtaPhiMVector p_ditrack = p_kplus + p_kminus;
+
+    res[0] = p_ditrack.Pt();
+    res[1] = p_ditrack.Eta();
+    res[2] = p_ditrack.Phi();
+    res[3] = p_ditrack.M();
+
+    PtEtaPhiMVector p_phi(genPart_pt[idxPhi], genPart_eta[idxPhi],
+                          genPart_phi[idxPhi], genPart_mass[idxPhi]);
+
+    res[4] = p_phi.Pt();
+    res[5] = p_phi.Eta();
+    res[6] = p_phi.Phi();
+    res[7] = p_phi.M();
+  }
+  return res;
+}
+
+// Checks if H->Phi->Kaon
+bool isHPhiKaon(
+  const Vec_i& genPart_pdgId,
+  const Vec_i& genPart_genPartIdxMother
+) {
+  int idxHiggs = -1;
+  int idxPhi = -1;
+  int idxKPlus = -1;
+  for (int i=genPart_pdgId.size(); i>=0; i--) {
+    if (genPart_pdgId[i]==321 &&
+        genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+        genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]==25) {
+      idxKPlus = i;
+      idxPhi = genPart_genPartIdxMother[i];
+      idxHiggs = genPart_genPartIdxMother[genPart_genPartIdxMother[i]];
+      break;
+    }
+  }
+
+  bool foundMother = (idxHiggs!=-1 && idxPhi!=-1 && idxKPlus!=-1);
+
+  return foundMother;
+}
+
+// Checks if H->Phi->Phi->Kaon
+bool isHPhiPhiKaon(
+  const Vec_i& genPart_pdgId,
+  const Vec_i& genPart_genPartIdxMother
+) {
+  int idxHiggs = -1;
+  int idxPhi = -1;
+  int idxKPlus = -1;
+  for (int i=genPart_pdgId.size(); i>=0; i--) {
+    if (genPart_pdgId[i]==321 &&
+        genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+        genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]==333 &&
+        genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]]==25) {
+      idxKPlus = i;
+      idxPhi = genPart_genPartIdxMother[i];
+      idxHiggs = genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]];
+      break;
+    }
+  }
+
+  bool foundMother = (idxHiggs!=-1 && idxPhi!=-1 && idxKPlus!=-1);
+
+  return foundMother;
+}
+
+float getPhiPolarizationAngle(
+  const Vec_i& genPart_pdgId,
+  const Vec_i& genPart_genPartIdxMother,
+  const Vec_d& genPart_pt,
+  const Vec_d& genPart_eta,
+  const Vec_d& genPart_phi,
+  const Vec_d& genPart_mass) {
+  
+  ///// Part 1. Find the K+K- tracks from the phi
+  int idxHiggs = -1;
+  int idxPhi = -1;
+  int idxKPlus = -1;
+  for (int i=genPart_pdgId.size(); i>=0; i--) {
+    if (genPart_pdgId[i]==321 &&
+        genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+        genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]] == 25) {
+      idxKPlus = i;
+      idxPhi = genPart_genPartIdxMother[i];
+      idxHiggs = genPart_genPartIdxMother[genPart_genPartIdxMother[i]];
+      break;
+    } /*else if (genPart_pdgId[i]==321 &&
+               genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+               genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]==333 &&
+               genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]]==25) {
+      idxKPlus = i;
+      idxPhi = genPart_genPartIdxMother[i];
+      idxHiggs = genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]];
+      break;
+    }*/
+  }
+
+  bool foundMother = (idxHiggs!=-1 && idxPhi!=-1 && idxKPlus!=-1);
+
+  ///// Part 2. Get polarization angle
+  if (foundMother) {
+    TLorentzVector p_phi;
+    TLorentzVector p_kplus;
+    p_phi.SetPtEtaPhiM(genPart_pt[idxPhi], genPart_eta[idxPhi],
+                       genPart_phi[idxPhi], genPart_mass[idxPhi]);
+    p_kplus.SetPtEtaPhiM(genPart_pt[idxKPlus], genPart_eta[idxKPlus],
+                         genPart_phi[idxKPlus], genPart_mass[idxKPlus]);
+    TVector3 phiBoost = p_phi.BoostVector();
+    p_kplus.Boost(-phiBoost);
+    float theta = p_phi.Vect().Angle(p_kplus.Vect());
+    return theta;
+  } else {
+    return std::numeric_limits<float>::quiet_NaN();
+  }
+}
+
 
 #endif

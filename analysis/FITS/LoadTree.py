@@ -8,8 +8,10 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
 
    if category=='_VBFcatlow' or category=='_GFcat':
       if doSignal:
+         if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
          mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') #VBFH -- rho
          mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') #VBFH -- phi
+         if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1037'+category+mesonCat+year+'.root') #GFH -- k0star
          mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') #GFH -- rho
          mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') #GFH -- phi
       else:
@@ -26,6 +28,7 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
       if directory.find("2018")!=-1:
          if doSignal:
             ## can load the 1027 and 1017 ggH signal MC
+            if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
             mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2018.root') #VBFH -- rho
             mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2018.root') #VBFH -- phi
          else:
@@ -48,6 +51,7 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
             mytree.Add(directory+'outname_mc-64'+category+mesonCat+'_2018.root')  #DATA
       if directory.find("2017")!=-1:
          if doSignal:
+            if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
             mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2017.root') #VBFH -- rho
             mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2017.root') #VBFH -- phi
          else:
@@ -64,6 +68,7 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
             mytree.Add(directory+'outname_mc-76'+category+mesonCat+'_2017.root')  #DATA PH
       if directory.find("_12016")!=-1:
          if doSignal:
+            if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
             mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_12016.root') #VBFH -- rho
             mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_12016.root') #VBFH -- phi
          else:

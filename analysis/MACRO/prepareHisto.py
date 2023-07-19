@@ -18,21 +18,16 @@ class MyHisto():
     def __repr__(self):
         return self.name
 
-
 MVAbinRho={
-#   '_GFcat': 0.0,
-   '_GFcat': 0.5,
-   '_Zinvcat': 0.6,
-   '_VBFcat': 0.8,
-   '_VBFcatlow': 0.8,
+   '_GFcat': 0.4,
+   '_VBFcat': 0.6,
+   '_VBFcatlow': 0.3,
 }
 
 MVAbinPhi={
-#   '_GFcat': 0.0,
    '_GFcat': 0.4,
-   '_Zinvcat': 0.7,
    '_VBFcat': 0.6,
-   '_VBFcatlow': 0.6,
+   '_VBFcatlow': 0.3,
 }
 
 ROOT.ROOT.EnableImplicitMT()
@@ -41,7 +36,8 @@ RDataFrame = ROOT.RDataFrame
 def getHisto(mytree, category, mesonCat, item, nbin, low, high):
 
    if mesonCat=='_PhiCat': MVAbin = MVAbinPhi
-   if mesonCat=='_RhoCat': MVAbin = MVAbinRho    
+   if mesonCat=='_RhoCat': MVAbin = MVAbinRho
+   if mesonCat=='_K0StarCat': MVAbin = MVAbinRho
 
    redDark = (191, 34, 41)
 #   redMed = (255, 40, 0)
@@ -70,15 +66,13 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
        offline = "photon_pt>40 and meson_pt>40"
 
    if(category =='_Wcat'):
-       offline = "photon_pt>40 and meson_pt>40 and DeepMETResolutionTune_pt>15 and V_mass>15 and deltaLepMeson>0.5"
-#       offline = "photon_pt>40 and meson_pt>40 and DeepMETResolutionTune_pt>15 and deltaLepMeson>0.5"
-# VMass can be removed to gain stat
+       offline = "photon_pt>40 and meson_pt>40 and DeepMETResolutionTune_pt>15 and deltaLepMeson>0.5"
 
    if(category =='_GFcat'):
        offline = "photon_pt>40 and meson_pt>40"
 
    if(category =='_VBFcat'):
-       offline = "jet1Pt>30 and jet2Pt>20 and mJJ>400"
+       offline = "jet1Pt>40 and jet2Pt>20 and mJJ>400"
 
    if(category =='_VBFcatlow'):
        offline = "jet1Pt>30 and jet2Pt>20 and mJJ>300"
@@ -148,7 +142,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    #subleading
    if item == 29 : var = "min(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])/goodMeson_pt[index_pair[0]]"
    #subleading
-   if item == 39 : var = "min(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])/max(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])"
+   if item == 40 : var = "min(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])/max(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])"
    #leading
    if item == 31 : var = "max(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])"
    #subleading
@@ -156,6 +150,8 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 33 : var = "var = goodMeson_trk1_eta[index_pair[0]]"
    if item == 34 : var = "goodMeson_trk2_eta[index_pair[0]]"
    if item == 35 : var = "goodMeson_iso[index_pair[0]]"
+   if item == 36 : var = "goodMeson_isoPho[index_pair[0]]"
+   if item == 37 : var = "goodMeson_isoNeuHad[index_pair[0]]"
    if item == 16 : var = "abs(goodMeson_DR[index_pair[0]])"
    if item == 10 : var = "(abs(goodMeson_DR[index_pair[0]])*goodMeson_pt[index_pair[0]])/(2*goodMeson_mass[index_pair[0]])"
    if item == 7 : var = "goodMeson_sipPV[index_pair[0]]"
@@ -184,9 +180,9 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 59 : var = "jet2hfsigmaEtaEta"
    if item == 13 : var = "DeepMETResolutionTune_pt"
    #         var = ev.MET_pt
-   if item == 36 : var = "DeepMETResolutionTune_phi"
+   if item == 38 : var = "DeepMETResolutionTune_phi"
    #         var = ev.MET_pt
-   if item == 37 : var = "HCandPHI"
+   if item == 39 : var = "HCandPHI"
    #         var = ev.MET_pt
    if item == 14 : var = "abs(dPhiGammaMET)"
    if item == 15 : var = "abs(dPhiMesonMET)"
@@ -201,6 +197,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 90: var = "dPhiGammaMesonCand"
    if item == 91: var = "dEtaGammaMesonCand"
    if item == 95: var = "PV_npvsGood"
+   if item == 96: var = "goodMeson_bestVtx_idx[index_pair[0]]"
 
    df_common = df.Define("var","{}".format(var)).Define("offlineSel","{}".format(offline)).Define("weight","mc>=0 ? w_allSF*lumiIntegrated:1").Filter("offlineSel")
 
@@ -220,8 +217,8 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    hZinvH = df_common.Filter("mc==1015 or mc==1025 or mc==1016 or mc==1026").Histo1D(("hZinvH","h",nbin, low, high),"var","weight")
    hWH = df_common.Filter("mc==1011 or mc==1012 or mc==1021 or mc==1022").Histo1D(("hWH","h",nbin, low, high),"var","weight")
    hTTH = df_common.Filter("mc==1018 or mc==1028").Histo1D(("hTTH","h",nbin, low, high),"var","weight")
-   hVBFH = df_common.Filter("mc==1010 or mc==1020").Histo1D(("hVBFH","h",nbin, low, high),"var","weight")
-   hggH = df_common.Filter("mc==1017 or mc==1027").Histo1D(("hggH ","h",nbin, low, high),"var","weight")
+   hVBFH = df_common.Filter("(mc==1010 or mc==1020 or mc==1030)").Histo1D(("hVBFH","h",nbin, low, high),"var","weight")
+   hggH = df_common.Filter("(mc==1017 or mc==1027 or mc==1037)").Histo1D(("hggH ","h",nbin, low, high),"var","weight")
    if False: hData = df_common.Filter("mc<0").Histo1D(("hData","h",nbin, low, high),"var","weight")
    else:
        print('HELLO')
