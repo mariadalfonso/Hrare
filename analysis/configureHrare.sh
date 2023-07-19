@@ -37,8 +37,8 @@ echo " ------------------------------------------ " > $TMPDATFILE
 if [ $cat = "isGFtag" ]; then
 
     if [[ "$isMC" == '2' ]]; then
-	python3 VGammaMeson_cat.py $cat $type 1017 $year >> $TMPDATFILE #phi
-	python3 VGammaMeson_cat.py $cat $type 1027 $year >> $TMPDATFILE #rho
+	python3 VGammaMeson_cat.py $cat $type 1017 $year >> $TMPDATFILE # phi
+	python3 VGammaMeson_cat.py $cat $type 1027 $year >> $TMPDATFILE # rho
 	python3 VGammaMeson_cat.py $cat $type 1010 $year >> $TMPDATFILE # VBF phi
 	python3 VGammaMeson_cat.py $cat $type 1020 $year >> $TMPDATFILE # VBF rho
 # 	 python3 VGammaMeson_cat.py $cat $type 1015 $year >> $TMPDATFILE # Zinv phi
@@ -52,16 +52,17 @@ if [ $cat = "isGFtag" ]; then
     fi
 
     if [[ "$isMC" == '1' ]]; then
-#	python3 VGammaMeson_cat.py $cat $type 6 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 7 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 8 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 9 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 10 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 11 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 12 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 13 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 14 $year >> $TMPDATFILE
 
-	python3 VGammaMeson_cat.py $cat $type 10 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 11 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 12 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 13 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 14 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 15 $year >> $TMPDATFILE #Gjets with DR
+       python3 VGammaMeson_cat.py $cat $type 16 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 17 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 18 $year >> $TMPDATFILE
+       python3 VGammaMeson_cat.py $cat $type 19 $year >> $TMPDATFILE
 
 #	python3 VGammaMeson_cat.py $cat $type 20 $year >> $TMPDATFILE
 #	python3 VGammaMeson_cat.py $cat $type 21 $year >> $TMPDATFILE
@@ -82,6 +83,7 @@ if [ $cat = "isGFtag" ]; then
 
     if [[ "$isMC" == '-1' ]]; then
 	if [ $year = "2018" ] ; then
+	    echo '2018 dataset'
 	    python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # EGammaB 2018
 	    python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # EGammaC 2018
 	    python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # EGammaD 2018
@@ -105,10 +107,7 @@ if [ $cat = "isVBFtaglow" ]; then
 #	python3 VGammaMeson_cat.py $cat $type 46 $year >> $TMPDATFILE #ZG
 #	python3 VGammaMeson_cat.py $cat $type 47 $year >> $TMPDATFILE #TTG
 
-#	python3 VGammaMeson_cat.py $cat $type 6 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 7 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 8 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 9 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 9 $year >> $TMPDATFILE #VBFGamma
 
 	python3 VGammaMeson_cat.py $cat $type 10 $year >> $TMPDATFILE
 	python3 VGammaMeson_cat.py $cat $type 11 $year >> $TMPDATFILE
@@ -116,7 +115,11 @@ if [ $cat = "isVBFtaglow" ]; then
 	python3 VGammaMeson_cat.py $cat $type 13 $year >> $TMPDATFILE
 	python3 VGammaMeson_cat.py $cat $type 14 $year >> $TMPDATFILE
 
-	python3 VGammaMeson_cat.py $cat $type 15 $year >> $TMPDATFILE #VBFGamma
+	python3 VGammaMeson_cat.py $cat $type 15 $year >> $TMPDATFILE #Gjets with DR
+	python3 VGammaMeson_cat.py $cat $type 16 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 17 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 18 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 19 $year >> $TMPDATFILE
 
 #	python3 VGammaMeson_cat.py $cat $type 20 $year >> $TMPDATFILE
 #	python3 VGammaMeson_cat.py $cat $type 21 $year >> $TMPDATFILE
@@ -128,6 +131,7 @@ if [ $cat = "isVBFtaglow" ]; then
 
     if [[ "$isMC" == '-1' ]]; then
 	if [ $year = "2018" ] ; then
+	    echo '2018 dataset'
 	    python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # EGammaB 2018
 	    python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # EGammaC 2018
 	    python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # EGammaD 2018
@@ -138,6 +142,7 @@ fi
 if [ $cat = "isVBFtag" ]; then
 
     if [[ "$isMC" == '2' ]]; then
+	echo 'sig dataset' $year
 	python3 VGammaMeson_cat.py $cat $type 1010 $year >> $TMPDATFILE #phi
 	python3 VGammaMeson_cat.py $cat $type 1020 $year >> $TMPDATFILE #rho
 	python3 VGammaMeson_cat.py $cat $type 1017 $year >> $TMPDATFILE #phi
@@ -145,6 +150,27 @@ if [ $cat = "isVBFtag" ]; then
     fi
 
     if [[ "$isMC" == '1' ]]; then
+	echo 'bkg dataset' $year
+	python3 VGammaMeson_cat.py $cat $type 9 $year >> $TMPDATFILE #VBFGamma
+
+	python3 VGammaMeson_cat.py $cat $type 10 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 11 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 12 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 13 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 14 $year >> $TMPDATFILE
+
+	python3 VGammaMeson_cat.py $cat $type 15 $year >> $TMPDATFILE #Gjets with DR
+	python3 VGammaMeson_cat.py $cat $type 16 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 17 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 18 $year >> $TMPDATFILE
+	python3 VGammaMeson_cat.py $cat $type 19 $year >> $TMPDATFILE
+
+#	python3 VGammaMeson_cat.py $cat $type 20 $year >> $TMPDATFILE
+#	python3 VGammaMeson_cat.py $cat $type 21 $year >> $TMPDATFILE
+#	python3 VGammaMeson_cat.py $cat $type 22 $year >> $TMPDATFILE
+#	python3 VGammaMeson_cat.py $cat $type 23 $year >> $TMPDATFILE
+#	python3 VGammaMeson_cat.py $cat $type 24 $year >> $TMPDATFILE
+#	python3 VGammaMeson_cat.py $cat $type 25 $year >> $TMPDATFILE
 
 #	python3 VGammaMeson_cat.py $cat $type 45 $year >> $TMPDATFILE #WGamma had
 #	python3 VGammaMeson_cat.py $cat $type 46 $year >> $TMPDATFILE #ZGamma had
@@ -153,27 +179,13 @@ if [ $cat = "isVBFtag" ]; then
 #	python3 VGammaMeson_cat.py $cat $type 6 $year >> $TMPDATFILE
 #	python3 VGammaMeson_cat.py $cat $type 7 $year >> $TMPDATFILE
 #	python3 VGammaMeson_cat.py $cat $type 8 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 9 $year >> $TMPDATFILE
 
-	python3 VGammaMeson_cat.py $cat $type 10 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 11 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 12 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 13 $year >> $TMPDATFILE
-	python3 VGammaMeson_cat.py $cat $type 14 $year >> $TMPDATFILE
-
-	python3 VGammaMeson_cat.py $cat $type 15 $year >> $TMPDATFILE #VBFGamma
-
-#	python3 VGammaMeson_cat.py $cat $type 20 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 21 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 22 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 23 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 24 $year >> $TMPDATFILE
-#	python3 VGammaMeson_cat.py $cat $type 25 $year >> $TMPDATFILE
     fi
 
     if [[ "$isMC" == '-1' ]]; then
 
 	if [ $year = "2018" ] ; then
+	    echo '2018 dataset'
 	    python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # TauA 2018
             python3 VGammaMeson_cat.py $cat $type -63 $year >> $TMPDATFILE  # TauB 2018
             python3 VGammaMeson_cat.py $cat $type -64 $year >> $TMPDATFILE  # TauB 2018
@@ -185,10 +197,12 @@ if [ $cat = "isVBFtag" ]; then
 	fi
 
 	if [ $year = "2017" ]; then
-	   python3 VGammaMeson_cat.py $cat $type -76 $year >> $TMPDATFILE  # SinglePhoton RunF
+	    echo '2017 dataset'
+	    python3 VGammaMeson_cat.py $cat $type -76 $year >> $TMPDATFILE  # SinglePhoton RunF
 	fi
 
 	if [ $year = "12016" ]; then
+	   echo '12016 dataset'
 	   python3 VGammaMeson_cat.py $cat $type -81 $year >> $TMPDATFILE  # SinglePhoton RunB1
 	   python3 VGammaMeson_cat.py $cat $type -82 $year >> $TMPDATFILE  # SinglePhoton RunB2
 	   python3 VGammaMeson_cat.py $cat $type -83 $year >> $TMPDATFILE  # SinglePhoton RunC
@@ -196,6 +210,11 @@ if [ $cat = "isVBFtag" ]; then
 	   python3 VGammaMeson_cat.py $cat $type -85 $year >> $TMPDATFILE  # SinglePhoton RunE
 	   python3 VGammaMeson_cat.py $cat $type -86 $year >> $TMPDATFILE  # SinglePhoton RunF
 	fi
+
+	if [ $year = "22016" ]; then
+	    echo 'no 22016 dataset'
+	fi
+
     fi
 fi
 
@@ -263,6 +282,10 @@ if [ $cat = "isZinvtag" ]; then
         python3 VGammaMeson_cat.py $cat $type 1023 $year >> $TMPDATFILE  # Z-rho
         python3 VGammaMeson_cat.py $cat $type 1014 $year >> $TMPDATFILE  # ggZ-phi
         python3 VGammaMeson_cat.py $cat $type 1024 $year >> $TMPDATFILE  # ggZ-rho
+
+        python3 VGammaMeson_cat.py $cat $type 1018 $year >> $TMPDATFILE  # ttH-phi
+        python3 VGammaMeson_cat.py $cat $type 1028 $year >> $TMPDATFILE  # ttH-rho
+
     fi
     if [[ "$isMC" == '-1' ]]; then
 	python3 VGammaMeson_cat.py $cat $type -62 $year >> $TMPDATFILE  # TauA 2018
@@ -286,8 +309,8 @@ if [ $cat = "isZtag" ]; then
 
     if [[ "$isMC" == '1' ]]; then
 
-##	python3 VGammaMeson_cat.py $cat $type 1  $year >> $TMPDATFILE   # ZG
-	python3 VGammaMeson_cat.py $cat $type 0  $year >> $TMPDATFILE   # DYjets
+	python3 VGammaMeson_cat.py $cat $type 1  $year >> $TMPDATFILE   # ZG
+#	python3 VGammaMeson_cat.py $cat $type 0  $year >> $TMPDATFILE   # DYjets
 #	python3 VGammaMeson_cat.py $cat $type 34 $year >> $TMPDATFILE   # DYjets 0J
 #	python3 VGammaMeson_cat.py $cat $type 35 $year >> $TMPDATFILE   # DYjets 1J
 #	python3 VGammaMeson_cat.py $cat $type 36 $year >> $TMPDATFILE   # DYjets 2J
@@ -526,18 +549,18 @@ if [ $cat = "isWtag" ]; then
 	    python3 VGammaMeson_cat.py $cat $type -25 $year >> $TMPDATFILE  # MuonEG E
 	    python3 VGammaMeson_cat.py $cat $type -26 $year >> $TMPDATFILE  # MuonEG F
 
-	    python3 VGammaMeson_cat.py $cat $type -42 $year >> $TMPDATFILE  # DoubleEG B-ver1
+	    python3 VGammaMeson_cat.py $cat $type -41 $year >> $TMPDATFILE  # DoubleEG B-ver1
 	    python3 VGammaMeson_cat.py $cat $type -42 $year >> $TMPDATFILE  # DoubleEG B-ver2
 	    python3 VGammaMeson_cat.py $cat $type -43 $year >> $TMPDATFILE  # DoubleEG C
 	    python3 VGammaMeson_cat.py $cat $type -44 $year >> $TMPDATFILE  # DoubleEG D
 	    python3 VGammaMeson_cat.py $cat $type -45 $year >> $TMPDATFILE  # DoubleEG E
 	    python3 VGammaMeson_cat.py $cat $type -46 $year >> $TMPDATFILE  # DoubleEG F
 
-	    python3 VGammaMeson_cat.py $cat $type -52 $year >> $TMPDATFILE  # SingleEle B-ver1
-	    python3 VGammaMeson_cat.py $cat $type -53 $year >> $TMPDATFILE  # SingleEle B-ver2
-	    python3 VGammaMeson_cat.py $cat $type -54 $year >> $TMPDATFILE  # SingleEle C
-	    python3 VGammaMeson_cat.py $cat $type -55 $year >> $TMPDATFILE  # SingleEle D
-	    python3 VGammaMeson_cat.py $cat $type -56 $year >> $TMPDATFILE  # SingleEle E
+	    python3 VGammaMeson_cat.py $cat $type -51 $year >> $TMPDATFILE  # SingleEle B-ver1
+	    python3 VGammaMeson_cat.py $cat $type -52 $year >> $TMPDATFILE  # SingleEle B-ver2
+	    python3 VGammaMeson_cat.py $cat $type -53 $year >> $TMPDATFILE  # SingleEle C
+	    python3 VGammaMeson_cat.py $cat $type -54 $year >> $TMPDATFILE  # SingleEle D
+	    python3 VGammaMeson_cat.py $cat $type -55 $year >> $TMPDATFILE  # SingleEle E
 	    python3 VGammaMeson_cat.py $cat $type -56 $year >> $TMPDATFILE  # SingleEle F
 	fi
     fi
@@ -553,19 +576,22 @@ if [ $cat = "isWtag" ]; then
 	python3 VGammaMeson_cat.py $cat $type 1023 $year >> $TMPDATFILE #zh
 	python3 VGammaMeson_cat.py $cat $type 1024 $year >> $TMPDATFILE #ggzh
 
+	python3 VGammaMeson_cat.py $cat $type 1018 $year >> $TMPDATFILE #ttGH phi
+	python3 VGammaMeson_cat.py $cat $type 1028 $year >> $TMPDATFILE #ttGH rho
+
     fi
 
     if [[ "$isMC" == '1' ]]; then
 
-#	python3 VGammaMeson_cat.py $cat $type 2  $year >> $TMPDATFILE  # WG
-#	python3 VGammaMeson_cat.py $cat $type 1  $year >> $TMPDATFILE  # ZG
-#	python3 VGammaMeson_cat.py $cat $type 47 $year >> $TMPDATFILE  #TTG
+	python3 VGammaMeson_cat.py $cat $type 2  $year >> $TMPDATFILE  # WG
+	python3 VGammaMeson_cat.py $cat $type 1  $year >> $TMPDATFILE  # ZG
+	python3 VGammaMeson_cat.py $cat $type 47 $year >> $TMPDATFILE  #TTG
 
 #	python3 VGammaMeson_cat.py $cat $type 3  $year >> $TMPDATFILE  # Wjets
+#	python3 VGammaMeson_cat.py $cat $type 31 $year >> $TMPDATFILE # Wjets 0J
 #	python3 VGammaMeson_cat.py $cat $type 32 $year >> $TMPDATFILE # Wjets 1J
 #	python3 VGammaMeson_cat.py $cat $type 33 $year >> $TMPDATFILE # Wjets 2J
-#	python3 VGammaMeson_cat.py $cat $type 31 $year >> $TMPDATFILE # Wjets 0J
-	python3 VGammaMeson_cat.py $cat $type 0  $year >> $TMPDATFILE # DYjets
+#	python3 VGammaMeson_cat.py $cat $type 0  $year >> $TMPDATFILE # DYjets
 #	python3 VGammaMeson_cat.py $cat $type 34 $year >> $TMPDATFILE # DYjets 0J
 #	python3 VGammaMeson_cat.py $cat $type 35 $year >> $TMPDATFILE # DYjets 1J
 #	python3 VGammaMeson_cat.py $cat $type 36 $year >> $TMPDATFILE # DYjets 2J

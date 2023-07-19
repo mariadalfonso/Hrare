@@ -8,11 +8,11 @@ from utilsHrare import getMClist, getDATAlist, getSkims
 from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson
 from utilsHrare import loadCorrectionSet
 
-doSyst = False
+doSyst = True
 doMVA = True
 if sys.argv[1]=='isZtag': doMVA = False
 if sys.argv[1]=='isWtag': doMVA = False
-doPlot = True
+doPlot = False
 doTrigger = False
 doMesonMassSB=False
 
@@ -174,7 +174,7 @@ def selectionTAG(df, doSyst, isData):
 
     if isVBF or isVBFlow:
 
-        VBFcut = "mJJ>300 and dEtaJJ>3 and Y1Y2<0"
+        VBFcut = "mJJ>300 and dEtaJJ>3 and Y1Y2<0 and Jet_pt[goodJets][0]>40"
         if isVBFlow: VBFcut = "mJJ>250 and dEtaJJ>3. and Y1Y2<0"
 
 # tight means less PU
@@ -339,6 +339,7 @@ def dfHiggsCand(df,isData):
 
     if(isPhiCat=="true"):
 
+        print("PHI = ", GOODPHI)
         dfbase = (df.Filter("nphi>0").Define("goodMeson","({}".format(GOODPHI)+" && {}".format(isPhiCat)+")")
                   .Filter("Sum(goodMeson)>0", "one good Phi (ptPhi, validfit, ptTracks)")
                   .Define("goodMeson_pt", "phi_kin_pt[goodMeson]")
@@ -365,6 +366,7 @@ def dfHiggsCand(df,isData):
 
     if(isRhoCat=="true"):
 
+        print("RHO = ", GOODRHO)
         dfbase = (df.Filter("nrho>0").Define("goodMeson","({}".format(GOODRHO)+" && {}".format(isRhoCat)+")")
                   .Filter("Sum(goodMeson)>0", "one good Rho (ptPhi, validfit, ptTracks)")
                   .Define("goodMeson_pt", "rho_kin_pt[goodMeson]")
@@ -391,6 +393,7 @@ def dfHiggsCand(df,isData):
 
     if(isOmegaCat=="true"):
 
+        print("OMEGA = ", GOODOMEGA)
         dfbase = (df.Filter("nomega>0").Define("goodMeson","({}".format(GOODOMEGA)+" && {}".format(isOmegaCat)+")")
                   .Filter("Sum(goodMeson)>0", "one good Omega (ptPhi, validfit, ptTracks)")
                   .Define("goodMeson_pt", "omega_kin_pt[goodMeson]")
@@ -635,10 +638,7 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
     if(isZinv): MVAweights = "{}".format(getMVAFromJson(MVA, "isZinv" , sys.argv[2] ))
     print(MVAweights)
 
-    NVar = "0"
-    if(isGF): NVar = "12"
-    if(isVBF): NVar = "13"
-    if(isVBFlow): NVar = "13"
+    NVar = "10"
     if(isZinv): NVar = "10"
     print('NVAR=',NVar)
 
@@ -932,7 +932,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isGF: catTag = "GFcat"
 
     if True:
-        outputFile = "JUN20/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+        outputFile = "JUL3/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         print(outputFile)
         snapshotOptions = ROOT.RDF.RSnapshotOptions()
         snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
