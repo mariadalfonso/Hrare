@@ -54,7 +54,7 @@ V0prod = cms.EDProducer(
     maxD0pi0PreselectMass = cms.double(1.8),
     minD0PreselectMass = cms.double(1.6),
     maxD0PreselectMass = cms.double(2.1),
-    minD0StarMass  = cms.double(1.9), # D0Mass true mass 2007
+    minD0StarMass  = cms.double(1.92), # D0Mass true mass 2007
     maxD0StarMass  = cms.double(2.1),
     minK0StarMass  = cms.double(0.64), # K0Star true mass 892 (width = 50)
     maxK0StarMass  = cms.double(1.15),
