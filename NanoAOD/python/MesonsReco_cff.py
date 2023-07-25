@@ -25,6 +25,7 @@ V0prod = cms.EDProducer(
     muonCollection = cms.InputTag("linkedObjects","muons"),
     PFCandCollection = cms.InputTag("packedPFCandidates"),
     packedGenParticleCollection = cms.InputTag("packedGenParticles"),
+#    triggerResults = cms.InputTag( "TriggerResults", "", "HLT" ),
     minMuonPt  = cms.double(3.5),
     maxMuonEta = cms.double(1.4),
     minPionPt  = cms.double(1.0),
@@ -49,6 +50,8 @@ V0prod = cms.EDProducer(
     maxDsPreselectMass = cms.double(2.1),
     minD0Mass  = cms.double(1.75), # D0Mass true mass 1864 (width = 50)
     maxD0Mass  = cms.double(1.95),
+    minD0pi0PreselectMass = cms.double(0.6),
+    maxD0pi0PreselectMass = cms.double(1.8),
     minD0PreselectMass = cms.double(1.6),
     maxD0PreselectMass = cms.double(2.1),
     minD0StarMass  = cms.double(1.9), # D0Mass true mass 2007
@@ -385,6 +388,17 @@ D0McTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     variables = D0VariablesMC
 )
 
+D0pi0Table = D0Table.clone(
+    src = cms.InputTag("V0prod","D0pi0"),
+    name = cms.string("d0pi0"),
+    doc = cms.string("D0pi0s Variables")
+)
+D0pi0McTable = D0McTable.clone(
+    src = cms.InputTag("V0prodMC","D0pi0"),
+    name = cms.string("d0pi0"),
+    doc = cms.string("D0pi0s Variables")
+)
+
 # K0StarToKPi
 K0StarTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src=cms.InputTag("V0prod","K0Star"),
@@ -480,5 +494,5 @@ LambdaMcTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
 
 V0Sequence   = cms.Sequence(V0prod)
 V0McSequence = cms.Sequence(V0prodMC)
-V0Tables     = cms.Sequence(KsTable + RhosTable + OmegasTable + PhiTable + D0Table + K0StarTable + LambdaTable)
-V0McTables   = cms.Sequence(KsMcTable + RhosMcTable + OmegasMcTable + PhiMcTable + D0McTable + K0StarMcTable + LambdaMcTable)
+V0Tables     = cms.Sequence(KsTable + RhosTable + OmegasTable + PhiTable + D0Table + D0pi0Table + K0StarTable + LambdaTable)
+V0McTables   = cms.Sequence(KsMcTable + RhosMcTable + OmegasMcTable + PhiMcTable + D0McTable + D0pi0McTable + K0StarMcTable + LambdaMcTable)
