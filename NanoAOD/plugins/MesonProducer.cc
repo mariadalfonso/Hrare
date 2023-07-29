@@ -1352,7 +1352,8 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
 
   addP4.set( d0StarCand);
 
-  if ( d0StarCand.mass() < minD0StarMass_ or d0StarCand.mass() > maxD0StarMass_ )
+  // keep the lower bound to catch the cases with 0 photons
+  if ( d0StarCand.mass() < minD0Mass_ or d0StarCand.mass() > maxD0StarMass_ )
     return pat::CompositeCandidate();
 
   TLorentzVector tot_4;
