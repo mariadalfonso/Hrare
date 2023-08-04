@@ -1835,10 +1835,11 @@ MesonProducer::computeCandIsolation(const pat::PackedCandidate& pfCand1, const p
       if (particleType==0) {
 	if (pfCandIso.charge() == 0 ) continue; // for chargedIsolation
 	if (!pfCandIso.hasTrackDetails()) continue;
-      } else if (particleType==22) {
-	if (pfCandIso.charge() != 0 ) continue; // for neutralIsolation  MARIA
+      } else if (particleType==22 and pfCandIso.pdgId()==22) {
+	if (pfCandIso.charge() != 0 ) continue; // only photons for neutralIsolation
       } else {
-	if (pfCandIso.charge() != 0 ) continue; // for neutralIsolation  MARIA
+	if (pfCandIso.pdgId() == 22) continue; // only neutral hadrons
+	if (pfCandIso.charge() != 0 ) continue; // for neutralIsolation
       }
       if (pfCandIso.pt()<minPt) continue;
       if (pfCandIso.vertexRef().key()!=primaryVertexIndex) continue;
