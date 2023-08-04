@@ -3,6 +3,9 @@
 
 #include "TROOT.h"
 #include "TFile.h"
+#include "TString.h"
+#include <TTree.h>
+#include <TDirectory.h>
 #include "TH2.h"
 #include "TH3.h"
 #include "TF1.h"
@@ -342,7 +345,7 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
   // loop over all the phi/rho Cand
   for (unsigned int i=0; i<meson_pt.size(); i++) {
 
-    if(max(meson_trk1_pt[i], meson_trk2_pt[i]) < 20) continue;
+    // if(max(meson_trk1_pt[i], meson_trk2_pt[i]) < 20) continue;
 
     PtEtaPhiMVector p_meson(meson_pt[i], meson_eta[i], meson_phi[i], meson_mass[i]);
     if((p_meson + p_ph).M()<5.) continue; // object disambiguation, also remove the omega/tau resonances
@@ -704,7 +707,7 @@ float getPhiPolarizationAngle(
   const Vec_d& genPart_eta,
   const Vec_d& genPart_phi,
   const Vec_d& genPart_mass) {
-  
+
   ///// Part 1. Find the K+K- tracks from the phi
   int idxHiggs = -1;
   int idxPhi = -1;
@@ -747,5 +750,52 @@ float getPhiPolarizationAngle(
   }
 }
 
+TTree* myPolTree;
+
+void initPol(int mc, int year) {
+
+  TString prod = "";
+  if(mc==1027) prod = "ggH";
+  if(mc==1020) prod = "VBF";
+
+  const char* filename = Form("config/HRhoGammaAnalysis_Signal_Rho_%s_%d_M125_AOD.root",prod.Data(),year);
+  const char* dirname = Form("HRhoGammaAOD");
+  std::cout << "reading polarization file: " << filename << std::endl;
+
+  TFile* myFile = TFile::Open(filename, "READ");
+  TDirectory* myDir = static_cast<TDirectory*>(myFile->Get(dirname));
+  myPolTree = static_cast<TTree*>(myDir->Get("mytree"));
+  myPolTree->SetBranchStatus("*",0);
+  myPolTree->SetBranchStatus("event_number",1);
+  myPolTree->SetBranchStatus("theta_pol",1);
+
+}
+
+Vec_f getPolAngle(const ULong64_t event_) {
+
+  Vec_f angle = {};
+
+  std::vector<std::pair<Int_t, float>> evPolPair;
+  std::pair<Int_t, float> mypair;
+
+  Int_t event_var;
+  float theta_pol_var;
+  myPolTree->SetBranchAddress("event_number", &event_var);
+  myPolTree->SetBranchAddress("theta_pol", &theta_pol_var);
+
+  Long64_t nentries = myPolTree->GetEntries();
+  for (Long64_t i=0;i<nentries;i++) {
+    myPolTree->GetEntry(i);
+    if (event_ == event_var) {
+      mypair.first = event_var;
+      mypair.second = theta_pol_var;
+      //      std::cout << " event = " << event_var;
+      //      std::cout << " theta_pol = " << theta_pol_var << std::endl;
+      evPolPair.push_back(mypair);
+      angle.push_back(theta_pol_var);
+    }
+  }
+  return angle;
+}
 
 #endif

@@ -11,6 +11,9 @@ if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.s
 import correctionlib
 correctionlib.register_pyroot_binding()
 
+def loadPolarizationTree(mc,year):
+    ROOT.gInterpreter.ProcessLine('initPol(%d,%d);'% (mc,year))
+
 def loadCorrectionSet(year):
     ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.Declare('#include "config/mysf.h"')
@@ -388,7 +391,7 @@ def SwitchSample(argument,year):
         1028: (dirGluster02+"TTHtoRhoG_M-125_TuneCP5_13TeV_powheg-pythia8+"+campaign,505.2),
         #
         1030: (dirGluster02+"VBF_HtoK0starG_M-125_TuneCP5_PSWeights_13TeV_powheg-pythia8+"+campaign,3781.7),
-        1031: (dirGluster02+"WplusH_WtoLNu_HtoK0starG_M-125_TuneCP5_PSWeights_13TeV_powheg-pythia8+"+campaign,3*94.26),
+        1031: (dirGluster02+"WplusH_WToLNu_HtoK0starG_M-125_TuneCP5_PSWeights_13TeV_powheg-pythia8+"+campaign,3*94.26),
         1032: (dirGluster02+"WminusH_WtoLNu_HtoK0starG_M-125_TuneCP5_PSWeights_13TeV_powheg-pythia8+"+campaign,3*59.83),
         1033: (dirGluster02+"ZH_ZToLL_HtoK0starG_M-125_TuneCP5_PSWeights_13TeV_powheg-pythia8+"+campaign,3*(29.82 - 4.14)),
         1034: (dirGluster02+"GluGluZH_ZToLL_HtoK0starG_M-125_TuneCP5_PSWeights_13TeV_powheg-pythia8+"+campaign,3*4.14),
@@ -399,10 +402,10 @@ def SwitchSample(argument,year):
         #
         1039: (dirLocalNEW2+"ggh-hK0Stargamma-powheg_2"+"/NANOAOD_02",48580), #xsec = 3*9.426E-02 (xsec*ggH) * BR(HkstaraGamma)=1
         #
-        1040: (dirLocalNEW2+"ggh-homegagamma-powheg"+"/NANOAOD_03_test4",48580*0.892),
-        1041: (dirLocalNEW2+"ggh-hphipipipi0gamma-powheg"+"/NANOAOD_03_test4",48580*0.153),
-        1042: (dirLocalNEW2+"ggh-hD0StarKmPiPPi0gamma-powheg"+"/NANOAOD_03_test4",48580*0.14),
-        1043: (dirLocalNEW2+"ggh-hD0Stargamma-powheg"+"/NANOAOD_03_test4",48580*0.0389),
+        1040: (dirLocalNEW2+"ggh-homegagamma-powheg"+"/NANOAOD_03_test5",48580*0.892),
+        1041: (dirLocalNEW2+"ggh-hphipipipi0gamma-powheg"+"/NANOAOD_03_test5",48580*0.153),
+        1042: (dirLocalNEW2+"ggh-hD0StarKmPiPPi0gamma-powheg"+"/NANOAOD_03_test5",48580*0.14),
+        1043: (dirLocalNEW2+"ggh-hD0Stargamma-powheg"+"/NANOAOD_03_test5",48580*0.0389),
         #
         1054: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #

@@ -6,9 +6,10 @@ import json
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist, getSkims
 from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson
-from utilsHrare import loadCorrectionSet
+from utilsHrare import loadCorrectionSet,loadPolarizationTree
 
 doSyst = True
+doPol = False
 doMVA = True
 if sys.argv[1]=='isZtag': doMVA = False
 if sys.argv[1]=='isWtag': doMVA = False
@@ -159,7 +160,7 @@ def selectionTAG(df, doSyst, isData):
                  .Define("V_mass","Sum(goodMuons)>0 ? mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], DeepMETResolutionTune_pt, DeepMETResolutionTune_phi) : mt(Electron_pt[goodElectrons][0], Electron_phi[goodElectrons][0], DeepMETResolutionTune_pt, DeepMETResolutionTune_phi)")
                  .Define("Z_veto", "Sum(goodElectrons)==1 ? Minv2(Electron_pt[goodElectrons][0], Electron_eta[goodElectrons][0], Electron_phi[goodElectrons][0], Electron_mass[goodElectrons][0], photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]]).first: -1")
                  .Filter("abs(Z_veto-91) > 10","kill the Z recontructed as gamma + electron")
-                 .Filter("DeepMETResolutionTune_pt>15","MET>15")
+#                 .Filter("DeepMETResolutionTune_pt>15","MET>15")
 #                 .Filter("V_mass>15","MT>15")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Define("Mu1_hasTriggerMatch", "hasTriggerMatch(Muon_eta[goodMuons][0], Muon_phi[goodMuons][0], TrigObj_eta, TrigObj_phi)")
@@ -267,7 +268,9 @@ def selectionTAG(df, doSyst, isData):
                  .Define("goodJets","{}".format(GOODJETS))
                  .Define("nGoodJets","Sum(goodJets)*1.0f")
                  .Define("SoftActivityJetNjets5F","SoftActivityJetNjets5*1.0f")
-                 .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and Jet_pt[goodJets][0]<30) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]>0) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]<0 and abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])<3 )","0 or 1 jets (pt20, |eta|<4.7) or >=2 with dEta<3")
+#                 .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and Jet_pt[goodJets][0]<30) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]>0) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]<0 and abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])<3 )","0 or 1 jets (pt20, |eta|<4.7) or >=2 with dEta<3")
+                 .Define("mJJ","Sum(goodJets)>=2?Minv(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets]):0.")
+                 .Filter("Sum(goodJets)<2 or (Sum(goodJets)>=2 and Jet_pt[goodJets][0]<30) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]>0) or (Sum(goodJets)>=2 and Jet_eta[goodJets][0]*Jet_eta[goodJets][1]<0 and abs(Jet_eta[goodJets][0] - Jet_eta[goodJets][1])<3 ) or (Sum(goodJets)>=2 and mJJ<300) ","0 or 1 jets (pt20, |eta|<4.7) or >=2 with dEta<3 or >=2 with mJJ<300")
                  )
         return dftag
 
@@ -303,7 +306,6 @@ def dfGammaMeson(df,PDType):
              .Define("goodPhotons_energyErr", "Photon_energyErr[goodPhotons]")
              .Define("goodPhotons_isScEtaEB", "Photon_isScEtaEB[goodPhotons]")
              .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
-#             .Define("jet_mask", "cleaningMask(Photon_jetIdx[loosePhotons],nJet)")
              )
     return dfOBJ
 
@@ -474,6 +476,7 @@ def dfHiggsCand(df,isData):
     if isOmegaCat=="true": genMatchPDFNum='223'
 
     dfFinal = (dfbase.Define("index_pair","HiggsCandFromRECO(goodMeson_pt, goodMeson_eta, goodMeson_phi, goodMeson_mass, goodMeson_trk1_pt, goodMeson_trk2_pt, wrongMeson_pt, wrongMeson2_pt, goodPhotons_pt, goodPhotons_eta, goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
+#               .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
                .Define("jet_mask2", "cleaningJetFromOBJ(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
                .Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
                .Define("photon_pt", "(index_pair[1]!= -1) ? goodPhotons_pt[index_pair[1]]: 0.f")
@@ -678,6 +681,30 @@ def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
 
     return dfComm
 
+def callPolarization(dfcandtag, mc):
+
+    if (mc >= 1010 and mc <= 1018):
+        dfNew = (dfcandtag.Define('theta', 'getPhiPolarizationAngle(GenPart_pdgId, GenPart_genPartIdxMother, GenPart_pt, GenPart_eta, GenPart_phi, GenPart_mass,event)')
+                 .Define('isHPhiKaon', 'isHPhiKaon(GenPart_pdgId, GenPart_genPartIdxMother)')
+                 .Define('isHPhiPhiKaon', 'isHPhiPhiKaon(GenPart_pdgId, GenPart_genPartIdxMother)')
+                 .Define('fourvectors', 'getHPhiKaonFourVectors(GenPart_pdgId, GenPart_genPartIdxMother, GenPart_pt, GenPart_eta, GenPart_phi, GenPart_mass)')
+                 .Define('ditrack_pt', 'fourvectors[0]')
+                 .Define('ditrack_eta', 'fourvectors[1]')
+                 .Define('ditrack_phi', 'fourvectors[2]')
+                 .Define('ditrack_mass', 'fourvectors[3]')
+                 .Define('genphi_pt', 'fourvectors[4]')
+                 .Define('genphi_eta', 'fourvectors[5]')
+                 .Define('genphi_phi', 'fourvectors[6]')
+                 .Define('genphi_mass', 'fourvectors[7]')
+                 )
+    elif (mc >= 1020 and mc <= 1028):
+        dfNew = (dfcandtag.Define('theta',"getPolAngle(event)")
+                 )
+    else:
+        dfNew = dfcandtag
+
+    return dfNew
+
 def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
 
     MVAweights = ""
@@ -759,8 +786,8 @@ def DefineContent(branchList,isData):
             "goodPhotons_eta",
             "goodPhotons_pfRelIso03_all",
             "goodPhotons_hoe",
-            "goodPhotons_r9",
-            "goodPhotons_sieie",
+#            "goodPhotons_r9",
+#            "goodPhotons_sieie",
             "goodPhotons_mvaID",
             "goodPhotons_energyErr",
             "nPhoton",
@@ -787,6 +814,12 @@ def DefineContent(branchList,isData):
             "lumiIntegrated",
     ]:
         branchList.push_back(branchName)
+
+    if doPol:
+        for branchName in [
+                "theta",
+        ]:
+            branchList.push_back(branchName)
 
     if (isData == "false"):
         for branchName in [
@@ -913,7 +946,6 @@ def DefineContent(branchList,isData):
 
     return branchList
 
-
 def analysis(df,year,mc,sumw,isData,PDType):
 
     if doTrigger:
@@ -926,8 +958,11 @@ def analysis(df,year,mc,sumw,isData,PDType):
         dfOBJ = dfGammaMeson(dfCom,PDType)
         dfbase = dfHiggsCand(dfOBJ,isData)
         dfcandtag = selectionTAG(dfbase,doSyst,isData)
+        if (doPol and mc>1000):
+            dfpol_ = callPolarization(dfcandtag,mc)
+        else: dfpol_ = dfcandtag
         if (doSyst and isData == "false"):
-            dfpreFINAL = dfwithSYST(dfcandtag,year)
+            dfpreFINAL = dfwithSYST(dfpol_,year)
         else:
             dfpreFINAL = dfcandtag.Define("w_allSF", "w")
 
@@ -995,8 +1030,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isGF: catTag = "GFcat"
 
     if True:
-#        outputFile = "JUL3_CRmass/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
-        outputFile = "JUL12/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+        outputFile = "JUL27/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         print(outputFile)
         snapshotOptions = ROOT.RDF.RSnapshotOptions()
         snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
@@ -1103,6 +1137,7 @@ def readMCSample(year,sampleNOW):
     df = ROOT.RDataFrame("Events", files)
 
     sumW = computeWeigths(df, files, sampleNOW, year, True)
+    if (doPol and sampleNOW>1000): loadPolarizationTree(sampleNOW,year)
     loadCorrectionSet(year)
     analysis(df,year,sampleNOW,sumW,"false","NULL")
 
