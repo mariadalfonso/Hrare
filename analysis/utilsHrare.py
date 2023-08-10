@@ -12,7 +12,7 @@ import correctionlib
 correctionlib.register_pyroot_binding()
 
 def loadPolarizationTree(mc,year):
-    ROOT.gInterpreter.ProcessLine('initPol(%d,%d);'% (mc,year))
+    ROOT.gInterpreter.ProcessLine('initPol(%d,%d,%d);'% (mc,year,ROOT.GetThreadPoolSize()))
 
 def loadCorrectionSet(year):
     ROOT.gInterpreter.Load("config/mysf.so")

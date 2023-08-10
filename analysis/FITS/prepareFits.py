@@ -259,11 +259,11 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       if (doSignal) :
 #         wei = ev.w * ev.lumiIntegrated
          wei = ev.w_allSF * ev.lumiIntegrated
-         if ((nameSig=='WH' or nameSig=='WHl') and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022)): #W
+         if ((nameSig=='WH' or nameSig=='WHl') and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022 or ev.mc==1031 or ev.mc==1032)): #W
             h.Fill( var, wei )
-         if ((nameSig=='ZH' or nameSig=='ZHl') and (ev.mc==1013 or ev.mc==1023 or ev.mc==1014 or ev.mc==1024)): #Z
+         if ((nameSig=='ZH' or nameSig=='ZHl') and (ev.mc==1013 or ev.mc==1023 or ev.mc==1014 or ev.mc==1024 or ev.mc==1033 or ev.mc==1034)): #Z
             h.Fill( var, wei )
-         if ((nameSig=='TTH') and (ev.mc==1018 or ev.mc==1028)): #TTH
+         if ((nameSig=='TTH') and (ev.mc==1018 or ev.mc==1028 or ev.mc==1038)): #TTH
             h.Fill( var, wei )
          if ((nameSig=='VBFH' or nameSig=='VBFHlow') and (ev.mc==1010 or ev.mc==1020 or ev.mc==1030)): #VBF
             h.Fill( var, wei )

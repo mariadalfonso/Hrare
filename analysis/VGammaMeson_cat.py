@@ -5,8 +5,9 @@ import json
 
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist, getSkims
-from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson
-from utilsHrare import loadCorrectionSet,loadPolarizationTree
+from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson, getTriggerFromJson
+from utilsHrare import loadCorrectionSet, loadPolarizationTree
+import tmva_helper_xml
 
 doSyst = True
 doPol = False
@@ -300,8 +301,9 @@ def dfGammaMeson(df,PDType):
              .Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
              .Define("goodPhotons_pfRelIso03_chg", "Photon_pfRelIso03_chg[goodPhotons]")
              .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
-             .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
-             .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
+#             .Define("goodPhotons_pixelSeed", "Photon_pixelSeed[goodPhotons]")
+#             .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
+#             .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
              .Define("goodPhotons_mvaID", "Photon_mvaID[goodPhotons]")
              .Define("goodPhotons_energyErr", "Photon_energyErr[goodPhotons]")
              .Define("goodPhotons_isScEtaEB", "Photon_isScEtaEB[goodPhotons]")
@@ -378,7 +380,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_DR","DeltaR(phi_trk1_eta[goodMeson],phi_trk2_eta[goodMeson],phi_trk1_phi[goodMeson],phi_trk2_phi[goodMeson])")
                   .Define("wrongMeson","({}".format(GOODRHO)+")")
                   .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? rho_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
-                  .Define("wrongMeson2_pt", "ROOT::VecOps::RVec<float>(0.f)" )
+                  .Define("wrongMeson2","({}".format(GOODK0STAR)+")")
+                  .Define("wrongMeson2_pt","Sum(wrongMeson2) > 0 ? K0Star_kin_pt[wrongMeson2]: ROOT::VecOps::RVec<float>(0.f)")
                   )
 
     if(isRhoCat=="true"):
@@ -408,7 +411,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_DR","DeltaR(rho_trk1_eta[goodMeson],rho_trk2_eta[goodMeson],rho_trk1_phi[goodMeson],rho_trk2_phi[goodMeson])")
                   .Define("wrongMeson","({}".format(GOODPHI)+")")
                   .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? phi_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
-                  .Define("wrongMeson2_pt", "ROOT::VecOps::RVec<float>(0.f)" )
+                  .Define("wrongMeson2","({}".format(GOODK0STAR)+")")
+                  .Define("wrongMeson2_pt","Sum(wrongMeson2) > 0 ? K0Star_kin_pt[wrongMeson2]: ROOT::VecOps::RVec<float>(0.f)")
                   )
 
     if(isK0StarCat=="true"):
@@ -698,7 +702,7 @@ def callPolarization(dfcandtag, mc):
                  .Define('genphi_mass', 'fourvectors[7]')
                  )
     elif (mc >= 1020 and mc <= 1028):
-        dfNew = (dfcandtag.Define('theta',"getPolAngle(event)")
+        dfNew = (dfcandtag.Define('theta',"getPolAngle(event,rdfslot_)")
                  )
     else:
         dfNew = dfcandtag
@@ -714,20 +718,20 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
     if(isZinv): MVAweights = "{}".format(getMVAFromJson(MVA, "isZinv" , sys.argv[2] ))
     print(MVAweights)
 
+    tmva_helper = tmva_helper_xml.TMVAHelperXML(MVAweights)
+    print(tmva_helper.variables)
+
     NVar = "10"
     if(isZinv): NVar = "10"
     print('NVAR=',NVar)
 
-    s ='''
-    TMVA::Experimental::RReader model("{0}");
-    computeModel = TMVA::Experimental::Compute<{1}, float>(model);
-    '''
-
-    print(s.format(MVAweights,NVar))
-    ROOT.gInterpreter.ProcessLine(s.format(MVAweights,NVar))
-
-    variables = ROOT.model.GetVariableNames()
-    print(variables)
+#    s ='''
+#    TMVA::Experimental::RReader model("{0}");
+#    computeModel = TMVA::Experimental::Compute<{1}, float>(model);
+#    '''
+#    print(s.format(MVAweights,NVar))
+#    ROOT.gInterpreter.ProcessLine(s.format(MVAweights,NVar))
+#    variables = ROOT.model.GetVariableNames()
 
     dfWithMVA = (df.Define("HCandPT__div_sqrtHCandMass", "(HCandMass>0) ? HCandPT/sqrt(HCandMass): 0.f")
                .Define("HCandPT__div_HCandMass", "(HCandMass>0) ? HCandPT/HCandMass: 0.f")
@@ -767,8 +771,10 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
                .Define("dEtaGammaMesonCand__div_HCandMass","(HCandMass>0) ? dEtaGammaMesonCand/HCandMass: 0.f")
                # both GGH and VBF
                .Define("dEtaGammaMesonCand__div_sqrtHCandMass","(HCandMass>0) ? dEtaGammaMesonCand/sqrt(HCandMass): 0.f")
-               .Define("MVAdisc", ROOT.computeModel, list(variables))
-               )
+#               .Define("MVAdisc", ROOT.computeModel, list(variables))
+                )
+
+    dfWithMVA = tmva_helper.run_inference(dfWithMVA,"MVAdisc")
 
     return dfWithMVA
 
@@ -983,6 +989,8 @@ def analysis(df,year,mc,sumw,isData,PDType):
                 "dEtaJJ",
                 "dPhiJJ",
                 "Y1Y2",
+                "dPhiGammaMesonCand",
+                "dEtaGammaMesonCand",
                 #
                 "w",
                 "wraw",
@@ -997,24 +1005,57 @@ def analysis(df,year,mc,sumw,isData,PDType):
 
         for branchName in [
                 "triggerAna",
+                "TrigObj_filterBits",
+                "TrigObj_eta",
+                "TrigObj_pt",
+                "TrigObj_id",
         ]:
             branchList.push_back(branchName)
+
+        for branchName in [
+                "index_pair",
+                "goodPhotons_pt",
+                "goodPhotons_eta",
+                "goodPhotons_pfRelIso03_all",
+#                "goodPhotons_pixelSeed",
+#                "goodPhotons_r9",
+#                "goodPhotons_sieie",
+                "goodPhotons_hoe",
+                "goodPhotons_mvaID",
+
+                "goodMeson_mass",
+                "goodMeson_eta",
+                "goodMeson_iso",
+                "goodMeson_trk1_pt",
+                "goodMeson_trk2_pt",
+                "goodMeson_trk1_eta",
+                "goodMeson_trk2_eta",
+                "goodMeson_vtx_chi2dof",
+                "goodMeson_vtx_prob",
+                "goodMeson_bestVtx_idx",
+                "goodMeson_bestVtx_Z",
+                "goodMeson_bestVtx_X",
+                "goodMeson_bestVtx_Y",
+
+        ]:
+            branchList.push_back(branchName)
+
     else:
 
         branchList = DefineContent(branchList,isData)
 
-    if(isRhoCat=="true"):
-        for branchName in [
-                "goodMeson_isoPho",
-                "goodMeson_isoNeuHad",
-        ]:
-            branchList.push_back(branchName)
+        if(isRhoCat=="true"):
+            for branchName in [
+                    "goodMeson_isoPho",
+                    "goodMeson_isoNeuHad",
+            ]:
+                branchList.push_back(branchName)
 
-    if(isK0StarCat=="true"):
-        for branchName in [
-                "K0Star_mask",
-        ]:
-            branchList.push_back(branchName)
+        if(isK0StarCat=="true"):
+            for branchName in [
+                    "K0Star_mask",
+            ]:
+                branchList.push_back(branchName)
 
     catM = ""
     if(isPhiCat=="true"): catM = "PhiCat"

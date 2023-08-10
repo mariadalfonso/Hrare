@@ -750,9 +750,9 @@ float getPhiPolarizationAngle(
   }
 }
 
-TTree* myPolTree;
+std::vector<TTree*> myPolTree;
 
-void initPol(int mc, int year) {
+void initPol(int mc, int year, int nSlot) {
 
   TString prod = "";
   if(mc==1027) prod = "ggH";
@@ -764,14 +764,19 @@ void initPol(int mc, int year) {
 
   TFile* myFile = TFile::Open(filename, "READ");
   TDirectory* myDir = static_cast<TDirectory*>(myFile->Get(dirname));
-  myPolTree = static_cast<TTree*>(myDir->Get("mytree"));
-  myPolTree->SetBranchStatus("*",0);
-  myPolTree->SetBranchStatus("event_number",1);
-  myPolTree->SetBranchStatus("theta_pol",1);
+  TTree* myTree;
+  myTree = static_cast<TTree*>(myDir->Get("mytree"));
+  myTree->SetBranchStatus("*",0);
+  myTree->SetBranchStatus("event_number",1);
+  myTree->SetBranchStatus("theta_pol",1);
 
+  for ( int i=0; i<nSlot;i++) {
+    TTree *newtree = myTree->CloneTree(0);
+    myPolTree.push_back(newtree);
+  }
 }
 
-Vec_f getPolAngle(const ULong64_t event_) {
+Vec_f getPolAngle(const ULong64_t event_, int nSlot) {
 
   Vec_f angle = {};
 
@@ -780,12 +785,12 @@ Vec_f getPolAngle(const ULong64_t event_) {
 
   Int_t event_var;
   float theta_pol_var;
-  myPolTree->SetBranchAddress("event_number", &event_var);
-  myPolTree->SetBranchAddress("theta_pol", &theta_pol_var);
+  myPolTree[nSlot]->SetBranchAddress("event_number", &event_var);
+  myPolTree[nSlot]->SetBranchAddress("theta_pol", &theta_pol_var);
 
-  Long64_t nentries = myPolTree->GetEntries();
+  Long64_t nentries = myPolTree[nSlot]->GetEntries();
   for (Long64_t i=0;i<nentries;i++) {
-    myPolTree->GetEntry(i);
+    myPolTree[nSlot]->GetEntry(i);
     if (event_ == event_var) {
       mypair.first = event_var;
       mypair.second = theta_pol_var;
