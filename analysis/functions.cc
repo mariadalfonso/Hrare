@@ -99,6 +99,16 @@ Vec_b cleaningPair(const ULong64_t event, const UInt_t nK0Star,
 
 }
 
+bool firedTrigger(Vec_i id, int v1, Vec_f pt, float v2){
+
+  bool fired = false;
+  for (unsigned int i = 0; i < id.size(); i++){
+    if (id[i]==v1 && pt[i]>v2) fired = true;
+  }
+  return fired;
+}
+
+
 Vec_f getMaximum(Vec_f v1, Vec_f v2){
 	Vec_f output = {};
 	if (!v1.empty() && !v2.empty() && v1.size() == v2.size()){
@@ -750,57 +760,65 @@ float getPhiPolarizationAngle(
   }
 }
 
-std::vector<TTree*> myPolTree;
+std::vector<std::vector<float>> theta_pol_dict_VEC;
 
 void initPol(int mc, int year, int nSlot) {
 
   TString prod = "";
-  if(mc==1027) prod = "ggH";
-  if(mc==1020) prod = "VBF";
+  if(mc==1027 or mc==1017 or mc==1037) prod = "ggH";
+  if(mc==1020 or mc==1010 or mc==1030) prod = "VBF";
+  if(mc==1022 or mc==1012 or mc==1032) prod = "WminusH_WToLNu";
+  if(mc==1021 or mc==1011 or mc==1031) prod = "WplusH_WToLNu";
+  if(mc==1023 or mc==1013 or mc==1033) prod = "ZH_ZToLL";
+  if(mc==1024 or mc==1014 or mc==1034) prod = "ggZH_ZToLL";
+  if(mc==1028 or mc==1018 or mc==1038) prod = "TTH";
 
-  const char* filename = Form("config/HRhoGammaAnalysis_Signal_Rho_%s_%d_M125_AOD.root",prod.Data(),year);
-  const char* dirname = Form("HRhoGammaAOD");
+  TString meson = "";
+  if(mc>=1010 and mc<=1018) meson = "Phi";
+  if(mc>=1020 and mc<=1028) meson = "Rho";
+  if(mc>=1030 and mc<=1038) meson = "K0s";
+
+  const char* filename = Form("/work/submit/mariadlf/Hrare/polFiles/H%sGammaAnalysis_Signal_%s_%s_%d_M125_AOD.root",meson.Data(),meson.Data(),prod.Data(),year);
+  const char* dirname = Form("H%sGammaAOD",meson.Data());
   std::cout << "reading polarization file: " << filename << std::endl;
 
   TFile* myFile = TFile::Open(filename, "READ");
   TDirectory* myDir = static_cast<TDirectory*>(myFile->Get(dirname));
-  TTree* myTree;
-  myTree = static_cast<TTree*>(myDir->Get("mytree"));
+  TTree* myTree = static_cast<TTree*>(myDir->Get("mytree"));
   myTree->SetBranchStatus("*",0);
   myTree->SetBranchStatus("event_number",1);
   myTree->SetBranchStatus("theta_pol",1);
 
-  for ( int i=0; i<nSlot;i++) {
-    TTree *newtree = myTree->CloneTree(0);
-    myPolTree.push_back(newtree);
-  }
-}
-
-Vec_f getPolAngle(const ULong64_t event_, int nSlot) {
-
-  Vec_f angle = {};
-
-  std::vector<std::pair<Int_t, float>> evPolPair;
-  std::pair<Int_t, float> mypair;
+  std::vector<float> theta_pol_dict(3000000, 0.); // initialize with so that sin of 0 is 1.
 
   Int_t event_var;
   float theta_pol_var;
-  myPolTree[nSlot]->SetBranchAddress("event_number", &event_var);
-  myPolTree[nSlot]->SetBranchAddress("theta_pol", &theta_pol_var);
 
-  Long64_t nentries = myPolTree[nSlot]->GetEntries();
-  for (Long64_t i=0;i<nentries;i++) {
-    myPolTree[nSlot]->GetEntry(i);
-    if (event_ == event_var) {
-      mypair.first = event_var;
-      mypair.second = theta_pol_var;
-      //      std::cout << " event = " << event_var;
-      //      std::cout << " theta_pol = " << theta_pol_var << std::endl;
-      evPolPair.push_back(mypair);
-      angle.push_back(theta_pol_var);
-    }
+  myTree->SetBranchAddress("event_number", &event_var);
+  myTree->SetBranchAddress("theta_pol", &theta_pol_var);
+
+  Long64_t nentries = myTree->GetEntries();
+  for (Long64_t i=0;i<nentries;++i) {
+    myTree->GetEntry(i);
+    theta_pol_dict.at(int(event_var)) = theta_pol_var;
   }
-  return angle;
+
+  for ( int i=0; i<nSlot;i++) {
+    theta_pol_dict_VEC.push_back(theta_pol_dict);
+  }
+  std::cout << " theta_pol_dict_VEC.size() " << theta_pol_dict_VEC.size() << std::endl;
+
+  myTree->Delete();
+  myFile->Close();
+  delete myFile;
+
+}
+
+float getPolAngle(const ULong64_t event_, int nSlot) {
+
+  auto theta_pol_dict = theta_pol_dict_VEC[nSlot];
+  return theta_pol_dict[event_];
+
 }
 
 #endif

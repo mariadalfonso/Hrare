@@ -84,11 +84,13 @@ def plot(itemTRG, item, mytree):
          #VBFtrigger
          var = ev.mJJ
          offline = ev.mJJ>300 and ev.dEtaJJ>3 and ev.Y1Y2<0 and abs(ev.HCandMass-125)<25         
-         
-      if itemTRG == 0 and offline: h.Fill( var , ev.w )
-      if itemTRG == 1 and ev.triggerAna>0 and offline: h.Fill( var , ev.w )
-      if itemTRG == 2 and ev.triggerPhoton>0 and offline: h.Fill( var , ev.w )      
-      if itemTRG == 3 and ev.triggerPhotonIso>0 and offline: h.Fill( var , ev.w )      
+
+
+      weight = (3./2)*math.sin(ev.theta)*math.sin(ev.theta)*ev.w_allSF*ev.lumiIntegrated
+      if itemTRG == 0 and offline: h.Fill( var , weight )
+      if itemTRG == 1 and ev.triggerAna>0 and offline: h.Fill( var , weight )
+      if itemTRG == 2 and ev.triggerPhoton>0 and offline: h.Fill( var , weight )
+      if itemTRG == 3 and ev.triggerPhotonIso>0 and offline: h.Fill( var , weight )
 #      if item == 3 and ev.triggerPhoton>0 and offline: h.Fill( var , ev.w )
 #      if item == 2 and ev.triggerVBF>0 and offline: h.Fill( var , ev.w )
 

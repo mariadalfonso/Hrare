@@ -54,7 +54,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    greenDark = (98, 172, 141)
    gold = (212 ,175, 55)
    violet = (181 ,100, 227)
- 
+
    ####
 
    df = RDataFrame(mytree)
@@ -130,7 +130,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 208 : var = "goodPhotons_pfRelIso03_all[index_pair[1]]"
    if item == 209 : var = "goodPhotons_sieie[index_pair[1]]"
    if item == 210 : var = "goodPhotons_mvaID[index_pair[1]]"
-   if item == 101 : var = "goodPhotons_pixelSeed[index_pair[1]]"
+   if item == 211 : var = "goodPhotons_pixelSeed[index_pair[1]]"
    ## KS plots
    if item == 102 : var = "goodKs_mass[index_pair[0]]"
    if item == 103 : var = "goodKs_pt[index_pair[0]]"
@@ -138,6 +138,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    ## Meson plots
    if item == 2 : var = "goodMeson_mass[index_pair[0]]"
    if item == 3 : var = "goodMeson_pt[index_pair[0]]"
+   if item == 202: var = "goodMeson_mass[index_pair[0]]/goodMeson_pt[index_pair[0]]"
    #leading normalized
    if item == 30 : var = "max(goodMeson_trk1_pt[index_pair[0]],goodMeson_trk2_pt[index_pair[0]])/goodMeson_pt[index_pair[0]]"
    #subleading normalize
@@ -157,6 +158,10 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 39 : var = "goodMeson_trk2_pt[index_pair[0]]" # K0Star_kaon_pt
    if item == 16 : var = "abs(goodMeson_DR[index_pair[0]])"
    if item == 10 : var = "(abs(goodMeson_DR[index_pair[0]])*goodMeson_pt[index_pair[0]])/(2*goodMeson_mass[index_pair[0]])"
+   if item == 80 : var = "goodMeson_photon_pt[index_pair[0]]"
+   if item == 81 : var = "goodMeson_DR_trk1Ph[index_pair[0]]"
+   if item == 82 : var = "goodMeson_charged_mass[index_pair[0]]"
+   if item == 83 : var = "goodMeson_charged_pt[index_pair[0]]"
    if item == 7 : var = "goodMeson_sipPV[index_pair[0]]"
    if item == 8 : var = "goodMeson_doca_prob[index_pair[0]]"
    if item == 9 : var = "goodMeson_vtx_prob[index_pair[0]]/goodMeson_vtx_chi2dof[index_pair[0]]"
@@ -202,7 +207,8 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 95: var = "PV_npvsGood"
    if item == 96: var = "goodMeson_bestVtx_idx[index_pair[0]]"
 
-   df_common = df.Define("var","{}".format(var)).Define("offlineSel","{}".format(offline)).Define("weight","mc>=0 ? w_allSF*lumiIntegrated:1").Filter("offlineSel")
+   weightPol = "(3./2)*sin(theta)*sin(theta)"
+   df_common = df.Define("var","{}".format(var)).Define("offlineSel","{}".format(offline)).Define("weight","(mc>=0 and mc < 1000) ? w_allSF*lumiIntegrated: (mc>=1000 and mc<=1039) ? w_allSF*lumiIntegrated*{0}:1".format(weightPol)).Filter("offlineSel")
 
    hZinv = df_common.Filter("mc>=37 and mc<=44").Histo1D(("hZinv","h",nbin, low, high),"var","weight")
    hDY = df_common.Filter("mc==34 or mc==35 or mc==36 or mc==0").Histo1D(("hDY","h",nbin, low, high),"var","weight")
@@ -221,7 +227,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    hWH = df_common.Filter("mc==1011 or mc==1012 or mc==1021 or mc==1022 or mc==1031 or mc==1032").Histo1D(("hWH","h",nbin, low, high),"var","weight")
    hTTH = df_common.Filter("mc==1018 or mc==1028 or mc==1038").Histo1D(("hTTH","h",nbin, low, high),"var","weight")
    hVBFH = df_common.Filter("(mc==1010 or mc==1020 or mc==1030)").Histo1D(("hVBFH","h",nbin, low, high),"var","weight")
-   hggH = df_common.Filter("(mc==1017 or mc==1027 or mc==1037)").Histo1D(("hggH ","h",nbin, low, high),"var","weight")
+   hggH = df_common.Filter("(mc==1017 or mc==1027 or mc==1037 or mc==1040 or mc==1041 or mc==1042  or mc==1043)").Histo1D(("hggH ","h",nbin, low, high),"var","weight")
    if False: hData = df_common.Filter("mc<0").Histo1D(("hData","h",nbin, low, high),"var","weight")
    else:
        print('HELLO')

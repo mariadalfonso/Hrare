@@ -18,16 +18,13 @@ mesonCat = sys.argv[2]
 year = '_2018'
 #year = '_all'
 
-if (category=='_GFcat' or category=='_VBFcatlow' or category=='_VBFcat'):
-   dirLOCAL_= '/work/submit/mariadlf/JUL22_1Thread/'
-#   dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/JUL22_1Thread/'
-else:
-   dirLOCAL_= '/work/submit/mariadlf/JUL22/'
+#myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTSmarti/"
+#dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AUG29Marti/'
 
-if (category=='_Wcat' and mesonCat == '_K0StarCat'):
-   dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/JUL27/'
+myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTS/"
+dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AUG10pol/'
 
-if (category=='_Zinvcat'): directory4 = '/work/submit/mariadlf/Hrare/DEC28/2018/'
+if (category=='_Zinvcat'): directory4 = '/work/submit/mariadlf/Hrare/DEC28_ZinvLast/2018/'
 if (category=='_GFcat'): directory4 = dirLOCAL_+'2018/'
 if (category=='_VBFcatlow'): directory4 = dirLOCAL_+'2018/'
 if (category=='_VBFcat'):
@@ -192,7 +189,7 @@ def plot(item, nbin, low, high, doLog):
    '''
    if item==14 or item==15 or item==22: stack.SetMaximum(2*max(hData.GetValue().GetMaximum(), hWH.GetValue().GetMaximum(),hZH.GetValue().GetMaximum(), hVBFH.GetValue().GetMaximum(), hZinvH.GetValue().GetMaximum()))
    if item==102: stack.SetMaximum(10*max(hWG.GetValue().GetMaximum(),hZG.GetValue().GetMaximum(), hGJet.GetValue().GetMaximum()))
-   if item==1 or item==101 or item==51 or item==52 or item==23 or item==24 or item==12 or item==41: stack.SetMaximum(2*max(hData.GetValue().GetMaximum(), hWH.GetValue().GetMaximum(),hZH.GetValue().GetMaximum(), hVBFH.GetValue().GetMaximum(), hZinvH.GetValue().GetMaximum(), hggH.GetValue().GetMaximum()))
+   if item==1 or item==201 or item==51 or item==52 or item==23 or item==24 or item==12 or item==41: stack.SetMaximum(2*max(hData.GetValue().GetMaximum(), hWH.GetValue().GetMaximum(),hZH.GetValue().GetMaximum(), hVBFH.GetValue().GetMaximum(), hZinvH.GetValue().GetMaximum(), hggH.GetValue().GetMaximum()))
    if item==2 and category == '_GFcat': stack.SetMaximum(30000)     #Meson Mass
    if item==17 and mesonCat == '_RhoCat': stack.SetMaximum(5000)    # MJJ
    if item==17 and mesonCat == '_PhiCat': stack.SetMaximum(600)    # MJJ
@@ -218,10 +215,12 @@ def plot(item, nbin, low, high, doLog):
    if item==21 and mesonCat == "_PhiCat": hData.GetXaxis().SetTitle("#sigmaM_{#phi}/M_{#phi}")
    if item==21 and mesonCat == "_RhoCat": hData.GetXaxis().SetTitle("#sigmaM_{#rho}/M_{#rho}")
    if item==21 and mesonCat == "_K0StarCat": hData.GetXaxis().SetTitle("#sigmaM_{K^{0*}}/M_{K^{0*}}")
+   if item==21 and mesonCat == "_Omega3PiCat": hData.GetXaxis().SetTitle("#sigmaM_{#omega}/M_{#omega}")
+   if item==21 and mesonCat == "_Phi3PiCat": hData.GetXaxis().SetTitle("#sigmaM_{#phi}/M_{#phi}")
    if item==41: hData.GetXaxis().SetTitle("p_{T}^{#phi,#gamma}")
    if item==42: hData.GetXaxis().SetTitle("MVA discriminator")
    #   if item==35 or item==9 or item==21:
-   if item==35 or item==21:
+   if item==35 or item==36 or item==21:
       if hData: hData.GetYaxis().SetTitle("normalized events")
       if hData: hData.Scale(1./hData.Integral())
       if hData and item==35: hData.GetValue().SetMaximum(100*hData.GetMaximum())
@@ -238,7 +237,7 @@ def plot(item, nbin, low, high, doLog):
 #   if hData: hData.Draw("")
 #   if not hData: stack.Draw("HIST")
 #   if item==35 or item==9 or item==21:
-   if item==35 or item==21:
+   if item==35 or item==36 or item==21:
       h = stack.GetStack().Last()
       h.DrawNormalized("HIST same")
    else:
@@ -267,6 +266,8 @@ def plot(item, nbin, low, high, doLog):
       if (item==4 or item==43) and mesonCat == "_PhiCat": stack.GetXaxis().SetTitle("m_{#gamma#phi}^{H} [GeV]")
       if (item==4 or item==43) and mesonCat == "_RhoCat": stack.GetXaxis().SetTitle("m_{#gamma#rho}^{H} [GeV]")
       if (item==4 or item==43) and mesonCat == "_K0StarCat": stack.GetXaxis().SetTitle("m_{#gammaK^{0*}}^{H} [GeV]")
+      if (item==4 or item==43) and mesonCat == "_Omega3PiCat": stack.GetXaxis().SetTitle("m_{#gamma#omega}^{H} [GeV]")
+      if (item==4 or item==43) and mesonCat == "_Phi3PiCat": stack.GetXaxis().SetTitle("m_{#gamma#phi}^{H} [GeV]")
 
       if item==11: stack.GetXaxis().SetTitle("SoftActivityJetNjets5")
       if item==12: stack.GetXaxis().SetTitle("nJet")
@@ -290,6 +291,10 @@ def plot(item, nbin, low, high, doLog):
 
       if item==31: stack.GetXaxis().SetTitle("p_{T}^{leadTrk}")
       if item==32: stack.GetXaxis().SetTitle("p_{T}^{subLeadTrk}")
+      if item==80: stack.GetXaxis().SetTitle("p_{T}^{#gamma}")
+      if item==81: stack.GetXaxis().SetTitle("#Delta R (trk1, #gamma) ")
+      if item==82: stack.GetXaxis().SetTitle("mass charged ")
+      if item==83: stack.GetXaxis().SetTitle("p_{T} charged ")
 
       if item==38: stack.GetXaxis().SetTitle("p_{T}^{#pi}")
       if item==39: stack.GetXaxis().SetTitle("p_{T}^{k}")
@@ -406,7 +411,8 @@ def plot(item, nbin, low, high, doLog):
       if BTheo!=1.:
          legend.AddEntry(hWH.GetValue(), "WH(#gamma#rho) SM x 10^{4}", "f")
       else:
-         legend.AddEntry(hWH.GetValue(), "WH(#gamma#rho)", "f")
+         if item!=4 and item!=43 and item!=42: legend.AddEntry(hWH.GetValue(), "WH(#gamma#rho)", "l")
+         else: legend.AddEntry(hWH.GetValue(), "WH(#gamma#rho)", "f")
    if hTTH and hTTH.Integral()>0 and mesonCat == "_RhoCat":
       if BTheo!=1.:
          legend.AddEntry(hTTH.GetValue(), "ttH(#gamma#rho) SM x 10^{4}", "f")
@@ -430,7 +436,7 @@ def plot(item, nbin, low, high, doLog):
          legend.AddEntry(hWH.GetValue(), "WH(#gammak^{0*}) SM x 10^{4}", "f")
       else:
          if item!=4 and item!=43 and item!=42: legend.AddEntry(hWH.GetValue(), "WH(#gammak^{0*})", "l")
-         legend.AddEntry(hWH.GetValue(), "WH(#gammak^{0*})", "f")
+         else: legend.AddEntry(hWH.GetValue(), "WH(#gammak^{0*})", "f")
    if hTTH and hTTH.Integral()>0 and mesonCat == "_K0StarCat":
       if BTheo!=1.:
          legend.AddEntry(hTTH.GetValue(), "ttH(#gammak^{0*}) SM x 10^{4}", "f")
@@ -474,6 +480,17 @@ def plot(item, nbin, low, high, doLog):
          if item!=4 and item!=43 and item!=42: legend.AddEntry(hVBFH.GetValue(), "qqH(#gammak^{0*})", "l")
          else: legend.AddEntry(hVBFH.GetValue(), "qqH(#gammak^{0*})", "f")
    #####
+   if hggH and mesonCat == "_Omega3PhiCat" and hggH.Integral()>0:
+      if BTheo!=1.:
+         if BTheo==0.1:
+            if (category=='_VBFcatlow'): legend.AddEntry(hggH, "ggH(#gamma#omega) (BR=0.1)", "f")
+            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega) (BR=0.1)", "f")
+         else:
+            if (category=='_VBFcatlow'): legend.AddEntry(hggH, "ggH(#gamma#omega) SM x 10^{4}", "f")
+            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega) SM x 10^{3}", "f")
+      else:
+         if item!=4 and item!=43 and item!=42: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega)", "l")
+         else: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega)", "f")
    if hggH and mesonCat == "_PhiCat" and hggH.Integral()>0:
       if BTheo!=1.:
          if BTheo==0.1:
@@ -601,9 +618,6 @@ def plot(item, nbin, low, high, doLog):
    string = category+mesonCat+year
 #   if category=='_VBFcat' or category=='_VBFcatlow': string = category+mesonCat
 
-#   mydir = "PLOTS/"
-   mydir = "/home/submit/mariadlf/public_html/Hrare/PLOTS/"
-
    plotString = 'default'
 
    # Save the plot
@@ -616,6 +630,7 @@ def plot(item, nbin, low, high, doLog):
    #####
    if item==2: plotString = "MesonCandidate_Mass"
    if item==3: plotString = "MesonCandidate_Pt"
+   if item==202: plotString = "MesonCandidate_MoverPt"
    if item==35: plotString = "MesonCandidate_Iso"
    if item==36: plotString = "MesonCandidate_PhoIso"
    if item==37: plotString = "MesonCandidate_NeuIso"
@@ -624,10 +639,15 @@ def plot(item, nbin, low, high, doLog):
    if item==8: plotString = "MesonDOCA"
    if item==9: plotString = "MesonVTXprob"
 
-   if item==16: plotString = "DRtk12"
+   if item==16: plotString = "MesonCandidate_DRtk12"
    if item==10: plotString = "DRtk12norm"
    if item==18: plotString = "chi2dof"
    if item==21: plotString = "massErr"
+
+   if item==80: plotString = "MesonCandidate_photon_Pt"
+   if item==81: plotString = "MesonCandidate_photon_DRtk"
+   if item==82: plotString = "MesonCandidate_charged_mass"
+   if item==83: plotString = "MesonCandidate_charged_pt"
 
    if item==40: plotString = "MesonCandidate_TrkPtRel_"
    if item==29: plotString = "MesonCandidate_Trk1Pt_norm"
@@ -647,7 +667,7 @@ def plot(item, nbin, low, high, doLog):
    if item==208: plotString = "Photon_relIso"
    if item==209: plotString = "Photons_sieie"
    if item==210: plotString = "Photons_mvaID"
-   if item==101: plotString = "Photons_pixelSeed"
+   if item==201: plotString = "Photons_pixelSeed"
 
    if item==11: plotString = "SoftActivityJetNjets5"
    if item==12: plotString = "nJet"
@@ -694,27 +714,27 @@ def plot(item, nbin, low, high, doLog):
 #      c.SaveAs(mydir+plotString+string+".png")
 #   else:
    if 'CR' in dirLOCAL_:
-      c.SaveAs(mydir+plotString+string+"MesonMassSD.png")
+      c.SaveAs(myOutDir+plotString+string+"MesonMassSD.png")
    else:
-      c.SaveAs(mydir+plotString+string+".png")
+      c.SaveAs(myOutDir+plotString+string+".png")
    print(plotString+".png")
 
    ##
    if item==102:
-      c.SaveAs(mydir+"KSCandidate_Mass"+string+".png")
+      c.SaveAs(myOutDir+"KSCandidate_Mass"+string+".png")
       print("KSMass.png")
    if item==103:
-      c.SaveAs(mydir+"KSCandidate_Pt"+string+".png")
+      c.SaveAs(myOutDir+"KSCandidate_Pt"+string+".png")
       print("KSPt.png")
    if item==107:
-      c.SaveAs(mydir+"KSCandidate_Lxy"+string+".png")
+      c.SaveAs(myOutDir+"KSCandidate_Lxy"+string+".png")
       print("KSCandidate_Lxy.png")
 
 def plotPhoton():
 
-##   plot(101, 10, 0. , 10., False) # Photon pixel seed
+##   plot(201, 10, 0. , 10., False) # Photon pixel seed
    plot(206, 100, 0. , 0.1, True) # ph h/e
-   plot(207, 60, 0.5 , 1.1, False) # ph
+#   plot(207, 60, 0.5 , 1.1, False) # ph
    plot(208, 100, 0. , 0.1, True) # ph relIso all
 ##   plot(209, 100, 0. , 0.1, False) # ph sieta sieta
    plot(210, 100, 0. , 1., True) # ph mvaID
@@ -734,6 +754,8 @@ def plotMeson():
       if mesonCat == '_PhiCat': plot(2, 40, 1. , 1.04, False) # phi_mass
       if mesonCat == '_RhoCat': plot(2, 50, 0.5 , 1.00, False) # rho_mass
       if mesonCat == '_K0StarCat': plot(2, 40, 0.8 , 1., False) # K0Star_mass for CR
+      if mesonCat == '_Omega3PiCat': plot(2, 50, 0.5 , 1.00, False) # phi_mass
+      if mesonCat == '_Phi3PiCat': plot(2, 50, 0.92 , 1.12, False) # phi_mass
 
    plot(96, 50, 0. , 50., True) # NVTX
 
@@ -750,11 +772,15 @@ def plotMeson():
          plot(31, 80, 0. , 80., False) # max pt_trk1
          plot(32, 80, 0. , 80., False) # min pt_trk2
 
-   return
+   if mesonCat == '_Omega3PiCat' or mesonCat == '_Phi3PiCat':
+      plot(80, 80, 0. , 80., False) # pt_photon
+      plot(81, 50, 0. , 0.06, False) # DR_photon/meson
+      plot(82, 80, 0.3 , 1.00, False) # chargedMass
+      plot(83, 80, 0. , 80., False) # chargedPt
 
 #   plot(29, 100, 0. , 1., True) # pt_trk1_norm min
 #   plot(30, 100, 0. , 1., True) # pt_trk2_norm max
-   plot(40, 100, 0. , 1., True) # pt_trk_rel
+#   plot(40, 100, 0. , 1., True) # pt_trk_rel
 
    plot(33, 30, -3. , 3., False) # meson_trk1_eta
    plot(34, 30, -3. , 3., False) # meson_trk2_eta
@@ -764,6 +790,8 @@ def plotMeson():
 
    if mesonCat == '_PhiCat': plot(16, 50, 0. , 0.05, False) # DRtk12
    if mesonCat == '_RhoCat': plot(16, 50, 0. , 0.1, False) # DRtk12
+   if mesonCat == '_Omega3PiCat': plot(16, 50, 0. , 0.1, False) # DRtk12
+   if mesonCat == '_Phi3PiCat': plot(16, 50, 0. , 0.1, False) # DRtk12
 
    plot(35, 60, 0.6 , 1.2, True) # meson_iso
 #   plot(36, 60, 0.6 , 1.2, True) # meson_iso neu
@@ -837,6 +865,9 @@ def plotVBF():
 
 if __name__ == "__main__":
 
+#   plot(21, 100, 0. , 1., True) # energy Error
+#   plot(202, 100, 0. , 0.1, False)
+
    plot(4, 171, 0. , 171., True)  # normal plot for the AN
 #   plot(4, 71, 100. , 171., True) # HCandMass $# this is for the mass SD
 
@@ -847,8 +878,8 @@ if __name__ == "__main__":
       plot(42, 40, -1. , 1., False) # MVAdiscr
 
    plotMeson()
-   plotWZlep()
    plotPhoton()
+   plotWZlep()
    plotVBF()
 
    exit()

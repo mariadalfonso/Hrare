@@ -30,6 +30,10 @@ def loadCorrectionSet(year):
         #endif
         ''')
 
+def checkTrg():
+    trgObj = "firedTrigger(TrigObj_id,22,TrigObj_pt,35)"
+    return trgObj
+
 def getSkimsFromJson(overall, type ):
 
     for selection in overall:
@@ -134,9 +138,9 @@ def findMany(basedir, regex):
             #            if counter>250: break
     return rootFiles
 
-def getMClist(year, sampleNOW):
+def getMClist(year, sampleNOW,useD03):
 
-    files = findDIR("{}".format(SwitchSample(sampleNOW,year)[0]))
+    files = findDIR("{}".format(SwitchSample(sampleNOW,year,useD03)[0]))
     return files
 
 def getDATAlist(argument,year):
@@ -192,7 +196,7 @@ def getDATAlist(argument,year):
 
     return pair
 
-def getSkims(argument,year,category):
+def getSkims(argument,year,category,useD03):
 
     dirJson = "config"
 
@@ -204,6 +208,7 @@ def getSkims(argument,year,category):
         loadJSON("{}/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
 
     dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D02"
+    if useD03: dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D03"
     dirScratchSS = "/scratch/submit/cms/mariadlf/Hrare/SStau"
 
     switch = {
@@ -334,7 +339,7 @@ def getSkims(argument,year,category):
     pair = (findDIR(finalDir),tmp_pair[1])
     return pair
 
-def SwitchSample(argument,year):
+def SwitchSample(argument,year,useD03):
 
     #https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
     # cross section from  https://cms-gen-dev.cern.ch/xsdb
@@ -352,8 +357,12 @@ def SwitchSample(argument,year):
     dirLocalTEST2 = "/work/submit/mariadlf/Hrare/TESTtrackFIX/2018/"
 
     ####----------
-    dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D02/"
+    dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D02"
+    if useD03: dirScratch02 = "/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D03"
+
     dirGluster02 = "/data/submit/cms/store/user/mariadlf/nano/D02/"
+    if useD03: dirGluster02 = "/data/submit/cms/store/user/mariadlf/nano/D03/"
+
     dirT202 = "/mnt/T2_US_MIT/hadoop/cms/store/user/paus/nanohr/D02/"
 
     campaign = ""
@@ -531,7 +540,7 @@ def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv):
 
     return TRIGGER
 
-def computeWeigths(df, files, sampleNOW, year, isMC):
+def computeWeigths(df, files, sampleNOW, year, isMC, useD03):
 
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
@@ -543,9 +552,9 @@ def computeWeigths(df, files, sampleNOW, year, isMC):
         genEventSumWeight = rdf.Sum("genEventSumw").GetValue()
         genEventSumNoWeight = rdf.Sum("genEventCount").GetValue()
 
-        weight = (SwitchSample(sampleNOW,year)[1] / genEventSumWeight)
+        weight = (SwitchSample(sampleNOW,year,useD03)[1] / genEventSumWeight)
 
-        lumiEq = (genEventSumNoWeight / SwitchSample(sampleNOW,year)[1])
+        lumiEq = (genEventSumNoWeight / SwitchSample(sampleNOW,year,useD03)[1])
         print("lumi equivalent fb %s" %lumiEq)
 
         return weight

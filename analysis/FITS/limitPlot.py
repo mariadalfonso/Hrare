@@ -13,12 +13,14 @@ from math import sin
 from array import array
 
 
-doChekSync=True
-#mesonCat='Phi'
-mesonCat='Rho'
+doChekSync=False
+mesonCat='Phi'
+#mesonCat='Rho'
+#mesonCat='K0Star'
 
 dirTO_ = '/work/submit/mariadlf/cards_JUNE22/'
-dirMIT_ = '/work/submit/mariadlf/cards_JUNE26/'
+#dirMIT_ = '/work/submit/mariadlf/cards_JUNE26/'
+dirMIT_ = '/work/submit/mariadlf/cards_AUG10/'
 
 if doChekSync:
      ax = range(1,5) #
@@ -56,11 +58,11 @@ else:
 #                 , 'Zinv'
                  , '1l-2l'
                ]
-     limitfiles = [ "DATACARDSmva_MARCH11/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
-                    ,"DATACARDSmva_MARCH11/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
-                    ,"DATACARDSmva_MARCH11/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
+     limitfiles = [ dirMIT_+"workspaces_MVA_AUG10/higgsCombine"+mesonCat+"GFcat.AsymptoticLimits.mH125.root"
+                    ,dirMIT_+"workspaces_MVA_AUG10/higgsCombine"+mesonCat+"VBFcat.AsymptoticLimits.mH125.root"
+                    ,dirMIT_+"workspaces_MVA_AUG10/higgsCombine"+mesonCat+"VBFcatlow.AsymptoticLimits.mH125.root"
 #                    ,"limitsMVADEC28/higgsCombine"+mesonCat+"Zinvcat.AsymptoticLimits.mH125.root"
-                    ,"DATACARDS_MARCH11/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
+                    ,dirMIT_+"workspaces_AUG10/higgsCombine"+mesonCat+"Vcat.AsymptoticLimits.mH125.root"
                    ]
 
 c44 = ROOT.TCanvas("c44","c44",1200,800)
@@ -168,6 +170,7 @@ dummyHistogram.GetYaxis().SetTitleSize(0.04)
 dummyHistogram.GetYaxis().SetTitleOffset(1.8)
 if doChekSync and mesonCat=='Rho' : dummyHistogram.SetTitle("Rho")
 if doChekSync and mesonCat=='Phi' : dummyHistogram.SetTitle("Phi")
+if doChekSync and mesonCat=='K0Star' : dummyHistogram.SetTitle("K^{0*}")
 
 
 xax = dummyHistogram.GetXaxis()

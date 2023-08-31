@@ -1,6 +1,7 @@
 import ROOT
 import os
 from array import array
+import math
 
 from LoadTree import loadTree
 from LoadTree import resetTree
@@ -21,68 +22,79 @@ lumis={
 def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
 
 
-   if(category =='_GFcat' and mesonCat == '_K0StarCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1037'+category+mesonCat+year+'.root') # GF k0Star
-#   if(category =='_GFcat' and mesonCat == '_K0StarCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') # GF rho
-#   if(category =='_GFcat' and mesonCat == '_K0StarCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') # GF phi
-   if(category =='_GFcat' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
-#   if(category =='_GFcat' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF rho
-#   if(category =='_GFcat' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF phi
-   if(category =='_VBFcat' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
-#   if(category =='_VBFcat' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF rho
-#   if(category =='_VBFcat' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF phi
-   if(category =='_VBFcatlow' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
-#   if(category =='_VBFcatlow' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF rho
-#   if(category =='_VBFcatlow' and mesonCat == '_K0StarCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF phi
-   # for phi should add the 1027 1020 series
-   if(category =='_GFcat' and mesonCat == '_PhiCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') # VBF
-   if(category =='_GFcat' and mesonCat == '_PhiCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
-   if(category =='_VBFcat' and mesonCat == '_PhiCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
-   if(category =='_VBFcatlow' and mesonCat == '_PhiCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
-   if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Wp
-   if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
-   if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Wcat' and mesonCat == '_PhiCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1018'+category+mesonCat+year+'.root') # ttH
-   if(category =='_Zcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z
-   if(category =='_Zcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') # Z
-   if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1015'+category+mesonCat+year+'.root') # Zinv
-   if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1016'+category+mesonCat+year+'.root') # Zinv
-   if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Zinv Wp (lostL)
-   if(category =='_Zinvcat' and mesonCat == '_PhiCat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011_Wcat'+mesonCat+year+'.root') # Wp
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012_Wcat'+mesonCat+year+'.root') # Wm
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1018_Wcat'+mesonCat+year+'.root') # ttH
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1013_Wcat'+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1014_Wcat'+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013_Zcat'+mesonCat+year+'.root') # Z
-   if(category =='_Vcat' and mesonCat == '_PhiCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1014_Zcat'+mesonCat+year+'.root') # Z
+   if (mesonCat == '_K0StarCat'):
+      if(category =='_GFcat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1037'+category+mesonCat+year+'.root') # GF k0Star
+      if(category =='_GFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
+      if(category =='_VBFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
+      if(category =='_VBFcatlow' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
+      if(category =='_Wcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1031'+category+mesonCat+year+'.root') # Wp
+      if(category =='_Wcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1032'+category+mesonCat+year+'.root') # Wm
+      if(category =='_Wcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1033'+category+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Wcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1034'+category+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Wcat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1038'+category+mesonCat+year+'.root') # ttH
+      if(category =='_Zcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1033'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1034'+category+mesonCat+year+'.root') # Z
+#      if(category =='_Zinvcat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1035'+category+mesonCat+year+'.root') # Zinv
+#      if(category =='_Zinvcat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1036'+category+mesonCat+year+'.root') # Zinv
+#      if(category =='_Zinvcat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1031'+category+mesonCat+year+'.root') # Zinv Wp (lostL)
+#      if(category =='_Zinvcat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1032'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
+      if(category =='_Vcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1031_Wcat'+mesonCat+year+'.root') # Wp
+      if(category =='_Vcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1032_Wcat'+mesonCat+year+'.root') # Wm
+      if(category =='_Vcat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1038_Wcat'+mesonCat+year+'.root') # ttH
+      if(category =='_Vcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1033_Wcat'+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Vcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1034_Wcat'+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Vcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1033_Zcat'+mesonCat+year+'.root') # Z
+      if(category =='_Vcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1034_Zcat'+mesonCat+year+'.root') # Z
+   if (mesonCat == '_PhiCat'):
+      if(category =='_GFcat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') # VBF
+      if(category =='_GFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcatlow' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') # VBF
+      if(category =='_Wcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Wp
+      if(category =='_Wcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Wm
+      if(category =='_Wcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Wcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Wcat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1018'+category+mesonCat+year+'.root') # ttH
+      if(category =='_Zcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1014'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zinvcat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1015'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1016'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1011'+category+mesonCat+year+'.root') # Zinv Wp (lostL)
+      if(category =='_Zinvcat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1012'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
+      if(category =='_Vcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1011_Wcat'+mesonCat+year+'.root') # Wp
+      if(category =='_Vcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1012_Wcat'+mesonCat+year+'.root') # Wm
+      if(category =='_Vcat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1018_Wcat'+mesonCat+year+'.root') # ttH
+      if(category =='_Vcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1013_Wcat'+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Vcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1014_Wcat'+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Vcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1013_Zcat'+mesonCat+year+'.root') # Z
+      if(category =='_Vcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1014_Zcat'+mesonCat+year+'.root') # Z
    #
-   # for rho should add the 1017 1010 series
-   if(category =='_GFcat' and mesonCat == '_RhoCat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') # VBF
-   if(category =='_GFcat' and mesonCat == '_RhoCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
-   if(category =='_VBFcat' and mesonCat == '_RhoCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
-   if(category =='_VBFcatlow' and mesonCat == '_RhoCat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
-   if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Wp
-   if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Wm
-   if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Wcat' and mesonCat == '_RhoCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1028'+category+mesonCat+year+'.root') # ttH
-   if(category =='_Zcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z
-   if(category =='_Zcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') # Z
-   if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1025'+category+mesonCat+year+'.root') # Zinv
-   if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1026'+category+mesonCat+year+'.root') # Zinv
-   if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Zinv Wp (lostL)
-   if(category =='_Zinvcat' and mesonCat == '_RhoCat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021_Wcat'+mesonCat+year+'.root') # Wp
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022_Wcat'+mesonCat+year+'.root') # Wm
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1028_Wcat'+mesonCat+year+'.root') # ttH
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1023_Wcat'+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1024_Wcat'+mesonCat+year+'.root') # Z (lostL)
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023_Zcat'+mesonCat+year+'.root') # Z
-   if(category =='_Vcat' and mesonCat == '_RhoCat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1024_Zcat'+mesonCat+year+'.root') # Z
-   # maybe add the Zinv to the GF
+   if (mesonCat == '_RhoCat'):
+      if(category =='_GFcat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') # VBF
+      if(category =='_GFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_VBFcatlow' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') # VBF
+      if(category =='_Wcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Wp
+      if(category =='_Wcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Wm
+      if(category =='_Wcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Wcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Wcat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1028'+category+mesonCat+year+'.root') # ttH
+      if(category =='_Zcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1024'+category+mesonCat+year+'.root') # Z
+      if(category =='_Zinvcat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1025'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and nameSig=="ZinvH"): mytree.Add(directory+'outname_mc1026'+category+mesonCat+year+'.root') # Zinv
+      if(category =='_Zinvcat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1021'+category+mesonCat+year+'.root') # Zinv Wp (lostL)
+      if(category =='_Zinvcat' and nameSig=="WHl"): mytree.Add(directory+'outname_mc1022'+category+mesonCat+year+'.root') # Zinv Wm (lostL)
+      if(category =='_Vcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1021_Wcat'+mesonCat+year+'.root') # Wp
+      if(category =='_Vcat' and nameSig=="WH"): mytree.Add(directory+'outname_mc1022_Wcat'+mesonCat+year+'.root') # Wm
+      if(category =='_Vcat' and nameSig=="TTH"): mytree.Add(directory+'outname_mc1028_Wcat'+mesonCat+year+'.root') # ttH
+      if(category =='_Vcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1023_Wcat'+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Vcat' and nameSig=="ZHl"): mytree.Add(directory+'outname_mc1024_Wcat'+mesonCat+year+'.root') # Z (lostL)
+      if(category =='_Vcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1023_Zcat'+mesonCat+year+'.root') # Z
+      if(category =='_Vcat' and nameSig=="ZH"): mytree.Add(directory+'outname_mc1024_Zcat'+mesonCat+year+'.root') # Z
+      # maybe add the Zinv to the GF
 
-   resetTree(mytree, category)
+   resetTree(mytree, category, True)
 
 MVAbinRho={
    '_GFcat': 0.4,
@@ -116,15 +128,14 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
    if mesonCat == '_RhoCat': MVAbin = MVAbinRho
    if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
 
-   if category =='_VBFcat' or category =='_Wcat' or category =='_Zcat' :
+   if category =='_VBFcat' or category =='_Wcat' or category =='_Zcat' or category =='_Vcat':
       year = '_all'
    else:
       year = '_2018'
 
    mytree = ROOT.TChain('events')
 
-   dirLOCAL_='/work/submit/mariadlf/JUL22/'
-
+   dirLOCAL_='/work/submit/mariadlf/AUG10/'
    directory1 = dirLOCAL_+'12016/'
    directory2 = dirLOCAL_+'22016/'
    directory3 = dirLOCAL_+'2017/'
@@ -133,7 +144,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
    if doSignal:
       if(year == '_2018' or year == '_all'): addSigHisto(mytree, directory4, category, mesonCat, nameSig, '_2018')
       if(year == '_2017' or year == '_all'): addSigHisto(mytree, directory3, category, mesonCat, nameSig, '_2017')
-      if(category =='_Wcat' or category =='_Zcat'):
+      if(category =='_Wcat' or category =='_Zcat' or category =='_Vcat'):
          if(year == '_22016' or year == '_all'): addSigHisto(mytree, directory2, category, mesonCat, nameSig, '_22016')
       if(year == '_12016' or year == '_all'): addSigHisto(mytree, directory1, category, mesonCat, nameSig, '_12016')
    else:
@@ -144,7 +155,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
          if(year == '_2017' or year == '_all'):
             mytree = loadTree(mytree, directory3 , '_Wcat', mesonCat, '_2017', doSignal) # all sigm, BKG , data,
             mytree = loadTree(mytree, directory3 , '_Zcat', mesonCat, '_2017', doSignal) # all sigm, BKG , data,
-         if(category =='_Wcat' or category =='_Zcat'):
+         if(category =='_Wcat' or category =='_Zcat' or category =='_Vcat'):
             if(year == '_22016' or year == '_all'):
                mytree = loadTree(mytree, directory2 , '_Wcat', mesonCat, '_22016', doSignal) # all sigm, BKG , data,
                mytree = loadTree(mytree, directory2 , '_Zcat', mesonCat, '_22016', doSignal) # all sigm, BKG , data,
@@ -154,14 +165,20 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       else:
          if(year == '_2018' or year == '_all'): mytree = loadTree(mytree, directory4 , category, mesonCat, '_2018', doSignal) # all sigm, BKG , data,
          if(year == '_2017' or year == '_all'): mytree = loadTree(mytree, directory3 , category, mesonCat, '_2017', doSignal) # all sigm, BKG , data,
-         if(category =='_Wcat' or category =='_Zcat'):
+         if(category =='_Wcat' or category =='_Zcat' or category =='_Vcat'):
             if(year == '_22016' or year == '_all'): mytree = loadTree(mytree, directory2 , category, mesonCat, '_22016', doSignal) # all sigm, BKG , data,
          if(year == '_12016' or year == '_all'): mytree = loadTree(mytree, directory1 , category, mesonCat, '_12016', doSignal) # all sigm, BKG , data,
 
    h = ROOT.TH1F( 'Higgs', '', nbin, low, high )
 
-   PH_ptCut = 40
-   MES_ptCut = 40
+   PH_ptCut = 38
+   MES_ptCut = 38
+   if(category =='_VBFcat'):
+      PH_ptCut = 40 # this is set to 75 anyway
+      MES_ptCut = 30
+   if(category =='_Vcat'):
+      PH_ptCut = 40
+      MES_ptCut = 40
 
    for ev in mytree:
 
@@ -188,13 +205,8 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zcat' or category =='_Wcat' or category =='_Vcat'):
-#         if ev.goodPhotons_pt[idxPh]<40 :  continue
-#         if ev.goodMeson_pt[idxMeson]<40 : continue
          if ev.photon_pt<PH_ptCut :  continue
          if ev.meson_pt<MES_ptCut : continue
-
-#      if(category =='_Wcat'):
-#         if (abs(ev.Z_veto-91) < 5): continue # default cutting at +- 10
 
       ## ALREADY applied for Vcat in MARCH11
 #      if(category =='_Wcat'):
@@ -204,8 +216,6 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_Zinvcat'):
-#         if ev.goodPhotons_pt[idxPh]<40 :  continue
-#         if ev.goodMeson_pt[idxMeson]<40 : continue
          if ev.photon_pt<PH_ptCut :  continue
          if ev.meson_pt<MES_ptCut : continue
 #         if min(ev.goodMeson_trk1_pt[idxMeson],ev.goodMeson_trk2_pt[idxMeson]) < 10: continue
@@ -219,9 +229,6 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_VBFcatlow'):
-#         if ev.goodPhotons_pt[idxPh]<40 :  continue # already applied
-#         if ev.goodPhotons_pt[idxPh]>75 :  continue # already applied
-#         if ev.goodMeson_pt[idxMeson]<40 : continue
          if ev.photon_pt<PH_ptCut :  continue # already applied
          if ev.photon_pt>75 :  continue # already applied
          if ev.meson_pt<MES_ptCut : continue
@@ -243,12 +250,10 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       ## OPTIMIZED PHASE SPACE
       if(category =='_VBFcat'):
          if ev.photon_pt<PH_ptCut :  continue
-         if ev.meson_pt<30 : continue # relaxed this
+         if ev.meson_pt<MES_ptCut : continue
 
       ## OPTIMIZED PHASE SPACE
       if(category =='_GFcat'):
-#         if ev.goodPhotons_pt[idxPh]<40 :  continue
-#         if ev.goodMeson_pt[idxMeson]<40 : continue
          if ev.photon_pt<PH_ptCut :  continue
          if ev.meson_pt<MES_ptCut : continue
 #         if ev.nGoodJets < 2: continue
@@ -257,8 +262,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
       # Fill histograms
       if (doSignal) :
-#         wei = ev.w * ev.lumiIntegrated
-         wei = ev.w_allSF * ev.lumiIntegrated
+         wei = ev.w_allSF * ev.lumiIntegrated * (3./2)*math.sin(ev.theta)*math.sin(ev.theta)
          if ((nameSig=='WH' or nameSig=='WHl') and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022 or ev.mc==1031 or ev.mc==1032)): #W
             h.Fill( var, wei )
          if ((nameSig=='ZH' or nameSig=='ZHl') and (ev.mc==1013 or ev.mc==1023 or ev.mc==1014 or ev.mc==1024 or ev.mc==1033 or ev.mc==1034)): #Z

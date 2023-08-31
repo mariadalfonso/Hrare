@@ -9,11 +9,11 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
    if category=='_VBFcatlow' or category=='_GFcat':
       if doSignal:
          if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
-         mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') #VBFH -- rho
-         mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') #VBFH -- phi
+         if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1020'+category+mesonCat+year+'.root') #VBFH -- rho
+         if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1010'+category+mesonCat+year+'.root') #VBFH -- phi
          if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1037'+category+mesonCat+year+'.root') #GFH -- k0star
-         mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') #GFH -- rho
-         mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') #GFH -- phi
+         if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1027'+category+mesonCat+year+'.root') #GFH -- rho
+         if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1017'+category+mesonCat+year+'.root') #GFH -- phi
       else:
          if doLoadMC: mytree.Add(directory+'outname_mc10'+category+mesonCat+year+'.root')  #GJets
          if doLoadMC: mytree.Add(directory+'outname_mc11'+category+mesonCat+year+'.root')  #GJets
@@ -29,8 +29,8 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
          if doSignal:
             ## can load the 1027 and 1017 ggH signal MC
             if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
-            mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2018.root') #VBFH -- rho
-            mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2018.root') #VBFH -- phi
+            if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2018.root') #VBFH -- rho
+            if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2018.root') #VBFH -- phi
          else:
             if doLoadMC: mytree.Add(directory+'outname_mc10'+category+mesonCat+'_2018.root')  #GJets
             if doLoadMC: mytree.Add(directory+'outname_mc11'+category+mesonCat+'_2018.root')  #GJets
@@ -52,8 +52,8 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
       if directory.find("2017")!=-1:
          if doSignal:
             if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
-            mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2017.root') #VBFH -- rho
-            mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2017.root') #VBFH -- phi
+            if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_2017.root') #VBFH -- rho
+            if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_2017.root') #VBFH -- phi
          else:
             if doLoadMC: mytree.Add(directory+'outname_mc10'+category+mesonCat+'_2017.root')  #GJets
             if doLoadMC: mytree.Add(directory+'outname_mc11'+category+mesonCat+'_2017.root')  #GJets
@@ -69,8 +69,8 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
       if directory.find("_12016")!=-1:
          if doSignal:
             if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- k0star
-            mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_12016.root') #VBFH -- rho
-            mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_12016.root') #VBFH -- phi
+            if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1020'+category+mesonCat+'_12016.root') #VBFH -- rho
+            if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1010'+category+mesonCat+'_12016.root') #VBFH -- phi
          else:
             if doLoadMC: mytree.Add(directory+'outname_mc10'+category+mesonCat+'_12016.root')  #GJets
             if doLoadMC: mytree.Add(directory+'outname_mc11'+category+mesonCat+'_12016.root')  #GJets
@@ -244,14 +244,22 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
          mytree.Add(directory+'outname_mc-57'+category+mesonCat+'_22016.root')  #DATA
          mytree.Add(directory+'outname_mc-58'+category+mesonCat+'_22016.root')  #DATA
 
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc1011'+category+mesonCat+localTime+'.root') #W+H phi
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc1012'+category+mesonCat+localTime+'.root') #W-H
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc1021'+category+mesonCat+localTime+'.root') #W+H rho
-      if(category =='_Wcat'): mytree.Add(directory+'outname_mc1022'+category+mesonCat+localTime+'.root') #W-H
-      mytree.Add(directory+'outname_mc1013'+category+mesonCat+localTime+'.root') #Z-H
-      mytree.Add(directory+'outname_mc1014'+category+mesonCat+localTime+'.root') #ggZ-H
-      mytree.Add(directory+'outname_mc1023'+category+mesonCat+localTime+'.root') #Z-H
-      mytree.Add(directory+'outname_mc1024'+category+mesonCat+localTime+'.root') #ggZ-H
+      if(category =='_Wcat'):
+         if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1011'+category+mesonCat+localTime+'.root') #W+H phi
+         if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1012'+category+mesonCat+localTime+'.root') #W-H
+         if mesonCat == '_PhiCat':mytree.Add(directory+'outname_mc1018'+category+mesonCat+localTime+'.root') #TTH
+         if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1021'+category+mesonCat+localTime+'.root') #W+H rho
+         if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1022'+category+mesonCat+localTime+'.root') #W-H
+         if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1028'+category+mesonCat+localTime+'.root') #TTH
+         if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1031'+category+mesonCat+localTime+'.root') #W+H K0Star
+         if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1032'+category+mesonCat+localTime+'.root') #W-H
+         if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1038'+category+mesonCat+localTime+'.root') #TTH
+      if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1013'+category+mesonCat+localTime+'.root') #Z-H
+      if mesonCat == '_PhiCat': mytree.Add(directory+'outname_mc1014'+category+mesonCat+localTime+'.root') #ggZ-H
+      if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1023'+category+mesonCat+localTime+'.root') #Z-H
+      if mesonCat == '_RhoCat': mytree.Add(directory+'outname_mc1024'+category+mesonCat+localTime+'.root') #ggZ-H
+      if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1033'+category+mesonCat+localTime+'.root') #Z-H K0Star
+      if mesonCat == '_K0StarCat': mytree.Add(directory+'outname_mc1034'+category+mesonCat+localTime+'.root') #ggZ-H K0Star
 #      mytree.Add(directory+'outname_mc1'+category+mesonCat+localTime+'.root')  #ZG
 #      mytree.Add(directory+'outname_mc2'+category+mesonCat+localTime+'.root')  #WG
 #      mytree.Add(directory+'outname_mc31'+category+mesonCat+localTime+'.root')  #W0Jet
@@ -269,11 +277,11 @@ def loadTree(mytree, directory , category, mesonCat, year, doSignal ):
       print("ERROR: category not specified")
 
    # note: there is another call for the signal
-   resetTree(mytree,category)
+   resetTree(mytree,category,doSignal)
 
    return mytree
 
-def resetTree(mytree,category):
+def resetTree(mytree,category,doSignal):
 
    mytree.SetBranchStatus('*',0)
    mytree.SetBranchStatus('w',1)
@@ -290,6 +298,7 @@ def resetTree(mytree,category):
    mytree.SetBranchStatus('index_pair',1)
 
    mytree.SetBranchStatus('nPhotonsVeto',1)
+   if doSignal : mytree.SetBranchStatus('theta',1)
 
    if(category =='_GFcat' or category =='_Zinvcat' or category =='_VBFcat' or category =='_VBFcatlow'):
       mytree.SetBranchStatus('MVAdisc',1)

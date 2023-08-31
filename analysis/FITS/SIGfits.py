@@ -12,8 +12,8 @@ doCR=False
 histoEnum = 43
 #histoEnum = 4
 
-workspaceName = 'WS_JUL12'
-if histoEnum == 43: workspaceName = 'WSmva_JUL12'
+workspaceName = 'WS_AUG10'
+if histoEnum == 43: workspaceName = 'WSmva_AUG10'
 if histoEnum == 43 and doCR: workspaceName = 'WSmvaCR'
 
 ## for GF
@@ -106,8 +106,8 @@ def  fitSig(tag , mesonCat, year):
         cb_sigma = RooRealVar('cb_sigma'+mesonCat+tag+'_'+sig, 'cb_sigma', 0., 3.)
         cb_alphaL = RooRealVar('cb_alphaL'+mesonCat+tag+'_'+sig, 'cb_alphaL', 0., 5.)
         cb_alphaR = RooRealVar('cb_alphaR'+mesonCat+tag+'_'+sig, 'cb_alphaR', 0., 5.)
-        cb_nL = RooRealVar('cb_nL'+mesonCat+tag+'_'+sig, 'cb_nL', 0., 15.)
-        cb_nR = RooRealVar('cb_nR'+mesonCat+tag+'_'+sig, 'cb_nR', 0., 15.)
+        cb_nL = RooRealVar('cb_nL'+mesonCat+tag+'_'+sig, 'cb_nL', 0., 5.)
+        cb_nR = RooRealVar('cb_nR'+mesonCat+tag+'_'+sig, 'cb_nR', 0., 5.)
 
         pdf_crystalball = RooDoubleCBFast('crystal_ball'+mesonCat+tag+'_'+sig, 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
         model = pdf_crystalball
@@ -545,9 +545,7 @@ if __name__ == "__main__":
 
     if not blinded: fitSig('_VBFcat','_K0StarCat','Run2')
     fitBkg('_VBFcat','_K0StarCat','Run2')
-    '''
 
-    '''
     if histoEnum == 4:
 
         if not blinded: fitSig('_Vcat','_RhoCat','Run2')
@@ -555,6 +553,9 @@ if __name__ == "__main__":
 
         if not blinded: fitSig('_Vcat','_PhiCat','Run2')
         fitBkg('_Vcat','_PhiCat','Run2')
+
+        if not blinded: fitSig('_Vcat','_K0StarCat','Run2')
+        fitBkg('_Vcat','_K0StarCat','Run2')
     '''
 
     exit()
