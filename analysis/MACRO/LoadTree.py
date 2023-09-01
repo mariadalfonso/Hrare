@@ -10,7 +10,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
          if category=='_GFcat': mytree.Add(directory+'outname_mc1041'+category+mesonCat+year+'.root') #GFH -- Phi3Pi
       if(mesonCat=='_D0StarCat'):
          if category=='_GFcat': mytree.Add(directory+'outname_mc1043'+category+mesonCat+year+'.root') #GFH -- D0Star
-      if(mesonCat=='_D0StarPi0Cat'):
+      if(mesonCat=='_D0Pi0StarCat'):
          if category=='_GFcat': mytree.Add(directory+'outname_mc1042'+category+mesonCat+year+'.root') #GFH -- D0StarPi0
       if(mesonCat=='_K0StarCat'):
          mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- K0star

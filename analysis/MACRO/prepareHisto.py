@@ -207,7 +207,11 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 95: var = "PV_npvsGood"
    if item == 96: var = "goodMeson_bestVtx_idx[index_pair[0]]"
 
-   weightPol = "(3./2)*sin(theta)*sin(theta)"
+   if mesonCat=='_D0StarCat' or mesonCat=='_D0Pi0StarCat' or mesonCat=='_Phi3PiCat' or mesonCat=='_Omega3PiCat':
+       weightPol = "1."
+   else:
+       weightPol = "(3./2)*sin(theta)*sin(theta)"
+
    df_common = df.Define("var","{}".format(var)).Define("offlineSel","{}".format(offline)).Define("weight","(mc>=0 and mc < 1000) ? w_allSF*lumiIntegrated: (mc>=1000 and mc<=1039) ? w_allSF*lumiIntegrated*{0}:1".format(weightPol)).Filter("offlineSel")
 
    hZinv = df_common.Filter("mc>=37 and mc<=44").Histo1D(("hZinv","h",nbin, low, high),"var","weight")

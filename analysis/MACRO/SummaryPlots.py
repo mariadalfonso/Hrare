@@ -21,8 +21,8 @@ year = '_2018'
 #myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTSmarti/"
 #dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AUG29Marti/'
 
-myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTS/"
-dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AUG10pol/'
+myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTSaug31/"
+dirLOCAL_= '/work/submit/mariadlf/AUG31/'
 
 if (category=='_Zinvcat'): directory4 = '/work/submit/mariadlf/Hrare/DEC28_ZinvLast/2018/'
 if (category=='_GFcat'): directory4 = dirLOCAL_+'2018/'
@@ -268,6 +268,7 @@ def plot(item, nbin, low, high, doLog):
       if (item==4 or item==43) and mesonCat == "_K0StarCat": stack.GetXaxis().SetTitle("m_{#gammaK^{0*}}^{H} [GeV]")
       if (item==4 or item==43) and mesonCat == "_Omega3PiCat": stack.GetXaxis().SetTitle("m_{#gamma#omega}^{H} [GeV]")
       if (item==4 or item==43) and mesonCat == "_Phi3PiCat": stack.GetXaxis().SetTitle("m_{#gamma#phi}^{H} [GeV]")
+      if (item==4 or item==43) and mesonCat == "_K0StarCat": stack.GetXaxis().SetTitle("m_{#gammaD^{0*}}^{H} [GeV]")
 
       if item==11: stack.GetXaxis().SetTitle("SoftActivityJetNjets5")
       if item==12: stack.GetXaxis().SetTitle("nJet")
@@ -756,10 +757,18 @@ def plotMeson():
       if mesonCat == '_K0StarCat': plot(2, 40, 0.8 , 1., False) # K0Star_mass for CR
       if mesonCat == '_Omega3PiCat': plot(2, 50, 0.5 , 1.00, False) # phi_mass
       if mesonCat == '_Phi3PiCat': plot(2, 50, 0.92 , 1.12, False) # phi_mass
+      if mesonCat == '_D0StarCat': plot(2, 50, 1.5 , 2.5, False) # D0Star_mass
+      if mesonCat == '_D0Pi0StarCat': plot(2, 50, 1.5 , 2.5, False) # D0Star_mass
 
    plot(96, 50, 0. , 50., True) # NVTX
 
    plot(3, 20, 0. , 100., False) # meson_pt
+
+   if mesonCat == '_D0StarCat' or mesonCat == '_D0Pi0StarCat':
+      plot(38, 80, 0. , 80., False) # pt_trk1
+      plot(39, 80, 0. , 80., False) # pt_trk2
+      plot(31, 80, 0. , 80., False) # max pt_trk1
+      plot(32, 80, 0. , 80., False) # min pt_trk2
 
    if mesonCat == '_K0StarCat':
       plot(38, 80, 0. , 80., False) # pt_trk1
@@ -778,6 +787,10 @@ def plotMeson():
       plot(82, 80, 0.3 , 1.00, False) # chargedMass
       plot(83, 80, 0. , 80., False) # chargedPt
 
+   if mesonCat == '_D0StarCat':
+      plot(82, 50, 1.5 , 2.00, False) # chargedMass
+      plot(83, 80, 0. , 80., False) # chargedPt
+
 #   plot(29, 100, 0. , 1., True) # pt_trk1_norm min
 #   plot(30, 100, 0. , 1., True) # pt_trk2_norm max
 #   plot(40, 100, 0. , 1., True) # pt_trk_rel
@@ -788,10 +801,10 @@ def plotMeson():
 #   if mesonCat == '_PhiCat': plot(10, 100, 0. , 1., True) # DRtk12 norm
 #   if mesonCat == '_RhoCat': plot(10, 100, 0. , 5., True) # DRtk12 norm
 
-   if mesonCat == '_PhiCat': plot(16, 50, 0. , 0.05, False) # DRtk12
-   if mesonCat == '_RhoCat': plot(16, 50, 0. , 0.1, False) # DRtk12
-   if mesonCat == '_Omega3PiCat': plot(16, 50, 0. , 0.1, False) # DRtk12
-   if mesonCat == '_Phi3PiCat': plot(16, 50, 0. , 0.1, False) # DRtk12
+   if mesonCat == '_PhiCat':
+      plot(16, 50, 0. , 0.05, False) # DRtk12
+   else:
+      plot(16, 50, 0. , 0.1, False) # DRtk12
 
    plot(35, 60, 0.6 , 1.2, True) # meson_iso
 #   plot(36, 60, 0.6 , 1.2, True) # meson_iso neu
@@ -871,11 +884,12 @@ if __name__ == "__main__":
    plot(4, 171, 0. , 171., True)  # normal plot for the AN
 #   plot(4, 71, 100. , 171., True) # HCandMass $# this is for the mass SD
 
-   if (category=='_VBFcatlow' or category=='_VBFcat' or category=='_GFcat' or category=='_Zinvcat'):
-#      plot(43, 70, 100. , 170., False) # HCandMassWithCut
-#      plot(43, 100, 70. , 170., False) # HCandMassWithCut
-#      plot(43, 200, 0. , 200., False) # HCandMassWithCut
-      plot(42, 40, -1. , 1., False) # MVAdiscr
+   if mesonCat == '_RhoCat' or mesonCat == '_PhiCat' or mesonCat == '_K0StarCat':
+      if (category=='_VBFcatlow' or category=='_VBFcat' or category=='_GFcat' or category=='_Zinvcat'):
+         #      plot(43, 70, 100. , 170., False) # HCandMassWithCut
+         #      plot(43, 100, 70. , 170., False) # HCandMassWithCut
+         #      plot(43, 200, 0. , 200., False) # HCandMassWithCut
+         plot(42, 40, -1. , 1., False) # MVAdiscr
 
    plotMeson()
    plotPhoton()
