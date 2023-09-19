@@ -12,6 +12,7 @@ parser.add_option("","--inputFileBKG",type='string',help="Input ROOT file bkg mo
 
 parser.add_option("-c","--whichCat",type='string',help="Which category (Wcat, Zcat Zinvcatm, VBFcat)", default="Wcat")
 parser.add_option("-m","--whichMeson",type='string',help="Which meson (_RhoCat or _PhiCat)", default="_RhoCat")
+parser.add_option("-b","--whichBIN",type='string',help="Which bin of BDT (_bin1 or empty)", default="")
 parser.add_option("-o","--output",type='string',help="Output ROOT file. [%default]", default="workspace_STAT_Rho_2018.root")
 parser.add_option("-d","--datCardName",type='string',help="Output txt file. [%default]", default="datacard_STAT_Rho_2018.txt")
 
@@ -28,33 +29,33 @@ MultiPdf=True
 
 if MultiPdf:
     BkgPdf={
-        'Vcat': 'multipdf'+opts.whichMeson,
-        'Wcat': 'multipdf'+opts.whichMeson,
-        'Zcat': 'multipdf'+opts.whichMeson,
-        'VBFcat': 'multipdf'+opts.whichMeson,
-        'Zinvcat': 'multipdf'+opts.whichMeson,
-        'VBFcatlow': 'multipdf'+opts.whichMeson,
-        'GFcat': 'multipdf'+opts.whichMeson,
+        'Vcat': 'multipdf'+opts.whichBIN+opts.whichMeson,
+        'Wcat': 'multipdf'+opts.whichBIN+opts.whichMeson,
+        'Zcat': 'multipdf'+opts.whichBIN+opts.whichMeson,
+        'VBFcat': 'multipdf'+opts.whichBIN+opts.whichMeson,
+        'Zinvcat': 'multipdf'+opts.whichBIN+opts.whichMeson,
+        'VBFcatlow': 'multipdf'+opts.whichBIN+opts.whichMeson,
+        'GFcat': 'multipdf'+opts.whichBIN+opts.whichMeson,
     }
 else:
     BkgPdf={
-        'Vcat': 'exp1'+opts.whichMeson,
-        'Wcat': 'exp1'+opts.whichMeson,
-        'Zcat': 'exp1'+opts.whichMeson,
-        'VBFcat': 'bxg'+opts.whichMeson,
-        'Zinvcat': 'exp1'+opts.whichMeson,
-        'VBFcatlow': 'bxg'+opts.whichMeson,
-        'GFcat': 'bxg'+opts.whichMeson,
+        'Vcat': 'exp1'+opts.whichBIN+opts.whichMeson,
+        'Wcat': 'exp1'+opts.whichBIN+opts.whichMeson,
+        'Zcat': 'exp1'+opts.whichBIN+opts.whichMeson,
+        'VBFcat': 'bxg'+opts.whichBIN+opts.whichMeson,
+        'Zinvcat': 'exp1'+opts.whichBIN+opts.whichMeson,
+        'VBFcatlow': 'bxg'+opts.whichBIN+opts.whichMeson,
+        'GFcat': 'bxg'+opts.whichBIN+opts.whichMeson,
     }
 
 SigPdf={
-    'Vcat': 'crystal_ball'+opts.whichMeson,
-    'Wcat': 'crystal_ball'+opts.whichMeson,
-    'Zcat': 'crystal_ball'+opts.whichMeson,
-    'VBFcat': 'crystal_ball'+opts.whichMeson,
-    'Zinvcat': 'crystal_ball'+opts.whichMeson,
-    'VBFcatlow': 'crystal_ball'+opts.whichMeson,
-    'GFcat': 'crystal_ball'+opts.whichMeson,
+    'Vcat': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
+    'Wcat': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
+    'Zcat': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
+    'VBFcat': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
+    'Zinvcat': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
+    'VBFcatlow': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
+    'GFcat': 'crystal_ball'+opts.whichBIN+opts.whichMeson,
 }
 
 ENUM={
@@ -216,7 +217,7 @@ for cat in category:
 
     wInput=fBkgIn.Get("w")
     wInput.Print()
-    hist_data = wInput.data("datahist"+opts.whichMeson+'_'+cat)
+    hist_data = wInput.data("datahist"+opts.whichBIN+opts.whichMeson+'_'+cat)
     hist_data.SetName("observed_data")
     getattr(w,'import')(hist_data)
     datacard.write("shapes")
@@ -403,7 +404,7 @@ if opts.whichCat=='Vcat' and doSyst:
 datacard.write("-------------------------------------\n")
 
 if MultiPdf:
-    pdfindexSTR='pdfindex'+opts.whichMeson+"_"+opts.whichCat
+    pdfindexSTR='pdfindex'+opts.whichBIN+opts.whichMeson+"_"+opts.whichCat
     datacard.write("\n")
     datacard.write("%s discrete\n"%pdfindexSTR)
 

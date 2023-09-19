@@ -9,12 +9,16 @@ blinded=False
 
 doMultiPdf=True
 doCR=False
-histoEnum = 43
+#histoEnum = 43
+histoEnum = 44
 #histoEnum = 4
 
-workspaceName = 'WS_AUG10'
-if histoEnum == 43: workspaceName = 'WSmva_AUG10'
+workspaceName = 'WS_AUG31'
+if histoEnum == 43: workspaceName = 'WSmva_AUG31'
+if histoEnum == 44: workspaceName = 'WSmvaLowBin_AUG31'
 if histoEnum == 43 and doCR: workspaceName = 'WSmvaCR'
+
+if histoEnum == 44: binBDT="_bin1"
 
 ## for GF
 xlowRange = 110.
@@ -102,14 +106,14 @@ def  fitSig(tag , mesonCat, year):
 
         # -----------------------------------------------------------------------------
 
-        cb_mu = RooRealVar('cb_mu'+mesonCat+tag+'_'+sig, 'cb_mu', 125., 125-10. , 125+10.)
-        cb_sigma = RooRealVar('cb_sigma'+mesonCat+tag+'_'+sig, 'cb_sigma', 0., 3.)
-        cb_alphaL = RooRealVar('cb_alphaL'+mesonCat+tag+'_'+sig, 'cb_alphaL', 0., 5.)
-        cb_alphaR = RooRealVar('cb_alphaR'+mesonCat+tag+'_'+sig, 'cb_alphaR', 0., 5.)
-        cb_nL = RooRealVar('cb_nL'+mesonCat+tag+'_'+sig, 'cb_nL', 0., 5.)
-        cb_nR = RooRealVar('cb_nR'+mesonCat+tag+'_'+sig, 'cb_nR', 0., 5.)
+        cb_mu = RooRealVar('cb_mu'+binBDT+mesonCat+tag+'_'+sig, 'cb_mu', 125., 125-10. , 125+10.)
+        cb_sigma = RooRealVar('cb_sigma'+binBDT+mesonCat+tag+'_'+sig, 'cb_sigma', 0., 3.)
+        cb_alphaL = RooRealVar('cb_alphaL'+binBDT+mesonCat+tag+'_'+sig, 'cb_alphaL', 0., 5.)
+        cb_alphaR = RooRealVar('cb_alphaR'+binBDT+mesonCat+tag+'_'+sig, 'cb_alphaR', 0., 5.)
+        cb_nL = RooRealVar('cb_nL'+binBDT+mesonCat+tag+'_'+sig, 'cb_nL', 0., 5.)
+        cb_nR = RooRealVar('cb_nR'+binBDT+mesonCat+tag+'_'+sig, 'cb_nR', 0., 5.)
 
-        pdf_crystalball = RooDoubleCBFast('crystal_ball'+mesonCat+tag+'_'+sig, 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
+        pdf_crystalball = RooDoubleCBFast('crystal_ball'+binBDT+mesonCat+tag+'_'+sig, 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
         model = pdf_crystalball
 
         # -----------------------------------------------------------------------------
@@ -129,6 +133,10 @@ def  fitSig(tag , mesonCat, year):
                 titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- MVA>"+str(MVAbin[tag])
                 if tag == '_GFcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- MVA>"+str(MVAbin[tag])
                 if tag == '_Zinvcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- MVA>"+str(MVAbin[tag])
+        elif histoEnum == 44:
+            titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- "+str(MVAbinLow[tag])+"<MVA<"+str(MVAbin[tag])
+            if tag == '_GFcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- "+str(MVAbinLow[tag])+"<MVA<"+str(MVAbin[tag])
+            if tag == '_Zinvcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- "+str(MVAbinLow[tag])+"<MVA<"+str(MVAbin[tag])
 
         plotFrameWithNormRange = x.frame(RooFit.Title(titleSTR))
 
@@ -145,6 +153,7 @@ def  fitSig(tag , mesonCat, year):
         if histoEnum == 43:
             if doCR: canvas.SaveAs(workspaceName+"/signal_"+sig+"_"+mesonCat+tag+"_"+str(year)+"_lowMVA.png")
             else: canvas.SaveAs(workspaceName+"/signal_"+sig+"_"+mesonCat+tag+"_"+str(year)+"_withMVA.png")
+        elif histoEnum == 44: canvas.SaveAs(workspaceName+"/signal_"+sig+"_"+mesonCat+tag+"_"+str(year)+"_withMVAbin1.png")
         else : canvas.SaveAs(workspaceName+"/signal_"+sig+"_"+mesonCat+tag+"_"+str(year)+".png")
 
         # -----------------------------------------------------------------------------
@@ -190,6 +199,7 @@ def  fitSig(tag , mesonCat, year):
         if histoEnum == 43:
             if doCR: w.writeToFile(workspaceName+"/Signal"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
             else: w.writeToFile(workspaceName+"/Signal"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
+        elif histoEnum == 44: w.writeToFile(workspaceName+"/Signal"+tag+"_"+mesonCat+"_"+str(year)+"_bin1_workspace.root")
         else: w.writeToFile(workspaceName+"/Signal"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
 
 def  fitBkg(tag , mesonCat, year):
@@ -203,60 +213,60 @@ def  fitBkg(tag , mesonCat, year):
 
     foo = -1 * histoEnum if doCR else histoEnum
     data_full = getHisto(foo, int(xhighRange - xlowRange), xlowRange, xhighRange, True, tag, mesonCat, False, -1 )
-    data = RooDataHist('datahist'+mesonCat+tag, 'data', RooArgList(x), data_full)
+    data = RooDataHist('datahist'+binBDT+mesonCat+tag, 'data', RooArgList(x), data_full)
     blindedData = data.reduce(RooFit.CutRange("left,right"))
 
     data_reduced_Manual = data_full.Clone()
     for k in range(115, 135):
         data_reduced_Manual.SetBinContent(data_reduced_Manual.FindBin(k),0)
         data_reduced_Manual.SetBinError(data_reduced_Manual.FindBin(k),0.)
-    data_reduced = RooDataHist('datahistReduce'+mesonCat+tag, 'dataReduced', RooArgList(x), data_reduced_Manual)
+    data_reduced = RooDataHist('datahistReduce'+binBDT+mesonCat+tag, 'dataReduced', RooArgList(x), data_reduced_Manual)
 
     # -----------------------------------------------------------------------------
     # BERN law
-    bern_c0 = RooRealVar('bern_c0'+mesonCat+tag, 'bern_c0', 0.5, 0., 1.)
-    bern_c1 = RooRealVar('bern_c1'+mesonCat+tag, 'bern_c1', 0.1, 0., 1.)
-    bern_c2 = RooRealVar('bern_c2'+mesonCat+tag, 'bern_c2', 0.1, 0., 1.)
-    bern_c3 = RooRealVar('bern_c3'+mesonCat+tag, 'bern_c3', 0.01, 0., 0.1) # limit this for the GF
-    bern_c4 = RooRealVar('bern_c4'+mesonCat+tag, 'bern_c4', 0.5, 0., 5.)
-    bern_c5 = RooRealVar('bern_c5'+mesonCat+tag, 'bern_c5', 1e-2, 0., 0.1)
+    bern_c0 = RooRealVar('bern_c0'+binBDT+mesonCat+tag, 'bern_c0', 0.5, 0., 1.)
+    bern_c1 = RooRealVar('bern_c1'+binBDT+mesonCat+tag, 'bern_c1', 0.1, 0., 1.)
+    bern_c2 = RooRealVar('bern_c2'+binBDT+mesonCat+tag, 'bern_c2', 0.1, 0., 1.)
+    bern_c3 = RooRealVar('bern_c3'+binBDT+mesonCat+tag, 'bern_c3', 0.01, 0., 0.1) # limit this for the GF
+    bern_c4 = RooRealVar('bern_c4'+binBDT+mesonCat+tag, 'bern_c4', 0.5, 0., 5.)
+    bern_c5 = RooRealVar('bern_c5'+binBDT+mesonCat+tag, 'bern_c5', 1e-2, 0., 0.1)
 
-    pdf_bern0 = RooBernstein('bern0'+mesonCat+tag, 'bern0', x,
+    pdf_bern0 = RooBernstein('bern0'+binBDT+mesonCat+tag, 'bern0', x,
                              RooArgList(bern_c0))
-    pdf_bern1 = RooBernstein('bern1'+mesonCat+tag, 'bern1', x,
+    pdf_bern1 = RooBernstein('bern1'+binBDT+mesonCat+tag, 'bern1', x,
                              RooArgList(bern_c0, bern_c1))
-    pdf_bern2 = RooBernstein('bern2'+mesonCat+tag, 'bern2', x,
+    pdf_bern2 = RooBernstein('bern2'+binBDT+mesonCat+tag, 'bern2', x,
                              RooArgList(bern_c0, bern_c1, bern_c2))
-    pdf_bern3 = RooBernstein('bern3'+mesonCat+tag, 'bern3', x,
+    pdf_bern3 = RooBernstein('bern3'+binBDT+mesonCat+tag, 'bern3', x,
                              RooArgList(bern_c0, bern_c1, bern_c2, bern_c3))
-    pdf_bern4 = RooBernstein('bern4'+mesonCat+tag, 'bern4', x,
+    pdf_bern4 = RooBernstein('bern4'+binBDT+mesonCat+tag, 'bern4', x,
                              RooArgList(bern_c0, bern_c1, bern_c2, bern_c3, bern_c4))
-    pdf_bern5 = RooBernstein('bern5'+mesonCat+tag, 'bern5', x,
+    pdf_bern5 = RooBernstein('bern5'+binBDT+mesonCat+tag, 'bern5', x,
                              RooArgList(bern_c0, bern_c1, bern_c2, bern_c3, bern_c4, bern_c5))
 
 #    if blinded: pdf_bern4.selectNormalizationRange(RooFit.CutRange("left,right"))
 
     # -----------------------------------------------------------------------------
     # chebychev law
-    chebychev_c0 = RooRealVar('chebychev_c0'+mesonCat+tag, 'chebychev_c0', 1.08, -1.1, 10.)
-    chebychev_c1 = RooRealVar('chebychev_c1'+mesonCat+tag, 'chebychev_c1', 0.4, -1., 1.)
-    chebychev_c2 = RooRealVar('chebychev_c2'+mesonCat+tag, 'chebychev_c2', 0.01, -0.1, 0.1)
-    chebychev_c3 = RooRealVar('chebychev_c3'+mesonCat+tag, 'chebychev_c3', 0., -1., 1.) # limit this for the GF
+    chebychev_c0 = RooRealVar('chebychev_c0'+binBDT+mesonCat+tag, 'chebychev_c0', 1.08, -1.1, 10.)
+    chebychev_c1 = RooRealVar('chebychev_c1'+binBDT+mesonCat+tag, 'chebychev_c1', 0.4, -1., 1.)
+    chebychev_c2 = RooRealVar('chebychev_c2'+binBDT+mesonCat+tag, 'chebychev_c2', 0.01, -0.1, 0.1)
+    chebychev_c3 = RooRealVar('chebychev_c3'+binBDT+mesonCat+tag, 'chebychev_c3', 0., -1., 1.) # limit this for the GF
 
-    pdf_chebychev1 = RooChebychev("chebychev1"+mesonCat+tag, "chebychev1",x,
+    pdf_chebychev1 = RooChebychev("chebychev1"+binBDT+mesonCat+tag, "chebychev1",x,
                                   RooArgList(chebychev_c0,chebychev_c1))
 
-    pdf_chebychev2 = RooChebychev("chebychev2"+mesonCat+tag, "chebychev2",x,
+    pdf_chebychev2 = RooChebychev("chebychev2"+binBDT+mesonCat+tag, "chebychev2",x,
                                   RooArgList(chebychev_c0,chebychev_c1,chebychev_c2))
 
-    pdf_chebychev3 = RooChebychev("chebychev3"+mesonCat+tag,"chebychev3",x,
+    pdf_chebychev3 = RooChebychev("chebychev3"+binBDT+mesonCat+tag,"chebychev3",x,
                                   RooArgList(chebychev_c0,chebychev_c1,chebychev_c2,chebychev_c3))
 
     # -----------------------------------------------------------------------------
     # GAUS law
-    gauss_mu = RooRealVar('gauss_mu'+mesonCat+tag, 'gauss_mu', 10., 0, 30.)
-    gauss_sigma = RooRealVar('gauss_sigma'+mesonCat+tag, 'gaus_sigma', 10, 2, 30) #starting value, min max
-    pdf_gauss = RooGaussian('gauss'+mesonCat+tag, 'gauss', x , gauss_mu, gauss_sigma)
+    gauss_mu = RooRealVar('gauss_mu'+binBDT+mesonCat+tag, 'gauss_mu', 10., 0, 30.)
+    gauss_sigma = RooRealVar('gauss_sigma'+binBDT+mesonCat+tag, 'gaus_sigma', 10, 2, 30) #starting value, min max
+    pdf_gauss = RooGaussian('gauss'+binBDT+mesonCat+tag, 'gauss', x , gauss_mu, gauss_sigma)
 
     # -----------------------------------------------------------------------------
     # POW law
@@ -282,14 +292,14 @@ def  fitBkg(tag , mesonCat, year):
 
     # -----------------------------------------------------------------------------
     # EXP law
-    exp_p1 = RooRealVar('exp_p1'+mesonCat+tag, 'exp_p1', -0.1, -10, 0)
-    exp_p2 = RooRealVar('exp_p2'+mesonCat+tag, 'exp_p2', -1e-2, -10, 0)
+    exp_p1 = RooRealVar('exp_p1'+binBDT+mesonCat+tag, 'exp_p1', -0.1, -10, 0)
+    exp_p2 = RooRealVar('exp_p2'+binBDT+mesonCat+tag, 'exp_p2', -1e-2, -10, 0)
     exp_p3 = RooRealVar('exp_p3', 'exp_p3', -1e-3, -10, 0)
     exp_c1 = RooRealVar('exp_c1', 'exp_c1', 0., 1.)
     exp_c2 = RooRealVar('exp_c2', 'exp_c2', 0., 1.)
     exp_c3 = RooRealVar('exp_c3', 'exp_c3', 0., 1.)
 
-    pdf_exp1 = RooExponential('exp1'+mesonCat+tag, 'exp1', x, exp_p1)
+    pdf_exp1 = RooExponential('exp1'+binBDT+mesonCat+tag, 'exp1', x, exp_p1)
     pdf_single_exp2 = RooExponential('single_exp2', 'single_exp2', x, exp_p2)
     pdf_single_exp3 = RooExponential('single_exp3', 'single_exp3', x, exp_p3)
 
@@ -309,7 +319,7 @@ def  fitBkg(tag , mesonCat, year):
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern5, pdf_gauss);
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_bern1, pdf_gauss);
 
-    storedPdfs = RooArgList("store_"+mesonCat+tag)
+    storedPdfs = RooArgList("store_"+binBDT+mesonCat+tag)
 
     if tag=='_VBFcatlow':
 #        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
@@ -364,7 +374,7 @@ def  fitBkg(tag , mesonCat, year):
         BKG_norm = RooRealVar(model.GetName()+ "_normCR", model.GetName()+ "_normCR", norm_range, 0.5*norm_range, 2*norm_range)
     else:
         if doMultiPdf:
-            BKG_norm = RooRealVar("multipdf"+mesonCat+tag+"_bkg"+"_norm",model.GetName()+"_norm", norm_range, 0.5*norm_range, 2*norm_range)
+            BKG_norm = RooRealVar("multipdf"+binBDT+mesonCat+tag+"_bkg"+"_norm",model.GetName()+"_norm", norm_range, 0.5*norm_range, 2*norm_range)
         else:
             BKG_norm = RooRealVar(model.GetName()+ "_norm", model.GetName()+ "_norm", norm_range, 0.5*norm_range, 2*norm_range)
 
@@ -386,6 +396,10 @@ def  fitBkg(tag , mesonCat, year):
             titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- MVA>"+str(MVAbin[tag])
             if tag == '_GFcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- MVA>"+str(MVAbin[tag])
             if tag == '_Zinvcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- MVA>"+str(MVAbin[tag])
+    elif histoEnum == 44:
+        titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- "+str(MVAbinLow[tag])+"<MVA<"+str(MVAbin[tag])
+        if tag == '_GFcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- "+str(MVAbinLow[tag])+"<MVA<"+str(MVAbin[tag])
+        if tag == '_Zinvcat': titleSTR = "mH"+mesonCat+tag+"_"+str(year)+" -- "+str(MVAbinLow[tag])+"<MVA<"+str(MVAbin[tag])
 
 #    plotFrameWithNormRange = x.frame(RooFit.Title("mH_"+tag+"_"+mesonCat+"_"+str(year)+" -- MVA>0.3"))
     plotFrameWithNormRange = x.frame(RooFit.Title(titleSTR))
@@ -435,7 +449,7 @@ def  fitBkg(tag , mesonCat, year):
     if tag == '_GFcat': offsetY = 0
     if (tag == '_VBFcat' or tag == '_VBFcatlow') and mesonCat == '_RhoCat' and histoEnum == 4: offsetY = 0
     if (tag == '_VBFcat' or tag == '_VBFcatlow') and mesonCat == '_PhiCat' and histoEnum == 4: offsetY = 0.80*data_full.GetMaximum()
-    if (tag == '_VBFcat') and histoEnum == 43: offsetY = 0.90*data_full.GetMaximum()
+    if (tag == '_VBFcat') and (histoEnum == 43 or histoEnum == 44): offsetY = 0.90*data_full.GetMaximum()
     latex = TLatex()
     latex.SetTextColor(kRed)
     latex.SetTextSize(0.04)
@@ -449,11 +463,13 @@ def  fitBkg(tag , mesonCat, year):
         if histoEnum == 43:
             if doCR: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"_lowMVA.png")
             else: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"_REDUCED_withMVA.png")
+        elif histoEnum == 44: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"_REDUCED_withMVA_bin1.png")
         else: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"REDUCED.png")
     else:
         if histoEnum == 43:
             if doCR: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"_lowMVA.png")
             else: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"_withMVA.png")
+        elif histoEnum == 44: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+"_withMVA_bin1.png")
         else: canvas.SaveAs(workspaceName+"/bkg_"+mesonCat+tag+"_"+str(year)+".png")
 
     # -----------------------------------------------------------------------------
@@ -464,8 +480,8 @@ def  fitBkg(tag , mesonCat, year):
     w = RooWorkspace("w", "workspace")
 
     if doMultiPdf:
-        pdf_cat = RooCategory("pdfindex"+mesonCat+tag,"pdfindex"+mesonCat+tag)
-        pdf_bkg = RooMultiPdf("multipdf"+mesonCat+tag+"_bkg","multipdf",pdf_cat,storedPdfs)
+        pdf_cat = RooCategory("pdfindex"+binBDT+mesonCat+tag,"pdfindex"+binBDT+mesonCat+tag)
+        pdf_bkg = RooMultiPdf("multipdf"+binBDT+mesonCat+tag+"_bkg","multipdf",pdf_cat,storedPdfs)
         getattr(w,'import')(pdf_bkg)
     else:
         # Import model and all its components into the workspace
@@ -489,6 +505,7 @@ def  fitBkg(tag , mesonCat, year):
         if histoEnum == 43:
             if doCR: w.writeToFile(workspaceName+"/Bkg"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
             else: w.writeToFile(workspaceName+"/Bkg"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
+        elif histoEnum == 44: w.writeToFile(workspaceName+"/Bkg"+tag+"_"+mesonCat+"_"+str(year)+"_bin1_workspace.root")
         else: w.writeToFile(workspaceName+"/Bkg"+tag+"_"+mesonCat+"_"+str(year)+"_workspace.root")
 
 def makePlot():
@@ -528,6 +545,7 @@ if __name__ == "__main__":
     fitBkg('_GFcat','_K0StarCat',2018)
 
     '''
+
     if not blinded: fitSig('_VBFcatlow','_RhoCat',2018)
     fitBkg('_VBFcatlow','_RhoCat',2018)
 

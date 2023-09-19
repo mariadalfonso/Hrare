@@ -96,6 +96,12 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
 
    resetTree(mytree, category, True)
 
+MVAbinLow={
+   '_GFcat': -0.4,
+   '_VBFcat': -0.6,
+   '_VBFcatlow': -0.6,
+}
+
 MVAbinRho={
    '_GFcat': 0.4,
    '_VBFcat': 0.6,
@@ -135,7 +141,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    mytree = ROOT.TChain('events')
 
-   dirLOCAL_='/work/submit/mariadlf/AUG10/'
+   dirLOCAL_='/work/submit/mariadlf/AUG31/'
    directory1 = dirLOCAL_+'12016/'
    directory2 = dirLOCAL_+'22016/'
    directory3 = dirLOCAL_+'2017/'
@@ -188,6 +194,11 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
             if ev.MVAdisc[0]>MVAbin[category]:  var = ev.HCandMass
          else:
             if ev.MVAdisc[0]<MVAbin[category]:  var = ev.HCandMass
+
+      if abs(item) == 44:
+         var = -1
+         if item> 0:
+            if ev.MVAdisc[0]<MVAbin[category] and ev.MVAdisc[0]>MVAbinLow[category]:  var = ev.HCandMass
 
       if item == 4:
          var = ev.HCandMass
