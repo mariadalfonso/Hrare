@@ -1,4 +1,6 @@
 {
+    "BARRELphotons_cutbased" : "(Photon_pt>30 and Photon_isScEtaEB and (Photon_cutBased & 3))",
+    "ENDCAPphotons_cutbased" : "(Photon_pt>30 and Photon_isScEtaEE and (Photon_cutBased & 3))",
     "BARRELphotons" : "(Photon_pt>30 and Photon_isScEtaEB and Photon_mvaID_WP90)",
     "ENDCAPphotons" : "(Photon_pt>30 and Photon_isScEtaEE and Photon_mvaID_WP80)",
     "ENDCAPphotonsLoose" : "(Photon_pt>30 and Photon_isScEtaEE and Photon_mvaID_WP90)",
@@ -14,6 +16,24 @@
     "METFLAG": "(Flag_globalSuperTightHalo2016Filter and Flag_EcalDeadCellTriggerPrimitiveFilter and Flag_eeBadScFilter and Flag_ecalBadCalibFilter and Flag_HBHENoiseIsoFilter and Flag_HBHENoiseFilter)",
 
     "MVAweights": [
+	{
+	    "name": "isGF",
+	    "type": "isPhi3PiCat",
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df15_dl3684_v0_v1_opt10329_phi_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOpts2/TMVARegression_BDTG_df15_dl3684_v0_v1_opt10329_phi_0.weights.xml"
+	},
+	{
+	    "name": "isGF",
+	    "type": "isOmega3PiCat",
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df15_dl3684_v0_v1_opt11264_omega_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOpts2/TMVARegression_BDTG_df15_dl3684_v0_v1_opt10329_phi_0.weights.xml"
+	},
+	{
+	    "name": "isGF",
+	    "type": "isD0StarCat",
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df7_dl3684_v0_v1_opt12167_d0star_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOpts2/TMVARegression_BDTG_df7_dl3684_v0_v1_opt12167_d0star_0.weights.xml"
+	},
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
@@ -194,25 +214,25 @@
 	{
             "name": "isZinv",
             "type": "isOmega3PiCat",
-            "definition": "(omega_Nphotons>0 && abs(omega_Nbody_mass-0.782)<10*0.009 && omega_Nbody_pt>30 && abs(omega_kin_mass - 0.47) < 0.17 && omega_kin_pt>20 && getMaximum(omega_trk1_pt, omega_trk2_pt) > 10 && getMinimum(omega_trk1_pt, omega_trk2_pt) > 5 && omega_kin_valid && omega_iso > 0.9 && abs(omega_bestVtx_Z)<24 && omega_bestVtx_idx<5)",
-            "notes":" used for isGF"
+            "definition": "(omega_Nphotons>0 && omega_Nbody_pt>30 && abs(omega_kin_mass - 0.47) < 0.17 && omega_kin_pt>20 && abs(omega_Nbody_eta)<2.1 && getMaximum(omega_trk1_pt, omega_trk2_pt) > 10 && getMinimum(omega_trk1_pt, omega_trk2_pt) > 5 && omega_kin_valid && omega_iso > 0.9 && abs(omega_bestVtx_Z)<24 && omega_bestVtx_idx<5)",
+            "notes":" used for isGF, cut on omega_Nbody_mass applied later"
         },
 	{
             "name": "isZinv",
             "type": "isPhi3PiCat",
-            "definition": "(omega_Nphotons>0 && abs(omega_Nbody_mass-1.02)<20*0.005 && omega_Nbody_pt>30 && abs(omega_kin_mass - 0.59) < 0.25 && omega_kin_pt>20 && getMaximum(omega_trk1_pt, omega_trk2_pt) > 10 && getMinimum(omega_trk1_pt, omega_trk2_pt) > 5 && omega_kin_valid && omega_iso > 0.9 && abs(omega_bestVtx_Z)<24 && omega_bestVtx_idx<5)",
-            "notes":" used for isGF"
+            "definition": "(omega_Nphotons>0 && omega_Nbody_pt>30 && abs(omega_kin_mass - 0.59) < 0.25 && omega_kin_pt>20 && abs(omega_Nbody_eta)<2.1 && getMaximum(omega_trk1_pt, omega_trk2_pt) > 10 && getMinimum(omega_trk1_pt, omega_trk2_pt) > 5 && omega_kin_valid && omega_iso > 0.9 && abs(omega_bestVtx_Z)<24 && omega_bestVtx_idx<5)",
+            "notes":" used for isGF, cut on omega_Nbody_mass applied later"
         },
 	{
             "name": "isZinv",
             "type": "isD0Pi0StarCat",
-            "definition": "abs(d0pi0_d0Star_Nbody_mass-2.007)<30*0.02 && d0pi0_d0Star_Nbody_pt>38 && d0pi0_pion_pt>5 && d0pi0_kaon_pt>5 && d0pi0_kin_valid && d0pi0_iso > 0.9 && abs(d0pi0_bestVtx_Z)<24 && d0pi0_bestVtx_idx<5",
+            "definition": "d0pi0_d0Star_Nphotons>0 && abs(d0pi0_d0Star_Nbody_mass-2.007)<30*0.02 && d0pi0_d0Star_Nbody_pt>30 && abs(d0pi0_d0Star_Nbody_eta)<2.1 && d0pi0_kin_pt>20 && getMaximum(d0pi0_pion_pt, d0pi0_kaon_pt) > 10 && d0pi0_pion_pt>5 && d0pi0_kaon_pt>5 && d0pi0_kin_valid && d0pi0_iso > 0.9 && abs(d0pi0_bestVtx_Z)<24 && d0pi0_bestVtx_idx<5",
             "notes":" used for isGF; D0pi0Star and D0Star are excusive based on the charged mass system"
 	},
 	{
             "name": "isZinv",
             "type": "isD0StarCat",
-            "definition": "abs(d0_d0Star_Nbody_mass-2.007)<30*0.02 && d0_d0Star_Nbody_pt>38 && abs(d0_kin_mass-1.864)<0.05 && d0_pion_pt>5 && d0_kaon_pt>5 && d0_kin_valid && d0_iso > 0.9 && abs(d0_bestVtx_Z)<24 && d0_bestVtx_idx<5",
+            "definition": "abs(d0_d0Star_Nbody_mass-2.007)<30*0.02 && d0_d0Star_Nbody_pt>30 && abs(d0_d0Star_Nbody_eta)<2.1 && abs(d0_kin_mass-1.864)<0.05 && getMaximum(d0_pion_pt, d0_kaon_pt) > 20 && d0_pion_pt>5 && d0_kaon_pt>5 && d0_kin_valid && d0_iso > 0.9 && abs(d0_bestVtx_Z)<24 && d0_bestVtx_idx<5",
             "notes":" used for isGF"
 	}
     ],

@@ -54,6 +54,7 @@ using stdVec_i = std::vector<int>;
 using stdVec_b = std::vector<bool>;
 using stdVec_f = std::vector<float>;
 
+typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<float> > XYZVectorF;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
@@ -108,6 +109,16 @@ bool firedTrigger(Vec_i id, int v1, Vec_f pt, float v2){
   return fired;
 }
 
+
+Vec_f getMinimum(Vec_f v1, Vec_f v2){
+	Vec_f output = {};
+	if (!v1.empty() && !v2.empty() && v1.size() == v2.size()){
+		for (unsigned int i = 0; i < v1.size(); i++){
+			output.push_back(min(v1[i], v2[i]));
+		}
+	}
+	return output;
+}
 
 Vec_f getMaximum(Vec_f v1, Vec_f v2){
 	Vec_f output = {};
@@ -445,6 +456,20 @@ float mt(float pt1, float phi1, float pt2, float phi2) {
   return std::sqrt(2*pt1*pt2*(1-std::cos(phi1-phi2)));
 }
 
+Vec_f sum2BodyMass(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1, const Vec_f& m1,
+		   const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
+
+  const float pion_mass_ = 0.139570;
+  Vec_f mass(pt1.size());
+
+  for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
+    PtEtaPhiMVector p_1(pt1[idx], eta1[idx], phi1[idx], m1[idx]);
+    PtEtaPhiMVector p_2(pt2[idx], eta2[idx], phi2[idx], pion_mass_);
+    mass[idx] = (p_1 + p_2).M();
+  }
+  return mass;
+
+}
 
 float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) {
   PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
@@ -545,6 +570,63 @@ std::pair<float, float>  Minv2(const float& pt, const float& eta, const float& p
 float dR_Constituents(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx) {
   return deltaR(eta[idx[0]], phi[idx[0]], eta[idx[1]], phi[idx[1]]);
 }
+
+float compute_HiggsVars_var_VtxCorr(const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
+				    const float mes_vtx_X, const float mes_vtx_Y, const float mes_vtx_Z,
+				    const float ph_pt, const float ph_eta, const float ph_phi,
+				    const float ph_calo_X, const float ph_calo_Y, const float ph_calo_Z,
+				    unsigned int var)
+{
+
+  // passing only the one that make the Higgs candidate
+  // Here I have to do the correction to the photon 4 momentum
+  PtEtaPhiMVector p4_ph(ph_pt, ph_eta, ph_phi, 0);
+
+  XYZVectorF calorimiterPos(ph_calo_X, ph_calo_Y, ph_calo_Z);
+  XYZVectorF mesonVertex(mes_vtx_X, mes_vtx_Y, mes_vtx_Z);
+
+  XYZVectorF p_ph_origin = calorimiterPos.unit() * p4_ph.E();
+  XYZVectorF p_ph_vtx = (calorimiterPos - mesonVertex).unit() * p4_ph.E();
+
+  PtEtaPhiMVector p4_ph_origin;
+  p4_ph_origin.SetPxPyPzE(p_ph_origin.X(), p_ph_origin.Y(), p_ph_origin.Z(), p4_ph.E());
+
+  PtEtaPhiMVector p4_ph_vtx;
+  p4_ph_vtx.SetPxPyPzE(p_ph_vtx.X(), p_ph_vtx.Y(), p_ph_vtx.Z(), p4_ph.E());
+
+  //Correct them so they have  m=0
+  PtEtaPhiMVector p4_ph_origin_M(p4_ph_origin.Pt(), p4_ph_origin.Eta(), p4_ph_origin.Phi(), 0);
+  PtEtaPhiMVector p4_ph_vtx_M(p4_ph_vtx.Pt(), p4_ph_vtx.Eta(), p4_ph_vtx.Phi(), 0);
+
+  PtEtaPhiMVector p_mes(mes_pt, mes_eta, mes_phi, mes_mass);
+  PtEtaPhiMVector p_Hig_ORG = (p4_ph + p_mes);
+
+  //  cout << "--------------------------------------------------------------------------------------------" << endl;
+  //  cout << "(XYZ) Calo coords [mm]:                     " << calorimiterPos.X()  << " " << calorimiterPos.Y()    << " " << calorimiterPos.Z()    << endl;
+  //  cout << "(XYZ) Meson vtx coords [mm]:                " << mesonVertex.X()     << " " << mesonVertex.Y()       << " " << mesonVertex.Z()       << endl;
+  //  cout << "--------------------------------------------" << endl;
+  //  cout << "(PxPyPzE|p|) (0-calo) photon [GeV]:         " << p4_ph_origin.X()    << " " << p4_ph_origin.Y()      << " " << p4_ph_origin.Z()      << " " << p4_ph_origin.E()    << " " << p4_ph_origin.P()    << endl;
+  //  cout << "(PxPyPzE|p|) (meson_vtx-calo) photon [GeV]: " << p4_ph_vtx.X()       << " " << p4_ph_vtx.Y()         << " " << p4_ph_vtx.Z()         << " " << p4_ph_vtx.E()       << " " << p4_ph_vtx.P()       << endl;
+  //  cout << "(PxPyPzE|p|) Original photon [GeV]:         " << p4_ph.X()           << " " << p4_ph.Y()             << " " << p4_ph.Z()             << " " << p4_ph.E()           << " " << p4_ph.P()           << endl;
+  //  cout << "--------------------------------------------" << endl;
+  //  cout << "(PtEtaPhi) (0-calo) photon manually comp:   " << std::sqrt(p_ph_origin.X()*p_ph_origin.X()+p_ph_origin.Y()*p_ph_origin.Y())     << " " << std::atanh(p_ph_origin.Z()/p_ph_origin.P())    << " " << std::atan2(p_ph_origin.Y(), p_ph_origin.X()) << endl;
+  //  cout << "(PtEtaPhiME) (0-calo) photon:               " << p4_ph_origin.Pt()   << " " << p4_ph_origin.Eta()    << " " << p4_ph_origin.Phi()    << " " << p4_ph_origin.M()    << " " << p4_ph_origin.E()    << endl;
+  //  cout << "(PtEtaPhiME) (0-calo) photon M=0:           " << p4_ph_origin_M.Pt() << " " << p4_ph_origin_M.Eta()  << " " << p4_ph_origin_M.Phi()  << " " << p4_ph_origin_M.M()  << " " << p4_ph_origin_M.E()  << endl;
+  //  cout << "(PtEtaPhiME) (meson_vtx-calo) photon:       " << p4_ph_vtx.Pt()      << " " << p4_ph_vtx.Eta()       << " " << p4_ph_vtx.Phi()       << " " << p4_ph_vtx.M()       << " " << p4_ph_vtx.E()       << endl;
+  //  cout << "(PtEtaPhiME) (meson_vtx-calo) photon M=0:   " << p4_ph_vtx_M.Pt()    << " " << p4_ph_vtx_M.Eta()     << " " << p4_ph_vtx_M.Phi()     << " " << p4_ph_vtx_M.M()     << " " << p4_ph_vtx_M.E()     << endl;
+  //  cout << "(PtEtaPhiME) Original photon [GeV]:             " << p4_ph.Pt()          << " " << p4_ph.Eta()           << " " << p4_ph.Phi()           << " " << p4_ph.M()           << " " << p4_ph.E()           << endl;
+  //  cout << "--------------------------------------------------------------------------------------------" << endl;
+
+  PtEtaPhiMVector p_Hig = (p4_ph_vtx_M + p_mes);
+  float theVar = 0;
+  if     (var == 0) theVar = p_Hig.M();
+  else if(var == 1) theVar = p_Hig.Pt();
+  else if(var == 2) theVar = p_Hig.Phi();
+
+  return theVar;
+
+}
+
 
 float compute_HiggsVars_var(const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
 			    const float ph_pt, const float ph_eta, const float ph_phi,
