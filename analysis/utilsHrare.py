@@ -11,6 +11,10 @@ if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.s
 import correctionlib
 correctionlib.register_pyroot_binding()
 
+def loadSFhisto(mc,year):
+    ROOT.gInterpreter.ProcessLine('initTrigSF();')
+    ROOT.gInterpreter.ProcessLine('initIsoSF();')
+
 def loadPolarizationTree(mc,year):
     ROOT.gInterpreter.ProcessLine('initPol(%d,%d,%d);'% (mc,year,ROOT.GetThreadPoolSize()))
 
@@ -415,6 +419,10 @@ def SwitchSample(argument,year,useD03):
         1041: (dirLocalNEW2+"ggh-hphipipipi0gamma-powheg"+"/NANOAOD_03_test5",48580*0.153),
         1042: (dirLocalNEW2+"ggh-hD0StarKmPiPPi0gamma-powheg"+"/NANOAOD_03_test5",48580*0.14),
         1043: (dirLocalNEW2+"ggh-hD0Stargamma-powheg"+"/NANOAOD_03_test5",48580*0.0389),
+        1045: (dirLocalNEW2+"vbf-homegagamma-powheg"+"/NANOAOD_03_test5",3781.7*0.892),
+        1046: (dirLocalNEW2+"vbf-hphipipipi0gamma-powheg"+"/NANOAOD_03_test5",3781.7*0.153),
+        1047: (dirLocalNEW2+"vbf-hD0StarKmRhoPgamma-powheg"+"/NANOAOD_03_test5",3781.7*0.14),
+        1048: (dirLocalNEW2+"vbf-hD0Stargamma-powheg"+"/NANOAOD_03_test5",3781.7*0.0389),
         #
         1054: (dirLocalNEW+"vbf-hphiKLKSgamma-powheg"+"/NANOAOD_01",3781.7*0.24), # xsec = 4pb * BR(Hphigamma)=1 BR(phi->kLkS)=0.24
         #

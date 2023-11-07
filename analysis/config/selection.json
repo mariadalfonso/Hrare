@@ -19,74 +19,80 @@
 	{
 	    "name": "isGF",
 	    "type": "isPhi3PiCat",
-	    "file": "weights_regression_oct/TMVARegression_BDTG_df15_dl3684_v0_v1_opt10329_phi_0.weights.xml",
-	    "org": "/data/submit/pdmonte/TMVA_models/weightsOpts2/TMVARegression_BDTG_df15_dl3684_v0_v1_opt10329_phi_0.weights.xml"
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df13_dl3620_v0_v1_opt30001_omega_ggh_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOptsFinal/TMVARegression_BDTG_df13_dl3620_v0_v1_opt30001_omega_ggh_0.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isOmega3PiCat",
-	    "file": "weights_regression_oct/TMVARegression_BDTG_df15_dl3684_v0_v1_opt11264_omega_0.weights.xml",
-	    "org": "/data/submit/pdmonte/TMVA_models/weightsOpts2/TMVARegression_BDTG_df15_dl3684_v0_v1_opt10329_phi_0.weights.xml"
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df13_dl3620_v0_v1_opt30000_phi_ggh_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOptsFinal/TMVARegression_BDTG_df13_dl3620_v0_v1_opt30000_phi_ggh_0.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isD0StarCat",
-	    "file": "weights_regression_oct/TMVARegression_BDTG_df7_dl3684_v0_v1_opt12167_d0star_0.weights.xml",
-	    "org": "/data/submit/pdmonte/TMVA_models/weightsOpts2/TMVARegression_BDTG_df7_dl3684_v0_v1_opt12167_d0star_0.weights.xml"
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df7_dl3684_v0_v1_opt30002_d0star_ggh_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOptsFinal/TMVARegression_BDTG_df7_dl3684_v0_v1_opt30002_d0star_ggh_0.weights.xml"
+	},
+	{
+	    "name": "isGF",
+	    "type": "isD0Pi0StarCat",
+	    "file": "weights_regression_oct/TMVARegression_BDTG_df15_dl3684_v0_v1_opt30003_d0starrho_ggh_0.weights.xml",
+	    "org": "/data/submit/pdmonte/TMVA_models/weightsOptsFinal/TMVARegression_BDTG_df15_dl3684_v0_v1_opt30003_d0starrho_ggh_0.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isPhiCat",
-	    "file": "weights_mva_aug31/VBF_rhophi/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/VBF_RhoPhi_MH100-170/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/VBF_rhophi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT31/forMaria/wp80_8vars_mh_100-170/vbf_rhophi/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_aug31/VBF_rhophi/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/VBF_RhoPhi_MH100-170/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/VBF_rhophi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT31/forMaria/wp80_8vars_mh_100-170/vbf_rhophi/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBF",
 	    "type": "isK0StarCat",
-	    "file": "weights_mva_aug31/VBF_k0star/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/VBF_K0Star_MH100-170/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/VBF_k0star/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT31/forMaria/wp80_8vars_mh_100-170/vbf_k0star/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isPhiCat",
-	    "file": "weights_mva_aug31/ggH_phi/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/GF_Phi_MH110-160/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/ggH_phi/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT18/forMaria/wp80_6vars_mh110-160/phi/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_aug31/ggH_rho/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/GF_Rho_MH110-160/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/ggH_rho/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT5/forMaria/wp80_6vars_mh110-160/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isGF",
 	    "type": "isK0StarCat",
-	    "file": "weights_mva_aug31/ggH_k0star/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/GF_K0Star_MH110-160/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/ggH_k0star/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT18/forMaria/wp80_6vars_mh110-160/k0star/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isRhoCat",
-	    "file": "weights_mva_aug31/VBFlow_rhophi/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/VBFlow_RhoPhi_MH100-170/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/VBFlow_rhophi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT31/forMaria/wp80_8vars_mh_100-170/vbflow_rhophi/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isK0StarCat",
-	    "file": "weights_mva_aug31/VBFlow_k0star/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/VBFlow_K0Star_MH100-170/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/VBFlow_k0star/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT31/forMaria/wp80_8vars_mh_100-170/vbflow_k0star/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isVBFlow",
 	    "type": "isPhiCat",
-	    "file": "weights_mva_aug31/VBFlow_rhophi/TMVAClassification_BDTG1.weights.xml",
-	    "org": "/work/submit/kyoon/RareHiggs/Final_BDT_training/AUG30/VBFlow_RhoPhi_MH100-170/10vars/training/weights/TMVAClassification_BDTG1.weights.xml"
+	    "file": "weights_mva_oct/VBFlow_rhophi/TMVAClassification_BDTG.weights.xml",
+	    "org": "/work/submit/kyoon/RareHiggs/test/2023/MVA_MIT/OCT31/forMaria/wp80_8vars_mh_100-170/vbflow_rhophi/weights/TMVAClassification_BDTG.weights.xml"
 	},
 	{
 	    "name": "isZinv",

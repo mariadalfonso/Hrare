@@ -842,6 +842,74 @@ float getPhiPolarizationAngle(
   }
 }
 
+TH1F * myTH1_photon;
+TH1F * myTH1_twoProng;
+
+float SF_HLT_leg(float pt, int idParticle, int nomUpDowm) {
+
+  TH1* h_sf;
+
+  if(idParticle == 22) h_sf = myTH1_photon;
+  if(idParticle == 15) h_sf = myTH1_twoProng;
+
+  float trgSF = 1.0;
+  int ptbin = std::max(1, std::min(h_sf->GetNbinsX(), h_sf->GetXaxis()->FindBin(pt)));
+
+  if(nomUpDowm==0) trgSF = h_sf->GetBinContent(ptbin);
+  if(nomUpDowm==1) trgSF = h_sf->GetBinContent(ptbin) + std::min(0.10, h_sf->GetBinError(ptbin));
+  if(nomUpDowm==-1) trgSF = h_sf->GetBinContent(ptbin) - std::min(0.10, h_sf->GetBinError(ptbin));
+
+  return trgSF;
+
+}
+
+void initTrigSF() {
+
+  const char* filename_ph = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/Photon35TriggerSF.root";
+  const char* filename_had = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/TwoProngsTriggerSF.root";
+
+  TFile* myFile_photon = TFile::Open(filename_ph, "READ");
+  myTH1_photon = static_cast<TH1F*>(myFile_photon->Get("h_triggerEff_eT"));
+
+  TFile* myFile_twoProng = TFile::Open(filename_had, "READ");
+  myTH1_twoProng = static_cast<TH1F*>(myFile_twoProng->Get("h_efficiency_Data"));
+
+}
+
+TH1F * myTH1_chIso_barrel;
+TH1F * myTH1_chIso_endcap;
+
+float SF_chIso(float pt, float eta, int nomUpDowm) {
+
+  TH1* h_sf;
+
+  if(abs(eta)<1.4) h_sf = myTH1_chIso_barrel;
+  if(abs(eta)>=1.4) h_sf = myTH1_chIso_endcap;
+
+  float isoSF = 1.0;
+  int ptbin = std::max(1, std::min(h_sf->GetNbinsX(), h_sf->GetXaxis()->FindBin(pt)));
+
+  if(nomUpDowm==0) isoSF = h_sf->GetBinContent(ptbin);
+  if(nomUpDowm==1) isoSF = h_sf->GetBinContent(ptbin) + std::min(0.10, h_sf->GetBinError(ptbin));
+  if(nomUpDowm==-1) isoSF = h_sf->GetBinContent(ptbin) - std::min(0.10, h_sf->GetBinError(ptbin));
+
+  return isoSF;
+
+}
+
+void initIsoSF() {
+
+  const char* filename_barrel = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/IsoChEfficiencySF_barrel.root";
+  const char* filename_endcap = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/IsoChEfficiencySF_endcap.root";
+
+  TFile* myFile_chIso_barrel = TFile::Open(filename_barrel, "READ");
+  myTH1_chIso_barrel = static_cast<TH1F*>(myFile_chIso_barrel->Get("h_efficiency_Data"));
+
+  TFile* myFile_chIso_endcap = TFile::Open(filename_endcap, "READ");
+  myTH1_chIso_endcap = static_cast<TH1F*>(myFile_chIso_endcap->Get("h_efficiency_Data"));
+
+}
+
 std::vector<std::vector<float>> theta_pol_dict_VEC;
 
 void initPol(int mc, int year, int nSlot) {
@@ -860,7 +928,7 @@ void initPol(int mc, int year, int nSlot) {
   if(mc>=1020 and mc<=1028) meson = "Rho";
   if(mc>=1030 and mc<=1038) meson = "K0s";
 
-  const char* filename = Form("/work/submit/mariadlf/Hrare/polFiles/H%sGammaAnalysis_Signal_%s_%s_%d_M125_AOD.root",meson.Data(),meson.Data(),prod.Data(),year);
+  const char* filename = Form("/work/submit/mariadlf/Hrare/utilFiles/polFiles/H%sGammaAnalysis_Signal_%s_%s_%d_M125_AOD.root",meson.Data(),meson.Data(),prod.Data(),year);
   const char* dirname = Form("H%sGammaAOD",meson.Data());
   std::cout << "reading polarization file: " << filename << std::endl;
 

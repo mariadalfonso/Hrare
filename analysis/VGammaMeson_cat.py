@@ -6,7 +6,7 @@ import json
 ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist, getSkims
 from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson, getTriggerFromJson
-from utilsHrare import loadCorrectionSet, loadPolarizationTree
+from utilsHrare import loadCorrectionSet, loadPolarizationTree, loadSFhisto
 import tmva_helper_xml
 
 doSyst = True
@@ -22,11 +22,11 @@ if sys.argv[2]=='isOmega3PiCat': doPol = False
 if sys.argv[2]=='isPhi3PiCat': doPol = False
 if sys.argv[2]=='isD0StarCat': doPol = False
 if sys.argv[2]=='isD0Pi0StarCat': doPol = False
-doPlot = False
+doPlot = True
 doTrigger = False
 doMesonMassSB = False
 
-useD03=True
+useD03=False
 if sys.argv[2]=='isOmega3PiCat' or sys.argv[2]=='isPhi3PiCat' or sys.argv[2]=='isD0StarCat' or sys.argv[2]=='isD0Pi0StarCat': useD03=True
 
 isGF = False
@@ -210,7 +210,6 @@ def selectionTAG(df, doSyst, isData):
 #        if year == 2018 or year == 2017: PUjetID = "(((Jet_puId & 1) and abs(Jet_eta)>2.75) or ((Jet_puId & 2) and abs(Jet_eta)<=2.75))"
 #        if year == 2016 or year == 12016: PUjetID = "(((Jet_puId & 4) and abs(Jet_eta)>2.75 or ((Jet_puId & 2) and abs(Jet_eta)<=2.75))"
 
-
         if (doSyst and isData == "false"):
             df = df.Define("Jet_delta",'computeJECuncertainties(corr_sf, Jet_pt, Jet_eta)').Vary("Jet_pt", "ROOT::RVec<ROOT::RVecF>{Jet_pt*(1-Jet_delta),Jet_pt*(1+Jet_delta)}", variationTags=["dn","up"], variationName = "JetSYST")
 
@@ -297,9 +296,9 @@ def dfGammaMeson(df,PDType):
     TRIGGER=pickTRG(TRIGGERS,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
 
     GOODphotons = ""
-    if(isGF): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
+    if(isGF): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1 and Photon_mvaID_WP80".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isVBF): GOODphotons = "{} and Photon_pt>75 and Photon_electronVeto".format(BARRELphotons) #90
-    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
+    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto and abs(Photon_eta)<2.1 and Photon_mvaID_WP80".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isZinv): GOODphotons = "({0} or {1}) and Photon_pt>38 and abs(Photon_eta)<2.1 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
     if(isW or isZ): GOODphotons = "({0} or {1}) and (Photon_pixelSeed == false)".format(BARRELphotons,ENDCAPphotonsLoose) #90-90
     print("PHOTONS = ", GOODphotons)
@@ -321,14 +320,17 @@ def dfGammaMeson(df,PDType):
 #             .Define("goodPhotons_pixelSeed", "Photon_pixelSeed[goodPhotons]")
 #             .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
 #             .Define("goodPhotons_sieie", "Photon_sieie[goodPhotons]")
+#             .Define("goodPhotons_x_calo", "Photon_x_calo[goodPhotons]")
+#             .Define("goodPhotons_y_calo", "Photon_y_calo[goodPhotons]")
+#             .Define("goodPhotons_z_calo", "Photon_z_calo[goodPhotons]")
              .Define("goodPhotons_mvaID", "Photon_mvaID[goodPhotons]")
              .Define("goodPhotons_energyErr", "Photon_energyErr[goodPhotons]")
              .Define("goodPhotons_isScEtaEB", "Photon_isScEtaEB[goodPhotons]")
              .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
              )
 
-    if useD03:
-        dfOBJ.Define("goodPhotons_x_calo", "Photon_x_calo[goodPhotons]").Define("goodPhotons_y_calo", "Photon_y_calo[goodPhotons]").Define("goodPhotons_z_calo", "Photon_z_calo[goodPhotons]")
+#    if useD03:
+#        dfOBJ.Define("goodPhotons_x_calo", "Photon_x_calo[goodPhotons]").Define("goodPhotons_y_calo", "Photon_y_calo[goodPhotons]").Define("goodPhotons_z_calo", "Photon_z_calo[goodPhotons]")
 
     return dfOBJ
 
@@ -404,6 +406,7 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_phi", "phi_kin_phi[goodMeson]")
                   .Define("goodMeson_mass", "phi_kin_mass[goodMeson]")
                   .Define("goodMeson_iso", "phi_iso[goodMeson]")
+                  .Define("goodMeson_isoNeuHad", "phi_isoNeuHad[goodMeson]")
                   .Define("goodMeson_vtx_chi2dof", "phi_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "phi_kin_vtx_prob[goodMeson]")
                   .Define("goodMeson_sipPV", "phi_kin_sipPV[goodMeson]")
@@ -467,6 +470,7 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_eta", "K0Star_kin_eta[goodMeson]")
                   .Define("goodMeson_phi", "K0Star_kin_phi[goodMeson]")
                   .Define("goodMeson_iso", "K0Star_iso[goodMeson]")
+                  .Define("goodMeson_isoNeuHad", "K0Star_isoNeuHad[goodMeson]")
                   .Define("goodMeson_mass", "K0Star_kin_mass[goodMeson]")
                   .Define("goodMeson_vtx_chi2dof", "K0Star_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "K0Star_kin_vtx_prob[goodMeson]")
@@ -633,18 +637,18 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_bestVtx_Z", "d0pi0_bestVtx_Z[goodMeson]")
                   .Define("goodMeson_massErr", "d0pi0_kin_massErr[goodMeson]")
                   .Define("goodMeson_charged_mass", "d0pi0_kin_mass[goodMeson]")
+                  .Define("goodMeson_charged_pt", "d0pi0_kin_pt[goodMeson]")
                   .Define("goodMeson_charged_eta", "d0pi0_kin_eta[goodMeson]")
                   .Define("goodMeson_charged_phi", "d0pi0_kin_phi[goodMeson]")
-                  .Define("goodMeson_charged_pt", "d0pi0_kin_pt[goodMeson]")
                   .Define("goodMeson_trk1_pt", "d0pi0_pion_pt[goodMeson]")
                   .Define("goodMeson_trk2_pt", "d0pi0_kaon_pt[goodMeson]")
                   .Define("goodMeson_trk1_eta", "d0pi0_pion_eta[goodMeson]")
                   .Define("goodMeson_trk2_eta", "d0pi0_kaon_eta[goodMeson]")
                   .Define("goodMeson_DR","DeltaR(d0pi0_pion_eta[goodMeson],d0pi0_kaon_eta[goodMeson],d0pi0_pion_phi[goodMeson],d0pi0_kaon_phi[goodMeson])")
-                  .Define("goodMeson_photon_pt", "(d0pi0_Nphotons[goodMeson] >= 1) ? d0pi0_photon_pt[goodMeson] : Vec_f {0.0}")
-                  .Define("goodMeson_photon2_pt", "(d0pi0_Nphotons[goodMeson] >= 2) ? d0pi0_photon2_pt[goodMeson] : Vec_f {0.0}")
-                  .Define("goodMeson_DR_trkPairPh","(d0pi0_Nphotons[goodMeson] >= 1) ? DeltaR(d0pi0_kin_eta[goodMeson],d0pi0_photon_eta[goodMeson],d0pi0_kin_phi[goodMeson],d0pi0_photon_phi[goodMeson]) : Vec_f {0.0}")
-                  .Define("goodMeson_DR_trkPairPh2","(d0pi0_Nphotons[goodMeson] >= 2) ? DeltaR(d0pi0_kin_eta[goodMeson],d0pi0_photon2_eta[goodMeson],d0pi0_kin_phi[goodMeson],d0pi0_photon2_phi[goodMeson]) : Vec_f {0.0}")
+                  .Define("goodMeson_photon_pt", "(Sum(d0pi0_d0Star_Nphotons[goodMeson]) >= 1) ? d0pi0_d0Star_photon_pt[goodMeson] : Vec_f {0.0}")
+                  .Define("goodMeson_photon2_pt", "(Sum(d0pi0_d0Star_Nphotons[goodMeson]) >= 2) ? d0pi0_d0Star_photon2_pt[goodMeson] : Vec_f {0.0}")
+                  .Define("goodMeson_DR_trkPairPh","(Sum(d0pi0_d0Star_Nphotons[goodMeson]) >= 1) ? DeltaR(d0pi0_kin_eta[goodMeson],d0pi0_d0Star_photon_eta[goodMeson],d0pi0_kin_phi[goodMeson],d0pi0_d0Star_photon_phi[goodMeson]) : Vec_f {0.0}")
+                  .Define("goodMeson_DR_trkPairPh2","(Sum(d0pi0_d0Star_Nphotons[goodMeson]) >= 2) ? DeltaR(d0pi0_kin_eta[goodMeson],d0pi0_d0Star_photon2_eta[goodMeson],d0pi0_kin_phi[goodMeson],d0pi0_d0Star_photon2_phi[goodMeson]) : Vec_f {0.0}")
                   .Define("goodMeson_dEta_trkPairPh","abs(d0pi0_kin_eta[goodMeson] - d0pi0_d0Star_photon_eta[goodMeson])")
 #                  .Define("wrongMeson","({}".format(GOODRHO)+")")
 #                  .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? rho_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
@@ -659,23 +663,22 @@ def dfHiggsCand(df,isData):
     if isOmega3PiCat=="true": genMatchPDFNum='223'
     if isPhi3PiCat=="true": genMatchPDFNum='333'
 
-
     dfHig = (dfbase.Define("index_pair","HiggsCandFromRECO(goodMeson_pt, goodMeson_eta, goodMeson_phi, goodMeson_mass, goodMeson_trk1_pt, goodMeson_trk2_pt, wrongMeson_pt, wrongMeson2_pt, goodPhotons_pt, goodPhotons_eta, goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
              #               .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
              .Define("jet_mask2", "cleaningJetFromOBJ(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
              #.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
              .Define("photon_pt", "(index_pair[1]!= -1) ? goodPhotons_pt[index_pair[1]]: 0.f")
-             #               .Define("meson_isoNeuHad", "(index_pair[0]!= -1) ? goodMeson_isoNeuHad[index_pair[0]]: 0.f")
+             .Define("meson_isoNeuHad", "(index_pair[0]!= -1) ? goodMeson_isoNeuHad[index_pair[0]]: 0.f")
              )
 
-    if(isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0Pi0StarCat=="true" or isD0StarCat=="true"): dfHig_ = callMVAregress(dfHig,isVBF,isVBFlow,isGF,isZinv)
-    if(isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"): dfHig_ = dfFinal.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
+    if(isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0StarCat=="true" or isD0Pi0StarCat=="true"): dfHig_ = callMVAregress(dfHig,isVBF,isVBFlow,isGF,isZinv)
+    if(isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"): dfHig_ = dfHig.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
 
     dfFinal = (dfHig_.Define("HCandMass", "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
                .Define("HCandPT",   "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],1)")
                .Define("HCandPHI",   "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],2)")
                .Define("HCandMass_noregress", "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
-               #               .Define("HCandMass_VTXcorr", "compute_HiggsVars_var_VtxCorr(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodMeson_bestVtx_X[index_pair[0]],goodMeson_bestVtx_Y[index_pair[0]], goodMeson_bestVtx_Z[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],goodPhotons_x_calo[index_pair[1]],goodPhotons_y_calo[index_pair[1]],goodPhotons_z_calo[index_pair[1]],0)")
+#               .Define("HCandMass_VTXcorr", "compute_HiggsVars_var_VtxCorr(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodMeson_bestVtx_X[index_pair[0]],goodMeson_bestVtx_Y[index_pair[0]], goodMeson_bestVtx_Z[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],goodPhotons_x_calo[index_pair[1]],goodPhotons_y_calo[index_pair[1]],goodPhotons_z_calo[index_pair[1]],0)")
                .Define("dPhiGammaMesonCand","abs(deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]]))")
                .Define("dEtaGammaMesonCand","abs(goodPhotons_eta[index_pair[1]] - goodMeson_eta[index_pair[0]])")
                .Define("dRGammaMesonCand","deltaR(goodPhotons_eta[index_pair[1]], goodPhotons_phi[index_pair[1]], goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
@@ -720,7 +723,7 @@ def dfwithSYST(df,year):
     if year==22016: photonIDyear = '2016postVFP'
 
     photonIDwp="wp90"
-    #    if isGF: photonIDwp="wp80"
+    if isGF or isVBFlow: photonIDwp="wp80"
 
     muonIDyear=year
     if year==2018: muonIDyear = '2018_UL'
@@ -757,6 +760,20 @@ def dfwithSYST(df,year):
                       .Define("idx_nom_up_down", "indices(3)")
                       #
                       )
+
+
+    if isGF or isVBFlow:
+        dfFinal_withSF_2 = (dfFinal_withSF
+                            .Define("photonTrigSF_Nom",'SF_HLT_leg(photon_pt,22,0)')
+                            .Define("photonTrigSF_Up",'SF_HLT_leg(photon_pt,22,1)')
+                            .Define("photonTrigSF_Dn",'SF_HLT_leg(photon_pt,22,-1)')
+                            .Define("tauTrigSF_Nom",'SF_HLT_leg(meson_pt,15,0)')
+                            .Define("tauTrigSF_Up",'SF_HLT_leg(meson_pt,15,1)')
+                            .Define("tauTrigSF_Dn",'SF_HLT_leg(meson_pt,15,-1)')
+                            .Define("chIso_Nom",'SF_chIso(meson_pt,goodMeson_eta[index_pair[0]],0)')
+                            .Define("chIso_Up",'SF_chIso(meson_pt,goodMeson_eta[index_pair[0]],1)')
+                            .Define("chIso_Dn",'SF_chIso(meson_pt,goodMeson_eta[index_pair[0]],-1)')
+                            )
 
     if isZ or isW:
         dfFinal_withSF_2 = (dfFinal_withSF
@@ -834,6 +851,21 @@ def dfwithSYST(df,year):
                          .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w_allSF)")
                          .Define("mesonRECO_weights", "NomUpDownVar(SFmeson_reco_Nom, SFmeson_reco_Up, SFmeson_reco_Dn, w_allSF)")
                          )
+
+    elif isGF or isVBFlow: dfFinal = (dfFinal_withSF_2
+                                      .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom*photonTrigSF_Nom*tauTrigSF_Nom*chIso_Nom")
+#                                      .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom")
+                                      .Define("phTrigSF_weights", "NomUpDownVar(photonTrigSF_Nom, photonTrigSF_Up, photonTrigSF_Dn, w_allSF)")
+                                      .Define("tauTrigSF_weights", "NomUpDownVar(tauTrigSF_Nom, tauTrigSF_Up, tauTrigSF_Dn, w_allSF)")
+                                      .Define("chIsoSF_weights", "NomUpDownVar(chIso_Nom, chIso_Up, chIso_Dn, w_allSF)")
+                                      .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w_allSF)")
+                                      .Define("PS_isr_weights", "NomUpDownVar(1., PSWeight[0], PSWeight[2], w_allSF)")
+                                      .Define("PS_fsr_weights", "NomUpDownVar(1., PSWeight[1], PSWeight[3], w_allSF)")
+                                      .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
+                                      .Define("phoID_weights", "NomUpDownVar(SFphoton_ID_Nom, SFphoton_ID_Up, SFphoton_ID_Dn, w_allSF)")
+                                      .Define("mesonRECO_weights", "NomUpDownVar(SFmeson_reco_Nom, SFmeson_reco_Up, SFmeson_reco_Dn, w_allSF)")
+                                      )
+
     else: dfFinal = (dfFinal_withSF
                      .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom")
                      .Define("L1PreFiring_weights", "NomUpDownVar(L1PreFiringWeight_Nom, L1PreFiringWeight_Up, L1PreFiringWeight_Dn, w_allSF)")
@@ -1003,7 +1035,7 @@ def DefineContent(branchList,isData):
     for branchName in [
             "HCandMass",
             "HCandMass_noregress",
-            #            "HCandMass_VTXcorr",
+#            "HCandMass_VTXcorr",
             "HCandPT",
             "index_pair",
             "meson_pt",
@@ -1030,9 +1062,15 @@ def DefineContent(branchList,isData):
             "classify",
             #
             "triggerAna",
+            # these below are for the 2018
 #            "L1_LooseIsoEG22er2p1_IsoTau26er2p1_dR_Min0p3",
 #            "L1_LooseIsoEG22er2p1_Tau70er2p1_dR_Min0p3",
 #            "L1_LooseIsoEG24er2p1_IsoTau27er2p1_dR_Min0p3",
+#            "L1_SingleIsoEG32er2p1",
+#            "L1_SingleIsoEG30er2p1",
+#            "L1_SingleIsoEG28er2p1",
+#            "L1_SingleLooseIsoEG30er1p5",
+#            "L1_SingleLooseIsoEG28er1p5",
             #
             "w",
             "wraw",
@@ -1069,6 +1107,12 @@ def DefineContent(branchList,isData):
                 "SFpu_Nom",
                 "SFpu_Up",
                 "SFpu_Dn",
+#                "photonTrigSF_Nom",
+#                "photonTrigSF_Up",
+#                "photonTrigSF_Dn",
+#                "tauTrigSF_Nom",
+#                "tauTrigSF_Up",
+#                "tauTrigSF_Dn",
         ]:
             branchList.push_back(branchName)
 
@@ -1140,15 +1184,15 @@ def DefineContent(branchList,isData):
         ]:
             branchList.push_back(branchName)
 
-    if isGF and doMVA and (isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0Pi0StarCat=="true" or isD0StarCat=="true"):
-        for branchName in [
-                "meson_regress_pt_sf",
-        ]:
-            branchList.push_back(branchName)
-
     if (isGF or isVBF or isVBFlow or isZinv) and doMVA and (isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"):
         for branchName in [
                 "MVAdisc",
+        ]:
+            branchList.push_back(branchName)
+
+    if isGF and doMVA and (isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0Pi0StarCat=="true" or isD0StarCat=="true"):
+        for branchName in [
+                "meson_regress_pt_sf",
         ]:
             branchList.push_back(branchName)
 
@@ -1281,6 +1325,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
                     "goodMeson_mass_RAW",
                     "goodMeson_photon_pt",
                     "goodMeson_DR_trkPairPh",
+                    "goodMeson_dEta_trkPairPh",
                     "goodMeson_charged_mass",
                     "goodMeson_charged_pt"
             ]:
@@ -1293,10 +1338,11 @@ def analysis(df,year,mc,sumw,isData,PDType):
             ]:
                 branchList.push_back(branchName)
 
-        if(isRhoCat=="true"):
+        if(isRhoCat=="true" or isK0StarCat=="true" or isPhiCat=="true"):
             for branchName in [
-                    "goodMeson_isoPho",
+#                    "goodMeson_isoPho",
                     "goodMeson_isoNeuHad",
+                    "meson_isoNeuHad",
             ]:
                 branchList.push_back(branchName)
 
@@ -1323,9 +1369,9 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isGF: catTag = "GFcat"
 
     if True:
-        outputFile = "/work/submit/mariadlf/AUG31/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+        outputFile = "/work/submit/mariadlf/NOV1/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         if sys.argv[2]=='isOmega3PiCat' or sys.argv[2]=='isPhi3PiCat' or sys.argv[2]=='isD0StarCat' or sys.argv[2]=='isD0Pi0StarCat':
-            outputFile = "/work/submit/mariadlf/SEPT25Marti/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+            outputFile = "/work/submit/mariadlf/NOVMarti/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         print(outputFile)
         snapshotOptions = ROOT.RDF.RSnapshotOptions()
         snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
@@ -1389,6 +1435,13 @@ def analysis(df,year,mc,sumw,isData,PDType):
             histos.append(dfFINAL.Histo2D(model2d_phoID, hists[h]["name"], "idx_nom_up_down", "phoID_weights"))
             model2d_mesonRECO = (hists[h]["name"]+":mesonRECO", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
             histos.append(dfFINAL.Histo2D(model2d_mesonRECO, hists[h]["name"], "idx_nom_up_down", "mesonRECO_weights"))
+            if isGF or isVBFlow:
+                model2d_mesonChISO = (hists[h]["name"]+":mesonChISO", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+                histos.append(dfFINAL.Histo2D(model2d_mesonChISO, hists[h]["name"], "idx_nom_up_down", "chIsoSF_weights"))
+                model2d_phoTrig = (hists[h]["name"]+":phoTrig", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+                histos.append(dfFINAL.Histo2D(model2d_phoTrig, hists[h]["name"], "idx_nom_up_down", "phTrigSF_weights"))
+                model2d_tauTrig = (hists[h]["name"]+":tauTrig", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+                histos.append(dfFINAL.Histo2D(model2d_tauTrig, hists[h]["name"], "idx_nom_up_down", "tauTrigSF_weights"))
             if isW or isZ:
                 model2d_eleID = (hists[h]["name"]+":eleID", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
                 histos.append(dfFINAL.Histo2D(model2d_eleID, hists[h]["name"], "idx_nom_up_down", "eleID_weights"))
@@ -1415,7 +1468,7 @@ def analysis(df,year,mc,sumw,isData,PDType):
 #        evtcounts.append(evtcount)
 #        ROOT.ROOT.RDF.RunGraphs(evtcounts)
 
-        outputFileHisto = "SYSTstudiesAUG10/{0}/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
+        outputFileHisto = "/work/submit/mariadlf/OCT_SYSTvar/{0}/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
         print(outputFileHisto)
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
 
@@ -1433,6 +1486,7 @@ def readMCSample(year,sampleNOW,useD03):
 
     sumW = computeWeigths(df, files, sampleNOW, year, True, useD03)
     if (doPol and sampleNOW>1000 and sampleNOW<1039): loadPolarizationTree(sampleNOW,year)
+    if doSyst: loadSFhisto(sampleNOW,year)
     loadCorrectionSet(year)
     analysis(df,year,sampleNOW,sumW,"false","NULL")
 

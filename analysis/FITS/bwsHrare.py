@@ -12,7 +12,7 @@ parser.add_option("","--inputFileBKG",type='string',help="Input ROOT file bkg mo
 
 parser.add_option("-c","--whichCat",type='string',help="Which category (Wcat, Zcat Zinvcatm, VBFcat)", default="Wcat")
 parser.add_option("-m","--whichMeson",type='string',help="Which meson (_RhoCat or _PhiCat)", default="_RhoCat")
-parser.add_option("-b","--whichBIN",type='string',help="Which bin of BDT (_bin1 or empty)", default="")
+parser.add_option("-b","--whichBIN",type='string',help="Which bin of BDT (_bin1 or empty)", default="_bin1")
 parser.add_option("-o","--output",type='string',help="Output ROOT file. [%default]", default="workspace_STAT_Rho_2018.root")
 parser.add_option("-d","--datCardName",type='string',help="Output txt file. [%default]", default="datacard_STAT_Rho_2018.txt")
 
@@ -277,16 +277,38 @@ datacard.write("\n")
 
 ############ SYST ########
 datacard.write("-------------------------------------\n")
-datacard.write("lumi_13TeV \tlnN ")
+if opts.whichCat=='GFcat' or opts.whichCat=='VBFcatlow': datacard.write("lumi_13TeV_2018 \tlnN ")
+else: datacard.write("lumi_13TeV \tlnN ")
 for cat in category:
     for proc in mcAll:
         if (proc=='bkg'): datacard.write("\t-")
         else:
-            datacard.write("\t%.3f"%(1.025) )
+            if opts.whichCat=='GFcat' or opts.whichCat=='VBFcatlow': datacard.write("\t%.3f"%(1.025) )
+            else: datacard.write("\t%.3f"%(1.016) )
     datacard.write("\n")
 
-
 if doSyst:
+
+    datacard.write("CMS_trig_PhotonLeg  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.02) )
+                if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.02) )
+                if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.02) )
+        datacard.write("\n")
+
+    datacard.write("CMS_trig_TwoProngs  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.05) )
+                if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.05) )
+                if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.05) )
+        datacard.write("\n")
+
     datacard.write("CMS_trackingEff  \tlnN ")
     for cat in category:
         for proc in mcAll:
@@ -297,6 +319,16 @@ if doSyst:
                 if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.05) )
         datacard.write("\n")
 
+    datacard.write("CMS_IsoEff  \tlnN ")
+    for cat in category:
+        for proc in mcAll:
+            if (proc=='bkg'): datacard.write("\t-")
+            else:
+                if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.01) )
+                if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.01) )
+                if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.01) )
+        datacard.write("\n")
+
     datacard.write("CMS_photonID \tlnN ")
     for cat in category:
         for proc in mcAll:
@@ -305,13 +337,14 @@ if doSyst:
                 datacard.write("\t%.3f"%(1.01) )
         datacard.write("\n")
 
-    datacard.write("CMS_prefiring \tlnN ")
-    for cat in category:
-        for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
-            else:
-                datacard.write("\t%.3f"%(1.005) )
-        datacard.write("\n")
+    if opts.whichCat=='Vcat' or opts.whichCat=='VBFcat':
+        datacard.write("CMS_prefiring \tlnN ")
+        for cat in category:
+            for proc in mcAll:
+                if (proc=='bkg'): datacard.write("\t-")
+                else:
+                    datacard.write("\t%.3f"%(1.005) )
+            datacard.write("\n")
 
     datacard.write("CMS_pileup  \tlnN ")
     for cat in category:

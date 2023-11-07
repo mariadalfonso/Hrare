@@ -21,7 +21,6 @@ lumis={
 
 def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
 
-
    if (mesonCat == '_K0StarCat'):
       if(category =='_GFcat' and nameSig=="ggH"): mytree.Add(directory+'outname_mc1037'+category+mesonCat+year+'.root') # GF k0Star
       if(category =='_GFcat' and nameSig=="VBFH"): mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') # VBF k0Star
@@ -96,22 +95,28 @@ def addSigHisto(mytree, directory, category, mesonCat, nameSig, year ):
 
    resetTree(mytree, category, True)
 
-MVAbinLow={
-   '_GFcat': -0.4,
+MVAbinRhoLow={
+   '_GFcat': -0.3,
+   '_VBFcat': -0.5,
+   '_VBFcatlow': -0.5,
+}
+
+MVAbinPhiLow={
+   '_GFcat': -0.5,
    '_VBFcat': -0.6,
    '_VBFcatlow': -0.6,
 }
 
 MVAbinRho={
-   '_GFcat': 0.4,
-   '_VBFcat': 0.6,
-   '_VBFcatlow': 0.3,
+   '_GFcat': 0.55,
+   '_VBFcat': 0.7,
+   '_VBFcatlow': 0.7,
 }
 
 MVAbinPhi={
-   '_GFcat': 0.4,
-   '_VBFcat': 0.6,
-   '_VBFcatlow': 0.3,
+   '_GFcat': 0.55,
+   '_VBFcat': 0.7,
+   '_VBFcatlow': 0.7,
 }
 
 #MVAbinRho={
@@ -134,6 +139,10 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
    if mesonCat == '_RhoCat': MVAbin = MVAbinRho
    if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
 
+   if mesonCat == '_K0StarCat': MVAbinLow = MVAbinRhoLow
+   if mesonCat == '_RhoCat': MVAbinLow = MVAbinRhoLow
+   if mesonCat == '_PhiCat': MVAbinLow = MVAbinPhiLow
+
    if category =='_VBFcat' or category =='_Wcat' or category =='_Zcat' or category =='_Vcat':
       year = '_all'
    else:
@@ -141,7 +150,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 
    mytree = ROOT.TChain('events')
 
-   dirLOCAL_='/work/submit/mariadlf/AUG31/'
+   dirLOCAL_='/work/submit/mariadlf/NOV1/'
    directory1 = dirLOCAL_+'12016/'
    directory2 = dirLOCAL_+'22016/'
    directory3 = dirLOCAL_+'2017/'
@@ -270,6 +279,7 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
 #         if ev.nGoodJets < 2: continue
 #         if ev.nGoodPhotons > 1: continue
 #         if ev.nPhotonsVeto>1: continue (COMMENT FOR NOW)
+#         if ev.meson_isoNeuHad < 0.80 :  continue
 
       # Fill histograms
       if (doSignal) :

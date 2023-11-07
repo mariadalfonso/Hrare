@@ -302,6 +302,7 @@ def resetTree(mytree,category,doSignal):
 
    if(category =='_GFcat' or category =='_Zinvcat' or category =='_VBFcat' or category =='_VBFcatlow'):
       mytree.SetBranchStatus('MVAdisc',1)
+   if(category =='_GFcat'): mytree.SetBranchStatus('meson_isoNeuHad',1)
 
    if(category =='_VBFcat' or category =='_VBFcatlow'):
       mytree.SetBranchStatus('jet1Pt',1)
