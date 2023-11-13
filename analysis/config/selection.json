@@ -176,13 +176,19 @@
 	    "START": "======================================================================================================",
 	    "name": "isZinv",
 	    "type": "isPhiCatMassSB",
-	    "definition": "(abs(phi_kin_mass-1.02)>3*0.004 && phi_kin_mass>0.98 && phi_kin_mass<1.08 && phi_kin_pt>38 && getMaximum(phi_trk1_pt, phi_trk2_pt) > 20 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && abs(phi_kin_eta)<2.1 && abs(phi_bestVtx_Z)<24)",
+	    "definition": "(abs(phi_kin_mass-1.02)>3*0.004 && phi_kin_mass>0.98 && phi_kin_mass<1.08 && phi_kin_pt>38 && getMaximum(phi_trk1_pt, phi_trk2_pt) > 20 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9 && abs(phi_kin_eta)<2.1 && abs(phi_bestVtx_Z)<24 && phi_bestVtx_idx<5)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{
 	    "name": "isZinv",
 	    "type": "isRhoCatMassSB",
-	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_mass>0.44 && rho_kin_mass<1.1 && rho_kin_pt>38 && getMaximum(rho_trk1_pt, rho_trk2_pt) > 20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && abs(rho_kin_eta)<2.1 && abs(rho_bestVtx_Z)<24)",
+	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_mass>0.44 && rho_kin_mass<1.1 && rho_kin_pt>38 && getMaximum(rho_trk1_pt, rho_trk2_pt) > 20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && abs(rho_kin_eta)<2.1 && abs(rho_bestVtx_Z)<24 && rho_bestVtx_idx<5)",
+	    "notes":" used for isZinv, isGF"
+	},
+	{
+	    "name": "isZinv",
+	    "type": "isK0StarCatMassSB",
+	    "definition": "(abs(K0Star_kin_mass-0.892)>0.05 && K0Star_kin_pt>38 && getMaximum(K0Star_pion_pt, K0Star_kaon_pt) > 20 && K0Star_kaon_pt>20 && K0Star_pion_pt>5 && K0Star_kin_valid && K0Star_iso > 0.9 && abs(K0Star_kin_eta)<2.1 && abs(K0Star_bestVtx_Z)<24 && K0Star_bestVtx_idx<5)",
 	    "notes":" used for isZinv, isGF"
 	},
 	{
@@ -196,6 +202,11 @@
 	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_mass>0.44 && rho_kin_mass<1.1 && rho_kin_pt>38 && getMaximum(rho_trk1_pt, rho_trk2_pt) > 20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 and abs(rho_kin_eta)<2.1 && abs(rho_bestVtx_Z)<24)"
 	},
 	{
+	    "name": "isVBFlow",
+	    "type": "isK0StarCatMassSB",
+	    "definition": "(abs(K0Star_kin_mass-0.892)>0.05 && K0Star_kin_pt>38 && getMaximum(K0Star_pion_pt, K0Star_kaon_pt) > 20 && K0Star_kaon_pt>20 && K0Star_pion_pt>5 && K0Star_kin_valid && K0Star_iso > 0.9 && abs(K0Star_kin_eta)<2.1 && abs(K0Star_bestVtx_Z)<24 && K0Star_bestVtx_idx<5)"
+	},
+	{
 	    "name": "isVBF",
 	    "type": "isPhiCatMassSB",
 	    "definition": "(abs(phi_kin_mass-1.02)>3*0.004 && phi_kin_mass>0.98 && phi_kin_mass<1.08 && phi_kin_pt>20 && getMaximum(phi_trk1_pt, phi_trk2_pt) > 20 && phi_trk1_pt>15 && phi_trk2_pt>15 && phi_kin_valid && phi_iso > 0.9  && abs(phi_bestVtx_Z)<24)"
@@ -204,6 +215,11 @@
 	    "name": "isVBF",
 	    "type": "isRhoCatMassSB",
 	    "definition": "(abs(rho_kin_mass-0.77)>0.150 && rho_kin_mass>0.44 && rho_kin_mass<1.1 && rho_kin_pt>20 && getMaximum(rho_trk1_pt, rho_trk2_pt) > 20 && rho_trk1_pt>5 && rho_trk2_pt>5 && rho_kin_valid && rho_iso > 0.9 && abs(rho_bestVtx_Z)<24)"
+	},
+	{
+	    "name": "isVBF",
+	    "type": "isK0StarCatMassSB",
+	    "definition": "(abs(K0Star_kin_mass-0.892)>0.05 && K0Star_kin_pt>30 && getMaximum(K0Star_pion_pt, K0Star_kaon_pt) > 20 && K0Star_kaon_pt>20 && K0Star_pion_pt>5 && K0Star_kin_valid && K0Star_iso > 0.9 && abs(K0Star_bestVtx_Z)<24 && K0Star_bestVtx_idx<5)"
 	},
 	{
 	    "START": "======================================================================================================",

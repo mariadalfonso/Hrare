@@ -13,11 +13,14 @@ doCR=False
 histoEnum = 44
 #histoEnum = 4
 
-workspaceName = 'WS_AUG31'
-if histoEnum == 43: workspaceName = 'WSmva_AUG31'
-if histoEnum == 44: workspaceName = 'WSmvaLowBin_AUG31'
+workspaceName = 'WS_NOV1'
+if histoEnum == 43: workspaceName = 'WSmva_NOV1'
+if histoEnum == 44: workspaceName = 'WSmvaLowBin_NOV1'
+#if histoEnum == 43: workspaceName = 'WSmva_NOV1_neuIso'
+#if histoEnum == 44: workspaceName = 'WSmvaLowBin_NOV1_neuIso'
 if histoEnum == 43 and doCR: workspaceName = 'WSmvaCR'
-
+if histoEnum == 4: binBDT=""
+if histoEnum == 43: binBDT=""
 if histoEnum == 44: binBDT="_bin1"
 
 ## for GF
@@ -43,6 +46,10 @@ def  fitSig(tag , mesonCat, year):
     if mesonCat == '_RhoCat': MVAbin = MVAbinRho
     if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
     if mesonCat == '_K0StarCat': MVAbin = MVAbinRho
+
+    if mesonCat == '_K0StarCat': MVAbinLow = MVAbinRhoLow
+    if mesonCat == '_RhoCat': MVAbinLow = MVAbinRhoLow
+    if mesonCat == '_PhiCat': MVAbinLow = MVAbinPhiLow
 
     # Create a empty workspace
     w = RooWorkspace("w", "workspace")
@@ -111,7 +118,7 @@ def  fitSig(tag , mesonCat, year):
         cb_alphaL = RooRealVar('cb_alphaL'+binBDT+mesonCat+tag+'_'+sig, 'cb_alphaL', 0., 5.)
         cb_alphaR = RooRealVar('cb_alphaR'+binBDT+mesonCat+tag+'_'+sig, 'cb_alphaR', 0., 5.)
         cb_nL = RooRealVar('cb_nL'+binBDT+mesonCat+tag+'_'+sig, 'cb_nL', 0., 5.)
-        cb_nR = RooRealVar('cb_nR'+binBDT+mesonCat+tag+'_'+sig, 'cb_nR', 0., 5.)
+        cb_nR = RooRealVar('cb_nR'+binBDT+mesonCat+tag+'_'+sig, 'cb_nR', 0., 10.)
 
         pdf_crystalball = RooDoubleCBFast('crystal_ball'+binBDT+mesonCat+tag+'_'+sig, 'crystal_ball', x, cb_mu, cb_sigma, cb_alphaL, cb_nL, cb_alphaR, cb_nR)
         model = pdf_crystalball
@@ -162,6 +169,12 @@ def  fitSig(tag , mesonCat, year):
         binUp = data_full.GetBin(int(xhighRange-xlowRange)*10)  # second to last bin contains the upper-edge
 
         norm_SR = data_full.Integral(binLow, binUp)
+
+        # this is to account the h.c.
+        if mesonCat == '_K0StarCat': norm_SR = norm_SR * 2
+        # this is for the trigger SF
+        if tag == '_VBFcat': norm_SR = 0.95 * norm_SR
+
         if doCR:
             Sig_norm = RooRealVar(model.GetName()+ "_normCR", model.GetName()+ "_normCR", norm_SR) # no range means contants
         else:
@@ -207,6 +220,10 @@ def  fitBkg(tag , mesonCat, year):
     if mesonCat == '_RhoCat': MVAbin = MVAbinRho
     if mesonCat == '_PhiCat': MVAbin = MVAbinPhi
     if mesonCat == '_K0StarCat': MVAbin = MVAbinRho
+
+    if mesonCat == '_K0StarCat': MVAbinLow = MVAbinRhoLow
+    if mesonCat == '_RhoCat': MVAbinLow = MVAbinRhoLow
+    if mesonCat == '_PhiCat': MVAbinLow = MVAbinPhiLow
 
     x.setBins(int(115-xlowRange), "left")
     x.setBins(int(xhighRange-135), "right")
@@ -323,19 +340,24 @@ def  fitBkg(tag , mesonCat, year):
 
     if tag=='_VBFcatlow':
 #        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern2, pdf_gauss);
-        model = pdf_bern1
         model2 = pdf_chebychev1
+        if histoEnum == 43 or histoEnum == 44: model = pdf_bern1
+        if histoEnum == 4: model = pdf_bern2
     elif tag=='_VBFcat':
         if histoEnum == 4:
             model = pdf_bern2
-            model2 = pdf_chebychev2
+            model2 = pdf_chebychev1
         else:
             model = pdf_bern1
             model2 = pdf_chebychev1
     elif tag=='_GFcat':
-#        model = RooFFTConvPdf ('bxg'+mesonCat+tag+'_bkg', "bernstein (X) gauss", x, pdf_bern3, pdf_gauss);
-        model = pdf_bern3
-        model2 = pdf_chebychev3
+        if histoEnum == 4:
+            model = pdf_bern1
+            model2 = pdf_chebychev1
+            if mesonCat == '_RhoCat' : model = pdf_bern2
+        elif histoEnum == 43 or histoEnum == 44:
+            model = pdf_bern2
+            model2 = pdf_chebychev1
     elif tag=='_Wcat' or tag=='_Zcat' or tag=='_Zinvcat' or tag=='_Vcat':
         model = pdf_exp1
         model2 = pdf_chebychev2
@@ -438,6 +460,15 @@ def  fitBkg(tag , mesonCat, year):
         print(model.GetName(),"    chi2/ndof=",round(chi2_1,2)," ndof",fitresults.floatParsFinal().getSize())
         print('--------------------')
 
+        if histoEnum == 4: fileToWrite="preselection_"+tag+"_"+mesonCat+"_"+str(year)+".txt"
+        if histoEnum == 43: fileToWrite="bin0_"+tag+"_"+mesonCat+"_"+str(year)+".txt"
+        if histoEnum == 44: fileToWrite="bin1_"+tag+"_"+mesonCat+"_"+str(year)+".txt"
+        with open(fileToWrite, "a") as f:
+            str1 = model2.GetName()+"    chi2/ndof="+str(round(chi2_2,2))+" ndof"+str(fitresults2.floatParsFinal().getSize())+"\n"
+            str2 = model.GetName()+"    chi2/ndof="+str(round(chi2_1,2))+" ndof"+str(fitresults.floatParsFinal().getSize())+"\n"
+            f.write(str1)
+            f.write(str2)
+
 #    model.paramOn(plotFrameWithNormRange, RooFit.Layout(0.6,0.99,0.95))
 #    plotFrameWithNormRange.getAttText().SetTextSize(0.02);
 
@@ -450,6 +481,8 @@ def  fitBkg(tag , mesonCat, year):
     if (tag == '_VBFcat' or tag == '_VBFcatlow') and mesonCat == '_RhoCat' and histoEnum == 4: offsetY = 0
     if (tag == '_VBFcat' or tag == '_VBFcatlow') and mesonCat == '_PhiCat' and histoEnum == 4: offsetY = 0.80*data_full.GetMaximum()
     if (tag == '_VBFcat') and (histoEnum == 43 or histoEnum == 44): offsetY = 0.90*data_full.GetMaximum()
+    if tag == '_Vcat' and ( mesonCat == '_RhoCat' or mesonCat == '_K0StarCat'): offsetY = 0.25*data_full.GetMaximum()
+    if tag == '_Vcat' and ( mesonCat == '_PhiCat'): offsetY = 0.65*data_full.GetMaximum()
     latex = TLatex()
     latex.SetTextColor(kRed)
     latex.SetTextSize(0.04)

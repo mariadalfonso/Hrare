@@ -5,12 +5,16 @@ def loadTree(mytree, directory , category, mesonCat, year ):
 
    if category=='_VBFcatlow' or category=='_GFcat':
       if(mesonCat=='_Omega3PiCat'):
+         mytree.Add(directory+'outname_mc1045'+category+mesonCat+year+'.root') #vbfH -- Omega3Pi
          if category=='_GFcat': mytree.Add(directory+'outname_mc1040'+category+mesonCat+year+'.root') #GFH -- Omega3Pi
       if(mesonCat=='_Phi3PiCat'):
+         mytree.Add(directory+'outname_mc1046'+category+mesonCat+year+'.root') #vbfH -- Phi3Pi
          if category=='_GFcat': mytree.Add(directory+'outname_mc1041'+category+mesonCat+year+'.root') #GFH -- Phi3Pi
       if(mesonCat=='_D0StarCat'):
+         mytree.Add(directory+'outname_mc1048'+category+mesonCat+year+'.root') #vbfH -- D0Star
          if category=='_GFcat': mytree.Add(directory+'outname_mc1043'+category+mesonCat+year+'.root') #GFH -- D0Star
       if(mesonCat=='_D0Pi0StarCat'):
+         mytree.Add(directory+'outname_mc1047'+category+mesonCat+year+'.root') #vbfH -- D0StarPi0
          if category=='_GFcat': mytree.Add(directory+'outname_mc1042'+category+mesonCat+year+'.root') #GFH -- D0StarPi0
       if(mesonCat=='_K0StarCat'):
          mytree.Add(directory+'outname_mc1030'+category+mesonCat+year+'.root') #VBFH -- K0star
@@ -75,7 +79,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       if(mesonCat=='_K0StarCat'): mytree.Add(directory+'outname_mc1030'+category+mesonCat+localTime+'.root') #VBFH -- K0star
       if(mesonCat=='_RhoCat'): mytree.Add(directory+'outname_mc1020'+category+mesonCat+localTime+'.root') #VBFH -- rho
       if(mesonCat=='_PhiCat'): mytree.Add(directory+'outname_mc1010'+category+mesonCat+localTime+'.root') #VBFH -- phi
-      if((mesonCat=='_RhoCat') and localTime=='_12016'): mytree.Add(directory+'outname_mc10'+category+mesonCat+localTime+'.root')  #GJets (THIS IS EMPTY for PHI and K0Star)
+      if((mesonCat=='_K0StarCat') and localTime=='_12016'): mytree.Add(directory+'outname_mc10'+category+mesonCat+localTime+'.root')  #GJets (THIS IS EMPTY for PHI and K0Star)
       mytree.Add(directory+'outname_mc11'+category+mesonCat+localTime+'.root')  #GJets
       mytree.Add(directory+'outname_mc12'+category+mesonCat+localTime+'.root')  #GJets
       mytree.Add(directory+'outname_mc13'+category+mesonCat+localTime+'.root')  #GJets

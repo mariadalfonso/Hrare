@@ -1,17 +1,32 @@
+python SummaryPlots.py '_GFcat' '_K0StarCat'
 python SummaryPlots.py '_GFcat' '_RhoCat'
 python SummaryPlots.py '_GFcat' '_PhiCat'
 
+python SummaryPlots.py '_VBFcatlow' '_K0StarCat'
 python SummaryPlots.py '_VBFcatlow' '_RhoCat'
 python SummaryPlots.py '_VBFcatlow' '_PhiCat'
 
+python SummaryPlots.py '_VBFcat' '_K0StarCat'
 python SummaryPlots.py '_VBFcat' '_RhoCat'
 python SummaryPlots.py '_VBFcat' '_PhiCat'
 
-python SummaryPlots.py '_Zinvcat' '_RhoCat'
-python SummaryPlots.py '_Zinvcat' '_PhiCat'
-
+python SummaryPlots.py '_Wcat' '_K0StarCat'
 python SummaryPlots.py '_Wcat' '_RhoCat'
 python SummaryPlots.py '_Wcat' '_PhiCat'
 
+python SummaryPlots.py '_Zcat' '_K0StarCat'
 python SummaryPlots.py '_Zcat' '_RhoCat'
 python SummaryPlots.py '_Zcat' '_PhiCat'
+
+exit
+
+python SummaryPlots.py '_GFcat' '_D0StarCat'
+python SummaryPlots.py '_GFcat' '_D0Pi0StarCat'
+
+python SummaryPlots.py '_GFcat' '_Omega3PiCat'
+python SummaryPlots.py '_GFcat' '_Phi3PiCat'
+
+exit
+
+python SummaryPlots.py '_Zinvcat' '_RhoCat'
+python SummaryPlots.py '_Zinvcat' '_PhiCat'

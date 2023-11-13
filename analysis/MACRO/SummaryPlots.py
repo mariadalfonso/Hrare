@@ -18,11 +18,13 @@ mesonCat = sys.argv[2]
 year = '_2018'
 #year = '_all'
 
-#myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTSmarti/"
-#dirLOCAL_= '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AUG29Marti/'
+#phi, omega 3pi, D0Star D0pi0
+#myOutDir  = "/home/submit/mariadlf/public_html/Hrare/PLOTSmartiAFTERregress/"
+#dirLOCAL_ = '/work/submit/mariadlf/OCT25Marti/'
 
-myOutDir = "/home/submit/mariadlf/public_html/Hrare/PLOTSaug31/"
-dirLOCAL_= '/work/submit/mariadlf/AUG31/'
+## rho, phi, k0star
+myOutDir  = "/home/submit/mariadlf/public_html/Hrare/PLOTS_nov1/"
+dirLOCAL_ = '/work/submit/mariadlf/NOV1_CR/'
 
 if (category=='_Zinvcat'): directory4 = '/work/submit/mariadlf/Hrare/DEC28_ZinvLast/2018/'
 if (category=='_GFcat'): directory4 = dirLOCAL_+'2018/'
@@ -255,6 +257,10 @@ def plot(item, nbin, low, high, doLog):
          if mesonCat == "_PhiCat": stack.GetXaxis().SetTitle("m_{2trk}^{ #phi #rightarrow k k } [GeV]")
          if mesonCat == "_RhoCat": stack.GetXaxis().SetTitle("m_{2trk}^{ #rho #rightarrow #pi #pi } [GeV]")
          if mesonCat == "_K0StarCat": stack.GetXaxis().SetTitle("m_{2trk}^{ K^{0*} #rightarrow k #pi } [GeV]")
+         if mesonCat == "_Omega3PiCat": stack.GetXaxis().SetTitle("m_{2trk+#gamma}^{ #omega #rightarrow #pi #pi #gamma} [GeV]")
+         if mesonCat == "_Phi3PiCat": stack.GetXaxis().SetTitle("m_{2trk+#gamma}^{ #phi #rightarrow #pi #pi #gamma} [GeV]")
+         if mesonCat == "_D0StarCat": stack.GetXaxis().SetTitle("m_{2trk+#gamma}^{ D^{0} #rightarrow k #pi } [GeV]")
+         if mesonCat == "_D0Pi0StarCat": stack.GetXaxis().SetTitle("m_{2trk+#gamma}^{ D^{0} #rightarrow k #pi #gamma} [GeV]")
       if item==3:
          if mesonCat == "_PhiCat": stack.GetXaxis().SetTitle("pT_{2trk}^{ #phi #rightarrow k k } [GeV]")
          if mesonCat == "_RhoCat": stack.GetXaxis().SetTitle("pT_{2trk}^{ #rho #rightarrow #pi #pi } [GeV]")
@@ -268,7 +274,8 @@ def plot(item, nbin, low, high, doLog):
       if (item==4 or item==43) and mesonCat == "_K0StarCat": stack.GetXaxis().SetTitle("m_{#gammaK^{0*}}^{H} [GeV]")
       if (item==4 or item==43) and mesonCat == "_Omega3PiCat": stack.GetXaxis().SetTitle("m_{#gamma#omega}^{H} [GeV]")
       if (item==4 or item==43) and mesonCat == "_Phi3PiCat": stack.GetXaxis().SetTitle("m_{#gamma#phi}^{H} [GeV]")
-      if (item==4 or item==43) and mesonCat == "_K0StarCat": stack.GetXaxis().SetTitle("m_{#gammaD^{0*}}^{H} [GeV]")
+      if (item==4 or item==43) and mesonCat == "_D0StarCat": stack.GetXaxis().SetTitle("m_{#gammaD^{0*}}^{H} [GeV]")
+      if (item==4 or item==43) and mesonCat == "_D0Pi0StarCat": stack.GetXaxis().SetTitle("m_{#gammaD^{0*}}^{H} [GeV]")
 
       if item==11: stack.GetXaxis().SetTitle("SoftActivityJetNjets5")
       if item==12: stack.GetXaxis().SetTitle("nJet")
@@ -293,7 +300,8 @@ def plot(item, nbin, low, high, doLog):
       if item==31: stack.GetXaxis().SetTitle("p_{T}^{leadTrk}")
       if item==32: stack.GetXaxis().SetTitle("p_{T}^{subLeadTrk}")
       if item==80: stack.GetXaxis().SetTitle("p_{T}^{#gamma}")
-      if item==81: stack.GetXaxis().SetTitle("#Delta R (trk1, #gamma) ")
+      if item==81: stack.GetXaxis().SetTitle("#Delta R (charged pair, #gamma) ")
+      if item==84: stack.GetXaxis().SetTitle("#Delta #eta (charged pair, #gamma) ")
       if item==82: stack.GetXaxis().SetTitle("mass charged ")
       if item==83: stack.GetXaxis().SetTitle("p_{T} charged ")
 
@@ -373,11 +381,6 @@ def plot(item, nbin, low, high, doLog):
       if hGJet and hGJet.Integral()>0: legend.AddEntry(hGJet.GetValue(), "#gamma + jets", "f")
       if hVBFGJet and hVBFGJet.Integral()>0: legend.AddEntry(hVBFGJet.GetValue(), "#gamma + jets (EWK)", "f")
       ######
-   if hZinvH and hZinvH.Integral()>0 and mesonCat == "_PhiCat":
-      if BTheo!=1.:
-         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#phi) SM x 10^{4}", "f")
-      else:
-         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#phi)", "f")
    if hZH and hZH.Integral()>0 and mesonCat == "_PhiCat":
       if BTheo!=1.:
          legend.AddEntry(hZH.GetValue(), "ZH(#gamma#phi) SM x 10^{3}", "f")
@@ -397,11 +400,6 @@ def plot(item, nbin, low, high, doLog):
          if item!=4 and item!=43 and item!=42: legend.AddEntry(hTTH.GetValue(), "ttH(#gamma#phi)", "l")
          else: legend.AddEntry(hTTH.GetValue(), "ttH(#gamma#phi)", "f")
    ######
-   if hZinvH and hZinvH.Integral()>0 and mesonCat == "_RhoCat":
-      if BTheo!=1.:
-         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#rho) SM x 10^{4}", "f")
-      else:
-         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#rho)", "f")
    if hZH and hZH.Integral()>0 and mesonCat == "_RhoCat":
       if BTheo!=1.:
          legend.AddEntry(hZH.GetValue(), "ZH(#gamma#rho) SM x 10^{4}", "f")
@@ -421,11 +419,6 @@ def plot(item, nbin, low, high, doLog):
          if item!=4 and item!=43 and item!=42: legend.AddEntry(hTTH.GetValue(), "ttH(#gamma#rho)", "l")
          else: legend.AddEntry(hTTH.GetValue(), "ttH(#gamma#rho)", "f")
    ######
-   if hZinvH and hZinvH.Integral()>0 and mesonCat == "_K0StarCat":
-      if BTheo!=1.:
-         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gammak^{0*}) SM x 10^{4}", "f")
-      else:
-         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gammak^{0*})", "f")
    if hZH and hZH.Integral()>0 and mesonCat == "_K0StarCat":
       if BTheo!=1.:
          legend.AddEntry(hZH.GetValue(), "ZH(#gammak^{0*}) SM x 10^{4}", "f")
@@ -445,86 +438,65 @@ def plot(item, nbin, low, high, doLog):
          if item!=4 and item!=43 and item!=42: legend.AddEntry(hTTH.GetValue(), "ttH(#gammak^{0*})", "l")
          else: legend.AddEntry(hTTH.GetValue(), "ttH(#gammak^{0*})", "f")
    ######
-   if hVBFH and mesonCat == "_PhiCat" and hVBFH.Integral()>0:
+   if hZinvH and hZinvH.Integral()>0 and mesonCat == "_K0StarCat":
+      if BTheo!=1.:
+         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gammak^{0*}) SM x 10^{4}", "f")
+      else:
+         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gammak^{0*})", "f")
+   if hZinvH and hZinvH.Integral()>0 and mesonCat == "_RhoCat":
+      if BTheo!=1.:
+         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#rho) SM x 10^{4}", "f")
+      else:
+         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#rho)", "f")
+   if hZinvH and hZinvH.Integral()>0 and mesonCat == "_PhiCat":
+      if BTheo!=1.:
+         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#phi) SM x 10^{4}", "f")
+      else:
+         legend.AddEntry(hZinvH.GetValue(), "Z#nu#nuH(#gamma#phi)", "f")
+   ######
+   stringLegend = ''
+   if mesonCat == "_Omega3PiCat": stringLegend = 'qqH(#gamma#omega)'
+   if mesonCat == "_Phi3PiCat": stringLegend = 'qqH(#gamma#phi)'
+   if mesonCat == "_D0StarCat": stringLegend = 'qqH(#gammaD^{0*})'
+   if mesonCat == "_D0Pi0StarCat": stringLegend = 'qqH(#gammaD^{0*})'
+   if mesonCat == "_PhiCat": stringLegend = 'qqH(#gamma#phi)'
+   if mesonCat == "_RhoCat": stringLegend = 'qqH(#gamma#rho)'
+   if mesonCat == "_K0StarCat": stringLegend = 'qqH(#gammak^{0*})'
+
+   if hVBFH and hVBFH.Integral()>0:
       if BTheo!=1.:
          if BTheo==0.1:
-            if category=='_VBFcatlow': legend.AddEntry(hVBFH, "qqH(#gamma#phi) (BR=0.1)", "f")
-            if category=='_VBFcat': legend.AddEntry(hVBFH, "qqH(#gamma#phi) (BR=0.1)", "f")
-            if category=='_GFcat': legend.AddEntry(hVBFH, "qqH(#gamma#phi) (BR=0.1)", "f")
+            if category=='_VBFcatlow': legend.AddEntry(hVBFH.GetValue(), stringLegend+" (BR=0.1)", "f")
+            if category=='_VBFcat': legend.AddEntry(hVBFH.GetValue(), stringLegend+" (BR=0.1)", "f")
+            if category=='_GFcat': legend.AddEntry(hVBFH.GetValue(), stringLegend+" (BR=0.1)", "f")
          else:
-            if category=='_VBFcatlow': legend.AddEntry(hVBFH, "qqH(#gamma#phi) SM x 10^{4}", "f")
-            if category=='_VBFcat': legend.AddEntry(hVBFH, "qqH(#gamma#phi) SM x 5 x 10^{3}", "f")
-            if category=='_GFcat': legend.AddEntry(hVBFH, "qqH(#gamma#phi) SM x 10^{3}", "f")
+            if category=='_VBFcatlow': legend.AddEntry(hVBFH.GetValue(), stringLegend+" SM x 10^{4}", "f")
+            if category=='_VBFcat': legend.AddEntry(hVBFH.GetValue(), stringLegend+" SM x 5 x 10^{3}", "f")
+            if category=='_GFcat': legend.AddEntry(hVBFH.GetValue(), stringLegend+" SM x 10^{3}", "f")
       else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hVBFH.GetValue(), "qqH(#gamma#phi)", "l")
-         else: legend.AddEntry(hVBFH.GetValue(), "qqH(#gamma#phi)", "f")
-   if hVBFH and mesonCat == "_RhoCat" and hVBFH.Integral()>0:
+         if item!=4 and item!=43 and item!=42: legend.AddEntry(hVBFH.GetValue(), stringLegend , "l")
+         else: legend.AddEntry(hVBFH.GetValue(), stringLegend , "f")
+   ######
+   stringLegend = ''
+   if mesonCat == "_Omega3PiCat": stringLegend = 'ggH(#gamma#omega)'
+   if mesonCat == "_Phi3PiCat": stringLegend = 'ggH(#gamma#phi)'
+   if mesonCat == "_D0StarCat": stringLegend = 'ggH(#gammaD^{0*})'
+   if mesonCat == "_D0Pi0StarCat": stringLegend = 'ggH(#gammaD^{0*})'
+   if mesonCat == "_PhiCat": stringLegend = 'ggH(#gamma#phi)'
+   if mesonCat == "_RhoCat": stringLegend = 'ggH(#gamma#rho)'
+   if mesonCat == "_K0StarCat": stringLegend = 'ggH(#gammak^{0*})'
+
+   if hggH and hggH.Integral()>0:
       if BTheo!=1.:
          if BTheo==0.1:
-            if (category=='_VBFcatlow'): legend.AddEntry(hVBFH, "qqH(#gamma#rho) (BR=0.1)", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hVBFH, "qqH(#gamma#rho) (BR=0.1)", "f")
+            if (category=='_VBFcatlow'): legend.AddEntry(hggH, stringLegend+" (BR=0.1)", "f")
+            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), stringLegend+" (BR=0.1)", "f")
          else:
-            if (category=='_VBFcatlow'): legend.AddEntry(hVBFH, "qqH(#gamma#rho) SM x 5 x 10^{3}", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hVBFH.GetValue(), "qqH(#gamma#rho) SM x 10^{3}", "f")
+            if (category=='_VBFcatlow'): legend.AddEntry(hggH, stringLegend+" SM x 10^{4}", "f")
+            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), stringLegend+" SM x 10^{3}", "f")
       else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hVBFH.GetValue(), "qqH(#gamma#rho)", "l")
-         else: legend.AddEntry(hVBFH.GetValue(), "qqH(#gamma#rho)", "f")
-   if hVBFH and mesonCat == "_K0StarCat" and hVBFH.Integral()>0:
-      if BTheo!=1.:
-         if BTheo==0.1:
-            if (category=='_VBFcatlow'): legend.AddEntry(hVBFH, "qqH(#gammak^{0*}) (BR=0.1)", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hVBFH, "qqH(#gammak^{0*}) (BR=0.1)", "f")
-         else:
-            if (category=='_VBFcatlow'): legend.AddEntry(hVBFH, "qqH(#gammak^{0*}) SM x 5 x 10^{3}", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hVBFH.GetValue(), "qqH(#gammak^{0*}) SM x 10^{3}", "f")
-      else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hVBFH.GetValue(), "qqH(#gammak^{0*})", "l")
-         else: legend.AddEntry(hVBFH.GetValue(), "qqH(#gammak^{0*})", "f")
-   #####
-   if hggH and mesonCat == "_Omega3PhiCat" and hggH.Integral()>0:
-      if BTheo!=1.:
-         if BTheo==0.1:
-            if (category=='_VBFcatlow'): legend.AddEntry(hggH, "ggH(#gamma#omega) (BR=0.1)", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega) (BR=0.1)", "f")
-         else:
-            if (category=='_VBFcatlow'): legend.AddEntry(hggH, "ggH(#gamma#omega) SM x 10^{4}", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega) SM x 10^{3}", "f")
-      else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega)", "l")
-         else: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#omega)", "f")
-   if hggH and mesonCat == "_PhiCat" and hggH.Integral()>0:
-      if BTheo!=1.:
-         if BTheo==0.1:
-            if (category=='_VBFcatlow'): legend.AddEntry(hggH, "ggH(#gamma#phi) (BR=0.1)", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#phi) (BR=0.1)", "f")
-         else:
-            if (category=='_VBFcatlow'): legend.AddEntry(hggH, "ggH(#gamma#phi) SM x 10^{4}", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#phi) SM x 10^{3}", "f")
-      else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#phi)", "l")
-         else: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#phi)", "f")
-   if hggH and mesonCat == "_RhoCat" and hggH.Integral()>0:
-      if BTheo!=1.:
-         if BTheo==0.1:
-            if category=='_VBFcatlow': legend.AddEntry(hggH, "ggH(#gamma#rho) (BR=0.1)", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH, "ggH(#gamma#rho) (BR=0.1)", "f")
-         else:
-            if category=='_VBFcatlow': legend.AddEntry(hggH, "ggH(#gamma#rho) SM x 10^{4}", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gamma#rho) SM x 10^{3}", "f")
-      else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#rho)", "l")
-         else: legend.AddEntry(hggH.GetValue(), "ggH(#gamma#rho)", "f")
-   if hggH and mesonCat == "_K0StarCat" and hggH.Integral()>0:
-      if BTheo!=1.:
-         if BTheo==0.1:
-            if category=='_VBFcatlow': legend.AddEntry(hggH, "ggH(#gammak^{0*}) (BR=0.1)", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH, "ggH(#gammak^{0*}) (BR=0.1)", "f")
-         else:
-            if category=='_VBFcatlow': legend.AddEntry(hggH, "ggH(#gammak^{0*}) SM x 10^{4}", "f")
-            if category=='_GFcat' or category=='_VBFcat': legend.AddEntry(hggH.GetValue(), "ggH(#gammak^{0*}) SM x 10^{3}", "f")
-      else:
-         if item!=4 and item!=43 and item!=42: legend.AddEntry(hggH.GetValue(), "ggH(#gammak^{0*})", "l")
-         else: legend.AddEntry(hggH.GetValue(), "ggH(#gammak^{0*})", "f")
+         if item!=4 and item!=43 and item!=42: legend.AddEntry(hggH.GetValue(), stringLegend, "l")
+         else: legend.AddEntry(hggH.GetValue(), stringLegend, "f")
 
    pad1.cd()
    legend.Draw("SAME")
@@ -649,6 +621,7 @@ def plot(item, nbin, low, high, doLog):
    if item==81: plotString = "MesonCandidate_photon_DRtk"
    if item==82: plotString = "MesonCandidate_charged_mass"
    if item==83: plotString = "MesonCandidate_charged_pt"
+   if item==84: plotString = "MesonCandidate_photon_Deta"
 
    if item==40: plotString = "MesonCandidate_TrkPtRel_"
    if item==29: plotString = "MesonCandidate_Trk1Pt_norm"
@@ -781,14 +754,15 @@ def plotMeson():
          plot(31, 80, 0. , 80., False) # max pt_trk1
          plot(32, 80, 0. , 80., False) # min pt_trk2
 
-   if mesonCat == '_Omega3PiCat' or mesonCat == '_Phi3PiCat':
+   if mesonCat == '_Omega3PiCat' or mesonCat == '_Phi3PiCat' or mesonCat == '_D0Pi0StarCat':
       plot(80, 80, 0. , 80., False) # pt_photon
       plot(81, 50, 0. , 0.06, False) # DR_photon/meson
       plot(82, 80, 0.3 , 1.00, False) # chargedMass
       plot(83, 80, 0. , 80., False) # chargedPt
+      plot(84, 50, 0. , 0.06, False) # Deta_photon/meson
 
    if mesonCat == '_D0StarCat':
-      plot(82, 50, 1.5 , 2.00, False) # chargedMass
+      plot(82, 50, 1.65 , 2.05, False) # chargedMass
       plot(83, 80, 0. , 80., False) # chargedPt
 
 #   plot(29, 100, 0. , 1., True) # pt_trk1_norm min
@@ -810,7 +784,7 @@ def plotMeson():
 #   plot(36, 60, 0.6 , 1.2, True) # meson_iso neu
 #   plot(37, 60, 0.6 , 1.2, True) # meson_iso neu
 
-   plot(7, 100, 0. , 10., True) # phi_lxy
+   plot(7, 100, 0. , 10., False) # phi_lxy
    plot(9, 30, 0. , 1.5, False) # phi_VTXprob
 #   plot(8, 100, 0. , 0.1, True) # phi_doca
 #   plot(18, 100, 0. , 1., False) # vtx_chi2dof
@@ -881,8 +855,12 @@ if __name__ == "__main__":
 #   plot(21, 100, 0. , 1., True) # energy Error
 #   plot(202, 100, 0. , 0.1, False)
 
+#   plot(3, 20, 0. , 100., False) # meson_pt
+
    plot(4, 171, 0. , 171., True)  # normal plot for the AN
 #   plot(4, 71, 100. , 171., True) # HCandMass $# this is for the mass SD
+
+#   plot(37, 60, 0.0 , 1.2, True) # meson_iso neu
 
    if mesonCat == '_RhoCat' or mesonCat == '_PhiCat' or mesonCat == '_K0StarCat':
       if (category=='_VBFcatlow' or category=='_VBFcat' or category=='_GFcat' or category=='_Zinvcat'):
