@@ -13,7 +13,7 @@ python3 -m pip install correctionlib
 python3 -m pip install dask-jobqueue
 
 ## run distributed test
-python testdist.py
+python testDistLocalCluster.py
 
 ## test standalone xrootd
 python testXROOTD.py

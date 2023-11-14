@@ -1,9 +1,11 @@
 import ROOT
 import os
+import sys
 import json
 import fnmatch
 import glob
 from XRootD import client
+from subprocess import call,check_output
 
 if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.cc","k")
@@ -19,8 +21,8 @@ def loadPolarizationTree(mc,year):
     ROOT.gInterpreter.ProcessLine('initPol(%d,%d,%d);'% (mc,year,ROOT.GetThreadPoolSize()))
 
 def loadCorrectionSet(year):
-    ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.Declare('#include "config/mysf.h"')
+    ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
     ROOT.gInterpreter.Declare('''
         #ifndef MYFUN
@@ -86,11 +88,12 @@ def findDIR(directory,useXROOTD=False):
     maxFiles = 1000000000
 
     if(useXROOTD == True and "/data/submit/cms" in directory):
-        print(directory)
-        fs = client.FileSystem('root://submit50.mit.edu/')
-        lsst = fs.dirlist(directory.replace("/data/submit/cms",""))
-        for e in lsst[1]:
-            filePath = os.path.join(directory.replace("/data/submit/cms","root://submit50.mit.edu/"),e.name)
+        xrd = "root://submit50.mit.edu/"
+        xrdpath = directory.replace("/data/submit/cms","")
+        f = check_output(['xrdfs', f'{xrd}', 'ls', xrdpath]).decode(sys.stdout.encoding)
+        stringFiles = f.split()
+        for e in range(len(stringFiles)):
+            filePath = xrd + stringFiles[e]
             if "failed/" in filePath: continue
             if "log/" in filePath: continue
             if ".txt" in filePath: continue

@@ -1,6 +1,11 @@
+#ifndef mysf_h
+#define mysf_h
+
 #include "correction.h"
 #include <stdio.h>
 #include <string.h>
+#include <ostream>
+#include <iostream>
 
 //g++ $(correction config --cflags --ldflags) mysf.cc -shared -fPIC -o mysf.so
 //g++ $(correction config --cflags --ldflags --rpath) mysf.cc -shared -fPIC -o mysf.so
@@ -39,3 +44,5 @@ private:
   correction::Correction::Ref vetoMaps_;
 
 };
+
+#endif

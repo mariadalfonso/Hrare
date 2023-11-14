@@ -1,8 +1,10 @@
 import ROOT
 import json
 import os
+import sys
 from XRootD import client
 import glob
+from subprocess import call,check_output
 
 def findDIR(directory,useXROOTD=False):
 
@@ -12,11 +14,12 @@ def findDIR(directory,useXROOTD=False):
     maxFiles = 1000000000
 
     if(useXROOTD == True and "/data/submit/cms" in directory):
-        print(directory)
-        fs = client.FileSystem('root://submit50.mit.edu/')
-        lsst = fs.dirlist(directory.replace("/data/submit/cms",""))
-        for e in lsst[1]:
-            filePath = os.path.join(directory.replace("/data/submit/cms","root://submit50.mit.edu/"),e.name)
+        xrd = "root://submit50.mit.edu/"
+        xrdpath = directory.replace("/data/submit/cms","")
+        f = check_output(['xrdfs', f'{xrd}', 'ls', xrdpath]).decode(sys.stdout.encoding)
+        stringFiles = f.split()
+        for e in range(len(stringFiles)):
+            filePath = xrd + stringFiles[e]
             if "failed/" in filePath: continue
             if "log/" in filePath: continue
             if ".txt" in filePath: continue
@@ -46,7 +49,7 @@ year = 2018
 GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
 
 def analysis():
-    files = findDIR("/data/submit/cms/store/user/mariadlf/nano/D01/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v1+MINIAODSIM/",useXROOTD)
+    files = findDIR("/data/submit/cms/store/user/mariadlf/nano/D02/GluGlu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v3+MINIAODSIM/",useXROOTD)
 
     dfINI = RDataFrame("Events", files)
     print(GOODphotons)
