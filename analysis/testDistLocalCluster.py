@@ -148,6 +148,23 @@ def analysis():
             myfile.Close()
             myfile.Write()
 
+
+    if True:
+
+        branchList = ROOT.vector('string')()
+        for branchName in [
+                "HCandMass",
+        ]:
+            branchList.push_back(branchName)
+
+        outputFile = "DASKlogs/snapshotOUTname.root"
+        print(outputFile)
+        snapshotOptions = ROOT.RDF.RSnapshotOptions()
+        snapshotOptions.fCompressionAlgorithm = ROOT.kLZ4
+        snapshot_tdf = df.Snapshot("events", outputFile, branchList, snapshotOptions)
+        print("snapshot_tdf DONE")
+        print(outputFile)
+
     now = datetime.now()
     print('==> ends: ',now)
 
