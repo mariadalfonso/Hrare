@@ -551,7 +551,7 @@ def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv):
 
     return TRIGGER
 
-def computeWeigths(df, files, sampleNOW, year, isMC, useD03):
+def computeWeigths(df, rdf, sampleNOW, year, isMC, useD03):
 
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
@@ -559,7 +559,7 @@ def computeWeigths(df, files, sampleNOW, year, isMC, useD03):
     if not isMC:
         return 1.
     else:
-        rdf = ROOT.RDataFrame("Runs", files)
+#        rdf = ROOT.RDataFrame("Runs", files)
         genEventSumWeight = rdf.Sum("genEventSumw").GetValue()
         genEventSumNoWeight = rdf.Sum("genEventCount").GetValue()
 

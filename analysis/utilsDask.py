@@ -63,7 +63,7 @@ print(cluster.job_script())
 
 from dask.distributed import LocalCluster
 
-def create_connection(n_workers):
+def create_local_connection(n_workers):
     cluster = LocalCluster(n_workers=n_workers, threads_per_worker=1, processes=True, memory_limit="5GiB")
     try:
         client = Client(cluster,timeout='2s')

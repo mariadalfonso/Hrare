@@ -9,6 +9,7 @@ from utilsHrare import computeWeigths
 
 doINTERACTIVE=False
 useXROOTD=True
+doLocal=True
 
 if doINTERACTIVE:
     ROOT.ROOT.EnableImplicitMT()
@@ -19,7 +20,14 @@ if doINTERACTIVE:
 else:
     RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
     import pkg_resources
-    from utilsDask import create_connection
+    from utilsDask import create_local_connection
+    from utilsDask import client_
+
+    def sf():
+        import correctionlib
+        correctionlib.register_pyroot_binding()
+        ROOT.gInterpreter.Declare('#include "config/sfCorrLib.h"')
+        ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(2018);')
 
     def myinit():
         print('HELLO init myinit() ')
@@ -27,7 +35,7 @@ else:
         ROOT.gROOT.ProcessLine(".include ./.")
         ROOT.gInterpreter.AddIncludePath("./.")
         ROOT.gSystem.CompileMacro("./functions.cc","k")
-        
+
 with open("./config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
@@ -60,6 +68,20 @@ lumis={
     'all': 86.92,      #19.52 + 7.7 + 59.70
 }
 
+def callVary(df):
+
+    dfVaryPh=(df
+              .Define("SFpu_Nom",'corr_sf.eval_puSF(Pileup_nTrueInt,"nominal")')
+              .Define("SFpu_Up",'corr_sf.eval_puSF(Pileup_nTrueInt,"up")')
+              .Define("SFpu_Dn",'corr_sf.eval_puSF(Pileup_nTrueInt,"down")')
+              #
+              .Define("idx_nom_up_down", "indices(3)")
+              .Define("w_allSF", "w*SFpu_Nom")
+              .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
+              #
+              )
+    return dfVaryPh
+
 def analysis():
 
     now = datetime.now()
@@ -69,17 +91,26 @@ def analysis():
 
     if doINTERACTIVE:
         dfINI = RDataFrame("Events", files)
+        rdf = RDataFrame("Runs", files)
+        sumW = computeWeigths(dfINI, rdf, 1017, year, True, "False")
+
     else:
-        connection = create_connection(10)
-        dfINI = RDataFrame("Events", files, daskclient=connection)
+        if doLocal:
+            connection = create_local_connection(10)
+            dfINI = RDataFrame("Events", files, daskclient=connection)
+            rdf = RDataFrame("Runs", files, daskclient=connection)
+            sumW = computeWeigths(dfINI, rdf, 1017, year, True, "False")
+        else:
+            dfINI = RDataFrame("Events", files, daskclient=client_)
+            rdf = RDataFrame("Runs", files, daskclient=client_)
+            sumW = 1. # fixme the computeWeigths( doens't work for remote slurm
 
         ROOT.RDF.Experimental.Distributed.initialize(myinit)
+        ROOT.RDF.Experimental.Distributed.initialize(sf)
 
     print(GOODphotons)
     print(GOODPHI)
     print(TRIGGER)
-    
-    sumW = computeWeigths(dfINI, files, 1017, year, True, "False")
 
     lumi = 1.
     weight = "{0}*genWeight*{1}".format(lumi,sumW)
@@ -104,6 +135,8 @@ def analysis():
           .Define("goodMeson_phi", "phi_kin_phi[goodMeson]")
           .Define("goodMeson_mass", "phi_kin_mass[goodMeson]")
           #
+          .Define("goodMeson_iso", "phi_iso[goodMeson]")
+          .Define("goodMeson_DR","DeltaR(phi_trk1_eta[goodMeson],phi_trk2_eta[goodMeson],phi_trk1_phi[goodMeson],phi_trk2_phi[goodMeson])")
           .Define("goodMeson_trk1_pt", "phi_trk1_pt[goodMeson]")
           .Define("goodMeson_trk2_pt", "phi_trk2_pt[goodMeson]")
           .Define("wrongMeson","({}".format(GOODRHO)+")")
@@ -115,6 +148,7 @@ def analysis():
           .Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
           .Define("photon_pt", "(index_pair[1]!= -1) ? goodPhotons_pt[index_pair[1]]: 0.f")
           .Define("HCandMass", "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
+          .Define("HCandPT",   "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],1)")
           #
           )
 
@@ -122,10 +156,11 @@ def analysis():
     res = ptsum.GetValue()
     print('sum of HCandMass  = ',res)
 
+    df = callVary(df)
+
     if True:
         print("writing plots")
         hists = {
-            "goodPhotons_pt":  {"name":"goodPhotons_pt","title":"Photon PT; pt_{#gamma} (GeV);N_{Events}","bin":200,"xmin":0,"xmax":200},
             "HCandMass":  {"name":"HCandMass","title":"H mass;m_{k^{+}k^{-}#gamma} (GeV);N_{Events}","bin":70,"xmin":100,"xmax":170},
         }
 
@@ -137,6 +172,10 @@ def analysis():
             h1d = df.Histo1D(model, hists[h]["name"], "w")
             histos.append(h1d)
             print("h1d append")
+
+            model2d_pu = (hists[h]["name"]+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+            histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
+            print("h2d append")
 
             outputFileHisto = "DASKlogs/histoOUTname.root"
             myfile = ROOT.TFile(outputFileHisto,"RECREATE")
@@ -153,6 +192,7 @@ def analysis():
 
         branchList = ROOT.vector('string')()
         for branchName in [
+                "goodPhotons_pt",
                 "HCandMass",
         ]:
             branchList.push_back(branchName)
