@@ -35,7 +35,10 @@ xhighRange = 160.
 #xlowRange = 100.
 #xhighRange = 170.
 
-x = RooRealVar('mh', 'm_{#gamma,meson}', xlowRange, xhighRange)
+x = RooRealVar('mh'+'GFcat', 'm_{#gamma,meson}', xlowRange, xhighRange)
+#x = RooRealVar('mh'+'VBFcat', 'm_{#gamma,meson}', xlowRange, xhighRange)
+#x = RooRealVar('mh'+'VBFcatlow', 'm_{#gamma,meson}', xlowRange, xhighRange)
+#x = RooRealVar('mh'+'Vcat', 'm_{#gamma,meson}', xlowRange, xhighRange)
 
 x.setRange("full", xlowRange, xhighRange)
 x.setRange("left", xlowRange, 115)
@@ -360,7 +363,7 @@ def  fitBkg(tag , mesonCat, year):
             model2 = pdf_chebychev1
     elif tag=='_Wcat' or tag=='_Zcat' or tag=='_Zinvcat' or tag=='_Vcat':
         model = pdf_exp1
-        model2 = pdf_chebychev2
+        model2 = pdf_chebychev1
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_exp3, pdf_gauss);
 #    model = RooFFTConvPdf ("bxg", "bernstein (X) gauss", x, pdf_pow1, pdf_gauss);
 #    model = pdf_gauss
@@ -453,10 +456,10 @@ def  fitBkg(tag , mesonCat, year):
         name1 = model.GetName()+"_Norm[mh]_Comp["+model.GetName()+"]_Range[full]_NormRange[full]"
         name2 = model2.GetName()+"_Norm[mh]_Comp["+model2.GetName()+"]_Range[full]_NormRange[full]"
         chi2_1 = plotFrameWithNormRange.chiSquare(name1,"h_"+data.GetName(),fitresults.floatParsFinal().getSize())
-        chi2_2 = plotFrameWithNormRange.chiSquare(name2,"h_"+data.GetName(),fitresults2.floatParsFinal().getSize())
+        if doMultiPdf: chi2_2 = plotFrameWithNormRange.chiSquare(name2,"h_"+data.GetName(),fitresults2.floatParsFinal().getSize())
 #        plotFrameWithNormRange.Print("v")
         print('--------------------')
-        print(model2.GetName(),"    chi2/ndof=",round(chi2_2,2)," ndof",fitresults2.floatParsFinal().getSize())
+        if doMultiPdf: print(model2.GetName(),"    chi2/ndof=",round(chi2_2,2)," ndof",fitresults2.floatParsFinal().getSize())
         print(model.GetName(),"    chi2/ndof=",round(chi2_1,2)," ndof",fitresults.floatParsFinal().getSize())
         print('--------------------')
 
@@ -464,10 +467,10 @@ def  fitBkg(tag , mesonCat, year):
         if histoEnum == 43: fileToWrite="bin0_"+tag+"_"+mesonCat+"_"+str(year)+".txt"
         if histoEnum == 44: fileToWrite="bin1_"+tag+"_"+mesonCat+"_"+str(year)+".txt"
         with open(fileToWrite, "a") as f:
-            str1 = model2.GetName()+"    chi2/ndof="+str(round(chi2_2,2))+" ndof"+str(fitresults2.floatParsFinal().getSize())+"\n"
-            str2 = model.GetName()+"    chi2/ndof="+str(round(chi2_1,2))+" ndof"+str(fitresults.floatParsFinal().getSize())+"\n"
+            str1 = model.GetName()+"    chi2/ndof="+str(round(chi2_1,2))+" ndof"+str(fitresults.floatParsFinal().getSize())+"\n"
             f.write(str1)
-            f.write(str2)
+            if doMultiPdf: str2 = model2.GetName()+"    chi2/ndof="+str(round(chi2_2,2))+" ndof"+str(fitresults2.floatParsFinal().getSize())+"\n"
+            if doMultiPdf: f.write(str2)
 
 #    model.paramOn(plotFrameWithNormRange, RooFit.Layout(0.6,0.99,0.95))
 #    plotFrameWithNormRange.getAttText().SetTextSize(0.02);
@@ -578,7 +581,6 @@ if __name__ == "__main__":
     fitBkg('_GFcat','_K0StarCat',2018)
 
     '''
-
     if not blinded: fitSig('_VBFcatlow','_RhoCat',2018)
     fitBkg('_VBFcatlow','_RhoCat',2018)
 

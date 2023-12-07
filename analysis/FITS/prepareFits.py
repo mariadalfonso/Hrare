@@ -284,6 +284,8 @@ def getHisto(item, nbin, low, high, doLog,category,mesonCat, doSignal, nameSig):
       # Fill histograms
       if (doSignal) :
          wei = ev.w_allSF * ev.lumiIntegrated * (3./2)*math.sin(ev.theta)*math.sin(ev.theta)
+         if math.isnan(wei):
+            wei = ev.w_allSF * ev.lumiIntegrated
          if ((nameSig=='WH' or nameSig=='WHl') and (ev.mc==1011 or ev.mc==1012 or ev.mc==1021 or ev.mc==1022 or ev.mc==1031 or ev.mc==1032)): #W
             h.Fill( var, wei )
          if ((nameSig=='ZH' or nameSig=='ZHl') and (ev.mc==1013 or ev.mc==1023 or ev.mc==1014 or ev.mc==1024 or ev.mc==1033 or ev.mc==1034)): #Z

@@ -66,6 +66,7 @@ ENUM={
     'ZinvH': -4,
     'WHl': -5,
     'ZHl': -6,
+    'TTH': -7,
 }
 
 QCDscale={
@@ -76,6 +77,7 @@ QCDscale={
     'ZinvH': '0.995/1.005',
     'WHl': '0.993/1.006',
     'ZHl': '0.995/1.005',
+    'TTH': '0.995/1.005', ## TMP
 }
 
 pdf_Higgs={
@@ -86,6 +88,7 @@ pdf_Higgs={
     'ZinvH': '0.981/1.019', #assume the majority is not ggZH
     'WHl': '0.98/1.020',
     'ZHl': '0.981/1.019', #assume the majority is not ggZH
+    'TTH': '0.981/1.019', ## TMP
 }
 
 lumi={
@@ -112,12 +115,12 @@ print(opts.whichCat)
 
 if opts.whichCat=='GFcat':
     sigAll = ['ggH','VBFH']
-    mcAll = ['ggH','VBFH','bkg']
+    mcAll = ['ggH','VBFH','bkgGF']
     category = ['GFcat']
 
 if opts.whichCat=='Vcat':
-    sigAll = ['WH','ZH','ZHl']
-    mcAll = ['WH','ZH','ZHl','bkg']
+    sigAll = ['WH','ZH','ZHl','TTH']
+    mcAll = ['WH','ZH','ZHl','TTH','bkgV'] #to add TTH
     category = ['Vcat']
 
 if opts.whichCat=='Wcat':
@@ -132,12 +135,12 @@ if opts.whichCat=='Zcat':
 
 if opts.whichCat=='VBFcat':
     sigAll = ['VBFH']
-    mcAll = ['VBFH','bkg']
+    mcAll = ['VBFH','bkgVBF']
     category = ['VBFcat']
 
 if opts.whichCat=='VBFcatlow':
     sigAll = ['VBFH']
-    mcAll = ['VBFH','bkg']
+    mcAll = ['VBFH','bkgVBFlow']
     category = ['VBFcatlow']
 
 if opts.whichCat=='Zinvcat':
@@ -164,13 +167,20 @@ datacard.write("-------------------------------------\n")
 
 ########################## IMPORT DATA #############
 if opts.whichCat=='Vcat':
-    w.factory("mh[100,150]"); # RooRealVar
+    w.factory("mhVcat[100,150]"); # RooRealVar
+    mh=w.var("mhVcat")
 elif opts.whichCat=='GFcat':
-    w.factory("mh[110,160]"); # RooRealVar
+    w.factory("mhGF[110,160]"); # RooRealVar
+    mh=w.var("mhGF")
+elif opts.whichCat=='VBFcat':
+    w.factory("mhVBFcat[100,170]"); # RooRealVar
+    mh=w.var("mhVBFcat")
+elif opts.whichCat=='VBFcatlow':
+    w.factory("mhVBFcatlow[100,170]"); # RooRealVar
+    mh=w.var("mhVBFcatlow")
 else:
-    w.factory("mh[100,170]"); # RooRealVar
+    print('mg not specified')
 
-mh=w.var("mh")
 arglist_obs = ROOT.RooArgList(mh)
 argset_obs = ROOT.RooArgSet(mh)
 
@@ -189,10 +199,11 @@ if fBkgIn == None:
 for cat in category:
     for proc in mcAll:
         
-        if proc=='bkg':
+        if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow':
             if opts.inputFileBKG != "":
                 wInput=fBkgIn.Get("w")
-                name = BkgPdf[cat]+"_"+cat+"_"+proc
+                if opts.whichCat=='Vcat': name = BkgPdf[cat]+"_"+cat+"_"+'bkg'
+                else: name = BkgPdf[cat]+"_"+cat+"_"+'bkg'
                 nameNorm = name+"_norm"
         else:
             if opts.inputFileSig != "":
@@ -255,7 +266,7 @@ datacard.write("process\t")
 for cat in category:
     for idx,proc in enumerate(mcAll): ## TRICK, put the only signal first
         print(idx,proc,(-1)*idx)
-        if (proc=='bkg'): datacard.write("\t1")
+        if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t1")
         else:
 #            newIDX=(-1)*idx
             newIDX=ENUM[proc]
@@ -265,7 +276,7 @@ datacard.write("rate\t")
 for cat in category:
     for proc in mcAll:
 #        datacard.write("\t1")
-        if (proc=='bkg'): datacard.write("\t1")
+        if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t1")
         else:
             datacard.write("\t0.01")
 #	datacard.write("\t1")
@@ -281,7 +292,7 @@ if opts.whichCat=='GFcat' or opts.whichCat=='VBFcatlow': datacard.write("lumi_13
 else: datacard.write("lumi_13TeV \tlnN ")
 for cat in category:
     for proc in mcAll:
-        if (proc=='bkg'): datacard.write("\t-")
+        if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
         else:
             if opts.whichCat=='GFcat' or opts.whichCat=='VBFcatlow': datacard.write("\t%.3f"%(1.025) )
             else: datacard.write("\t%.3f"%(1.016) )
@@ -289,21 +300,22 @@ for cat in category:
 
 if doSyst:
 
-    datacard.write("CMS_trig_PhotonLeg  \tlnN ")
-    for cat in category:
-        for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
-            else:
-                if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.02) )
-                if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.02) )
-                if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.02) )
-        datacard.write("\n")
+    if opts.whichCat=='GFcat' or opts.whichCat=='VBFcatlow' or opts.whichCat=='VBFcat':
+        datacard.write("CMS_trig_PhotonLeg  \tlnN ")
+        for cat in category:
+            for proc in mcAll:
+                if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
+                else:
+                    if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.02) )
+                    if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.02) )
+                    if opts.whichMeson == '_K0StarCat': datacard.write("\t%.3f"%(1.02) )
+            datacard.write("\n")
 
     if opts.whichCat=='GFcat' or opts.whichCat=='VBFcatlow':
         datacard.write("CMS_trig_TwoProngs  \tlnN ")
         for cat in category:
             for proc in mcAll:
-                if (proc=='bkg'): datacard.write("\t-")
+                if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
                 else:
                     if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.05) )
                     if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.05) )
@@ -313,7 +325,7 @@ if doSyst:
     datacard.write("CMS_trackingEff  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.05) )
                 if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.03) )
@@ -323,7 +335,7 @@ if doSyst:
     datacard.write("CMS_IsoEff  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if opts.whichMeson == '_RhoCat': datacard.write("\t%.3f"%(1.01) )
                 if opts.whichMeson == '_PhiCat': datacard.write("\t%.3f"%(1.01) )
@@ -333,7 +345,7 @@ if doSyst:
     datacard.write("CMS_photonID \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 datacard.write("\t%.3f"%(1.01) )
         datacard.write("\n")
@@ -342,7 +354,7 @@ if doSyst:
         datacard.write("CMS_prefiring \tlnN ")
         for cat in category:
             for proc in mcAll:
-                if (proc=='bkg'): datacard.write("\t-")
+                if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
                 else:
                     datacard.write("\t%.3f"%(1.005) )
             datacard.write("\n")
@@ -350,14 +362,14 @@ if doSyst:
     datacard.write("CMS_pileup  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 datacard.write("\t%.3f"%(1.01) )
         datacard.write("\n")
 
     for proc in mcAll:
         print("proc",proc)
-        if (proc=='bkg'): continue
+        if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': continue
         else:
             # theo
             addSystematics("QCDscale_"+proc, 'lnN' ,QCDscale[proc], proc, category, mcAll, datacard)
@@ -370,7 +382,7 @@ if opts.whichCat=='GFcat' and doSyst:
     datacard.write("CMS_jes  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if(proc=='ggH'): datacard.write("\t0.99/1.01")
                 if(proc=='VBFH'): datacard.write("\t0.97/1.03")
@@ -378,7 +390,7 @@ if opts.whichCat=='GFcat' and doSyst:
     datacard.write("CMS_isr \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if(proc=='ggH'): datacard.write("\t0.97/1.03")
                 if(proc=='VBFH'): datacard.write("\t0.995/1.005")
@@ -386,7 +398,7 @@ if opts.whichCat=='GFcat' and doSyst:
     datacard.write("CMS_fsr \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if(proc=='ggH'): datacard.write("\t0.99/1.01")
                 if(proc=='VBFH'): datacard.write("\t0.985/1.015")
@@ -396,21 +408,21 @@ if (opts.whichCat=='VBFcat' or opts.whichCat=='VBFcatlow') and doSyst:
     datacard.write("CMS_jes  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if(proc=='VBFH'): datacard.write("\t0.97/1.03")
         datacard.write("\n")
     datacard.write("CMS_isr \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if(proc=='VBFH'): datacard.write("\t0.995/1.005")
         datacard.write("\n")
     datacard.write("CMS_fsr \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 if(proc=='VBFH'): datacard.write("\t0.99/1.01")
         datacard.write("\n")
@@ -419,14 +431,14 @@ if opts.whichCat=='Vcat' and doSyst:
     datacard.write("CMS_eff_e  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 datacard.write("\t%.3f"%(1.03) )
         datacard.write("\n")
     datacard.write("CMS_eff_m  \tlnN ")
     for cat in category:
         for proc in mcAll:
-            if (proc=='bkg'): datacard.write("\t-")
+            if proc=='bkgGF' or proc=='bkgV' or proc=='bkgVBF' or proc=='bkgVBFlow': datacard.write("\t-")
             else:
                 datacard.write("\t%.3f"%(1.01) )
         datacard.write("\n")
