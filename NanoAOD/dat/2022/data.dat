@@ -1,36 +1,19 @@
-/EGamma/Run2022A-10Dec2022-v1/MINIAOD
-/EGamma/Run2022B-10Dec2022-v1/MINIAOD
-/EGamma/Run2022C-10Dec2022-v1/MINIAOD
-/EGamma/Run2022D-10Dec2022-v1/MINIAOD
-/EGamma/Run2022E-10Dec2022-v3/MINIAOD
-/EGamma/Run2022F-PromptReco-v1/MINIAOD
-/EGamma/Run2022G-PromptReco-v1/MINIAOD
+/EGamma/Run2022C-22Sep2023-v1/NANOAOD
+/EGamma/Run2022D-22Sep2023-v1/NANOAOD
 
-/Tau/Run2022A-10Dec2022-v1/MINIAOD
-/Tau/Run2022B-10Dec2022-v1/MINIAOD
-/Tau/Run2022C-10Dec2022-v1/MINIAOD
-/Tau/Run2022D-10Dec2022-v1/MINIAOD
-/Tau/Run2022E-10Dec2022-v2/MINIAOD
-/Tau/Run2022F-PromptReco-v1/MINIAOD
-/Tau/Run2022G-PromptReco-v1/MINIAOD
+/Tau/Run2022C-22Sep2023-v1/NANOAOD
+/Tau/Run2022D-22Sep2023-v1/NANOAOD
 
-/MuonEG/Run2022A-10Dec2022-v1/MINIAOD
-/MuonEG/Run2022B-10Dec2022-v1/MINIAOD
-/MuonEG/Run2022C-10Dec2022-v1/MINIAOD
-/MuonEG/Run2022D-10Dec2022-v1/MINIAOD
-/MuonEG/Run2022E-10Dec2022-v2/MINIAOD
-/MuonEG/Run2022F-PromptReco-v1/MINIAOD
-/MuonEG/Run2022G-PromptReco-v1/MINIAOD
+/MuonEG/Run2022C-22Sep2023-v1/NANOAOD
+/MuonEG/Run2022D-22Sep2023-v1/NANOAOD
 
-/SingleMuon/Run2022A-10Dec2022-v2/MINIAOD
-/SingleMuon/Run2022B-10Dec2022-v2/MINIAOD
-/SingleMuon/Run2022C-10Dec2022-v2/MINIAOD
-/DoubleMuon/Run2022A-10Dec2022-v2/MINIAOD
-/DoubleMuon/Run2022B-10Dec2022-v2/MINIAOD
-/DoubleMuon/Run2022C-10Dec2022-v2/MINIAOD
-/Muon/Run2022D-10Dec2022-v1/MINIAOD
-/Muon/Run2022E-10Dec2022-v2/MINIAOD
-/Muon/Run2022F-PromptReco-v1/MINIAOD
-/Muon/Run2022G-PromptReco-v1/MINIAOD
+/SingleMuon/Run2022C-22Sep2023-v1/NANOAOD
+/DoubleMuon/Run2022C-22Sep2023-v1/NANOAOD
+
+/Muon/Run2022C-22Sep2023-v1/NANOAOD
+/Muon/Run2022D-22Sep2023-v1/NANOAOD
 
 #https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVRun3Analysis
+#https://docs.google.com/presentation/d/1TjPem5jX0fzqvTGl271_nQFoVBabsrdrO0i8Qo1uD5E/edit#slide=id.g289f499aa6b_2_58
+#https://cmsweb.cern.ch/das/request?view=plain&limit=50&instance=prod%2Fglobal&input=dataset+status%3DVALID+dataset%3D%2F*%2F*2022*22Sep2023*%2FNANOAOD
+#BCD non-EE, EFG EE
