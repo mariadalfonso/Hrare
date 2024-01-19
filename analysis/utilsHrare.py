@@ -7,78 +7,9 @@ import glob
 from XRootD import client
 from subprocess import call,check_output
 
-if "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.so" not in ROOT.gSystem.GetLibraries():
-    ROOT.gSystem.CompileMacro("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/functions.cc","k")
-
-import correctionlib
-correctionlib.register_pyroot_binding()
-
-def loadSFhisto(mc,year):
-    ROOT.gInterpreter.ProcessLine('initTrigSF();')
-    ROOT.gInterpreter.ProcessLine('initIsoSF();')
-
-def loadPolarizationTree(mc,year):
-    ROOT.gInterpreter.ProcessLine('initPol(%d,%d,%d);'% (mc,year,ROOT.GetThreadPoolSize()))
-
-def loadCorrectionSet(year):
-    ROOT.gInterpreter.Declare('#include "config/mysf.h"')
-    ROOT.gInterpreter.Load("config/mysf.so")
-    ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
-    ROOT.gInterpreter.Declare('''
-        #ifndef MYFUN
-        #define MYFUN
-        Vec_f computeJECuncertainties(MyCorrections corrSFs, Vec_f jet_pt, Vec_f jet_eta){
-        Vec_f new_jet_delta(jet_pt.size(), 1.0);
-        int type = 0;
-        for (unsigned int idx = 0; idx < jet_pt.size(); ++idx) new_jet_delta[idx] = corrSFs.eval_jesUnc(jet_eta[idx], jet_pt[idx], type );
-        return new_jet_delta;
-        }
-        #endif
-        ''')
-
 def checkTrg():
     trgObj = "firedTrigger(TrigObj_id,22,TrigObj_pt,35)"
     return trgObj
-
-def getSkimsFromJson(overall, type ):
-
-    for selection in overall:
-        if selection['type'] == type : return selection['PRESELECTION']
-
-def getTriggerFromJson(overall, type, year ):
-
-    for trigger in overall:
-        if trigger['name'] == type and trigger['year'] == year: return trigger['definition']
-
-def getMesonFromJson(overall, type, cat ):
-
-    for meson in overall:
-        if meson['name'] == type and meson['type'] == cat: return meson['definition']
-
-def getMVAFromJson(overall, type, cat ):
-
-    for meson in overall:
-        if meson['name'] == type and meson['type'] == cat: return meson['file']
-
-def loadJSON(fIn):
-
-    if not os.path.isfile(fIn):
-        print("JSON file %s does not exist" % fIn)
-        return
-
-    if not hasattr(ROOT, "jsonMap"):
-        print("jsonMap not found in ROOT dict")
-        return
-
-    info = json.load(open(fIn))
-    print("JSON file %s loaded" % fIn)
-    for k,v in info.items():
-
-        vec = ROOT.std.vector["std::pair<unsigned int, unsigned int>"]()
-        for combo in v:
-            pair = ROOT.std.pair["unsigned int", "unsigned int"](*[int(c) for c in combo])
-            vec.push_back(pair)
-            ROOT.jsonMap[int(k)] = vec
 
 def findDIR(directory,useXROOTD=False):
 

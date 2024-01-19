@@ -4,9 +4,9 @@ import sys
 import json
 
 ROOT.ROOT.EnableImplicitMT()
-from utilsHrare import getMClist, getDATAlist, getSkims
-from utilsHrare import computeWeigths, getMesonFromJson, pickTRG, getMVAFromJson, getTriggerFromJson
-from utilsHrare import loadCorrectionSet, loadPolarizationTree, loadSFhisto
+from utilsHrare import getMClist, getDATAlist, getSkims, computeWeigths
+from utilsAna import getMesonFromJson, pickTRG, getMVAFromJson, getTriggerFromJson
+from utilsAna import loadCorrectionSet, loadPolarizationTree, loadSFhisto, loadUserCode, loadtmva_helper
 import tmva_helper_xml
 
 doSyst = True
@@ -1483,8 +1483,9 @@ def readMCSample(year,sampleNOW,useD03):
     print(len(files))
     #local
     df = ROOT.RDataFrame("Events", files)
+    rdf = ROOT.RDataFrame("Runs", files)
 
-    sumW = computeWeigths(df, files, sampleNOW, year, True, useD03)
+    sumW = computeWeigths(df, rdf, sampleNOW, year, True, useD03)
     if (doPol and sampleNOW>1000 and sampleNOW<1039): loadPolarizationTree(sampleNOW,year)
     if doSyst: loadSFhisto(sampleNOW,year)
     loadCorrectionSet(year)
@@ -1543,6 +1544,9 @@ def runTest():
 
    
 if __name__ == "__main__":
+
+    loadUserCode()
+    loadtmva_helper()
 
 #    runTest()
 #    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12 2018

@@ -4,37 +4,16 @@ import json
 import os
 from datetime import datetime
 
-from utilsHrare import pickTRG,findDIR,getMesonFromJson
+from utilsAna import pickTRG,findDIR,getMesonFromJson,getMVAFromJson
+from utilsAna import loadUserCode, loadCorrectionSet
 from utilsHrare import computeWeigths
 
 doINTERACTIVE=False
 useXROOTD=True
 doLocal=True
 
-if doINTERACTIVE:
-    ROOT.ROOT.EnableImplicitMT()
-    from utilsHrare import loadCorrectionSet
-    RDataFrame = ROOT.RDataFrame
-    loadCorrectionSet(2018)
-    
-else:
-    RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
-    import pkg_resources
-    from utilsDask import create_local_connection
-    from utilsDask import client_
-
-    def sf():
-        import correctionlib
-        correctionlib.register_pyroot_binding()
-        ROOT.gInterpreter.Declare('#include "config/sfCorrLib.h"')
-        ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(2018);')
-
-    def myinit():
-        print('HELLO init myinit() ')
-        ROOT.gSystem.AddDynamicPath("./.")
-        ROOT.gROOT.ProcessLine(".include ./.")
-        ROOT.gInterpreter.AddIncludePath("./.")
-        ROOT.gSystem.CompileMacro("./functions.cc","k")
+###-----------------------------------------
+###-----------------------------------------
 
 with open("./config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
@@ -68,18 +47,51 @@ lumis={
     'all': 86.92,      #19.52 + 7.7 + 59.70
 }
 
+###-----------------------------------------
+###-----------------------------------------
+
+def init():
+    loadUserCode()
+    loadCorrectionSet(2018)
+
+if doINTERACTIVE:
+    ROOT.ROOT.EnableImplicitMT()
+    RDataFrame = ROOT.RDataFrame
+
+else:
+    RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+    import pkg_resources
+    from utilsDask import create_local_connection
+    from utilsDask import client_
+
 def callVary(df):
 
+    ROOT.gInterpreter.ProcessLine('corr_sf.eval_puSF(10,"nominal")')
+
     dfVaryPh=(df
+              .Define("idx_nom_up_down", "indices(3)")
+              .Define("SFpu_A",'corr_sf.eval_puSF(10,"nominal")')
               .Define("SFpu_Nom",'corr_sf.eval_puSF(Pileup_nTrueInt,"nominal")')
               .Define("SFpu_Up",'corr_sf.eval_puSF(Pileup_nTrueInt,"up")')
               .Define("SFpu_Dn",'corr_sf.eval_puSF(Pileup_nTrueInt,"down")')
               #
-              .Define("idx_nom_up_down", "indices(3)")
               .Define("w_allSF", "w*SFpu_Nom")
               .Define("pu_weights", "NomUpDownVar(SFpu_Nom, SFpu_Up, SFpu_Dn, w_allSF)")
               #
               )
+    return dfVaryPh
+
+def callVariation(df):
+
+    dfVaryPh=(df
+              .Define("goodPhotons_dEsigmaUp", 'Photon_dEsigmaUp[goodPhotons]')
+              .Define("goodPhotons_dEsigmaDown", 'Photon_dEsigmaDown[goodPhotons]')
+              .Define("photon_dEsigmaUp",'(1.f+goodPhotons_dEsigmaUp[index_pair[1]])')
+              .Define("photon_dEsigmaDown",'(1.f+goodPhotons_dEsigmaDown[index_pair[1]])')
+              .Vary("photon_pt", "ROOT::RVecF{photon_pt*photon_dEsigmaDown,photon_pt*photon_dEsigmaUp}", variationTags=["dn","up"], variationName = "PhotonSYST")
+#              .Define("goodPhoton_pt", 'goodPhotons_pt[0]')
+#              .Vary("goodPhoton_pt", "ROOT::RVecF{goodPhoton_pt*0.9f,goodPhoton_pt*1.1f}", variationTags=["dn","up"], variationName = "PhotonSYST")
+	      )
     return dfVaryPh
 
 def analysis():
@@ -93,7 +105,7 @@ def analysis():
         dfINI = RDataFrame("Events", files)
         rdf = RDataFrame("Runs", files)
         sumW = computeWeigths(dfINI, rdf, 1017, year, True, "False")
-
+        init()
     else:
         if doLocal:
             connection = create_local_connection(10)
@@ -102,11 +114,10 @@ def analysis():
             sumW = computeWeigths(dfINI, rdf, 1017, year, True, "False")
         else:
             dfINI = RDataFrame("Events", files, daskclient=client_)
-            rdf = RDataFrame("Runs", files, daskclient=client_)
+#            rdf = RDataFrame("Runs", files, daskclient=client_)
             sumW = 1. # fixme the computeWeigths( doens't work for remote slurm
 
-        ROOT.RDF.Experimental.Distributed.initialize(myinit)
-        ROOT.RDF.Experimental.Distributed.initialize(sf)
+        ROOT.RDF.Experimental.Distributed.initialize(init)
 
     print(GOODphotons)
     print(GOODPHI)
@@ -152,15 +163,17 @@ def analysis():
           #
           )
 
-    ptsum = df.Sum("HCandMass")
-    res = ptsum.GetValue()
+    MassSum = df.Sum("goodPhotons_pt")
+    res = MassSum.GetValue()
     print('sum of HCandMass  = ',res)
 
     df = callVary(df)
+    df = callVariation(df) # only works for photon_pt (both interactive and distr)
 
     if True:
         print("writing plots")
         hists = {
+#            "photon_pt":  {"name":"photon_pt","title":"Photon PT; pt_{#gamma} (GeV);N_{Events}","bin":200,"xmin":0,"xmax":200},
             "HCandMass":  {"name":"HCandMass","title":"H mass;m_{k^{+}k^{-}#gamma} (GeV);N_{Events}","bin":70,"xmin":100,"xmax":170},
         }
 
@@ -168,14 +181,27 @@ def analysis():
         for h in hists:
 
             # 1D is for nom only
-            model = (hists[h]["name"], hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
-            h1d = df.Histo1D(model, hists[h]["name"], "w")
+            model1d = (hists[h]["name"], hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
+            h1d = df.Histo1D(model1d, hists[h]["name"], "w")
             histos.append(h1d)
             print("h1d append")
 
+            ## SYST with a weight
             model2d_pu = (hists[h]["name"]+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
             histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
             print("h2d append")
+
+#            all_hs = ROOT.RDF.Experimental.VariationsFor(h1d);
+#            all_hs.GetKeys();
+#            print(all_hs.GetKeys())
+
+            ## to use the SYST that change the variable  (for some reason this is associated only to the photon+pt and not the HCandMass)
+#            if doINTERACTIVE: hx = ROOT.RDF.Experimental.VariationsFor(h1d)
+#            else: hx = ROOT.RDF.Experimental.Distributed.VariationsFor(h1d)
+#            hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn")
+#            histos.append(hx["PhotonSYST:dn"])
+#            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up")
+#            histos.append(hx["PhotonSYST:up"])
 
             outputFileHisto = "DASKlogs/histoOUTname.root"
             myfile = ROOT.TFile(outputFileHisto,"RECREATE")
@@ -186,7 +212,6 @@ def analysis():
                 h.Write()
             myfile.Close()
             myfile.Write()
-
 
     if True:
 
