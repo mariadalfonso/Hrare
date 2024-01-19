@@ -8,9 +8,12 @@ conda create --name myenv
 
 conda install -c conda-forge root
 
-python3 -m pip install correctionlib
+python3 -m pip install --user --no-binary=correctionlib correctionlib
 
 python3 -m pip install dask-jobqueue
+
+## run RDF on notebook
+testDistCluster.ipynb
 
 ## run distributed test
 python testDistLocalCluster.py
