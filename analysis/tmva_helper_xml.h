@@ -1,3 +1,8 @@
+#ifndef tmva_xml_h
+#define tmva_xml_h
+
+using Vec_f = ROOT::VecOps::RVec<float>;
+
 class tmva_xml {
 
     public:
@@ -60,6 +65,13 @@ class tmva_xml {
 		TMVA::Experimental::Internal::AnalysisType fAnalysisType;
 };
 
+#endif
+
+#ifndef tmva_helper_xml_h
+#define tmva_helper_xml_h
+
+using Vec_f = ROOT::VecOps::RVec<float>;
+
 class tmva_helper_xml {
     public:
         tmva_helper_xml(const std::string &filename, const unsigned int nslots = 1) {
@@ -80,3 +92,6 @@ class tmva_helper_xml {
         std::vector<tmva_xml *> interpreters_;
 
 };
+
+
+#endif

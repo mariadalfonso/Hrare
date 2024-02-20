@@ -7,9 +7,11 @@ from datetime import datetime
 from utilsAna import pickTRG,findDIR,getMesonFromJson,getMVAFromJson
 from utilsAna import loadUserCode, loadCorrectionSet
 from utilsHrare import computeWeigths
+from utilsHrare import getMClist, getDATAlist, getSkims
+from utilsAna import listDir
 
-doINTERACTIVE=False
-useXROOTD=True
+doINTERACTIVE=True
+useXROOTD=False
 doLocal=True
 
 ###-----------------------------------------
@@ -27,14 +29,71 @@ BARRELphotons = jsonObject['BARRELphotons']
 ENDCAPphotons = jsonObject['ENDCAPphotons']
 TRIGGERS = trgObject['triggers']
 mesons = jsonObject['mesons']
+GOODJETS = jsonObject['GOODJETS']
 
 year = 2018
+
 GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and Photon_mvaID_WP80 and abs(Photon_eta)<2.1".format(BARRELphotons,ENDCAPphotons) #90-80
 GOODPHI = "{}".format(getMesonFromJson(mesons, "isZinv", "isPhiCat"))
 GOODRHO = "{}".format(getMesonFromJson(mesons, "isZinv", "isRhoCat"))
 GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isZinv", "isK0StarCat"))
 
 TRIGGER=pickTRG(TRIGGERS,year,"NULL",True,False,False,False)
+
+MVA = jsonObject['MVAweights']
+MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , "isPhiCat"))
+#from urllib import request
+#request.urlretrieve("root://submit30.mit.edu//mariadlf/utilFiles/weights_mva_oct/ggH_phi/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml")
+
+print(GOODphotons)
+print(GOODPHI)
+print(TRIGGER)
+print(MVAweights)
+
+###-----------------------------------------
+###-----------------------------------------
+
+def init():
+    loadUserCode()
+    loadCorrectionSet(2018)
+#    loadtmva_local()
+
+def loadtmva_local():
+    print('loadtmva_local() ')
+    s ='''
+    TMVA::Experimental::RReader model("weights_mva_oct/ggH_phi/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml");
+    auto computeModel = TMVA::Experimental::Compute<6, float>(model);
+    auto prediction = model.Compute({0.5, 1.0, -0.2, 1.5, 0.5, 1.0});
+    '''
+#    s ='''
+#    TMVA::Experimental::RReader model("{0}");
+#    auto computeModel = TMVA::Experimental::Compute<{1}, float>(model);
+#    auto prediction = model.Compute({0.5, 1.0, -0.2, 1.5, 0.5, 1.0});
+#    '''
+
+    NVar=6
+#    print(s.format(MVAweights,NVar))
+    ROOT.gSystem.AccessPathName(MVAweights)
+#    ROOT.gInterpreter.ProcessLine(s.format(MVAweights,NVar))
+    ROOT.gInterpreter.ProcessLine(s)
+    variables = ROOT.model.GetVariableNames()
+    print('just inside the load',variables)
+
+###-----------------------------------------
+###-----------------------------------------
+
+if doINTERACTIVE:
+    ROOT.ROOT.EnableImplicitMT()
+    RDataFrame = ROOT.RDataFrame
+    RunGraphs = ROOT.RDF.RunGraphs
+    init()
+else:
+    RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+    RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
+    import pkg_resources
+    from utilsDask import create_local_connection
+#    from utilsDask import client
+    ROOT.RDF.Experimental.Distributed.initialize(init)
 
 lumis={
     '12016': 19.52, #APV #(B-F for 2016 pre)
@@ -47,26 +106,40 @@ lumis={
     'all': 86.92,      #19.52 + 7.7 + 59.70
 }
 
-###-----------------------------------------
-###-----------------------------------------
+def callMVA(df):
 
-def init():
-    loadUserCode()
-    loadCorrectionSet(2018)
+    if False:
+        #need to be multicore
+        tmva_helper_ = tmva_helper_xml.TMVAHelperXML(MVAweights)
+        print(tmva_helper_.variables)
 
-if doINTERACTIVE:
-    ROOT.ROOT.EnableImplicitMT()
-    RDataFrame = ROOT.RDataFrame
+        print('printing tmva_helper_ inside callMVA: ',tmva_helper_)
+    else:
+        variables = ROOT.model.GetVariableNames()
+        print('just inside call MVA: ',variables)
+        print(list(variables))
 
-else:
-    RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
-    import pkg_resources
-    from utilsDask import create_local_connection
-    from utilsDask import client_
+    dfWithMVA = (df.Define("goodJets","{}".format(GOODJETS))
+                 .Define("nGoodJets","Sum(goodJets)*1.0f")
+#                 .Define("meson_DR", "goodMeson_DR[0]")
+#                 .Define("meson_iso","goodMeson_iso[0]")
+                 .Define("meson_DR", "(index_pair[0]!= -1) ? goodMeson_DR[index_pair[0]]: 0.f")
+                 .Define("meson_iso","(index_pair[0]!= -1) ? goodMeson_iso[index_pair[0]]: 0.f")
+                 .Define("HCandPT__div_HCandMass", "(HCandMass>0) ? HCandPT/HCandMass: 0.f")
+#                .Define("photon_pt__daiv_HCandMass", "(HCandMass>0) ? photon_pt/HCandMass: 0.f")
+#                 .Define("meson_pt__div_HCandMass", "(HCandMass>0) ? goodMeson_pt[index_pair[0]]/HCandMass: 0.f")
+                 .Define("photon_pt__div_HCandMass", "(index_pair[1]!= -1 && HCandMass>0) ? photon_pt/HCandMass: 0.f")
+                 .Define("meson_pt__div_HCandMass", "(index_pair[0]!= -1 && HCandMass>0) ? goodMeson_pt[index_pair[0]]/HCandMass: 0.f")
+                 )
+
+    if False:
+        dfWithMVA = tmva_helper_.run_inference(dfWithMVA,"MVAdisc")
+    else:
+        dfWithMVA = dfWithMVA.Define("MVAdisc", ROOT.computeModel, list(ROOT.model.GetVariableNames()))
+
+    return dfWithMVA
 
 def callVary(df):
-
-    ROOT.gInterpreter.ProcessLine('corr_sf.eval_puSF(10,"nominal")')
 
     dfVaryPh=(df
               .Define("idx_nom_up_down", "indices(3)")
@@ -94,37 +167,30 @@ def callVariation(df):
 	      )
     return dfVaryPh
 
-def analysis():
+histos = []
+evtcounts = []
+
+def analysis(files,year,mc,sumW):
 
     now = datetime.now()
     print('==> start: ',now)
 
-    files = findDIR("/data/submit/cms/store/user/mariadlf/nano/D02/GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v3+MINIAODSIM/",useXROOTD)
-
     if doINTERACTIVE:
         dfINI = RDataFrame("Events", files)
-        rdf = RDataFrame("Runs", files)
-        sumW = computeWeigths(dfINI, rdf, 1017, year, True, "False")
-        init()
+        #        loadtmva_helper()
     else:
         if doLocal:
-            connection = create_local_connection(10)
-            dfINI = RDataFrame("Events", files, daskclient=connection)
-            rdf = RDataFrame("Runs", files, daskclient=connection)
-            sumW = computeWeigths(dfINI, rdf, 1017, year, True, "False")
+            connection = create_local_connection(1)
+            print(connection)
+            # The `npartitions` optional argument tells the RDataFrame how many tasks are desired
+            NPARTITIONS=300
+            dfINI = RDataFrame("Events", files, daskclient=connection, npartitions=NPARTITIONS)
         else:
-            dfINI = RDataFrame("Events", files, daskclient=client_)
-#            rdf = RDataFrame("Runs", files, daskclient=client_)
-            sumW = 1. # fixme the computeWeigths( doens't work for remote slurm
-
-        ROOT.RDF.Experimental.Distributed.initialize(init)
-
-    print(GOODphotons)
-    print(GOODPHI)
-    print(TRIGGER)
+            dfINI = RDataFrame("Events", files, daskclient=client)
 
     lumi = 1.
-    weight = "{0}*genWeight*{1}".format(lumi,sumW)
+    weight = "{0}".format(1.)
+    if mc>=0: weight = "{0}*genWeight*{1}".format(lumi,sumW)
     if year==2018: lumiIntegrated = lumis['2018']
 
     df = (dfINI
@@ -163,12 +229,11 @@ def analysis():
           #
           )
 
-    MassSum = df.Sum("goodPhotons_pt")
-    res = MassSum.GetValue()
-    print('sum of HCandMass  = ',res)
+#    df = callMVA(df)
+#    df = callVary(df)
+#    df = callVariation(df) # only works for photon_pt (both interactive and distr)
 
-    df = callVary(df)
-    df = callVariation(df) # only works for photon_pt (both interactive and distr)
+    evtcounts.append(df.Count())
 
     if True:
         print("writing plots")
@@ -177,19 +242,18 @@ def analysis():
             "HCandMass":  {"name":"HCandMass","title":"H mass;m_{k^{+}k^{-}#gamma} (GeV);N_{Events}","bin":70,"xmin":100,"xmax":170},
         }
 
-        histos = []
         for h in hists:
 
             # 1D is for nom only
-            model1d = (hists[h]["name"], hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
+            model1d = (hists[h]["name"]+"_"+str(year)+"_"+str(mc), hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
             h1d = df.Histo1D(model1d, hists[h]["name"], "w")
             histos.append(h1d)
             print("h1d append")
 
             ## SYST with a weight
-            model2d_pu = (hists[h]["name"]+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
-            histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
-            print("h2d append")
+#            model2d_pu = (hists[h]["name"]+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+#            histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
+#            print("h2d append")
 
 #            all_hs = ROOT.RDF.Experimental.VariationsFor(h1d);
 #            all_hs.GetKeys();
@@ -203,22 +267,26 @@ def analysis():
 #            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up")
 #            histos.append(hx["PhotonSYST:up"])
 
-            outputFileHisto = "DASKlogs/histoOUTname.root"
-            myfile = ROOT.TFile(outputFileHisto,"RECREATE")
-            myfile.ls()
 
-            print(histos)
-            for h in histos:
-                h.Write()
-            myfile.Close()
-            myfile.Write()
+#    if not doINTERACTIVE:
+##    if False:
+#        outputFileHisto = "DASKlogs/histoOUTname_mc{0}_{1}.root".format(mc,year)
+#        myfile = ROOT.TFile(outputFileHisto,"RECREATE")
+#        myfile.ls()
 
-    if True:
+#        print(histos)
+#        for h in histos:
+#            h.Write()
+#        myfile.Close()
+#        myfile.Write()
+
+    if False:
 
         branchList = ROOT.vector('string')()
         for branchName in [
                 "goodPhotons_pt",
                 "HCandMass",
+#                "MVAdisc",
         ]:
             branchList.push_back(branchName)
 
@@ -230,11 +298,115 @@ def analysis():
         print("snapshot_tdf DONE")
         print(outputFile)
 
+#    return histos
     now = datetime.now()
     print('==> ends: ',now)
+
+def BuildDict():
+
+    isT2=False
+    if isT2:
+        dirName="/store/user/paus/nanohr/D02/"
+    else:
+        dirName="/store/user/mariadlf/nano/D02/"
+
+    campaignv3 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v3+MINIAODSIM/"
+    campaignv1 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM/"
+    campaignv2 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
+    campaignFIX = "RunIISummer20UL18MiniAODv2-4cores5k_106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
+
+    thisdict = {
+        1010: (listDir(isT2,dirName+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv1),3781.7*0.49),
+        1017: (listDir(isT2,dirName+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv3),48580*0.49),
+        10: (listDir(isT2,dirName+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),18540.0*1000*1.26), #LO *1.26
+        11: (listDir(isT2,dirName+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX),8644.0*1000*1.26), #LO *1.26
+        12: (listDir(isT2,dirName+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),2183.0*1000*1.26), #LO *1.26
+        13: (listDir(isT2,dirName+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),260.2*1000*1.26), #LO *1.26
+        14: (listDir(isT2,dirName+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),86.58*1000*1.26) #LO *1.26
+    }
+
+    return thisdict
+
+def SwitchSample(thisdict,argument):
+
+    return thisdict.get(argument, "BKGdefault, xsecDefault")
+
+def loopOnDataset():
+
+    thisdict = BuildDict()
+
+    year=2018
+    mc = [1017,1010,10,11,12,13,14]
+
+    for sampleNOW in mc:
+        files = SwitchSample(thisdict,sampleNOW)[0]
+        print('outside the function: ',len(files))
+        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
+        sumW = computeWeigths(rdf,mc, year, True, "False")
+        analysis(files,year,sampleNOW,sumW)
+
+#    print('DONE with MC going for Data')
+#    data = [-62,-63,-64]
+
+#    for datasetNumber in data:
+#         pair = getSkims(datasetNumber,year,"Zinv",useD03)
+#         files = pair[0]
+#         PDType = pair[1]
+#         print(len(files))
+#         print(PDType)
+#         analysis(files,year,datasetNumber,1.)
+
+def loopOnDatasetLocal():
+
+    useD03=False
+    year=2018
+
+    mc = [1017,1010,10,11,12,13,14]
+
+    for sampleNOW in mc:
+        files = getMClist(year,sampleNOW,useD03)
+        print(len(files))
+        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
+        sumW = computeWeigths(rdf,sampleNOW, year, True, "False")
+        analysis(files,year,sampleNOW,sumW)
+
+    data = [-62,-63,-64]
+    for datasetNumber in data:
+         pair = getSkims(datasetNumber,year,"Zinv",useD03)
+         files = pair[0]
+         PDType = pair[1]
+         print(len(files))
+         print(PDType)
+         analysis(files,year,datasetNumber,1.)
 
 # In a Python script the Dask client needs to be initalized in a context
 # Jupyter notebooks / Python session don't need this
 if __name__ == "__main__":
 
-    analysis()
+    now = datetime.now()
+    print('==> very beginning: ',now)
+
+    loopOnDatasetLocal()
+
+    if True:
+
+        now = datetime.now()
+        print('==> start runGraph: ',now)
+        RunGraphs(evtcounts);
+
+        now = datetime.now()
+        print('==> done runGraph: ',now)
+
+        if doINTERACTIVE: outputFileHisto = "DASKlogs/histoOUTname_test_interactive.root"
+        else: outputFileHisto = "DASKlogs/histoOUTname_test_LocalCluster.root"
+        myfile = ROOT.TFile(outputFileHisto,"RECREATE")
+        myfile.ls()
+
+        print(histos)
+        for h in histos:
+            h.Write()
+        myfile.Close()
+        myfile.Write()
+
+        now = datetime.now()
+        print('==> histo done: ',now)

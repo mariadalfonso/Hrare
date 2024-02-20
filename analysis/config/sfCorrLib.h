@@ -60,6 +60,8 @@ MyCorrections::MyCorrections(int year) {
   if(year == 12016)  { subDirName += "2016preVFP_UL/"; dataName = "UL16APV"; }
   if(year == 12022)  { subDirName = "2022_Summer22/"; }
   if(year == 22022)  { subDirName = "2022_Summer22EE/"; }
+  if(year == 12023)  { subDirName = "2023_Summer23/"; }
+  if(year == 22023)  { subDirName = "2023_Summer23BPix/"; }
 
   const std::string fileNameLUM = dirName+"LUM/"+subDirName+"puWeights.json.gz";
 
@@ -67,7 +69,10 @@ MyCorrections::MyCorrections(int year) {
   if(year == 2018) corrNameLUM = "Collisions18_UltraLegacy_goldenJSON";
   if(year == 2017) corrNameLUM = "Collisions17_UltraLegacy_goldenJSON";
   if(year == 22016 or year == 12016) corrNameLUM = "Collisions16_UltraLegacy_goldenJSON";
-  // PU missing for 2022/2023
+  if(year == 12022) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
+  if(year == 22022) corrNameLUM = "Collisions2022_359022_362760_eraEFG_GoldenJson";
+  if(year == 12023) corrNameLUM = "Collisions2023_366403_369802_eraBC_GoldenJson";
+  if(year == 12023) corrNameLUM = "Collisions2023_369803_370790_eraD_GoldenJson";
 
   auto csetPU = correction::CorrectionSet::from_file(fileNameLUM);
   puSF_ = csetPU->at(corrNameLUM);

@@ -74,12 +74,17 @@ def findDIR(directory,useXROOTD=False):
     print(len(rootFiles))
     return rootFiles
 
-def listDir(xrdpath):
+def listDir(isT2,xrdpath):
     print(xrdpath)
-    xrd = "root://submit50.mit.edu/"
+    if isT2:
+        xrd = "root://xrootd.cmsaf.mit.edu/"
+    else:
+        xrd = "root://submit50.mit.edu/"
     f = check_output(['xrdfs', f'{xrd}', 'ls', xrdpath]).decode(sys.stdout.encoding)
 
+    rootFiles = ROOT.vector('string')()
     stringFiles = f.split()
+
     for e in range(len(stringFiles)):
         filePath = xrd + stringFiles[e]
         rootFiles.push_back(filePath)

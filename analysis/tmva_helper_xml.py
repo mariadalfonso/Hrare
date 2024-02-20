@@ -1,5 +1,4 @@
 import ROOT
-ROOT.gInterpreter.Declare('#include "tmva_helper_xml.h"')
 
 class TMVAHelperXML():
 
