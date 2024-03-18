@@ -319,7 +319,7 @@ def SwitchSample(argument,year,useD03):
         ## SIGNAL
         1010: (dirGluster02+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3781.7*0.49), #NNLO
         1011: (dirGluster02+"WplusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*94.26*0.49), #xsec = 3*9.426E-02 (xsec*Wl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
-        1012: (dirGluster02+"WminusH_WToLNu_HToRhoGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
+        1012: (dirGluster02+"WminusH_WToLNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*59.83*0.49), #xsec = 3*5.983E-02 (xsecWl) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1013: (dirGluster02+"ZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*(29.82 - 4.14)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1014: (dirGluster02+"ggZH_ZToLL_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,3*4.14*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49
         1015: (dirGluster+"ZH_ZToNuNu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaign,(177.62 - 24.57)*0.49), #xsec = 3*9.426E-02 (xsec*Zll) * BR(Hphigamma)=1 BR(phi->kk)=0.49

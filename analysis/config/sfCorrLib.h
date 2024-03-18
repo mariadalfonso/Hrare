@@ -23,7 +23,7 @@ public:
   double eval_puSF      (double NumTrueInteractions, std::string weights);
   double eval_photonSF  (std::string year, std::string valType, std::string workingPoint, double eta, double pt);
   double eval_photonPixVetoSF  (std::string year, std::string valType, std::string workingPoint, double eta, double pt);
-  double eval_electronSF(std::string year, std::string valType, std::string workingPoint, double eta, double pt);
+  double eval_electronSF(std::string year, std::string valType, std::string workingPoint, double eta, double pt, double minVal);
   double eval_muonTRKSF (std::string year, std::string valType, double eta, double pt);
   double eval_muonIDSF  (std::string year, std::string valType, double eta, double pt, std::string workingPoint);
   double eval_muonISOSF (std::string year, std::string valType, double eta, double pt, std::string workingPoint);
@@ -89,6 +89,7 @@ MyCorrections::MyCorrections(int year) {
   // ELE missing for 2023/2023
 
   std::string fileNameMU = dirName+"MUO/"+subDirName+"muon_Z_v2.json.gz";
+  if(year == 2018 or year == 2017 or year == 12016 or 22016) fileNameMU = "config/POG/MUO/"+subDirName+"muon_Z.json.gz";
   if(year == 12022) fileNameMU = dirName+"MUO/"+"2022_27Jun2023/"+"muon_Z.json.gz";
   if(year == 22022) fileNameMU = dirName+"MUO/"+"2022EE_27Jun2023/"+"muon_Z.json.gz";
 
@@ -156,8 +157,9 @@ double MyCorrections::eval_jetVeto(std::string str1, double double1, double doub
   return vetoMaps_->evaluate({str1,double1, double2});
 };
 
-double MyCorrections::eval_electronSF(std::string year, std::string valType,  std::string workingPoint, double eta, double pt) {
-  pt = std::max(pt,10.001);
+double MyCorrections::eval_electronSF(std::string year, std::string valType,  std::string workingPoint, double eta, double pt, double minVal) {
+  //  pt = std::max(pt,10.001); for wp80 is 10 while for the above10 is 20
+  pt = std::max(pt,minVal);
   return electronSF_->evaluate({year, valType, workingPoint, eta, pt});
 };
 

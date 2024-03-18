@@ -119,8 +119,8 @@ if opts.whichCat=='GFcat':
     category = ['GFcat']
 
 if opts.whichCat=='Vcat':
-    sigAll = ['WH','ZH','ZHl','TTH']
-    mcAll = ['WH','ZH','ZHl','TTH','bkgV'] #to add TTH
+    sigAll = ['WH','ZH','ZHl']
+    mcAll = ['WH','ZH','ZHl','TTH','bkgV']
     category = ['Vcat']
 
 if opts.whichCat=='Wcat':

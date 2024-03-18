@@ -39,7 +39,7 @@
 #include <limits>
 #include <map>
 
-#include <ROOT/RVec.hxx>
+//#include <ROOT/RVec.hxx>
 #include <ROOT/RVec.hxx>
 #include <ROOT/RDataFrame.hxx>
 //#include <ROOT/RDF/RInterface.hxx>
@@ -865,7 +865,8 @@ float SF_HLT_leg(float pt, int idParticle, int nomUpDowm) {
 
 void initTrigSF() {
 
-  const char* filename_ph = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/Photon35TriggerSF.root";
+  const char* filename_ph = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/Photon35TriggerSF_FSR.root";
+  //  const char* filename_ph = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/Photon35TriggerSF.root";
   const char* filename_had = "/work/submit/mariadlf/Hrare/utilFiles/sfFiles/TwoProngsTriggerSF.root";
 
   TFile* myFile_photon = TFile::Open(filename_ph, "READ");
@@ -938,20 +939,31 @@ void initPol(int mc, int year, int nSlot) {
   myTree->SetBranchStatus("*",0);
   myTree->SetBranchStatus("event_number",1);
   myTree->SetBranchStatus("theta_pol",1);
+  myTree->SetBranchStatus("genPhoton_eT",1);
+  myTree->SetBranchStatus("genMeson_pT",1);
 
   std::vector<float> theta_pol_dict(3000000, 0.); // initialize with so that sin of 0 is 1.
 
   Int_t event_var;
   float theta_pol_var;
+  float genPhoton_eT;
+  float genMeson_pT;
 
   myTree->SetBranchAddress("event_number", &event_var);
   myTree->SetBranchAddress("theta_pol", &theta_pol_var);
 
+  myTree->SetBranchAddress("genPhoton_eT", &genPhoton_eT);
+  myTree->SetBranchAddress("genMeson_pT", &genMeson_pT);
+
+  int countNan=0;
   Long64_t nentries = myTree->GetEntries();
   for (Long64_t i=0;i<nentries;++i) {
     myTree->GetEntry(i);
     theta_pol_dict.at(int(event_var)) = theta_pol_var;
+    if (genMeson_pT < -9 and genPhoton_eT < -9) countNan++; 
   }
+
+  std::cout << " countNan " << countNan << " out of tot events" << nentries << std::endl;
 
   for ( int i=0; i<nSlot;i++) {
     theta_pol_dict_VEC.push_back(theta_pol_dict);
