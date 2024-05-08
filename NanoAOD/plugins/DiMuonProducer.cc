@@ -291,6 +291,8 @@ private:
 			const pat::Muon& pfCand2,
 			unsigned int primaryVertexIndex,
 			float minPt=0.9, float dR=0.7,
+			int particleType=0,
+			unsigned int returnType = 0,
 			std::vector<const pat::PackedCandidate*> ignoreTracks =
 			std::vector<const pat::PackedCandidate*>());
 
@@ -475,7 +477,24 @@ DiMuonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
   int pvIndex = displacement3D.pvIndex;
 
-  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3)); //minPt and DR=0.3 as for muons
+  // particleType: 0 is charged Isolation; 22 is photon, -1 is neuHad
+  // returnType: 0 isolation, 1 scalar sum, 2 leading Track Pt, 2 leading Track Dxy
+  v0Cand.addUserFloat( "iso", computeCandIsolation(cand1,cand2,pvIndex,      0.9,0.3,0)); //minPt and DR=0.3 as for muons
+  v0Cand.addUserFloat( "isoPho", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.3,22)); //minPt and DR=0.3 as for muons
+  v0Cand.addUserFloat( "isoNeuHad", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.3,-1)); //minPt and DR=0.3 as for muons
+  v0Cand.addUserFloat( "phoPtSumOutsideSignalConedR03", computeCandIsolation(cand1,cand2,pvIndex, 0.9,0.3,22,  1)); //minPt and DR=0.3 as for muons
+  //
+  v0Cand.addUserFloat( "leadingChargedMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,      0.9,0.4,0,  2)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingCharged2dSignMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.4,0,  3)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingCharged3dSignMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.4,0,  4)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedDxyMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  5)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedDzMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,    0.9,0.4,0,  6)); //minPt and DR=0.4 as for muons
+  //
+  v0Cand.addUserFloat( "leadingChargedMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,      0.9,0.4,0,  7)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingCharged2dSignMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.4,0,  8)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingCharged3dSignMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.4,0,  9)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedDxyMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  10)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedDzMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,    0.9,0.4,0,  11)); //minPt and DR=0.4 as for muons
 
   v0Cand.addUserInt( "muon1_isTightMuon", (pvIndex!=-1) ? cand1.isTightMuon((*primaryVertices_).at(pvIndex)): false );
   v0Cand.addUserInt( "muon2_isTightMuon", (pvIndex!=-1) ? cand2.isTightMuon((*primaryVertices_).at(pvIndex)): false );
@@ -974,12 +993,27 @@ DisplacementInformationIn3D
 
 float
 DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& muon2, 
-				    unsigned int primaryVertexIndex,
-				    float minPt, float dR,
-				    std::vector<const pat::PackedCandidate*> ignoreTracks)
+				     unsigned int primaryVertexIndex,
+				     float minPt, float dR, int particleType,
+				     unsigned int returnType,
+				     std::vector<const pat::PackedCandidate*> ignoreTracks)
 {
     float sumPt(0);
+
+    float maxPt1(0);
+    float dxyForMaxPt1(-999.);
+    float dzForMaxPt1(-999.);
+    float signedIP2dSignMaxPt1(-999.);
+    float signedIP3dSignMaxPt1(-999.);
+
+    float maxPt2(0);
+    float dxyForMaxPt2(-999.);
+    float dzForMaxPt2(-999.);
+    float signedIP2dSignMaxPt2(-999.);
+    float signedIP3dSignMaxPt2(-999.);
+
     auto b_p4 = muon1.p4()+muon2.p4();
+    auto b_dir = GlobalVector(b_p4.x(),b_p4.y(),b_p4.z());
     for (const auto& pfCandIso: *pfCandHandle_.product()){
       bool ignore_track = false;
       for (auto trk: ignoreTracks){
@@ -988,16 +1022,68 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
 	  break;
 	}
       }
+
       if (ignore_track) continue;
-      if (deltaR(muon1, pfCandIso) < 0.01 || deltaR(muon2, pfCandIso) < 0.01) continue;
-      if (pfCandIso.charge() == 0 ) continue;
-      if (!pfCandIso.hasTrackDetails()) continue;
+      if (deltaR(muon1, pfCandIso) < 0.001 || deltaR(muon2, pfCandIso) < 0.001) continue;
       if (pfCandIso.pt()<minPt) continue;
-      if (pfCandIso.vertexRef().key()!=primaryVertexIndex) continue;
       if (deltaR(b_p4, pfCandIso) > dR) continue;
+      if (particleType==0) {
+	if (pfCandIso.charge() == 0 ) continue; // for charged quantities
+	if (!pfCandIso.hasTrackDetails()) continue;
+	//	if (pfCandIso.vertexRef().key()!=primaryVertexIndex) continue; // check what happens for displaced
+	if (pfCandIso.pt() > maxPt1 ) {
+	  maxPt1 = pfCandIso.pt();
+	  if (returnType==4) {
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    auto signedIP3d = IPTools::signedImpactParameter3D(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
+	    signedIP3dSignMaxPt1 = signedIP3d.second.significance();
+	  } else if (returnType==3){
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    auto signedIP2d = IPTools::signedTransverseImpactParameter(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
+	    signedIP2dSignMaxPt1 = signedIP2d.second.significance();
+	  } else if (returnType==5 or returnType==6){
+	    auto vtx_point = (*primaryVertices_).at(primaryVertexIndex).position();
+	    dxyForMaxPt1 = pfCandIso.dxy(vtx_point);
+	    dzForMaxPt1 = pfCandIso.dz(vtx_point);
+	  }
+	} else if (pfCandIso.pt() > maxPt2) {
+	  maxPt2 = pfCandIso.pt();
+	  if (returnType==9) {
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    auto signedIP3d = IPTools::signedImpactParameter3D(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
+	    signedIP3dSignMaxPt2 = signedIP3d.second.significance();
+	  } else if (returnType==8){
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    auto signedIP2d = IPTools::signedTransverseImpactParameter(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
+	    signedIP2dSignMaxPt2 = signedIP2d.second.significance();
+	  } else if (returnType==10 or returnType==11){
+	    auto vtx_point = (*primaryVertices_).at(primaryVertexIndex).position();
+	    dxyForMaxPt2 = pfCandIso.dxy(vtx_point);
+	    dzForMaxPt2 = pfCandIso.dz(vtx_point);
+	  }
+	}
+      } else if (particleType==22 and pfCandIso.pdgId()==22) {
+	if (pfCandIso.charge() != 0 ) continue; // only photons for neutralIsolation
+      } else {
+	if (pfCandIso.pdgId() == 22) continue; // only neutral hadrons
+	if (pfCandIso.charge() != 0 ) continue; // for neutralIsolation
+      }
       sumPt += pfCandIso.pt();
     }
 
+    if(returnType==1) return sumPt;
+    //
+    else if (returnType==2) return maxPt1;
+    else if (returnType==3) return signedIP2dSignMaxPt1;
+    else if (returnType==4) return signedIP3dSignMaxPt1;
+    else if (returnType==5) return dxyForMaxPt1;
+    else if (returnType==6) return dzForMaxPt1;
+    //
+    else if (returnType==7) return maxPt2;
+    else if (returnType==8) return signedIP2dSignMaxPt2;
+    else if (returnType==9) return signedIP3dSignMaxPt2;
+    else if (returnType==10) return dxyForMaxPt2;
+    else if (returnType==11) return dzForMaxPt2;
     return b_p4.pt()/(b_p4.pt()+sumPt);
 }
 

@@ -53,7 +53,23 @@ DiMuProdMC = DiMuProd.clone( isMC = cms.bool(True) )
 JpsisVariables = cms.PSet(
     mass         = Var("mass",                         float, doc = "Unfit invariant mass"),
     doca         = Var("userFloat('doca')",            float, doc = "Distance of closest approach of tracks"),
-    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum))"),
+    iso          = Var("userFloat('iso')",             float, doc = "tracks isolation (pt/(pt+sum)) around dimuon of R=03"),
+    isoPho       = Var("userFloat('isoPho')",          float, doc = "photon isolation (pt/(pt+sum)) around dimuon of R=03"),
+    isoNeuHad    = Var("userFloat('isoNeuHad')",       float, doc = "neutral Hadron isolation (pt/(pt+sum)) around dimuon of R=03"),
+    phoPtSumOutsideSignalConedR03       = Var("userFloat('phoPtSumOutsideSignalConedR03')",       float, doc = "phoPtSumOutsideSignalConedR03"),
+    ##
+    leadingChargedMaxPt1 = Var("userFloat('leadingChargedMaxPt1')", float, doc = "leadingCharged Pt in a signal cone around dimuon of R=04"),
+    leadingChargedDxyMaxPt1 = Var("userFloat('leadingChargedDxyMaxPt1')", float, doc = "leadingCharged Dxy in a signal cone around dimuon of R=04"),
+    leadingChargedDzMaxPt1 = Var("userFloat('leadingChargedDzMaxPt1')", float, doc = "leadingCharged Dxy in a signal cone around dimuon of R=04"),
+    leadingCharged2dSignMaxPt1 = Var("userFloat('leadingCharged2dSignMaxPt1')", float, doc = "leadingCharged 2-sign in a signal cone around dimuon of R=04"),
+    leadingCharged3dSignMaxPt1 = Var("userFloat('leadingCharged3dSignMaxPt1')", float, doc = "leadingCharged 3-sign in a signal cone around dimuon of R=04"),
+    ##
+    leadingChargedMaxPt2 = Var("userFloat('leadingChargedMaxPt2')", float, doc = "SubLeadingCharged Pt in a signal cone around dimuon of R=04"),
+    leadingChargedDxyMaxPt2 = Var("userFloat('leadingChargedDxyMaxPt2')", float, doc = "SubLeadingCharged Dxy in a signal cone around dimuon of R=04"),
+    leadingChargedDzMaxPt2 = Var("userFloat('leadingChargedDzMaxPt2')", float, doc = "SubLeadingCharged Dxy in a signal cone around dimuon of R=04"),
+    leadingCharged2dSignMaxPt2 = Var("userFloat('leadingCharged2dSignMaxPt2')", float, doc = "SubLeadingCharged 2-sign in a signal cone around dimuon of R=04"),
+    leadingCharged3dSignMaxPt2 = Var("userFloat('leadingCharged3dSignMaxPt2')", float, doc = "SubLeadingCharged 3-sign in a signal cone around dimuon of R=04"),
+    ##
     muon1_pt     = Var("userFloat('muon1_pt')",        float, doc = "Muon 1 pt"),
     muon1_eta    = Var("userFloat('muon1_eta')",       float, doc = "Muon 1 eta"),
     muon1_phi    = Var("userFloat('muon1_phi')",       float, doc = "Muon 1 phi"),
