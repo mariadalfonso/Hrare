@@ -8,7 +8,7 @@ def loadUserCode():
     ROOT.gSystem.AddDynamicPath("./.")
     ROOT.gROOT.ProcessLine(".include ./.")
     ROOT.gInterpreter.AddIncludePath("./.")
-    ROOT.gInterpreter.Declare('#include "config/functions.h"')
+    ROOT.gInterpreter.Declare('#include "./config/functions.h"')
 
 def loadSFhisto(mc,year):
     ROOT.gInterpreter.ProcessLine('initTrigSF();')
@@ -24,7 +24,7 @@ def loadCorrectionSet(year):
     print('loadCorrectionSet()')
     import correctionlib
     correctionlib.register_pyroot_binding()
-    ROOT.gInterpreter.Declare('#include "config/sfCorrLib.h"')
+    ROOT.gInterpreter.Declare('#include "./config/sfCorrLib.h"')
 #    ROOT.gInterpreter.Declare('#include "config/mysf.h"')
 #    ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
@@ -78,6 +78,7 @@ def listDir(isT2,xrdpath):
     print(xrdpath)
     if isT2:
         xrd = "root://xrootd.cmsaf.mit.edu/"
+#        xrd = "root://xcache/"
     else:
         xrd = "root://submit50.mit.edu/"
     f = check_output(['xrdfs', f'{xrd}', 'ls', xrdpath]).decode(sys.stdout.encoding)
@@ -93,22 +94,54 @@ def listDir(isT2,xrdpath):
     return rootFiles
 
 
+def BuildDict():
+
+    isT2=True
+    if isT2:
+        dirName="/store/user/paus/nanohr/D02/"
+    else:
+        dirName="/store/user/mariadlf/nano/D02/"
+
+    campaignv3 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v3+MINIAODSIM/"
+    campaignv1 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM/"
+    campaignv2 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
+    campaignFIX = "RunIISummer20UL18MiniAODv2-4cores5k_106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
+
+    thisdict = {
+        1010: (listDir(isT2,dirName+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv1),3781.7*0.49),
+        1017: (listDir(isT2,dirName+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv3),48580*0.49),
+        10: (listDir(isT2,dirName+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),18540.0*1000*1.26), #LO *1.26
+        11: (listDir(isT2,dirName+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX),8644.0*1000*1.26), #LO *1.26
+        12: (listDir(isT2,dirName+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),2183.0*1000*1.26), #LO *1.26
+        13: (listDir(isT2,dirName+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),260.2*1000*1.26), #LO *1.26
+        14: (listDir(isT2,dirName+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),86.58*1000*1.26) #LO *1.26
+    }
+
+    return thisdict
+
+def SwitchSample(thisdict,argument):
+
+    return thisdict.get(argument, "BKGdefault, xsecDefault")
+
 def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv):
 
     TRIGGER=''
     if(year == 2018 and isVBF):
         if (PDType== "EGamma"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
         elif (PDType== "Tau"): TRIGGER="{0} and not {1}".format(getTriggerFromJson(overall, "isZinv", year),getTriggerFromJson(overall, "isVBF", year))
-        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBFor", year)   # MC seems the same                                                                                                                                                                                                                                                 
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBFor", year)   # MC seems the same
+
     if(year == 2018 and isZinv):
         if (PDType== "Tau"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)
-        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)    # MC seems the same                                                                                                                                                                                                                                                 
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)    # MC seems the same
+
     if(year == 2017 and isVBF):
         if (PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
-        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same                                                                                                                                                                                                                                                 
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
+
     if((year == 12016 or year == 22016) and isVBF):
         if (PDType== "SinglePhoton"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)
-        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same                                                                                                                                                                                                                                                 
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBF", year)     # MC seems the same
 
     if(year == 2018 and (isW or isZ)):
         if (PDType == "DoubleMuon"): TRIGGER = "{0}".format(getTriggerFromJson(overall, "diMU", year))
@@ -153,4 +186,3 @@ def getSkimsFromJson(overall, type ):
 
     for selection in overall:
         if selection['type'] == type : return selection['PRESELECTION']
-

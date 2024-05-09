@@ -983,4 +983,54 @@ float getPolAngle(const ULong64_t event_, int nSlot) {
 
 }
 
+stdVec_i jetCloseFar(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_m,
+                     const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
+
+  unsigned int indexClose = -1;
+
+  for (unsigned int idx = 0; idx < jet_pt.size(); ++idx) {
+    float drJetPhi = deltaR(jet_eta[idx], jet_phi[idx], jpsi_eta[0], jpsi_phi[0]);
+    if (drJetPhi < 0.4 and indexClose==-1) indexClose=idx;
+  }
+
+  stdVec_i idx(2, -1); // initialize with -1 a vector of size 2
+
+  idx[0] = indexClose;
+  idx[1] = (indexClose==1) ? 0 : 1 ;
+
+  return idx;
+
+}
+
+float Minv3massiveCorr(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_m,
+                       const Vec_f& jet_cRegCorr,
+                       int& jet_muonIdx1, int& jet_muonIdx2,
+                       const Vec_f& muon_pt, const Vec_f& muon_eta, const Vec_f& muon_phi,
+                       const Vec_f& jpsi_muon1_pt, const Vec_f& jpsi_muon1_eta, const Vec_f& jpsi_muon1_phi,
+                       const Vec_f& jpsi_muon2_pt, const Vec_f& jpsi_muon2_eta, const Vec_f& jpsi_muon2_phi,
+                       const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m,
+                       int indexCloseScale) {
+
+  const float muon_mass_ = 0.1057;
+  const float jetCloseScale_ = 0.90;
+
+  float invMass = 0.;
+  PtEtaPhiMVector mu1(muon_pt[jet_muonIdx1], muon_eta[jet_muonIdx1], muon_phi[jet_muonIdx1], muon_mass_);
+  PtEtaPhiMVector mu2(muon_pt[jet_muonIdx2], muon_eta[jet_muonIdx2], muon_phi[jet_muonIdx2], muon_mass_);
+  PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
+
+  // to add is a DR between the two muons
+  if (indexCloseScale == 0) {
+    PtEtaPhiMVector p1(jetCloseScale_*jet_pt[0], jet_eta[0], jet_phi[0], jet_m[0]);
+    PtEtaPhiMVector p2(jet_pt[1]*jet_cRegCorr[1], jet_eta[1], jet_phi[1], jet_m[1]);
+    invMass = (p1 + p2 + p_jpsi - mu1 - mu2).M();
+  } else {
+    PtEtaPhiMVector p1(jet_pt[0]*jet_cRegCorr[0], jet_eta[0], jet_phi[0], jet_m[0]);
+    PtEtaPhiMVector p2(jetCloseScale_*jet_pt[1], jet_eta[1], jet_phi[1], jet_m[1]);
+    invMass = (p1 + p2 + p_jpsi - mu1 - mu2).M();
+  }
+  return invMass;
+}
+
+
 #endif
