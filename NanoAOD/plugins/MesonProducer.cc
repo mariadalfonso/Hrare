@@ -329,13 +329,18 @@ private:
 	   string cand1_name = "trk1",
 	   string cand2_name = "trk2");
 
-  reco::Vertex refit_vertex(edm::Event& iEvent, const edm::EventSetup& iSetup, size_t ipv, bool beamSpotContrant, const std::vector<pat::PackedCandidate> &pfCandHandle);
+  reco::Vertex refit_vertex(edm::Event& iEvent, const edm::EventSetup& iSetup, size_t ipv, bool beamSpotContrant);
   reco::Track fix_track(const reco::Track *tk, double delta=1e-8);
   reco::Track fix_track(const reco::TrackRef& tk);
   //  reco::Track fix_track(const reco::Track *tk, double delta);
 
   // ----------member data ---------------------------
     
+
+  const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> theTTBuilderToken_;
+  const TransientTrackBuilder* theTTBuilder_;
+  const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> idealMagneticFieldRecordToken_;
+  const MagneticField* bField_;
 
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const reco::BeamSpot* beamSpot_;
@@ -345,14 +350,10 @@ private:
   vector<reco::Vertex> possibleVtxs_ = {};
 
   edm::EDGetTokenT<std::vector<pat::Muon>> muonToken_;
-  edm::EDGetTokenT<std::vector<pat::PackedCandidate>> pfCandToken_;
+  edm::EDGetTokenT<pat::PackedCandidateCollection> pfCandToken_;
+  const pat::PackedCandidateCollection* pfCands_;
   edm::EDGetTokenT<std::vector<pat::PackedGenParticle> >   packedGenToken_;
   const std::vector<pat::PackedGenParticle>* packedGenParticles_;
-
-  edm::ESHandle<TransientTrackBuilder> theTTBuilder_;
-  edm::ESHandle<MagneticField> bFieldHandle_;
-  edm::Handle<std::vector<pat::PackedCandidate> > pfCandHandle_;
-  edm::Handle<std::vector<pat::Muon>> muonHandle_;
 
   const AnalyticalImpactPointExtrapolator* impactPointExtrapolator_;
 
@@ -407,12 +408,17 @@ private:
 };
 
 MesonProducer::MesonProducer(const edm::ParameterSet &iConfig):
+theTTBuilderToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
+theTTBuilder_(nullptr),
+idealMagneticFieldRecordToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+bField_(nullptr),
 beamSpotToken_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
 beamSpot_(nullptr),
 vertexToken_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ),
 primaryVertices_(nullptr),
 muonToken_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
-pfCandToken_( consumes<std::vector<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+pfCandToken_( consumes<pat::PackedCandidateCollection> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+pfCands_(nullptr),
 packedGenToken_( consumes<std::vector<pat::PackedGenParticle>> ( iConfig.getParameter<edm::InputTag>( "packedGenParticleCollection" ) ) ),
 packedGenParticles_(nullptr),
 impactPointExtrapolator_(0),
@@ -528,13 +534,12 @@ namespace {
   }    
 }
 
-reco::Vertex MesonProducer::refit_vertex(edm::Event& iEvent, const edm::EventSetup& iSetup, size_t ipv, bool beamSpotContrant, const std::vector<pat::PackedCandidate> &pfCandHandle)
+reco::Vertex MesonProducer::refit_vertex(edm::Event& iEvent, const edm::EventSetup& iSetup, size_t ipv, bool beamSpotContrant)
 {
-  unsigned int i;
   std::vector<reco::TransientTrack> mytracks;
 
-  edm::ESHandle<TransientTrackBuilder> TTBuilder;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",TTBuilder);
+  //  edm::ESHandle<TransientTrackBuilder> TTBuilder;
+  //  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",TTBuilder);
 
   edm::Handle<reco::BeamSpot> recoBeamSpotHandle;
   iEvent.getByLabel("offlineBeamSpot", recoBeamSpotHandle);
@@ -544,8 +549,7 @@ reco::Vertex MesonProducer::refit_vertex(edm::Event& iEvent, const edm::EventSet
   // iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtxHandle);
 
   // cout << "========> Vtx: " << ipv << endl;
-  for (i = 0; i < pfCandHandle.size(); i++) {
-    const pat::PackedCandidate &ptk = pfCandHandle[i];
+  for (const auto& ptk : *pfCands_){
 
     if (!ptk.hasTrackDetails()) continue;
 
@@ -558,7 +562,7 @@ reco::Vertex MesonProducer::refit_vertex(edm::Event& iEvent, const edm::EventSet
     // if (vtxTK->x() != vtxMINI.x() || vtxTK->y() != vtxMINI.y() || vtxTK->z() != vtxMINI.z()) continue;
 
     auto tk = ptk.bestTrack();
-    reco::TransientTrack transientTrack = TTBuilder->build(fix_track(tk));
+    reco::TransientTrack transientTrack = theTTBuilder_->build(fix_track(tk));
     transientTrack.setBeamSpot(vertexBeamSpot);
     mytracks.push_back(transientTrack);
   }
@@ -837,10 +841,12 @@ namespace{
 
 void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-    iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle_);
-    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTTBuilder_);
+    auto const& bFieldHandle_ = iSetup.getHandle(idealMagneticFieldRecordToken_);
+    bField_ = bFieldHandle_.product();
+    auto const& theTTBuilderHandle_ = iSetup.getHandle(theTTBuilderToken_);
+    theTTBuilder_ = theTTBuilderHandle_.product();
 
-    AnalyticalImpactPointExtrapolator extrapolator(bFieldHandle_.product());
+    AnalyticalImpactPointExtrapolator extrapolator(bField_);
     impactPointExtrapolator_ = &extrapolator;
 
     edm::Handle<reco::BeamSpot> beamSpotHandle;
@@ -853,10 +859,12 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     edm::Handle<reco::VertexCollection> pvHandle;
     iEvent.getByToken(vertexToken_, pvHandle);
     primaryVertices_ = pvHandle.product();
-    
+
+    edm::Handle<pat::PackedCandidateCollection > pfCandHandle_;
     //    iEvent.getByToken(muonToken_, muonHandle_);
     iEvent.getByToken(pfCandToken_, pfCandHandle_);
-    
+    pfCands_ = pfCandHandle_.product();
+
     edm::Handle<std::vector<pat::PackedGenParticle> > packedGenParticleHandle;
     if ( isMC_ ) {
       iEvent.getByToken(packedGenToken_,packedGenParticleHandle);
@@ -866,7 +874,7 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     }
 
     // auto nMuons = muonHandle_->size();
-    auto nPFCands = pfCandHandle_->size();
+    auto nPFCands = pfCands_->size();
     
     // REFIT VERTICES as in
     // https://github.com/ocerri/BPH_RDntuplizer/blob/1fef8bb05ebf8eb99a3d75343197eb72da52ab83/plugins/B2DstMuDecayTreeProducer.cc#L142
@@ -890,7 +898,7 @@ void MesonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
        *  ndof <= 4 the data and MC do not seem to agree, and there is an
        *  excess of vertices with low ndof in data. */
       if (vtx.ndof() <= 4) continue;
-      reco::Vertex tmp = refit_vertex(iEvent, iSetup, i_vtx, 1, *pfCandHandle_);
+      reco::Vertex tmp = refit_vertex(iEvent, iSetup, i_vtx, 1);
       if (tmp.isValid()) possibleVtxs_.push_back(tmp);
       // else {
       // cout << "[WARNING] Invalid vertex refit for " << i_vtx << endl;
@@ -1165,8 +1173,7 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
   omegaFullCand.addDaughter( pfCand1 , "trk1" );
   omegaFullCand.addDaughter( pfCand2 , "trk2" );
 
-  for (unsigned int k=0; k < pfCandHandle_->size(); ++k){
-    auto iphoton(pfCandHandle_->at(k));
+  for (const auto& iphoton: *pfCands_){
 
     if (iphoton.charge() != 0 ) continue;
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
@@ -1332,8 +1339,7 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
   d0StarCand.addDaughter( kaon , "kaon" );
   d0StarCand.addDaughter( pion , "pion" );
 
-  for (unsigned int k=0; k < pfCandHandle_->size(); ++k){
-    auto iphoton(pfCandHandle_->at(k));
+  for (const auto& iphoton: *pfCands_){
 
     if (iphoton.charge() != 0 ) continue;
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
@@ -1455,8 +1461,7 @@ MesonProducer::getD0ToKPiPi0(const edm::Event& iEvent,
   d0StarCand.addDaughter( kaon , "kaon" );
   d0StarCand.addDaughter( pion , "pion" );
 
-  for (unsigned int k=0; k < pfCandHandle_->size(); ++k){
-    auto iphoton(pfCandHandle_->at(k));
+  for (const auto& iphoton: *pfCands_){
 
     if (iphoton.charge() != 0 ) continue;
     if (iphoton.mass() > 1 ) continue; // some uninitialized mass
@@ -1560,7 +1565,7 @@ MesonProducer::getPhiToKK(const edm::Event& iEvent,
   // Keep the best candidate by vertex probability if there are multiple
   KinematicFitResult dsVtx;
   const pat::PackedCandidate* ds_pion(nullptr);
-  for (const pat::PackedCandidate& ipion: *pfCandHandle_){
+  for (const pat::PackedCandidate& ipion: *pfCands_){
     if (&ipion == &ipfCand1 or &ipion == &ipfCand2) continue;
     if (not isGoodTrack(ipion) ) continue;
     if (not isGoodPion(ipion) ) continue;
@@ -1825,7 +1830,7 @@ MesonProducer::computeCandIsolation(const pat::PackedCandidate& pfCand1, const p
 {
     float sumPt(0);
     auto b_p4 = pfCand1.p4()+pfCand2.p4();
-    for (const auto& pfCandIso: *pfCandHandle_.product()){
+    for (const auto& pfCandIso: *pfCands_){
       bool ignore_track = false;
       for (auto trk: ignoreTracks){
 	if (trk==&pfCandIso){
