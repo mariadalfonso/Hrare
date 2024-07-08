@@ -221,7 +221,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////
 
 class DiMuonProducer : public edm::EDProducer {
-    
+
 public:
     
   explicit DiMuonProducer(const edm::ParameterSet &iConfig);
@@ -312,6 +312,11 @@ private:
 
   // ----------member data ---------------------------
     
+  const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> theTTBuilderToken_;
+  const TransientTrackBuilder* theTTBuilder_;
+  const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> idealMagneticFieldRecordToken_;
+  const MagneticField* magField_;
+
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const reco::BeamSpot* beamSpot_;
 
@@ -319,14 +324,11 @@ private:
   const reco::VertexCollection* primaryVertices_;
 
   edm::EDGetTokenT<std::vector<pat::Muon>> muonToken_;
-  edm::EDGetTokenT<std::vector<pat::PackedCandidate>> pfCandToken_;
+  edm::EDGetTokenT<pat::PackedCandidateCollection> pfCandToken_;
+  const pat::PackedCandidateCollection* pfCands_;
+
   edm::EDGetTokenT<std::vector<pat::PackedGenParticle> >   packedGenToken_;
   const std::vector<pat::PackedGenParticle>* packedGenParticles_;
-
-  edm::ESHandle<TransientTrackBuilder> theTTBuilder_;
-  edm::ESHandle<MagneticField> bFieldHandle_;
-  edm::Handle<std::vector<pat::PackedCandidate> > pfCandHandle_;
-  edm::Handle<std::vector<pat::Muon>> muonHandle_;
 
   const AnalyticalImpactPointExtrapolator* impactPointExtrapolator_;
 
@@ -358,12 +360,17 @@ private:
 };
 
 DiMuonProducer::DiMuonProducer(const edm::ParameterSet &iConfig):
+theTTBuilderToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
+theTTBuilder_(nullptr),
+idealMagneticFieldRecordToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+magField_(nullptr),
 beamSpotToken_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
 beamSpot_(nullptr),
 vertexToken_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ),
 primaryVertices_(nullptr),
 muonToken_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
-pfCandToken_( consumes<std::vector<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+pfCandToken_( consumes<pat::PackedCandidateCollection> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+pfCands_(nullptr),
 packedGenToken_( consumes<std::vector<pat::PackedGenParticle>> ( iConfig.getParameter<edm::InputTag>( "packedGenParticleCollection" ) ) ),
 packedGenParticles_(nullptr),
 impactPointExtrapolator_(0),
@@ -626,10 +633,12 @@ namespace{
 
 void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-    iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle_);
-    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTTBuilder_);
+    auto const& bFieldHandle_ = iSetup.getHandle(idealMagneticFieldRecordToken_);
+    magField_ = bFieldHandle_.product();
+    auto const& theTTBuilderHandle_ = iSetup.getHandle(theTTBuilderToken_);
+    theTTBuilder_ = theTTBuilderHandle_.product();
 
-    AnalyticalImpactPointExtrapolator extrapolator(bFieldHandle_.product());
+    AnalyticalImpactPointExtrapolator extrapolator(magField_);
     impactPointExtrapolator_ = &extrapolator;
 
     edm::Handle<reco::BeamSpot> beamSpotHandle;
@@ -643,8 +652,12 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     iEvent.getByToken(vertexToken_, pvHandle);
     primaryVertices_ = pvHandle.product();
     
+    edm::Handle<std::vector<pat::Muon> > muonHandle_;
     iEvent.getByToken(muonToken_, muonHandle_);
+
+    edm::Handle<pat::PackedCandidateCollection > pfCandHandle_;
     iEvent.getByToken(pfCandToken_, pfCandHandle_);
+    pfCands_ = pfCandHandle_.product();
     
     edm::Handle<std::vector<pat::PackedGenParticle> > packedGenParticleHandle;
     if ( isMC_ ) {
@@ -655,7 +668,6 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     }
 
     auto nMuons = muonHandle_->size();
-    //    auto nPFCands = pfCandHandle_->size();
     
     // Output collection
     auto jpsis = std::make_unique<pat::CompositeCandidateCollection>();
@@ -1014,7 +1026,7 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
 
     auto b_p4 = muon1.p4()+muon2.p4();
     auto b_dir = GlobalVector(b_p4.x(),b_p4.y(),b_p4.z());
-    for (const auto& pfCandIso: *pfCandHandle_.product()){
+    for (const auto& pfCandIso: *pfCands_){
       bool ignore_track = false;
       for (auto trk: ignoreTracks){
 	if (trk==&pfCandIso){
@@ -1034,11 +1046,11 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
 	if (pfCandIso.pt() > maxPt1 ) {
 	  maxPt1 = pfCandIso.pt();
 	  if (returnType==4) {
-	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), (magField_));
 	    auto signedIP3d = IPTools::signedImpactParameter3D(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
 	    signedIP3dSignMaxPt1 = signedIP3d.second.significance();
 	  } else if (returnType==3){
-	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), (magField_));
 	    auto signedIP2d = IPTools::signedTransverseImpactParameter(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
 	    signedIP2dSignMaxPt1 = signedIP2d.second.significance();
 	  } else if (returnType==5 or returnType==6){
@@ -1049,11 +1061,11 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
 	} else if (pfCandIso.pt() > maxPt2) {
 	  maxPt2 = pfCandIso.pt();
 	  if (returnType==9) {
-	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), (magField_));
 	    auto signedIP3d = IPTools::signedImpactParameter3D(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
 	    signedIP3dSignMaxPt2 = signedIP3d.second.significance();
 	  } else if (returnType==8){
-	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), &(*bFieldHandle_));
+	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), (magField_));
 	    auto signedIP2d = IPTools::signedTransverseImpactParameter(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
 	    signedIP2dSignMaxPt2 = signedIP2d.second.significance();
 	  } else if (returnType==10 or returnType==11){
@@ -1141,7 +1153,7 @@ DiMuonProducer::vertexWithKinematicFitter(std::vector<const reco::Track*> trks,
 pair<double,double> DiMuonProducer::computeDCA(const pat::PackedCandidate &kaon,
                                                  reco::BeamSpot beamSpot){
 
-  const reco::TransientTrack trackTT((*(kaon.bestTrack())), &(*bFieldHandle_));
+  const reco::TransientTrack trackTT((*(kaon.bestTrack())), (magField_));
 
   TrajectoryStateClosestToPoint theDCAXBS = trackTT.trajectoryStateClosestToPoint( GlobalPoint(beamSpot.position().x(),beamSpot.position().y(),beamSpot.position().z()) );  
   
