@@ -257,25 +257,5 @@
             "definition": "abs(d0_d0Star_Nbody_mass-2.007)<30*0.02 && d0_d0Star_Nbody_pt>30 && abs(d0_d0Star_Nbody_eta)<2.1 && abs(d0_kin_mass-1.864)<0.05 && getMaximum(d0_pion_pt, d0_kaon_pt) > 20 && d0_pion_pt>5 && d0_kaon_pt>5 && d0_kin_valid && d0_iso > 0.9 && abs(d0_bestVtx_Z)<24 && d0_bestVtx_idx<5",
             "notes":" used for isGF"
 	}
-    ],
-    "JSON" : "isGoodRunLS(isData, run, luminosityBlock)",
-
-    "JSONfile": [
-	{
-	    "year": 2018,
-	    "file": "Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
-	},
-	{
-	    "year": 2017,
-	    "file": "Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
-	},
-	{
-	    "year": 12016,
-	    "file": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
-	},
-	{
-	    "year": 22016,
-	    "file": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
-	}	
     ]
 }
