@@ -97,6 +97,14 @@ JpsisVariables = cms.PSet(
     kin_cosAlphaXY = Var("userFloat('kin_cosAlphaXY')",    float, doc = "Kinematic fit: cosine of pointing angle in XY wrt BS"),
     kin_sipBS    = Var("userFloat('kin_sipBS')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in XY wrt BS"),
     kin_sipPV    = Var("userFloat('kin_sipPV')",       float, doc = "Kinematic fit: impact parameter significance of the candidate trajectory in 3D wrt PV"),
+    kin_l3d      = Var("userFloat('kin_l3d')",         float, doc = "Kinematic fit: decay lenght in 3D wrt PV"),
+    kin_sl3d     = Var("userFloat('kin_sl3d')",        float, doc = "Kinematic fit: decay lenght significance in 3D wrt PV"),
+#
+    kin_bestVtx_x  = Var("userFloat('kin_bestVtx_x')",       float, doc = "best vtx SV x"),
+    kin_bestVtx_y  = Var("userFloat('kin_bestVtx_y')",       float, doc = "best vtx SV y"),
+    kin_bestVtx_z  = Var("userFloat('kin_bestVtx_z')",       float, doc = "best vtx SV z"),
+    kin_pvIndex    = Var("userInt('kin_pvIndex')",           int,   doc = "Kinematic fit: index of the PV"),
+
 )
 
 JpsisVariablesMC = merge_psets(

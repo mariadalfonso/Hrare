@@ -3,6 +3,19 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.nano_cff import *
 
 
+def nanoAOD_customizeMesons_Run3(process):
+    process.load('Hrare.NanoAOD.MesonsReco_cff')
+    process.load('Hrare.NanoAOD.DiMuonReco_cff')
+
+    # Data
+#    process.nanoSequence   = cms.Sequence(process.slimmedMuons + process.nanoSequence + process.V0Sequence + process.V0ForMuonFakeTables)
+    process.nanoSequence   = cms.Sequence(process.nanoSequence + process.V0Sequence + process.V0Tables + process.DiMuProdSequence + process.DiMuTables )
+    # MC
+#    process.nanoSequenceMC = cms.Sequence(process.slimmedMuons + process.nanoSequenceMC + process.V0ForMuonFakeMcSequence + process.V0ForMuonFakeMcTables)
+    process.nanoSequenceMC = cms.Sequence(process.nanoSequenceMC + process.V0McSequence + process.V0McTables + process.DiMuProdMcSequence + process.DiMuMcTables)
+    process.muonTable.variables.softMva = Var("softMvaValue()",float,doc="soft MVA ID score",precision=6)
+    return process
+
 def nanoAOD_customizeMesons(process):
     process.load('Hrare.NanoAOD.MesonsReco_cff')
     process.load('Hrare.NanoAOD.DiMuonReco_cff')
@@ -47,7 +60,7 @@ def nanoAOD_customizeMesons(process):
             "2048*filter('hltMu17Photon30IsoCaloIdPhotonlegTrackIsoFilter')")
         process.triggerObjectTable.selections[1].qualityBitsDoc = cms.string("Single Photon filters: 1 = hltEG33L1EG26HEFilter, 2 = hltEG50HEFilter, 4 = hltEG75HEFilter, 8 = hltEG90HEFilter, 16 = hltEG120HEFilter, 32 = hltEG150HEFilter, 64 = hltEG175HEFilter, 128 = hltEG200HEFilter, 256 = hltHtEcal800, 512 = hltEG110EBTightIDTightIsoTrackIsoFilter, 1024 = hltEG120EBTightIDTightIsoTrackIsoFilter, 2048 = 1mu-1photon")
 
-    # Data 
+    # Data
 #    process.nanoSequence   = cms.Sequence(process.slimmedMuons + process.nanoSequence + process.V0Sequence + process.V0ForMuonFakeTables)
     process.nanoSequence   = cms.Sequence(process.nanoSequence + process.V0Sequence + process.V0Tables + process.DiMuProdSequence + process.DiMuTables )
     # MC

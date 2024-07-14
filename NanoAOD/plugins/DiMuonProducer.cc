@@ -441,7 +441,7 @@ bool DiMuonProducer::isGoodPair(const pat::PackedCandidate& track1,
 }
 
 namespace {
-  void addFitInfo( pat::CompositeCandidate& cand, const KinematicFitResult& fit, std::string name ){
+  void addFitInfo( pat::CompositeCandidate& cand, const KinematicFitResult& fit, const DisplacementInformationIn3D& displacement, std::string name ){
     cand.addUserInt(   name+"_valid",       fit.valid() );
     cand.addUserFloat( name+"_vtx_prob",    fit.vtxProb() );
     cand.addUserFloat( name+"_vtx_chi2dof", fit.chi2()>0?fit.chi2()/fit.ndof():-1);
@@ -455,6 +455,18 @@ namespace {
     cand.addUserFloat( name+"_pt",          fit.p3().perp() );
     cand.addUserFloat( name+"_eta",         fit.p3().eta() );
     cand.addUserFloat( name+"_phi",         fit.p3().phi() );
+
+    auto vtx_position = fit.refitVertex->vertexState().position();
+    cand.addUserFloat( name+"_bestVtx_x",       vtx_position.x() );
+    cand.addUserFloat( name+"_bestVtx_y",       vtx_position.y() );
+    cand.addUserFloat( name+"_bestVtx_z",       vtx_position.z() );
+
+    // displacement information
+    cand.addUserFloat( name + "_l3d",         displacement.decayLength);
+    auto decayLenghtSig = displacement.decayLengthErr>0 ? displacement.decayLength/displacement.decayLengthErr : 0;
+    cand.addUserFloat( name + "_sl3d",        decayLenghtSig);
+    cand.addUserInt(   name + "_pvIndex",     displacement.pvIndex);
+
   }    
 }
 
@@ -475,14 +487,14 @@ DiMuonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   auto vtxFit = vertexWithKinematicFitter(trks, masses);
   vtxFit.postprocess(*beamSpot_, *primaryVertices_);
 
+  auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
+  int pvIndex = displacement3D.pvIndex;
+
   // printf("vtxFit (x,y,z): (%7.3f,%7.3f,%7.3f)\n", 
   // 	 vtxFit.refitVertex->position().x(),
   // 	 vtxFit.refitVertex->position().y(),
   // 	 vtxFit.refitVertex->position().z());
-  addFitInfo(v0Cand, vtxFit, "kin");
-
-  auto displacement3D = compute3dDisplacement(vtxFit, *primaryVertices_ ,true);
-  int pvIndex = displacement3D.pvIndex;
+  addFitInfo(v0Cand, vtxFit, displacement3D, "kin");
 
   // particleType: 0 is charged Isolation; 22 is photon, -1 is neuHad
   // returnType: 0 isolation, 1 scalar sum, 2 leading Track Pt, 2 leading Track Dxy
