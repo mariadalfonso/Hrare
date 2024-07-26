@@ -790,6 +790,8 @@ DiMuonProducer::getJpsiToMuMu(const edm::Event& iEvent,
   diMusCand.addUserFloat( "muon2_pt",  pfCand2.pt() );
   diMusCand.addUserFloat( "muon2_eta", pfCand2.eta() );
   diMusCand.addUserFloat( "muon2_phi", pfCand2.phi() );
+  diMusCand.addUserInt( "muon1_charge", pfCand1.charge() );
+  diMusCand.addUserInt( "muon2_charge", pfCand2.charge() );
   diMusCand.addUserInt( "muon1_isMediumMuon", pfCand1.isMediumMuon() );
   diMusCand.addUserInt( "muon2_isMediumMuon", pfCand2.isMediumMuon() );
 
@@ -833,6 +835,8 @@ DiMuonProducer::getUpsilonToMuMu(const edm::Event& iEvent,
   diMusCand.addUserFloat( "muon2_pt",  pfCand2.pt() );
   diMusCand.addUserFloat( "muon2_eta", pfCand2.eta() );
   diMusCand.addUserFloat( "muon2_phi", pfCand2.phi() );
+  diMusCand.addUserInt( "muon1_charge", pfCand1.charge() );
+  diMusCand.addUserInt( "muon2_charge", pfCand2.charge() );
   diMusCand.addUserInt( "muon1_isMediumMuon", pfCand1.isMediumMuon() );
   diMusCand.addUserInt( "muon2_isMediumMuon", pfCand2.isMediumMuon() );
   //  diMusCand.addUserFloat( "muon1_sip", trackImpactParameterSignificance(pfCand1) );
