@@ -79,14 +79,19 @@ MyCorrections::MyCorrections(int year) {
 
   const std::string fileNamePH = dirName+"EGM/"+subDirName+"photon.json.gz";
   auto csetPH = correction::CorrectionSet::from_file(fileNamePH);
-  photonSF_ = csetPH->at("UL-Photon-ID-SF");
-  photonPixVetoSF_ = csetPH->at("UL-Photon-PixVeto-SF");
-  // EGM missing forr 2022/2023
+  std::string corrNamePH = "Photon-ID-SF";
+  std::string corrNamePH2 = "Photon-PixVeto-SF";
+  if(year == 2018 or year == 2017 or year == 12016 or 22016) corrNamePH = "UL-Photon-ID-SF";
+  if(year == 2018 or year == 2017 or year == 12016 or 22016) corrNamePH2 = "UL-Photon-PixVeto-SF";
+  photonSF_ = csetPH->at(corrNamePH);
+  photonPixVetoSF_ = csetPH->at(corrNamePH2);
+  // note scale and smearing need to be applied in Run3 from the JSON file
 
   const std::string fileNameELE = dirName+"EGM/"+subDirName+"electron.json.gz";
   auto csetELE = correction::CorrectionSet::from_file(fileNameELE);
-  electronSF_ = csetELE->at("UL-Electron-ID-SF");
-  // ELE missing for 2023/2023
+  std::string corrNameEGM = "Electron-ID-SF";
+  if(year == 2018 or year == 2017 or year == 12016 or 22016) corrNameEGM = "UL-Electron-ID-SF";
+  electronSF_ = csetELE->at(corrNameEGM);
 
   std::string fileNameMU = dirName+"MUO/"+subDirName+"muon_Z_v2.json.gz";
   if(year == 2018 or year == 2017 or year == 12016 or 22016) fileNameMU = "config/POG/MUO/"+subDirName+"muon_Z.json.gz";

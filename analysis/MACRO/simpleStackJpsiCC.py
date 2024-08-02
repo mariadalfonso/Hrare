@@ -12,7 +12,7 @@ orange = (255, 204, 153)
 azure = (100, 192, 232)
 azureDark = (96, 147, 172)
 
-dirname='/work/submit/mariadlf/Hrare_JPsiCC/JUL4/'
+dirname='/work/submit/mariadlf/Hrare_JPsiCC/July21/'
 
 def getHisto(sample,histoName):
 
@@ -64,6 +64,7 @@ def plots(histoName):
     
     canv = ROOT.TCanvas("stackcanvas","Stack canvas",800,800)
     if histoName=='Jpsi_kin_massErr_' or histoName=='minDRjpsi_': canv.SetLogy(1)
+    hData.SetMaximum(max(hData.GetMaximum(),hSig.GetMaximum()))
     hData.Draw("p e")
     stack.Draw("HIST same")
     stack.GetYaxis().SetTitle("Events")
@@ -82,7 +83,7 @@ def plots(histoName):
     legend.Draw()
     
     canv.Draw()
-    canv.SaveAs("~/public_html/Hrare_JpsiJul4/Stack_"+histoName+".png")
+    canv.SaveAs("~/public_html/Hrare_JpsiJul21/Stack_"+histoName+".png")
 
 if __name__ == "__main__":
 
@@ -102,12 +103,17 @@ if __name__ == "__main__":
     plots('Jpsi_muon2_pt_')    
     #
     plots('jetClosePt_')
-    plots('jetFarPt_')        
+    plots('jetFarPt_')
+    plots('jetCloseEta_')
+    plots('jetFarEta_')
     plots('jetCloseCvL_')
     plots('jetFarCvL_')
     plots('minDRjpsi_')
     plots('jetCloseJPsiRatio_')
     #
-    plots('massHiggsCorr_')    
-
-    
+    plots('massHiggsCorr_')
+    #
+    plots('angle_phi1_')
+    plots('angle_phi2_')
+    plots('angle_cos_theta_jpsi_')
+    plots('angle_cos_theta_dicharm_')
