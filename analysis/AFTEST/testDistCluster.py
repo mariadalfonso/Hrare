@@ -4,7 +4,13 @@ import sys
 import os
 from datetime import datetime
 
+#MIT
 myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AFTEST'
+#FNAL-EAF
+#myDir = '/home/dalfonso/Hrare/analysis/AFTEST'
+#Purdue
+#myDir = '/home/dalfonso-cern/Hrare/analysis/AFTEST'
+
 sys.path.insert(0, myDir)
 
 
@@ -13,7 +19,7 @@ from utilsAna import loadUserCode, loadCorrectionSet
 from utilsAna import BuildDictMgamma, SwitchSample
 from utilsAna import readDataQuality
 
-doINTERACTIVE=False
+doINTERACTIVE=True
 doLocalCluster=False
 
 doLocalDisk=False
@@ -233,21 +239,21 @@ def analysis(files,year,mc,sumW):
             histos.append(h1d)
             print("h1d.GetName()",h1d.GetName())
             print("h1d append")
-#            h1d.SetDirectory(0)
 
             if True and mc>1000:
                 model2d_pu = (hists[h]["name"]+"_"+str(year)+"_"+str(mc)+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
                 histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
 
-#                ## to use the SYST that change the variable
-#                hx = ROOT.RDF.Experimental.VariationsFor(h1d)
+                ## to use the SYST that change the variable
+#                if doINTERACTIVE: hx = ROOT.RDF.Experimental.VariationsFor(h1d)
+#                else: hx = ROOT.RDF.Experimental.Distributed.VariationsFor(h1d)
 #                for hist_handle in hx:
 #                    print(hist_handle[1].GetName())
 #                hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn")
 #                histos.append(hx["PhotonSYST:dn"])
 #                hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up")
 #                histos.append(hx["PhotonSYST:up"])
-#                histos.append(hx["PhotonSYST:up"])                
+#                histos.append(hx["PhotonSYST:up"])
 
                 ## to use the SYST that change the variable
 #                hx = ROOT.RDF.Experimental.VariationsFor(h1d.GetValue())
@@ -348,7 +354,7 @@ if __name__ == "__main__":
     print('==> very beginning: ',now)
 
     if doLocalDisk: loopOnDatasetLocalMIT()
-    else if doRemoteAccess: loopRemoteDataset()
+    elif doRemoteAccess: loopRemoteDataset()
 
 
     if True:

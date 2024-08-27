@@ -109,6 +109,7 @@ def listDir(isT2,xrdpath):
 
     xcache = "root://cms-xcache.rcac.purdue.edu:1094/";
 #    xcache = "root://bost-cms-xcache01.lhcone.es.net:1094/";
+#    xcache = "https://xrootd-local.unl.edu:1094/
 
     rootFiles = ROOT.vector('string')()
     print(xrdpath)
@@ -122,7 +123,7 @@ def listDir(isT2,xrdpath):
     for e in range(len(stringFiles)):
         filePath = xrd + stringFiles[e]
         if ".root" not in filePath: continue
-        filePath = filePath.replace("root://xrootd.cmsaf.mit.edu/",xcache)
+#        filePath = filePath.replace("root://xrootd.cmsaf.mit.edu/",xcache)
         rootFiles.push_back(filePath)
     print(len(rootFiles))
     return rootFiles
