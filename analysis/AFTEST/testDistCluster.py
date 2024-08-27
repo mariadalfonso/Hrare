@@ -1,29 +1,40 @@
 import ROOT
 import json
-#import sys
+import sys
 import os
 from datetime import datetime
 
+myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AFTEST'
+sys.path.insert(0, myDir)
+
+
 from utilsAna import pickTRG,findDIR,getMesonFromJson,getMVAFromJson
 from utilsAna import loadUserCode, loadCorrectionSet
-from utilsHrare import computeWeigths
-from utilsHrare import getMClist, getDATAlist, getSkims
-from utilsAna import listDir
+from utilsAna import BuildDictMgamma, SwitchSample
+from utilsAna import readDataQuality
 
-doINTERACTIVE=True
-useXROOTD=False
-doLocal=True
+doINTERACTIVE=False
+doLocalCluster=False
+
+doLocalDisk=False
+doRemoteAccess=True
 
 ###-----------------------------------------
 ###-----------------------------------------
 
-with open("./config/selection.json") as jsonFile:
+with open("../config/selection.json") as jsonFile:
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
-with open("./config/trigger.json") as trgJsonFile:
+with open("../config/trigger.json") as trgJsonFile:
     trgObject = json.load(trgJsonFile)
     trgJsonFile.close()
+
+with open("../config/qualityData.json") as qualityJsonFile:
+    qualObject = json.load(qualityJsonFile)
+    qualityJsonFile.close()
+
+JSON = qualObject['JSON']
 
 BARRELphotons = jsonObject['BARRELphotons']
 ENDCAPphotons = jsonObject['ENDCAPphotons']
@@ -38,62 +49,11 @@ GOODPHI = "{}".format(getMesonFromJson(mesons, "isZinv", "isPhiCat"))
 GOODRHO = "{}".format(getMesonFromJson(mesons, "isZinv", "isRhoCat"))
 GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isZinv", "isK0StarCat"))
 
-TRIGGER=pickTRG(TRIGGERS,year,"NULL",True,False,False,False)
+TRIGGER=pickTRG(TRIGGERS,year,"NULL",True,False,False,False,False)
 
-MVA = jsonObject['MVAweights']
-MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , "isPhiCat"))
-#from urllib import request
-#request.urlretrieve("root://submit30.mit.edu//mariadlf/utilFiles/weights_mva_oct/ggH_phi/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml")
-
-print(GOODphotons)
-print(GOODPHI)
-print(TRIGGER)
-print(MVAweights)
-
-###-----------------------------------------
-###-----------------------------------------
-
-def init():
-    loadUserCode()
-    loadCorrectionSet(2018)
-#    loadtmva_local()
-
-def loadtmva_local():
-    print('loadtmva_local() ')
-    s ='''
-    TMVA::Experimental::RReader model("weights_mva_oct/ggH_phi/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml");
-    auto computeModel = TMVA::Experimental::Compute<6, float>(model);
-    auto prediction = model.Compute({0.5, 1.0, -0.2, 1.5, 0.5, 1.0});
-    '''
-#    s ='''
-#    TMVA::Experimental::RReader model("{0}");
-#    auto computeModel = TMVA::Experimental::Compute<{1}, float>(model);
-#    auto prediction = model.Compute({0.5, 1.0, -0.2, 1.5, 0.5, 1.0});
-#    '''
-
-    NVar=6
-#    print(s.format(MVAweights,NVar))
-    ROOT.gSystem.AccessPathName(MVAweights)
-#    ROOT.gInterpreter.ProcessLine(s.format(MVAweights,NVar))
-    ROOT.gInterpreter.ProcessLine(s)
-    variables = ROOT.model.GetVariableNames()
-    print('just inside the load',variables)
-
-###-----------------------------------------
-###-----------------------------------------
-
-if doINTERACTIVE:
-    ROOT.ROOT.EnableImplicitMT()
-    RDataFrame = ROOT.RDataFrame
-    RunGraphs = ROOT.RDF.RunGraphs
-    init()
-else:
-    RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
-    RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
-    import pkg_resources
-    from utilsDask import create_local_connection
-#    from utilsDask import client
-    ROOT.RDF.Experimental.Distributed.initialize(init)
+#print(GOODphotons)
+#print(GOODPHI)
+#print(TRIGGER)
 
 lumis={
     '12016': 19.52, #APV #(B-F for 2016 pre)
@@ -106,40 +66,43 @@ lumis={
     'all': 86.92,      #19.52 + 7.7 + 59.70
 }
 
-def callMVA(df):
+###-----------------------------------------
+###-----------------------------------------
 
-    if False:
-        #need to be multicore
-        tmva_helper_ = tmva_helper_xml.TMVAHelperXML(MVAweights)
-        print(tmva_helper_.variables)
 
-        print('printing tmva_helper_ inside callMVA: ',tmva_helper_)
+def init():
+#    print('empy init')
+    loadUserCode()
+    loadCorrectionSet(2018)
+#    readDataQuality(2018)
+    
+###-----------------------------------------
+###-----------------------------------------
+
+
+if doINTERACTIVE:
+    ROOT.ROOT.EnableImplicitMT()
+    RDataFrame = ROOT.RDataFrame
+    RunGraphs = ROOT.RDF.RunGraphs
+    init()
+else:
+#    import pkg_resources
+    if doLocalCluster:
+        print('Hello doing Local Cluster')
+        RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+        RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
+        from utilsDask import create_local_connection
+        ROOT.RDF.Experimental.Distributed.initialize(init)
     else:
-        variables = ROOT.model.GetVariableNames()
-        print('just inside call MVA: ',variables)
-        print(list(variables))
+#        from utilsDask import create_remote_Dask
+        from utilsDask import create_remote_DaskGateway
+        RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+        RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
+#        from utilsDask import client
+        ROOT.RDF.Experimental.Distributed.initialize(init)
 
-    dfWithMVA = (df.Define("goodJets","{}".format(GOODJETS))
-                 .Define("nGoodJets","Sum(goodJets)*1.0f")
-#                 .Define("meson_DR", "goodMeson_DR[0]")
-#                 .Define("meson_iso","goodMeson_iso[0]")
-                 .Define("meson_DR", "(index_pair[0]!= -1) ? goodMeson_DR[index_pair[0]]: 0.f")
-                 .Define("meson_iso","(index_pair[0]!= -1) ? goodMeson_iso[index_pair[0]]: 0.f")
-                 .Define("HCandPT__div_HCandMass", "(HCandMass>0) ? HCandPT/HCandMass: 0.f")
-#                .Define("photon_pt__daiv_HCandMass", "(HCandMass>0) ? photon_pt/HCandMass: 0.f")
-#                 .Define("meson_pt__div_HCandMass", "(HCandMass>0) ? goodMeson_pt[index_pair[0]]/HCandMass: 0.f")
-                 .Define("photon_pt__div_HCandMass", "(index_pair[1]!= -1 && HCandMass>0) ? photon_pt/HCandMass: 0.f")
-                 .Define("meson_pt__div_HCandMass", "(index_pair[0]!= -1 && HCandMass>0) ? goodMeson_pt[index_pair[0]]/HCandMass: 0.f")
-                 )
-
-    if False:
-        dfWithMVA = tmva_helper_.run_inference(dfWithMVA,"MVAdisc")
-    else:
-        dfWithMVA = dfWithMVA.Define("MVAdisc", ROOT.computeModel, list(ROOT.model.GetVariableNames()))
-
-    return dfWithMVA
-
-def callVary(df):
+    
+def callSFVariation(df):
 
     dfVaryPh=(df
               .Define("idx_nom_up_down", "indices(3)")
@@ -154,8 +117,11 @@ def callVary(df):
               )
     return dfVaryPh
 
-def callVariation(df):
+def callVary(df):
 
+
+#   if df.HasColumn("Photon_dEsigmaUp") and df.HasColumn("Photon_dEsigmaDown"):
+    
     dfVaryPh=(df
               .Define("goodPhotons_dEsigmaUp", 'Photon_dEsigmaUp[goodPhotons]')
               .Define("goodPhotons_dEsigmaDown", 'Photon_dEsigmaDown[goodPhotons]')
@@ -163,7 +129,7 @@ def callVariation(df):
               .Define("photon_dEsigmaDown",'(1.f+goodPhotons_dEsigmaDown[index_pair[1]])')
               .Vary("photon_pt", "ROOT::RVecF{photon_pt*photon_dEsigmaDown,photon_pt*photon_dEsigmaUp}", variationTags=["dn","up"], variationName = "PhotonSYST")
 #              .Define("goodPhoton_pt", 'goodPhotons_pt[0]')
-#              .Vary("goodPhoton_pt", "ROOT::RVecF{goodPhoton_pt*0.9f,goodPhoton_pt*1.1f}", variationTags=["dn","up"], variationName = "PhotonSYST")
+#              .Vary("photon_pt", "ROOT::RVecF{photon_pt*0.9f,photon_pt*1.1f}", variationTags=["dn","up"], variationName = "PhotonSYST")
 	      )
     return dfVaryPh
 
@@ -176,26 +142,42 @@ def analysis(files,year,mc,sumW):
     print('==> start: ',now)
 
     if doINTERACTIVE:
-        dfINI = RDataFrame("Events", files)
+        dfINI = ROOT.RDataFrame("Events", files)
         #        loadtmva_helper()
+#        nevents = dfINI.Count().GetValue()
+#        print('number of events=',nevents)        
     else:
-        if doLocal:
-            connection = create_local_connection(1)
+        #files_per_partition = nfiles / npartitions
+#        NCLUSTERS=100 # this is the numbers of cluster to open
+        if doLocalCluster:
+            NPARTITIONS=5 # assuming one launch 7 Graphs (7*15 = 105 cores)
+            nCLUSTER=10 #(like scale for remote)
+#            connection = create_local_connection(NPARTITIONS)
+            connection = create_local_connection(nCLUSTER)            
             print(connection)
             # The `npartitions` optional argument tells the RDataFrame how many tasks are desired
-            NPARTITIONS=300
             dfINI = RDataFrame("Events", files, daskclient=connection, npartitions=NPARTITIONS)
         else:
-            dfINI = RDataFrame("Events", files, daskclient=client)
+#            client = create_remote_Dask()
+            client = create_remote_DaskGateway()            
+            print(client)
+            NPARTITIONS=5 # assuming one launch 10 Graphs (10*30 = 200 cores)
+            dfINI = RDataFrame("Events", files, daskclient=client, npartitions=NPARTITIONS)
+#            dfINI = RDataFrame("Events", files, daskclient=client)
 
     lumi = 1.
     weight = "{0}".format(1.)
     if mc>=0: weight = "{0}*genWeight*{1}".format(lumi,sumW)
     if year==2018: lumiIntegrated = lumis['2018']
 
+    isData = "false"
+    if mc<0: isData = "true"
+
     df = (dfINI
           .Filter("nPhoton>0 and PV_npvsGood>0","photon from nano >0 and PV_npvsGood > 0")
           .Define("w","{}".format(weight))
+          .Define("isData","{}".format(isData))
+#          .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON") # this doens't wotk to check why
           .Define("lumiIntegrated","{}".format(lumiIntegrated))
           .Define("triggerAna","{}".format(TRIGGER))
           .Filter("triggerAna>0", "pass triggers")
@@ -229,10 +211,10 @@ def analysis(files,year,mc,sumW):
           #
           )
 
-#    df = callMVA(df)
-#    df = callVary(df)
-#    df = callVariation(df) # only works for photon_pt (both interactive and distr)
-
+    if mc>0:
+        df = callSFVariation(df)
+#        df = callVary(df)
+        
     evtcounts.append(df.Count())
 
     if True:
@@ -240,6 +222,7 @@ def analysis(files,year,mc,sumW):
         hists = {
 #            "photon_pt":  {"name":"photon_pt","title":"Photon PT; pt_{#gamma} (GeV);N_{Events}","bin":200,"xmin":0,"xmax":200},
             "HCandMass":  {"name":"HCandMass","title":"H mass;m_{k^{+}k^{-}#gamma} (GeV);N_{Events}","bin":70,"xmin":100,"xmax":170},
+#            "MVAdisc":  {"name":"MVAdisc","title":"MVA; MVA discr;N_{Events}","bin":200,"xmin":-1.,"xmax":1.},                        
         }
 
         for h in hists:
@@ -248,37 +231,35 @@ def analysis(files,year,mc,sumW):
             model1d = (hists[h]["name"]+"_"+str(year)+"_"+str(mc), hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"])
             h1d = df.Histo1D(model1d, hists[h]["name"], "w")
             histos.append(h1d)
+            print("h1d.GetName()",h1d.GetName())
             print("h1d append")
+#            h1d.SetDirectory(0)
 
-            ## SYST with a weight
-#            model2d_pu = (hists[h]["name"]+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
-#            histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
-#            print("h2d append")
+            if True and mc>1000:
+                model2d_pu = (hists[h]["name"]+"_"+str(year)+"_"+str(mc)+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
+                histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
 
-#            all_hs = ROOT.RDF.Experimental.VariationsFor(h1d);
-#            all_hs.GetKeys();
-#            print(all_hs.GetKeys())
+#                ## to use the SYST that change the variable
+#                hx = ROOT.RDF.Experimental.VariationsFor(h1d)
+#                for hist_handle in hx:
+#                    print(hist_handle[1].GetName())
+#                hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn")
+#                histos.append(hx["PhotonSYST:dn"])
+#                hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up")
+#                histos.append(hx["PhotonSYST:up"])
+#                histos.append(hx["PhotonSYST:up"])                
 
-            ## to use the SYST that change the variable  (for some reason this is associated only to the photon+pt and not the HCandMass)
-#            if doINTERACTIVE: hx = ROOT.RDF.Experimental.VariationsFor(h1d)
-#            else: hx = ROOT.RDF.Experimental.Distributed.VariationsFor(h1d)
-#            hx["PhotonSYST:dn"].SetName(hists[h]["name"]+":PhotonSYST:dn")
-#            histos.append(hx["PhotonSYST:dn"])
-#            hx["PhotonSYST:up"].SetName(hists[h]["name"]+":PhotonSYST:up")
-#            histos.append(hx["PhotonSYST:up"])
+                ## to use the SYST that change the variable
+#                hx = ROOT.RDF.Experimental.VariationsFor(h1d.GetValue())
+                #                hx = ROOT.RDF.Experimental.VariationsFor(h1d.GetValue()) 
+                # pair<const string,shared_ptr<TH1D> >
+#                for hist_handle in hx:
+#                    print(hist_handle[1].GetName())                                
+#                hx["PhotonSYST:dn"].SetName(hists[h]["name"]+"_"+str(year)+"_"+str(mc)+":PhotonSYST:dn")
+#                histos.append(hx["PhotonSYST:dn"])
+#                hx["PhotonSYST:up"].SetName(hists[h]["name"]+"_"+str(year)+"_"+str(mc)+":PhotonSYST:up")
+#                histos.append(hx["PhotonSYST:up"])
 
-
-#    if not doINTERACTIVE:
-##    if False:
-#        outputFileHisto = "DASKlogs/histoOUTname_mc{0}_{1}.root".format(mc,year)
-#        myfile = ROOT.TFile(outputFileHisto,"RECREATE")
-#        myfile.ls()
-
-#        print(histos)
-#        for h in histos:
-#            h.Write()
-#        myfile.Close()
-#        myfile.Write()
 
     if False:
 
@@ -286,7 +267,7 @@ def analysis(files,year,mc,sumW):
         for branchName in [
                 "goodPhotons_pt",
                 "HCandMass",
-#                "MVAdisc",
+                "MVAdisc"
         ]:
             branchList.push_back(branchName)
 
@@ -298,70 +279,46 @@ def analysis(files,year,mc,sumW):
         print("snapshot_tdf DONE")
         print(outputFile)
 
-#    return histos
     now = datetime.now()
     print('==> ends: ',now)
 
-def BuildDict():
+def loopRemoteDataset():
 
-    isT2=False
-    if isT2:
-        dirName="/store/user/paus/nanohr/D02/"
-    else:
-        dirName="/store/user/mariadlf/nano/D02/"
-
-    campaignv3 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v3+MINIAODSIM/"
-    campaignv1 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM/"
-    campaignv2 = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
-    campaignFIX = "RunIISummer20UL18MiniAODv2-4cores5k_106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
-
-    thisdict = {
-        1010: (listDir(isT2,dirName+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv1),3781.7*0.49),
-        1017: (listDir(isT2,dirName+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv3),48580*0.49),
-        10: (listDir(isT2,dirName+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),18540.0*1000*1.26), #LO *1.26
-        11: (listDir(isT2,dirName+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX),8644.0*1000*1.26), #LO *1.26
-        12: (listDir(isT2,dirName+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),2183.0*1000*1.26), #LO *1.26
-        13: (listDir(isT2,dirName+"GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),260.2*1000*1.26), #LO *1.26
-        14: (listDir(isT2,dirName+"GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),86.58*1000*1.26) #LO *1.26
-    }
-
-    return thisdict
-
-def SwitchSample(thisdict,argument):
-
-    return thisdict.get(argument, "BKGdefault, xsecDefault")
-
-def loopOnDataset():
-
-    thisdict = BuildDict()
+    # used also in Purdue
+    from utilsAna import computeWeigths
+    
+    thisdict = BuildDictMgamma()
 
     year=2018
     mc = [1017,1010,10,11,12,13,14]
 
     for sampleNOW in mc:
         files = SwitchSample(thisdict,sampleNOW)[0]
+        xsec = SwitchSample(thisdict,sampleNOW)[1]
         print('outside the function: ',len(files))
-        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
-        sumW = computeWeigths(rdf,mc, year, True, "False")
+#        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
+#        sumW = computeWeigths(rdf,xsec)
+        sumW = 1
         analysis(files,year,sampleNOW,sumW)
 
-#    print('DONE with MC going for Data')
-#    data = [-62,-63,-64]
+    data = [ -62,-63,-64]                                                                                                             
 
-#    for datasetNumber in data:
-#         pair = getSkims(datasetNumber,year,"Zinv",useD03)
-#         files = pair[0]
-#         PDType = pair[1]
-#         print(len(files))
-#         print(PDType)
-#         analysis(files,year,datasetNumber,1.)
+    for datasetNumber in data:
+        files = SwitchSample(thisdict,datasetNumber)[0]
+        print(len(files))
+        analysis(files,year,datasetNumber,1.)
 
-def loopOnDatasetLocal():
+def loopOnDatasetLocalMIT():
+
+    # localDataset -- as used in the VGammaAnalysis
+    from utilsHrare import getMClist, getSkims
+    from utilsHrare import computeWeigths
 
     useD03=False
     year=2018
 
     mc = [1017,1010,10,11,12,13,14]
+#    mc = []
 
     for sampleNOW in mc:
         files = getMClist(year,sampleNOW,useD03)
@@ -371,6 +328,9 @@ def loopOnDatasetLocal():
         analysis(files,year,sampleNOW,sumW)
 
     data = [-62,-63,-64]
+#    data = []
+    readDataQuality(year)
+
     for datasetNumber in data:
          pair = getSkims(datasetNumber,year,"Zinv",useD03)
          files = pair[0]
@@ -379,6 +339,7 @@ def loopOnDatasetLocal():
          print(PDType)
          analysis(files,year,datasetNumber,1.)
 
+
 # In a Python script the Dask client needs to be initalized in a context
 # Jupyter notebooks / Python session don't need this
 if __name__ == "__main__":
@@ -386,7 +347,9 @@ if __name__ == "__main__":
     now = datetime.now()
     print('==> very beginning: ',now)
 
-    loopOnDatasetLocal()
+    if doLocalDisk: loopOnDatasetLocalMIT()
+    else if doRemoteAccess: loopRemoteDataset()
+
 
     if True:
 
@@ -398,7 +361,9 @@ if __name__ == "__main__":
         print('==> done runGraph: ',now)
 
         if doINTERACTIVE: outputFileHisto = "DASKlogs/histoOUTname_test_interactive.root"
-        else: outputFileHisto = "DASKlogs/histoOUTname_test_LocalCluster.root"
+        else:
+            if doLocalCluster: outputFileHisto = "DASKlogs/histoOUTname_test_LocalCluster.root"
+            else: outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster.root"
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
         myfile.ls()
 

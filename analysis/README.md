@@ -1,25 +1,34 @@
-## set environment
+## set environment with	singularity
 
-#wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+> APPTAINER_BIND="/home/submit,/work/submit,/data/submit,/scratch/submit,/cvmfs" singularity shell /cvmfs/unpacked.cern.ch/registry.hub.docker.com/rootproject/root:latest
 
-#bash Miniforge3-Linux-x86_64.sh
 
-conda create --name myenv
+## set environment with conda
 
-conda install -c conda-forge root
+> #wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 
-python3 -m pip install --user --no-binary=correctionlib correctionlib
+> #bash Miniforge3-Linux-x86_64.sh
 
-python3 -m pip install dask-jobqueue
+> conda create --name myenv
+
+> conda activate myenv
+
+> conda install -c conda-forge root
+
+> python3 -m pip install --user --no-binary=correctionlib correctionlib
+
+> python3 -m pip install distributed
+
+> python3 -m pip install dask-jobqueue
+
+> python3 -m pip install dask_gateway
 
 ## run RDF on notebook
 testDistCluster.ipynb
 
 ## run distributed test
-python testDistLocalCluster.py
+python testDistCluster.py
 
-## test standalone xrootd
-python testXROOTD.py
 
 ## set up VOMS
 voms-proxy-init  --voms cms -valid 198:0
@@ -28,9 +37,6 @@ voms-proxy-init  --voms cms -valid 198:0
 #1. access to cvmfs is needed i.e. /cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/
 
 #2. we can activate the environment with this: conda activate myenv
-
-#3. some librarty is pre-compiled i.e. g++ $(correction config --cflags --ldflags --rpath) mysf.cc -shared -fPIC -o mysf.so 
-or python utilsHrare.py pre-compile the functions_cc.so and functions_cc_ACLiC_dict_rdict.pcm
 
 ## standalone root
 export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch

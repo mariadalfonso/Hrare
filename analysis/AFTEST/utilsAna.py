@@ -11,7 +11,7 @@ def loadUserCode():
     ROOT.gROOT.ProcessLine(".include ./.")
     ROOT.gInterpreter.AddIncludePath("./.")
 #    ROOT.gInterpreter.Declare('#include "./config/functions.h"')
-    ROOT.gInterpreter.ProcessLine('#include "./config/functions.h"')
+    ROOT.gInterpreter.ProcessLine('#include "../config/functions.h"')
 
 def loadSFhisto(mc,year):
     ROOT.gInterpreter.ProcessLine('initTrigSF();')
@@ -22,15 +22,13 @@ def loadPolarizationTree(mc,year):
 
 def loadtmvahelper():
     print('loadtmvahelper()')
-    ROOT.gInterpreter.ProcessLine('#include "./tmva_helper_xml.h"')
+    ROOT.gInterpreter.ProcessLine('#include "../tmva_helper_xml.h"')
 
 def loadCorrectionSet(year):
     print('loadCorrectionSet()')
     import correctionlib
     correctionlib.register_pyroot_binding()
-    ROOT.gInterpreter.Declare('#include "./config/sfCorrLib.h"')
-#    ROOT.gInterpreter.Declare('#include "config/mysf.h"')
-#    ROOT.gInterpreter.Load("config/mysf.so")
+    ROOT.gInterpreter.Declare('#include "../config/sfCorrLib.h"')
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
     ROOT.gInterpreter.Declare('''
         #ifndef MYFUN
@@ -66,7 +64,7 @@ def loadJSON(fIn):
             ROOT.jsonMap[int(k)] = vec
 
 def readDataQuality(year):
-    dirJson = "./config"
+    dirJson = "../config"
     if(year == 2018):
         loadJSON("{}/cert/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt".format(dirJson))
     if(year == 2017):

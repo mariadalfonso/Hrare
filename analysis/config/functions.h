@@ -2,24 +2,14 @@
 #define FUNCTIONS_H
 
 #include "TROOT.h"
+#include "TSystem.h"
 #include "TFile.h"
+#include "TTree.h"
+#include "TDirectory.h"
 #include "TString.h"
-#include <TTree.h>
-#include <TDirectory.h>
-#include "TH2.h"
-#include "TH3.h"
-#include "TF1.h"
-#include "TH2Poly.h"
-#include "TRandom.h"
-#include "TRandom3.h"
-#include "TSpline.h"
-#include "TCanvas.h"
-#include "TGraphAsymmErrors.h"
 #include "TLorentzVector.h"
-#include "TEfficiency.h"
-#include "TVector2.h"
-#include "Math/GenVector/LorentzVector.h"
-#include "Math/GenVector/PtEtaPhiM4D.h"
+#include "ROOT/RVec.hxx"
+#include "TVector3.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -33,14 +23,9 @@
 #include <unordered_map>
 #include <utility>
 #include <algorithm>
-//#include <boost/algorithm/string/join.hpp>
-//#include <boost/algorithm/string.hpp>
-//#include <boost/functional/hash.hpp>
 #include <limits>
 #include <map>
 
-//#include <ROOT/RVec.hxx>
-#include <ROOT/RVec.hxx>
 #include <ROOT/RDataFrame.hxx>
 //#include <ROOT/RDF/RInterface.hxx>
 
@@ -51,14 +36,16 @@ using Vec_i = ROOT::VecOps::RVec<int>;
 using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
 using stdVec_i = std::vector<int>;
-using stdVec_b = std::vector<bool>;
-using stdVec_f = std::vector<float>;
 
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<float> > XYZVectorF;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
+typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > PxPyPzEVector;
+
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
-float massTheo = 0.892;
+float massTheoK0Star = 0.892;
+float muon_mass=0.10566;
+const double PI = 3.141592653589793238463;
 
 Vec_b cleaningPair(const ULong64_t event, const UInt_t nK0Star,
 		   Vec_f K0Star_kaon_phi, Vec_f K0Star_kaon_eta , Vec_f K0Star_kaon_pt,
@@ -82,7 +69,7 @@ Vec_b cleaningPair(const ULong64_t event, const UInt_t nK0Star,
   // Result vector to store selected elements, pick one element from each pair
   std::vector<unsigned int> selectedElements;
   for (const auto& pair : idxPair) {
-    if (abs(K0Star_kin_mass[pair.first] - massTheo) < abs(K0Star_kin_mass[pair.second]-massTheo)) {
+    if (abs(K0Star_kin_mass[pair.first] - massTheoK0Star) < abs(K0Star_kin_mass[pair.second]-massTheoK0Star)) {
       selectedElements.push_back(pair.second);
     } else {
       selectedElements.push_back(pair.first);
@@ -108,7 +95,6 @@ bool firedTrigger(Vec_i id, int v1, Vec_f pt, float v2){
   }
   return fired;
 }
-
 
 Vec_f getMinimum(Vec_f v1, Vec_f v2){
 	Vec_f output = {};
@@ -136,6 +122,8 @@ Vec_i indices(const int& size, const int& start = 0) {
     return res;
 }
 
+
+
 Vec_f NomUpDownVar(const float nom, const float up, const float down, float weight) {
 
   Vec_f res(3, 1);
@@ -145,12 +133,9 @@ Vec_f NomUpDownVar(const float nom, const float up, const float down, float weig
   return res;
 }
 
-
-
 bool isGoodRunLS(const bool isData, const UInt_t run, const UInt_t lumi) {
 
   if(not isData) return true;
-
   if(jsonMap.find(run) == jsonMap.end()) return false; // run not found
 
   auto& validlumis = jsonMap.at(run);
@@ -332,6 +317,7 @@ Vec_i genMatch(const float& reco_pt, const float& reco_eta, const float& reco_ph
 
 }
 
+
 stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const Vec_f& meson_phi, const Vec_f& meson_mass,
 			   const Vec_f& meson_trk1_pt, const Vec_f& meson_trk2_pt,
 			   const Vec_f& wrong_meson_pt, const Vec_f& wrong_meson2_pt,
@@ -468,7 +454,6 @@ Vec_f sum2BodyMass(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1, const
     mass[idx] = (p_1 + p_2).M();
   }
   return mass;
-
 }
 
 float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) {
@@ -518,6 +503,71 @@ Vec_f Pair12PHI(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
   }
   return pair;
 }
+
+
+float Minv3massive(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m,
+		   const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
+
+  PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
+  PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
+  PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
+  return (p1 + p2 + p_jpsi).M();
+
+}
+
+float Minv3body(const float& jetClose_pt, const float& jetClose_eta, const float& jetClose_phi, const float& jetClose_m,
+		const float& jetFar_pt, const float& jetFar_eta, const float& jetFar_phi, const float& jetFar_m,
+		const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
+
+  PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
+  PtEtaPhiMVector jetClose(jetClose_pt, jetClose_eta, jetClose_phi, jetClose_m);
+  PtEtaPhiMVector jetFar(jetFar_pt, jetFar_eta, jetFar_phi , jetFar_m);
+
+  PtEtaPhiMVector HiggsCand = p_jpsi+jetClose+jetFar;
+  return HiggsCand.M();
+
+}
+
+
+float Minv3massiveCorr(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_m,
+		       const Vec_f& jet_cRegCorr,
+		       int& jet_muonIdx1, int& jet_muonIdx2,
+		       const Vec_f& muon_pt, const Vec_f& muon_eta, const Vec_f& muon_phi,
+		       const Vec_f& jpsi_muon1_pt, const Vec_f& jpsi_muon1_eta, const Vec_f& jpsi_muon1_phi,
+		       const Vec_f& jpsi_muon2_pt, const Vec_f& jpsi_muon2_eta, const Vec_f& jpsi_muon2_phi,
+		       const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m,
+		       int indexCloseScale) {
+
+  const float jetCloseScale_ = 0.90;
+
+  float invMass = 0.;
+  PtEtaPhiMVector mu1(muon_pt[jet_muonIdx1], muon_eta[jet_muonIdx1], muon_phi[jet_muonIdx1], muon_mass);
+  PtEtaPhiMVector mu2(muon_pt[jet_muonIdx2], muon_eta[jet_muonIdx2], muon_phi[jet_muonIdx2], muon_mass);
+  PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
+
+  // to add is a DR between the two muons
+  if (indexCloseScale == 0) {
+    PtEtaPhiMVector p1(jetCloseScale_*jet_pt[0], jet_eta[0], jet_phi[0], jet_m[0]);
+    PtEtaPhiMVector p2(jet_pt[1]*jet_cRegCorr[1], jet_eta[1], jet_phi[1], jet_m[1]);
+    invMass = (p1 + p2 + p_jpsi - mu1 - mu2).M();
+  } else {
+    PtEtaPhiMVector p1(jet_pt[0]*jet_cRegCorr[0], jet_eta[0], jet_phi[0], jet_m[0]);
+    PtEtaPhiMVector p2(jetCloseScale_*jet_pt[1], jet_eta[1], jet_phi[1], jet_m[1]);
+    invMass = (p1 + p2 + p_jpsi - mu1 - mu2).M();
+  }
+  return invMass;
+}
+
+float Ptinv3massive(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m,
+		   const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
+
+  PtEtaPhiMVector p1(pt[0], eta[0], phi[0], m[0]);
+  PtEtaPhiMVector p2(pt[1], eta[1], phi[1], m[1]);
+  PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
+  return (p1 + p2 + p_jpsi).pt();
+
+}
+
 
 float Minv3(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m,
 	    const float& ph_pt, const float& ph_eta, const float& ph_phi) {
@@ -588,11 +638,9 @@ float compute_HiggsVars_var_VtxCorr(const float mes_pt, const float mes_eta, con
   XYZVectorF p_ph_origin = calorimiterPos.unit() * p4_ph.E();
   XYZVectorF p_ph_vtx = (calorimiterPos - mesonVertex).unit() * p4_ph.E();
 
-  PtEtaPhiMVector p4_ph_origin;
-  p4_ph_origin.SetPxPyPzE(p_ph_origin.X(), p_ph_origin.Y(), p_ph_origin.Z(), p4_ph.E());
 
-  PtEtaPhiMVector p4_ph_vtx;
-  p4_ph_vtx.SetPxPyPzE(p_ph_vtx.X(), p_ph_vtx.Y(), p_ph_vtx.Z(), p4_ph.E());
+  PxPyPzEVector p4_ph_origin(p_ph_origin.X(), p_ph_origin.Y(), p_ph_origin.Z(), p4_ph.E());
+  PxPyPzEVector p4_ph_vtx(p_ph_vtx.X(), p_ph_vtx.Y(), p_ph_vtx.Z(), p4_ph.E());
 
   //Correct them so they have  m=0
   PtEtaPhiMVector p4_ph_origin_M(p4_ph_origin.Pt(), p4_ph_origin.Eta(), p4_ph_origin.Phi(), 0);
@@ -813,9 +861,9 @@ float getPhiPolarizationAngle(
       idxHiggs = genPart_genPartIdxMother[genPart_genPartIdxMother[i]];
       break;
     } /*else if (genPart_pdgId[i]==321 &&
-               genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
-               genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]==333 &&
-               genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]]==25) {
+      genPart_pdgId[genPart_genPartIdxMother[i]]==333 &&
+      genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]==333 &&
+      genPart_pdgId[genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]]]==25) {
       idxKPlus = i;
       idxPhi = genPart_genPartIdxMother[i];
       idxHiggs = genPart_genPartIdxMother[genPart_genPartIdxMother[genPart_genPartIdxMother[i]]];
@@ -911,6 +959,7 @@ void initIsoSF() {
 
 }
 
+
 std::vector<std::vector<float>> theta_pol_dict_VEC;
 
 void initPol(int mc, int year, int nSlot) {
@@ -984,7 +1033,7 @@ float getPolAngle(const ULong64_t event_, int nSlot) {
 }
 
 stdVec_i jetCloseFar(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_m,
-                     const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
+		     const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
 
   unsigned int indexClose = -1;
 
@@ -1002,35 +1051,516 @@ stdVec_i jetCloseFar(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet
 
 }
 
-float Minv3massiveCorr(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_m,
-                       const Vec_f& jet_cRegCorr,
-                       int& jet_muonIdx1, int& jet_muonIdx2,
-                       const Vec_f& muon_pt, const Vec_f& muon_eta, const Vec_f& muon_phi,
-                       const Vec_f& jpsi_muon1_pt, const Vec_f& jpsi_muon1_eta, const Vec_f& jpsi_muon1_phi,
-                       const Vec_f& jpsi_muon2_pt, const Vec_f& jpsi_muon2_eta, const Vec_f& jpsi_muon2_phi,
-                       const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m,
-                       int indexCloseScale) {
+float buildCloseJets(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet_phi, const Vec_f& jet_m,
+		     const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m,
+		     const unsigned int idx_close, unsigned int var) {
 
-  const float muon_mass_ = 0.1057;
-  const float jetCloseScale_ = 0.90;
+  // one shoult not subtract the jpsi but ideally simple the mu1 - mu2 w/o any correction due to the kin-fit or the various calibrations.
+  PtEtaPhiMVector p4_Close(jet_pt[idx_close], jet_eta[idx_close], jet_phi[idx_close], jet_m[idx_close]);
+  PtEtaPhiMVector p4_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
 
-  float invMass = 0.;
-  PtEtaPhiMVector mu1(muon_pt[jet_muonIdx1], muon_eta[jet_muonIdx1], muon_phi[jet_muonIdx1], muon_mass_);
-  PtEtaPhiMVector mu2(muon_pt[jet_muonIdx2], muon_eta[jet_muonIdx2], muon_phi[jet_muonIdx2], muon_mass_);
-  PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
+  PtEtaPhiMVector newJet = p4_Close-p4_jpsi;
+  float theVar = 0;
+  if     (var == 0) theVar = newJet.Pt();
+  else if(var == 1) theVar = newJet.Eta();
+  else if(var == 2) theVar = newJet.Phi();
+  else if(var == 3) theVar = newJet.M();
 
-  // to add is a DR between the two muons
-  if (indexCloseScale == 0) {
-    PtEtaPhiMVector p1(jetCloseScale_*jet_pt[0], jet_eta[0], jet_phi[0], jet_m[0]);
-    PtEtaPhiMVector p2(jet_pt[1]*jet_cRegCorr[1], jet_eta[1], jet_phi[1], jet_m[1]);
-    invMass = (p1 + p2 + p_jpsi - mu1 - mu2).M();
-  } else {
-    PtEtaPhiMVector p1(jet_pt[0]*jet_cRegCorr[0], jet_eta[0], jet_phi[0], jet_m[0]);
-    PtEtaPhiMVector p2(jetCloseScale_*jet_pt[1], jet_eta[1], jet_phi[1], jet_m[1]);
-    invMass = (p1 + p2 + p_jpsi - mu1 - mu2).M();
-  }
-  return invMass;
+  return theVar;
+
 }
 
+
+
+/// BELOW all the angles from Charlotte
+
+float azimuthal_plane_plane_angle(const ROOT::Math::SVector<double, 3>& plane1_vec1,
+                                 const ROOT::Math::SVector<double, 3>& plane1_vec2,
+                                 const ROOT::Math::SVector<double, 3>& plane2_vec1,
+                                 const ROOT::Math::SVector<double, 3>& plane2_vec2) {
+
+
+   // returns in range [0, pi]
+
+   // Calculate normal vectors
+   ROOT::Math::SVector<double, 3> plane1_normvec = ROOT::Math::Cross(plane1_vec1, plane1_vec2);
+   ROOT::Math::SVector<double, 3> plane2_normvec = ROOT::Math::Cross(plane2_vec1, plane2_vec2);
+
+
+   // Normalize the normal vectors
+   plane1_normvec /= ROOT::Math::Mag(plane1_normvec);
+   plane2_normvec /= ROOT::Math::Mag(plane2_normvec);
+
+
+   // Ensure normal vectors have positive z-components
+   if (plane1_normvec[2] < 0) {
+       plane1_normvec = -plane1_normvec;
+   }
+   if (plane2_normvec[2] < 0) {
+       plane2_normvec = -plane2_normvec;
+   }
+
+
+   double phi1 = std::atan2(plane1_normvec[1], plane1_normvec[0]);
+   double phi2 = std::atan2(plane2_normvec[1], plane2_normvec[0]);
+
+
+   // Calculate the difference in azimuthal angles
+   double delta_phi = phi2 - phi1;
+
+
+   // Normalize the angle difference to the range [-PI, PI]
+   if (delta_phi > PI) {
+       delta_phi -= 2 * PI;
+   } else if (delta_phi < -PI) {
+       delta_phi += 2 * PI;
+   }
+
+
+   // Convert any negative angle difference to a positive one within [0, PI]
+   if (delta_phi < 0) {
+       delta_phi = -delta_phi;
+   }
+
+
+   return delta_phi;
+}
+
+
+float azimuthal_plane_plane_angle_pihalf(const ROOT::Math::SVector<double, 3>& plane1_vec1,
+                                 const ROOT::Math::SVector<double, 3>& plane1_vec2,
+                                 const ROOT::Math::SVector<double, 3>& plane2_vec1,
+                                 const ROOT::Math::SVector<double, 3>& plane2_vec2) {
+
+   const double PI_OVER_2 = PI / 2.0;
+
+
+   // Calculate normal vectors
+   ROOT::Math::SVector<double, 3> plane1_normvec = ROOT::Math::Cross(plane1_vec1, plane1_vec2);
+   ROOT::Math::SVector<double, 3> plane2_normvec = ROOT::Math::Cross(plane2_vec1, plane2_vec2);
+
+
+   // Normalize the normal vectors
+   plane1_normvec /= ROOT::Math::Mag(plane1_normvec);
+   plane2_normvec /= ROOT::Math::Mag(plane2_normvec);
+
+
+   // Ensure normal vectors have positive z-components
+   if (plane1_normvec[2] < 0) {
+       plane1_normvec = -plane1_normvec;
+   }
+   if (plane2_normvec[2] < 0) {
+       plane2_normvec = -plane2_normvec;
+   }
+
+
+   // Calculate azimuthal angles
+   double phi1 = std::atan2(plane1_normvec[1], plane1_normvec[0]);
+   double phi2 = std::atan2(plane2_normvec[1], plane2_normvec[0]);
+
+
+   // Calculate the difference in azimuthal angles
+   double delta_phi = phi2 - phi1;
+
+
+   // Normalize the angle difference to the range [-PI, PI]
+   delta_phi = std::fmod(delta_phi + PI, 2 * PI);
+   if (delta_phi < 0) {
+       delta_phi += 2 * PI;
+   }
+   delta_phi -= PI;
+
+
+   // Ensure the angle difference is within [0, PI]
+   if (delta_phi < 0) {
+       delta_phi = -delta_phi;
+   }
+   if (delta_phi > PI) {
+       delta_phi = 2 * PI - delta_phi;
+   }
+
+
+   // Restrict the angle difference to [0, PI/2]
+   if (delta_phi > PI_OVER_2) {
+       delta_phi = PI - delta_phi;
+   }
+
+
+   return delta_phi;
+}
+
+
+  float vector_vector_angle(ROOT::Math::SVector<double, 3> vec_1, ROOT::Math::SVector<double, 3> vec_2) {
+     double vec_1_mag = sqrt(pow(vec_1[0], 2) + pow((vec_1[1]), 2) + pow(vec_1[2], 2));
+     double vec_2_mag = sqrt(pow(vec_2[0], 2) + pow((vec_2[1]), 2) + pow(vec_2[2], 2));
+     float angle = acos(Dot(vec_1, vec_2)/(vec_1_mag * vec_2_mag));
+     return angle;
+  }
+
+
+
+
+  float vector_vector_angle(ROOT::VecOps::RVec<float> vec_1, ROOT::VecOps::RVec<float> vec_2) {
+     double vec_1_mag = sqrt(pow(vec_1[0], 2) + pow((vec_1[1]), 2) + pow(vec_1[2], 2));
+     double vec_2_mag = sqrt(pow(vec_2[0], 2) + pow((vec_2[1]), 2) + pow(vec_2[2], 2));
+     float angle = acos(Dot(vec_1, vec_2)/(vec_1_mag * vec_2_mag));
+     return angle;
+  }
+
+
+
+
+ float plane_vector_angle(ROOT::Math::SVector<double, 3> plane_vec_1, ROOT::Math::SVector<double, 3> plane_vec_2, ROOT::VecOps::RVec<float> vec) {
+     double vec_mag = sqrt(pow(vec[0], 2) + pow((vec[1]), 2) + pow(vec[2], 2));
+     ROOT::Math::SVector<double, 3> plane_normvec = ROOT::Math::Cross(plane_vec_1, plane_vec_2);
+     float plane_normvec_mag = sqrt(pow(plane_normvec[0], 2) + pow((plane_normvec[1]), 2) + pow(plane_normvec[2], 2));
+
+
+     float plane_vec_dot = plane_normvec[0]*vec[0] + plane_normvec[1]*vec[1] + plane_normvec[2]*vec[2];
+     float plane_vec_angle = TMath::Pi()/2 - acos(plane_vec_dot/(vec_mag * plane_normvec_mag));
+     return plane_vec_angle;
+ }
+
+
+ float plane_plane_angle(ROOT::Math::SVector<double, 3> plane1_vec1, ROOT::Math::SVector<double, 3> plane1_vec2, ROOT::Math::SVector<double, 3> plane2_vec1, ROOT::Math::SVector<double, 3> plane2_vec2) {
+     ROOT::Math::SVector<double, 3> plane1_normvec = ROOT::Math::Cross(plane1_vec1, plane1_vec2);
+     ROOT::Math::SVector<double, 3> plane2_normvec = ROOT::Math::Cross(plane2_vec1, plane2_vec2);
+
+     float plane_plane_angle = vector_vector_angle(plane1_normvec, plane2_normvec);
+     return plane_plane_angle;
+ }
+
+
+
+float get_cos_theta_jpsi(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta,float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+   PtEtaPhiMVector jpsi_higgsrest = higgs_boost(jpsi_tlv);
+   ROOT::Math::SVector<double, 3> Jpsi_pvec_higgsrest = {jpsi_higgsrest.Px(), jpsi_higgsrest.Py(), jpsi_higgsrest.Pz()};
+
+   PxPyPzEVector z_axis_lab_4v(0, 0, 1, 0);
+   PxPyPzEVector z_axis_higgsrest_4v = higgs_boost * z_axis_lab_4v;
+   ROOT::Math::SVector<double, 3> z_axis_higgsrest = {z_axis_higgsrest_4v.Px(), z_axis_higgsrest_4v.Py(), z_axis_higgsrest_4v.Pz()};
+
+
+   float cos_theta_jpsi = cos(vector_vector_angle(Jpsi_pvec_higgsrest, z_axis_higgsrest));
+   return cos_theta_jpsi;
+
+}
+
+
+float get_cos_theta_dicharm(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float  c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+   PtEtaPhiMVector dicharm_tlv = c1_tlv + c2_tlv;
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+   PtEtaPhiMVector dicharm_higgsrest = higgs_boost(dicharm_tlv);
+   ROOT::Math::SVector<double, 3> dicharm_pvec_higgsrest = {dicharm_higgsrest.Px(), dicharm_higgsrest.Py(), dicharm_higgsrest.Pz()};
+
+
+   PxPyPzEVector z_axis_lab_4v(0, 0, 1, 0);
+   PxPyPzEVector z_axis_higgsrest_4v = higgs_boost * z_axis_lab_4v;
+   ROOT::Math::SVector<double, 3> z_axis_higgsrest = {z_axis_higgsrest_4v.Px(), z_axis_higgsrest_4v.Py(), z_axis_higgsrest_4v.Pz()};
+
+
+   float cos_theta_dicharm = cos(vector_vector_angle(dicharm_pvec_higgsrest, z_axis_higgsrest));
+   return cos_theta_dicharm;
+
+}
+
+
+float get_phi1(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   PtEtaPhiMVector muon1_higgsrest = higgs_boost(muon1_tlv);
+   PtEtaPhiMVector muon2_higgsrest = higgs_boost(muon2_tlv);
+   ROOT::Math::SVector<double, 3> muon1_pvec_higgsrest = {muon1_higgsrest.Px(), muon1_higgsrest.Py(), muon1_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> muon2_pvec_higgsrest = {muon2_higgsrest.Px(), muon2_higgsrest.Py(), muon2_higgsrest.Pz()};
+
+
+   PtEtaPhiMVector c1_higgsrest = higgs_boost(c1_tlv);
+   PtEtaPhiMVector c2_higgsrest = higgs_boost(c2_tlv);
+   ROOT::Math::SVector<double, 3> c1_pvec_higgsrest = {c1_higgsrest.Px(), c1_higgsrest.Py(), c1_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> c2_pvec_higgsrest = {c2_higgsrest.Px(), c2_higgsrest.Py(), c2_higgsrest.Pz()};
+
+
+   double phi1 = plane_plane_angle(c1_pvec_higgsrest, c2_pvec_higgsrest, muon1_pvec_higgsrest, muon2_pvec_higgsrest);
+   return phi1;
+}
+
+
+float get_phi2(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   PtEtaPhiMVector muon1_higgsrest = higgs_boost(muon1_tlv);
+   PtEtaPhiMVector muon2_higgsrest = higgs_boost(muon2_tlv);
+   ROOT::Math::SVector<double, 3> muon1_pvec_higgsrest = {muon1_higgsrest.Px(), muon1_higgsrest.Py(), muon1_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> muon2_pvec_higgsrest = {muon2_higgsrest.Px(), muon2_higgsrest.Py(), muon2_higgsrest.Pz()};
+
+
+   PtEtaPhiMVector jpsi_higgsrest = higgs_boost(jpsi_tlv);
+   ROOT::Math::SVector<double, 3> jpsi_pvec_higgsrest = {jpsi_higgsrest.Px(), jpsi_higgsrest.Py(), jpsi_higgsrest.Pz()};
+
+
+   PxPyPzEVector z_axis_lab_4v(0, 0, 1, 0);
+   PxPyPzEVector z_axis_higgsrest_4v = higgs_boost * z_axis_lab_4v;
+   ROOT::Math::SVector<double, 3> z_axis_higgsrest = {z_axis_higgsrest_4v.Px(), z_axis_higgsrest_4v.Py(), z_axis_higgsrest_4v.Pz()};
+
+
+   float phi2 = plane_plane_angle(z_axis_higgsrest, jpsi_pvec_higgsrest, muon1_pvec_higgsrest, muon2_pvec_higgsrest);
+   return phi2;
+}
+
+float get_phi3(float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   // between plane defined by dicharm and z, and charm decay plan e
+
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+
+   PtEtaPhiMVector dicharm_tlv = c1_tlv + c2_tlv;
+
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   PtEtaPhiMVector c1_higgsrest = higgs_boost(c1_tlv);
+   PtEtaPhiMVector c2_higgsrest = higgs_boost(c2_tlv);
+   PtEtaPhiMVector dicharm_higgsrest = higgs_boost(dicharm_tlv);
+   ROOT::Math::SVector<double, 3> c1_pvec_higgsrest = {c1_higgsrest.Px(), c1_higgsrest.Py(), c1_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> c2_pvec_higgsrest = {c2_higgsrest.Px(), c2_higgsrest.Py(), c2_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> dicharm_pvec_higgsrest = {dicharm_higgsrest.Px(), dicharm_higgsrest.Py(), dicharm_higgsrest.Pz()};
+
+
+   PxPyPzEVector z_axis_lab_4v(0, 0, 1, 0);
+   PxPyPzEVector z_axis_higgsrest_4v = higgs_boost * z_axis_lab_4v;
+   ROOT::Math::SVector<double, 3> z_axis_higgsrest = {z_axis_higgsrest_4v.Px(), z_axis_higgsrest_4v.Py(), z_axis_higgsrest_4v.Pz()};
+
+
+   double phi3 = plane_plane_angle(z_axis_higgsrest, dicharm_pvec_higgsrest, c1_pvec_higgsrest, c2_pvec_higgsrest);
+   return phi3;
+}
+
+
+float get_phi4(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   // azimuthal angle between charm decay plane and muon decay plane (cplane_muonplane_angle_az)
+
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   PtEtaPhiMVector muon1_higgsrest = higgs_boost(muon1_tlv);
+   PtEtaPhiMVector muon2_higgsrest = higgs_boost(muon2_tlv);
+   ROOT::Math::SVector<double, 3> muon1_pvec_higgsrest = {muon1_higgsrest.Px(), muon1_higgsrest.Py(), muon1_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> muon2_pvec_higgsrest = {muon2_higgsrest.Px(), muon2_higgsrest.Py(), muon2_higgsrest.Pz()};
+
+
+   PtEtaPhiMVector c1_higgsrest = higgs_boost(c1_tlv);
+   PtEtaPhiMVector c2_higgsrest = higgs_boost(c2_tlv);
+   ROOT::Math::SVector<double, 3> c1_pvec_higgsrest = {c1_higgsrest.Px(), c1_higgsrest.Py(), c1_higgsrest.Pz()};
+   ROOT::Math::SVector<double, 3> c2_pvec_higgsrest = {c2_higgsrest.Px(), c2_higgsrest.Py(), c2_higgsrest.Pz()};
+
+
+   float phi4 = azimuthal_plane_plane_angle(c1_pvec_higgsrest, c2_pvec_higgsrest, muon1_pvec_higgsrest, muon2_pvec_higgsrest);
+   return phi4;
+}
+
+float get_cos_delta_m_min(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   float jpsi_E = jpsi_tlv.E();
+   Vec_f jpsi_boost_vec = {jpsi_tlv.Px()/jpsi_E, jpsi_tlv.Py()/jpsi_E, jpsi_tlv.Pz()/jpsi_E};
+   ROOT::Math::Boost jpsi_boost(-jpsi_boost_vec[0], -jpsi_boost_vec[1], -jpsi_boost_vec[2]);
+
+
+   PtEtaPhiMVector jpsi_higgsrest = higgs_boost(jpsi_tlv);
+   ROOT::Math::SVector<double, 3> jpsi_pvec_higgsrest = {jpsi_higgsrest.Px(), jpsi_higgsrest.Py(), jpsi_higgsrest.Pz()};
+
+
+   PtEtaPhiMVector muon1_jpsirest = jpsi_boost(muon1_tlv);
+   PtEtaPhiMVector muon2_jpsirest = jpsi_boost(muon2_tlv);
+   ROOT::Math::SVector<double, 3> muon1_pvec_jpsirest = {muon1_jpsirest.Px(), muon1_jpsirest.Py(), muon1_jpsirest.Pz()};
+   ROOT::Math::SVector<double, 3> muon2_pvec_jpsirest = {muon2_jpsirest.Px(), muon2_jpsirest.Py(), muon2_jpsirest.Pz()};
+
+
+   double muon1_Jpsi_angle = vector_vector_angle(muon1_pvec_jpsirest, jpsi_pvec_higgsrest);
+   double muon2_Jpsi_angle = vector_vector_angle(muon2_pvec_jpsirest, jpsi_pvec_higgsrest);
+
+
+   float cos_delta_m_min = cos(min(muon1_Jpsi_angle, muon2_Jpsi_angle));
+   return cos_delta_m_min;
+   }
+
+
+float get_cos_delta_m(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, int muon1_charge, float muon2_eta, float muon2_phi, int muon2_charge, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+
+   PtEtaPhiMVector neg_muon_tlv;
+   if (muon1_charge < 0){
+       neg_muon_tlv = PtEtaPhiMVector(muon1_pt, muon1_eta, muon1_phi, muon_mass);}
+   else{
+       neg_muon_tlv = PtEtaPhiMVector(muon2_pt, muon2_eta, muon2_phi, muon_mass);}
+
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   float jpsi_E = jpsi_tlv.E();
+   Vec_f jpsi_boost_vec = {jpsi_tlv.Px()/jpsi_E, jpsi_tlv.Py()/jpsi_E, jpsi_tlv.Pz()/jpsi_E};
+   ROOT::Math::Boost jpsi_boost(-jpsi_boost_vec[0], -jpsi_boost_vec[1], -jpsi_boost_vec[2]);
+
+
+   PtEtaPhiMVector jpsi_higgsrest = higgs_boost(jpsi_tlv);
+   ROOT::Math::SVector<double, 3> jpsi_pvec_higgsrest = {jpsi_higgsrest.Px(), jpsi_higgsrest.Py(), jpsi_higgsrest.Pz()};
+
+
+   PtEtaPhiMVector neg_muon_jpsirest = jpsi_boost(neg_muon_tlv);
+   ROOT::Math::SVector<double, 3> neg_muon_pvec_jpsirest = {neg_muon_jpsirest.Px(), neg_muon_jpsirest.Py(), neg_muon_jpsirest.Pz()};
+
+
+   float cos_neg_muon_Jpsi_angle = cos(vector_vector_angle(neg_muon_pvec_jpsirest, jpsi_pvec_higgsrest));
+   return cos_neg_muon_Jpsi_angle;
+}
+
+
+float get_cos_delta_m(float muon1_pt, float muon1_eta, float muon1_phi, int muon1_charge, float muon2_pt,  float muon2_eta, float muon2_phi, int muon2_charge, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
+
+
+   PtEtaPhiMVector neg_muon_tlv;
+   if (muon1_charge < 0){
+       neg_muon_tlv = PtEtaPhiMVector(muon1_pt, muon1_eta, muon1_phi, muon_mass);}
+   else{
+       neg_muon_tlv = PtEtaPhiMVector(muon2_pt, muon2_eta, muon2_phi, muon_mass);}
+
+
+   PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
+   PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
+
+
+   PtEtaPhiMVector jpsi_tlv(jpsi_pt, jpsi_eta, jpsi_phi, jpsi_mass);
+   PtEtaPhiMVector higgs_tlv = c1_tlv + c2_tlv + jpsi_tlv;
+
+
+   float higgs_E = higgs_tlv.E();
+   Vec_f higgs_boost_vec = {higgs_tlv.Px() / higgs_E, higgs_tlv.Py() / higgs_E, higgs_tlv.Pz() / higgs_E};
+   ROOT::Math::Boost higgs_boost(-higgs_boost_vec[0], -higgs_boost_vec[1], -higgs_boost_vec[2]);
+
+
+   float jpsi_E = jpsi_tlv.E();
+   Vec_f jpsi_boost_vec = {jpsi_tlv.Px()/jpsi_E, jpsi_tlv.Py()/jpsi_E, jpsi_tlv.Pz()/jpsi_E};
+   ROOT::Math::Boost jpsi_boost(-jpsi_boost_vec[0], -jpsi_boost_vec[1], -jpsi_boost_vec[2]);
+
+
+   PtEtaPhiMVector jpsi_higgsrest = higgs_boost(jpsi_tlv);
+   ROOT::Math::SVector<double, 3> jpsi_pvec_higgsrest = {jpsi_higgsrest.Px(), jpsi_higgsrest.Py(), jpsi_higgsrest.Pz()};
+
+
+   PtEtaPhiMVector neg_muon_jpsirest = jpsi_boost(neg_muon_tlv);
+   ROOT::Math::SVector<double, 3> neg_muon_pvec_jpsirest = {neg_muon_jpsirest.Px(), neg_muon_jpsirest.Py(), neg_muon_jpsirest.Pz()};
+
+
+   double cos_neg_muon_Jpsi_angle = cos(vector_vector_angle(neg_muon_pvec_jpsirest, jpsi_pvec_higgsrest));
+   return cos_neg_muon_Jpsi_angle;
+}
 
 #endif

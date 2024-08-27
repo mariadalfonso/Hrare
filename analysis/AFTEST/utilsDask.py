@@ -84,7 +84,7 @@ def create_remote_Dask():
         'export XRD_STREAMTIMEOUT=10',
         'echo "Landed on $HOSTNAME"',
         f'source {os.getenv("HOME")}/.bashrc',
-        f'conda activate myenvLuca',
+        f'conda activate myenvAF',
     ]
 
     extra_args=[

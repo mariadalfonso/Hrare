@@ -10,7 +10,7 @@ class tmva_xml {
 
             auto c = TMVA::Experimental::Internal::ParseXMLConfig(filename);
 			fVariables = c.variables;
-			fExpressions = c.expressions;
+			fExpressions = c.variable_expressions;
 			fAnalysisType = c.analysisType;
 			fNumClasses = c.numClasses;
 

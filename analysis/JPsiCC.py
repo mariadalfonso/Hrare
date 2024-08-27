@@ -4,6 +4,7 @@ import json
 from utilsAna import loadUserCode
 from utilsAna import BuildDictJpsiCC, SwitchSample
 from utilsAna import readDataQuality
+from utilsAna import computeWeigths
 
 from datetime import datetime
 
@@ -17,21 +18,6 @@ with open("./config/qualityData.json") as qualityJsonFile:
     qualityJsonFile.close()
 
 JSON = qualObject['JSON']
-
-def computeWeigths(rdf,xsec):
-
-    genEventSumWeight = rdf.Sum("genEventSumw").GetValue()
-    genEventSumNoWeight = rdf.Sum("genEventCount").GetValue()
-
-    print('genEventSumWeight',genEventSumWeight)
-    print('genEventSumNoWeight',genEventSumNoWeight)
-
-    weight = xsec / genEventSumWeight
-
-    # neglecting the lumi
-    #    weight = (1./genEventSumWeight)
-    print('weight',weight)
-    return weight
 
 '''
 chain = ROOT.TChain("Events")
@@ -63,7 +49,7 @@ def analysis(files,year,mc,sumW):
     df= (dfINI.Filter("nJpsi>0 && PV_npvsGood>0","at least one Jpsi; one PV")
          .Define("mc","{}".format(mc))
          .Define("isData","{}".format(isData))
-         .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
+#         .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
          .Define("w","{}".format(weight))
          .Define("triggerAna","{}".format(TRIGGER))
          .Filter("triggerAna>0","passing trigger")
@@ -85,40 +71,53 @@ def analysis(files,year,mc,sumW):
          # for the FAR we apply JEC and c-Regression
          # for the CLOSE no JEC and no c-Regression
          .Define("jetFarPtRaw","Jet_pt[goodJets][index_CloseFar[1]]")
-         .Define("jetFarPt","Jet_pt[goodJets][index_CloseFar[1]]*Jet_cRegCorr[goodJets][index_CloseFar[1]]")
-         .Filter("jetFarPt>30","30 GeV threshould for jetFar")
-         .Define("jetFarEta","Jet_eta[goodJets][index_CloseFar[1]]")
-         .Define("jetFarPhi","Jet_phi[goodJets][index_CloseFar[1]]")
-         .Define("jetFarMass","Jet_mass[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_Pt","Jet_pt[goodJets][index_CloseFar[1]]*Jet_cRegCorr[goodJets][index_CloseFar[1]]")
+         .Filter("jetFar_Pt>30","30 GeV threshould for jetFar")
+         .Define("jetFar_Eta","Jet_eta[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_Phi","Jet_phi[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_Mass","Jet_mass[goodJets][index_CloseFar[1]]")
 #         .Define("jetClosePt","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],0)")
-         .Define("jetClosePt","buildCloseJets(Jet_pt[goodJets]*(1-Jet_rawFactor[goodJets]), Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],0)")
-         .Define("jetCloseEta","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],1)")
-         .Define("jetClosePhi","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],2)")
-         .Define("jetCloseMass","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],3)")
+         .Define("jetClose_Pt","buildCloseJets(Jet_pt[goodJets]*(1-Jet_rawFactor[goodJets]), Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],0)")
+         .Define("jetClose_Eta","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],1)")
+         .Define("jetClose_Phi","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],2)")
+         .Define("jetClose_Mass","buildCloseJets(Jet_pt[goodJets], Jet_eta[goodJets], Jet_phi[goodJets], Jet_mass[goodJets], Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass, index_CloseFar[0],3)")
          #
          .Define("jetClosecRegCorr","Jet_cRegCorr[goodJets][index_CloseFar[0]]")
          .Define("jetFarcRegCorr","Jet_cRegCorr[goodJets][index_CloseFar[1]]")
          #
-         .Define("jetCloseJPsiRatio","Jpsi_kin_pt[0]/jetClosePt")
-         .Define("jetCloseCvL","Jet_btagDeepCvL[goodJets][index_CloseFar[0]]")
-         .Define("jetFarCvL","Jet_btagDeepCvL[goodJets][index_CloseFar[1]]")
-         .Define("jetClosenConst","Jet_nConstituents[goodJets][index_CloseFar[0]]-2.0")
-         .Define("jetFarnConst","Jet_nConstituents[goodJets][index_CloseFar[1]]")
-         .Define("jetClosenMuons","Jet_nMuons[goodJets][index_CloseFar[0]]")
-         .Define("jetFarnMuons","Jet_nMuons[goodJets][index_CloseFar[1]]")
-         .Define("jetClosenElectrons","Jet_nElectrons[goodJets][index_CloseFar[0]]")
-         .Define("jetFarnElectrons","Jet_nElectrons[goodJets][index_CloseFar[1]]")
+         .Define("jetCloseJPsiRatio","Jpsi_kin_pt[0]/jetClose_Pt")
+         .Define("jetClose_CvL","Jet_btagDeepCvL[goodJets][index_CloseFar[0]]")
+         .Define("jetFar_CvL","Jet_btagDeepCvL[goodJets][index_CloseFar[1]]")
+         .Define("jetClose_nConst","Jet_nConstituents[goodJets][index_CloseFar[0]]-2.0")
+         .Define("jetFar_nConst","Jet_nConstituents[goodJets][index_CloseFar[1]]")
+         .Define("jetClose_nMuons","Jet_nMuons[goodJets][index_CloseFar[0]]")
+         .Define("jetFar_nMuons","Jet_nMuons[goodJets][index_CloseFar[1]]")
+         .Define("jetClose_nElectrons","Jet_nElectrons[goodJets][index_CloseFar[0]]")
+         .Define("jetFar_nElectrons","Jet_nElectrons[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_chEmEF","Jet_chEmEF[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_chHEF","Jet_chHEF[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_neEmEF","Jet_neEmEF[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_neHEF","Jet_neHEF[goodJets][index_CloseFar[1]]")
+         .Define("jetFar_muEF","Jet_muEF[goodJets][index_CloseFar[1]]")
+         .Define("jetClose_chEmEF","Jet_chEmEF[goodJets][index_CloseFar[0]]")
+         .Define("jetClose_chHEF","Jet_chHEF[goodJets][index_CloseFar[0]]")
+         .Define("jetClose_neEmEF","Jet_neEmEF[goodJets][index_CloseFar[0]]")
+         .Define("jetClose_neHEF","Jet_neHEF[goodJets][index_CloseFar[0]]")
+         .Define("jetClose_muEF","Jet_muEF[goodJets][index_CloseFar[0]]")
          #
-         .Define("massHiggsCorr","Minv3body(jetClosePt,jetCloseEta,jetClosePhi,jetCloseMass,jetFarPt,jetFarEta,jetFarPhi,jetFarMass,Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass)")
+         .Define("massHiggsCorr","Minv3body(jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt, Jpsi_kin_eta, Jpsi_kin_phi, Jpsi_kin_mass)")
          #
          .Define("minDRjpsi","std::min(deltaR(Jet_eta[goodJets][0], Jet_phi[goodJets][0], Jpsi_kin_eta[0], Jpsi_kin_phi[0]),deltaR(Jet_eta[goodJets][1], Jet_phi[goodJets][1], Jpsi_kin_eta[0], Jpsi_kin_phi[0]))")
 #         .Filter("minDRjpsi<0.3","jPsi very close to 1 charm-jet")
          #     .Filter("abs(Jpsi_kin_eta[0])>1.4","barrel JPsi")
          #     .Filter("abs(Jpsi_leadingChargedDxy[0])>0.5","bad track")
-         .Define("angle_phi1","get_phi1(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClosePt,jetCloseEta,jetClosePhi,jetCloseMass,jetFarPt,jetFarEta,jetFarPhi,jetFarMass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
-         .Define("angle_phi2","get_phi1(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClosePt,jetCloseEta,jetClosePhi,jetCloseMass,jetFarPt,jetFarEta,jetFarPhi,jetFarMass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
-         .Define("angle_cos_theta_jpsi","get_cos_theta_jpsi(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClosePt,jetCloseEta,jetClosePhi,jetCloseMass,jetFarPt,jetFarEta,jetFarPhi,jetFarMass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
-         .Define("angle_cos_theta_dicharm","get_cos_theta_jpsi(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClosePt,jetCloseEta,jetClosePhi,jetCloseMass,jetFarPt,jetFarEta,jetFarPhi,jetFarMass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_phi1","get_phi1(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_phi2","get_phi2(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_phi3","get_phi3(jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_phi4","get_phi4(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_cos_delta_m_min","get_cos_delta_m_min(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_cos_theta_jpsi","get_cos_theta_jpsi(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
+         .Define("angle_cos_theta_dicharm","get_cos_theta_jpsi(Jpsi_muon1_pt[0], Jpsi_muon1_eta[0], Jpsi_muon1_phi[0], Jpsi_muon2_pt[0], Jpsi_muon2_eta[0], Jpsi_muon2_phi[0], jetClose_Pt,jetClose_Eta,jetClose_Phi,jetClose_Mass,jetFar_Pt,jetFar_Eta,jetFar_Phi,jetFar_Mass,Jpsi_kin_pt[0],Jpsi_kin_eta[0],Jpsi_kin_phi[0],Jpsi_kin_mass[0])")
          )
 
     if mc>0:
@@ -180,21 +179,21 @@ def analysis(files,year,mc,sumW):
             "jet2CvL":  {"name":"jet2CvL","title":"Subleading Jet CvL; AK4 btagDeepCvL (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
             #        "jet1nMuons":  {"name":"jet1nMuons","title":"Leading Jet nMuons; nMuons (GeV); N_{Events}","bin":10,"xmin":0.,"xmax":10.},
             #        "jet2nMuons":  {"name":"jet2nMuons","title":"Subleading Jet nMuons; nMuons (GeV); N_{Events}","bin":10,"xmin":0.,"xmax":10.},
-            "jetClosenMuons":  {"name":"jetClosenMuons","title":"Close nMuons; nMuons; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
-            "jetFarnMuons":  {"name":"jetFarnMuons","title":"Far nMuons; nMuons; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
-            "jetClosenElectrons":  {"name":"jetClosenElectrons","title":"Close Electrons; nElectron; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
-            "jetFarnElectrons":  {"name":"jetFarnElectrons","title":"Far Electrons; nElectrons; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
+#            "jetClose_nMuons":  {"name":"jetClosenMuons","title":"Close nMuons; nMuons; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
+#            "jetFar_nMuons":  {"name":"jetFarnMuons","title":"Far nMuons; nMuons; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
+#            "jetClose_nElectrons":  {"name":"jetClosenElectrons","title":"Close Electrons; nElectron; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
+#            "jetFar_nElectrons":  {"name":"jetFarnElectrons","title":"Far Electrons; nElectrons; N_{Events}","bin":10,"xmin":0.,"xmax":10.},
             #
-            "jetFarPt":  {"name":"jetFarPt","title":"Jet Far Pt; AK4 pt Far (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":100.},
-            "jetFarEta":  {"name":"jetFarEta","title":"Jet Far eta; AK4 jet #eta (GeV);N_{Events}","bin":100,"xmin":-5.,"xmax":5.},
-            "jetClosePt":  {"name":"jetClosePt","title":"Jet Close Pt; AK4 pt Close (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":100.},
-            "jetCloseEta":  {"name":"jetCloseEta","title":"Jet Close eta; AK4 jet #eta} (GeV);N_{Events}","bin":100,"xmin":-5.,"xmax":5.},
+            "jetFar_Pt":  {"name":"jetFar_Pt","title":"Jet Far Pt; AK4 pt Far (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":100.},
+            "jetFar_Eta":  {"name":"jetFar_Eta","title":"Jet Far eta; AK4 jet #eta (GeV);N_{Events}","bin":100,"xmin":-5.,"xmax":5.},
+            "jetClose_Pt":  {"name":"jetClose_Pt","title":"Jet Close Pt; AK4 pt Close (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":100.},
+            "jetClose_Eta":  {"name":"jetClose_Eta","title":"Jet Close eta; AK4 jet #eta} (GeV);N_{Events}","bin":100,"xmin":-5.,"xmax":5.},
             "jetFarcRegCorr":  {"name":"jetFarcRegCorr","title":"Jet Far value of the regression; cRegCorr ;N_{Events}","bin":100,"xmin":0.,"xmax":2.},
             "jetClosecRegCorr":  {"name":"jetClosecRegCorr","title":"Jet Close value of the regression; cRegCorr;N_{Events}","bin":100,"xmin":0.,"xmax":2.},
-            "jetFarCvL":  {"name":"jetFarCvL","title":"Jet Far; AK4 btagDeepCvL Far (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
-            "jetCloseCvL":  {"name":"jetCloseCvL","title":"Jet Close; AK4 btagDeepCvL Close (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
-            "jetFarnConst":  {"name":"jetFarnConst","title":"Jet Far; AK4 n constituent Far;N_{Events}","bin":20,"xmin":0.,"xmax":40.},
-            "jetClosenConst":  {"name":"jetClosenConst","title":"Jet Close; AK4 n constituent Close;N_{Events}","bin":20,"xmin":0.,"xmax":40.},
+            "jetFar_CvL":  {"name":"jetFar_CvL","title":"Jet Far; AK4 btagDeepCvL Far (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
+            "jetClose_CvL":  {"name":"jetClose_CvL","title":"Jet Close; AK4 btagDeepCvL Close (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
+            "jetFar_nConst":  {"name":"jetFar_nConst","title":"Jet Far; AK4 n constituent Far;N_{Events}","bin":20,"xmin":0.,"xmax":40.},
+            "jetClose_nConst":  {"name":"jetClose_nConst","title":"Jet Close; AK4 n constituent Close;N_{Events}","bin":20,"xmin":0.,"xmax":40.},
             "jetCloseJPsiRatio":  {"name":"jetCloseJPsiRatio","title":"Jet Close; pt(JPsi) / AK4 pt(Jet);N_{Events}","bin":100,"xmin":0.,"xmax":5.},
             #        "Jet_btagDeepCvL":  {"name":"Jet_btagDeepCvL","title":"btagDeepCvL; FlavCvL} (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
             #        "Jet_btagDeepFlavCvL":  {"name":"Jet_btagDeepFlavCvL","title":"btagDeepFlavCvL; DeepFlavCvL} (GeV);N_{Events}","bin":100,"xmin":0.,"xmax":1.},
@@ -210,8 +209,11 @@ def analysis(files,year,mc,sumW):
 #            "triggerAna":  {"name":"triggerAna","title":"HLT_Dimuon20_Jpsi_Barrel_Seagulls or HLT_Dimuon25_Jpsi;N_{Events}","bin":100,"xmin":0.,"xmax":2.},
             "angle_phi1":  {"name":"angle_phi1","title":"angle_phi1; angle_phi1;N_{Events}","bin":100,"xmin":0.,"xmax":3.15},
             "angle_phi2":  {"name":"angle_phi2","title":"angle_phi2; angle_phi2;N_{Events}","bin":100,"xmin":0.,"xmax":3.15},
+            "angle_phi3":  {"name":"angle_phi3","title":"angle_phi3; angle_phi3;N_{Events}","bin":100,"xmin":0.,"xmax":3.15},
+            "angle_phi4":  {"name":"angle_phi4","title":"angle_phi4; angle_phi4;N_{Events}","bin":100,"xmin":0.,"xmax":3.15},
             "angle_cos_theta_jpsi":  {"name":"angle_cos_theta_jpsi","title":"angle_cos_theta_jpsi; angle_cos_theta_jpsi; N_{Events}","bin":100,"xmin":-1.,"xmax":1.},
             "angle_cos_theta_dicharm":  {"name":"angle_cos_theta_dicharm","title":"angle_cos_theta_dicharm; angle_cos_theta_dicharm; N_{Events}","bin":100,"xmin":-1.,"xmax":1.},
+            "angle_cos_delta_m_min":  {"name":"angle_cos_delta_m_min","title":"angle_cos_delta_m_min; angle_cos_delta_m_min; N_{Events}","bin":100,"xmin":-1.,"xmax":1.},
         }
 
         hists2 = {
@@ -269,14 +271,14 @@ def analysis(files,year,mc,sumW):
                     "mc",
                     "w",
                     #
-                    "jetFarPt",
-                    "jetFarEta",
-                    "jetFarPhi",
-                    "jetFarMass",
-                    "jetClosePt",
-                    "jetCloseEta",
-                    "jetClosePhi",
-                    "jetCloseMass",
+                    "jetFar_Pt",
+                    "jetFar_Eta",
+                    "jetFar_Phi",
+                    "jetFar_Mass",
+                    "jetClose_Pt",
+                    "jetClose_Eta",
+                    "jetClose_Phi",
+                    "jetClose_Mass",
                     "Jpsi_kin_pt",
                     "Jpsi_kin_eta",
                     "Jpsi_kin_phi",
@@ -289,10 +291,21 @@ def analysis(files,year,mc,sumW):
                     "Jpsi_muon2_phi",
                     # for the classification
                     "nGoodJets",
-                    "jetCloseCvL",
-                    "jetFarCvL",
-                    "jetClosenConst",
-                    "jetFarnConst",
+                    "jetClose_CvL",
+                    "jetFar_CvL",
+                    "jetClose_nConst",
+                    "jetFar_nConst",
+                    "jetFar_chEmEF",
+                    "jetFar_chHEF",
+                    "jetFar_neEmEF",
+                    "jetFar_neHEF",
+                    "jetFar_muEF",
+                    "jetClose_chEmEF",
+                    "jetClose_chHEF",
+                    "jetClose_neEmEF",
+                    "jetClose_neHEF",
+                    "jetClose_muEF",
+                    #
                     "Jpsi_kin_sipPV",
                     "Jpsi_iso",
                     "Jpsi_kin_lxy",
@@ -301,7 +314,18 @@ def analysis(files,year,mc,sumW):
                     "Jpsi_leadingCharged3dSignMaxPt2",
                     "Jpsi_leadingChargedMaxPt2",
                     # event like quantities
-                    "massHiggsCorr"
+                    "massHiggsCorr",
+                    # angles
+                    "angle_phi1",
+                    "angle_phi2",
+                    "angle_phi3",
+                    "angle_phi4",
+                    "angle_cos_theta_jpsi",
+                    "angle_cos_theta_dicharm",
+                    "angle_cos_delta_m_min",
+                    #
+                    "MET_pt",
+                    "MET_phi",
             ]:
                 branchList.push_back(branchName)
 
