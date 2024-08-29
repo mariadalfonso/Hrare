@@ -15,15 +15,19 @@ sys.path.insert(0, myDir)
 
 
 from utilsAna import pickTRG,findDIR,getMesonFromJson,getMVAFromJson
-from utilsAna import loadUserCode, loadCorrectionSet
+from utilsAna import loadUserCode, loadCorrectionSet, loadUserCodeGateway
 from utilsAna import BuildDictMgamma, SwitchSample
-from utilsAna import readDataQuality
+#from utilsAna import readDataQuality
 
-doINTERACTIVE=True
+doINTERACTIVE=False
 doLocalCluster=False
 
-doLocalDisk=False
-doRemoteAccess=True
+doLocalDisk=True
+doRemoteAccess=False
+
+#AF="MIT-dask"
+AF="MIT-daskgateway"
+
 
 ###-----------------------------------------
 ###-----------------------------------------
@@ -75,13 +79,16 @@ lumis={
 ###-----------------------------------------
 ###-----------------------------------------
 
-
 def init():
-#    print('empy init')
-    loadUserCode()
-    loadCorrectionSet(2018)
+
+    if AF=="MIT-daskgateway":
+        loadUserCodeGateway("functions.h")
+        loadUserCodeGateway("sfCorrLib.h")
+    else:
+        loadUserCode()
+        loadCorrectionSet(2018)
 #    readDataQuality(2018)
-    
+
 ###-----------------------------------------
 ###-----------------------------------------
 
@@ -90,7 +97,6 @@ if doINTERACTIVE:
     ROOT.ROOT.EnableImplicitMT()
     RDataFrame = ROOT.RDataFrame
     RunGraphs = ROOT.RDF.RunGraphs
-    init()
 else:
 #    import pkg_resources
     if doLocalCluster:
@@ -98,16 +104,58 @@ else:
         RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
         RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
         from utilsDask import create_local_connection
-        ROOT.RDF.Experimental.Distributed.initialize(init)
     else:
-#        from utilsDask import create_remote_Dask
-        from utilsDask import create_remote_DaskGateway
+#
+        from utilsDask import create_DaskGateway_MIT
+        if AF=="MIT-dask": from utilsDask import create_remote_Dask
+        elif AF=="MIT-daskgateway": from utilsDask import create_DaskGateway_MIT
         RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
         RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
 #        from utilsDask import client
-        ROOT.RDF.Experimental.Distributed.initialize(init)
 
+def makeRDF(files):
+
+    if doINTERACTIVE:
+        df = ROOT.RDataFrame("Events", files)
+        init()
+    else:
+        #files_per_partition = nfiles / npartitions
+#        NCLUSTERS=100 # this is the numbers of cluster to open
+        if doLocalCluster:
+            NPARTITIONS=5 # assuming one launch 7 Graphs (7*15 = 105 cores)
+            nCLUSTER=10 #(like scale for remote)
+#            connection = create_local_connection(NPARTITIONS)
+            connection = create_local_connection(nCLUSTER)
+            print(connection)
+            # The `npartitions` optional argument tells the RDataFrame how many tasks are desired
+            df = RDataFrame("Events", files, daskclient=connection, npartitions=NPARTITIONS)
+            ROOT.RDF.Experimental.Distributed.initialize(init)
+        else:
+
+            #Create the client
+            if AF=="MIT-dask": client = create_remote_Dask()
+            elif AF=="MIT-daskgateway":
+                client = create_DaskGateway_MIT()
+                client.upload_file("utilsAna.py")
+            print(client)
+            NPARTITIONS=5 # assuming one launch 10 Graphs (10*30 = 200 cores)
+
+            #Create the RDF and initialize user lib
+            df = RDataFrame("Events", files, daskclient=client, npartitions=NPARTITIONS)
+            if AF=="MIT-daskgateway":
+                df._headnode.backend.distribute_unique_paths(
+                    [
+                        "../config/functions.h",
+#                        "../config/sfCorrLib.h",
+                    ]
+                )
+            ROOT.RDF.Experimental.Distributed.initialize(init)
+
+    return df
     
+###-----------------------------------------
+###-----------------------------------------
+
 def callSFVariation(df):
 
     dfVaryPh=(df
@@ -147,29 +195,7 @@ def analysis(files,year,mc,sumW):
     now = datetime.now()
     print('==> start: ',now)
 
-    if doINTERACTIVE:
-        dfINI = ROOT.RDataFrame("Events", files)
-        #        loadtmva_helper()
-#        nevents = dfINI.Count().GetValue()
-#        print('number of events=',nevents)        
-    else:
-        #files_per_partition = nfiles / npartitions
-#        NCLUSTERS=100 # this is the numbers of cluster to open
-        if doLocalCluster:
-            NPARTITIONS=5 # assuming one launch 7 Graphs (7*15 = 105 cores)
-            nCLUSTER=10 #(like scale for remote)
-#            connection = create_local_connection(NPARTITIONS)
-            connection = create_local_connection(nCLUSTER)            
-            print(connection)
-            # The `npartitions` optional argument tells the RDataFrame how many tasks are desired
-            dfINI = RDataFrame("Events", files, daskclient=connection, npartitions=NPARTITIONS)
-        else:
-#            client = create_remote_Dask()
-            client = create_remote_DaskGateway()            
-            print(client)
-            NPARTITIONS=5 # assuming one launch 10 Graphs (10*30 = 200 cores)
-            dfINI = RDataFrame("Events", files, daskclient=client, npartitions=NPARTITIONS)
-#            dfINI = RDataFrame("Events", files, daskclient=client)
+    dfINI=makeRDF(files)
 
     lumi = 1.
     weight = "{0}".format(1.)
@@ -217,8 +243,8 @@ def analysis(files,year,mc,sumW):
           #
           )
 
-    if mc>0:
-        df = callSFVariation(df)
+#    if mc>0:
+#        df = callSFVariation(df)
 #        df = callVary(df)
         
     evtcounts.append(df.Count())
@@ -240,7 +266,7 @@ def analysis(files,year,mc,sumW):
             print("h1d.GetName()",h1d.GetName())
             print("h1d append")
 
-            if True and mc>1000:
+            if False and mc>1000:
                 model2d_pu = (hists[h]["name"]+"_"+str(year)+"_"+str(mc)+":PU", hists[h]["title"], hists[h]["bin"], hists[h]["xmin"], hists[h]["xmax"], 3, 0, 3)
                 histos.append(df.Histo2D(model2d_pu, hists[h]["name"], "idx_nom_up_down", "pu_weights"))
 
@@ -302,12 +328,11 @@ def loopRemoteDataset():
         files = SwitchSample(thisdict,sampleNOW)[0]
         xsec = SwitchSample(thisdict,sampleNOW)[1]
         print('outside the function: ',len(files))
-#        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
-#        sumW = computeWeigths(rdf,xsec)
-        sumW = 1
+        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
+        sumW = computeWeigths(rdf,xsec)
         analysis(files,year,sampleNOW,sumW)
 
-    data = [ -62,-63,-64]                                                                                                             
+    data = [-62,-63,-64]
 
     for datasetNumber in data:
         files = SwitchSample(thisdict,datasetNumber)[0]
@@ -316,6 +341,7 @@ def loopRemoteDataset():
 
 def loopOnDatasetLocalMIT():
 
+    print('inside loopOnDatasetLocalMIT')
     # localDataset -- as used in the VGammaAnalysis
     from utilsHrare import getMClist, getSkims
     from utilsHrare import computeWeigths
@@ -335,7 +361,7 @@ def loopOnDatasetLocalMIT():
 
     data = [-62,-63,-64]
 #    data = []
-    readDataQuality(year)
+#    readDataQuality(year)
 
     for datasetNumber in data:
          pair = getSkims(datasetNumber,year,"Zinv",useD03)
@@ -369,7 +395,10 @@ if __name__ == "__main__":
         if doINTERACTIVE: outputFileHisto = "DASKlogs/histoOUTname_test_interactive.root"
         else:
             if doLocalCluster: outputFileHisto = "DASKlogs/histoOUTname_test_LocalCluster.root"
-            else: outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster.root"
+            else:
+                if AF=="MIT-dask": outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster_Dask.root"
+                elif AF=="MIT-daskgateway": outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster_Gateway.root"
+
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
         myfile.ls()
 

@@ -5,6 +5,21 @@ import sys
 import json
 import os
 
+def loadUserCodeGateway(fileName):
+    print('loadUserCode.h')
+
+    from pathlib import Path
+    from dask.distributed import get_worker
+
+    # Get the local directory where the file is stored
+    worker = get_worker()
+    localdir = worker.local_directory
+
+    # Define the path to the file
+    lib_path = Path(localdir) / fileName
+#    ROOT.gInterpreter.Declare(f'#include "{lib_path}"')
+    ROOT.gInterpreter.ProcessLine(f'#include "{lib_path}"')
+
 def loadUserCode():
     print('loadUserCode()')
     ROOT.gSystem.AddDynamicPath("./.")

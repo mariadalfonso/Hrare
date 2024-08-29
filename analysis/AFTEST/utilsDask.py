@@ -9,7 +9,7 @@ def create_Purdue_connection():
     from dask_gateway import Gateway
     from distributed import Client
 
-    os.environ["X509_USER_PROXY"] = "/home/dalfonso-cern/JULY_ex/x509up_u146312"
+    os.environ["X509_USER_PROXY"] = "/work/users/dalfonso-cern/x509up_u146312"
     print("done with environ")
 
     gateway = Gateway(
@@ -27,6 +27,7 @@ def create_Purdue_connection():
     print("options.worker_memory",options.worker_memory)
     print("options.environment",options.environment)
 
+
     # Create the cluster                                                                                                                                                                                
     cluster = gateway.new_cluster(
         conda_env = "/depot/cms/kernels/root632", # path to conda env
@@ -41,43 +42,40 @@ def create_Purdue_connection():
     print(client)
     return client
 
-def set_env():
-    os.environ["X509_USER_PROXY"] = "/tmp/x509up_u7592"
+def create_DaskGateway_MIT():
 
-def create_remote_DaskGateway():
+    print('HELLO -- inside create_DaskGateway_MIT')
 
     from dask_gateway import Gateway, GatewayCluster, BasicAuth
 
     gateway = Gateway(address="http://submit.mit.edu:6820",
                       proxy_address="http://submit.mit.edu:6821")
 
+    options = gateway.cluster_options()
+    options['environment'] = "/work/submit/mariadlf/miniforge3/envs/myenvAF"
+    options['worker_memory'] = 8.0
+
+    cluster = gateway.new_cluster(options)
+    cluster.scale(10)
+
+   # need to close all the old clusters first
     clusters = gateway.list_clusters()
     for cl in clusters:
         cluster_name = cl.name
         print("cluster_name",cluster_name)
+#        cluster = gateway.connect(cluster_name)
+#        cluster.shutdown()
 
-    # make a new cluster
-    cluster = gateway.new_cluster(
-#        env = "/work/submit/mariadlf/miniforge3/envs/myenvAF", # path to conda env
-        worker_cores = 1,    # cores per worker
-        worker_memory = 6,   # memory per worker in GB
-    )
-
-    cluster.scale(10)
-
-    options = gateway.cluster_options()
-    print("options.worker_cores",options.worker_cores)
-    print("options.worker_memory",options.worker_memory)
-
-    # get a client
     client = cluster.get_client()
-    client.run(set_env)
+    print(client)
+
+#    print(cluster.scheduler_info)
 
     return client
 
-
 def create_remote_Dask():
 
+    print('setting up Dask + SLURM')
     slurm_env = [
         'export DASK_DISTRIBUTED__COMM__ALLOWED_TRANSPORTS=["tcp://[::]:0"]',
         'export XRD_RUNFORKHANDLER=1',
