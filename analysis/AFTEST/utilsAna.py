@@ -5,6 +5,17 @@ import sys
 import json
 import os
 
+
+def initSpark():
+    print('loadUserCode.h')
+    from pathlib import Path
+    from pyspark import SparkFiles
+    localdir = SparkFiles.getRootDirectory()
+    lib_path = Path(localdir) / "functions.h"
+#    lib_path = Path(localdir) / "myLibrary.h"
+    ROOT.gInterpreter.ProcessLine(f'#include "{lib_path}"')
+#    ROOT.gInterpreter.Declare(f'#include "{lib_path}"')
+
 def loadUserCodeGateway(fileName):
     print('loadUserCode.h')
 
@@ -123,8 +134,8 @@ def findDIR(directory,useXROOTD=False):
 def listDir(isT2,xrdpath):
 
     xcache = "root://cms-xcache.rcac.purdue.edu:1094/";
-#    xcache = "root://bost-cms-xcache01.lhcone.es.net:1094/";
-#    xcache = "https://xrootd-local.unl.edu:1094/
+#    xcache = "root://bost-cms-xcache01.es.net/";
+#    xcache = "https://xcache/
 
     rootFiles = ROOT.vector('string')()
     print(xrdpath)
