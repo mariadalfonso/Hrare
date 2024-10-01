@@ -22,14 +22,18 @@ def loadUserCodeGateway(fileName):
     from pathlib import Path
     from dask.distributed import get_worker
 
-    # Get the local directory where the file is stored
-    worker = get_worker()
-    localdir = worker.local_directory
+    try:
+        #this try is needed at CERN Swan-Dask
+        # Get the local directory where the file is stored
+        worker = get_worker()
+        localdir = worker.local_directory
 
-    # Define the path to the file
-    lib_path = Path(localdir) / fileName
-#    ROOT.gInterpreter.Declare(f'#include "{lib_path}"')
-    ROOT.gInterpreter.ProcessLine(f'#include "{lib_path}"')
+        # Define the path to the file
+        lib_path = Path(localdir) / fileName
+        #    ROOT.gInterpreter.Declare(f'#include "{lib_path}"')
+        ROOT.gInterpreter.ProcessLine(f'#include "{lib_path}"')
+    except:
+        pass
 
 def loadUserCode():
     print('loadUserCode()')
