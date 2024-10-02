@@ -35,10 +35,6 @@ def nanoAOD_customizeMesons_Run3(process):
     process.genParticleTable.variables.pt.precision=Var("pt",  float, precision=-1)
     process.genParticleTable.variables.phi.precision=Var("phi",  float, precision=-1)
     process.genParticleTable.variables.eta.precision=Var("eta",  float, precision=-1)
-    process.genParticleTable.variables.px.precision=Var("px",  float, precision=-1)
-    process.genParticleTable.variables.py.precision=Var("py",  float, precision=-1)
-    process.genParticleTable.variables.pz.precision=Var("pz",  float, precision=-1)
-    process.genParticleTable.variables.energy.precision=Var("energy",  float, precision=-1)
     process.genParticleTable.variables.mass.precision=Var("mass",  float, precision=-1)
 
     finalGenParticles.select +=[
