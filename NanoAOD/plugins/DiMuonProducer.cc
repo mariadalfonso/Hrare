@@ -688,14 +688,14 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     // Build V0 candidates first from Muon Collections
 
     if ( nMuons > 1 ){
-      for ( unsigned int i = 0; i < nMuons-1; ++i ) {
+      for ( unsigned int i = 0; i < nMuons; ++i ) {
 	const pat::Muon& patMuon1( (*muonHandle_)[i] );
 	if ( not isGoodMuon(patMuon1) ) continue;
 
 	for ( unsigned int j = i+1; j < nMuons; ++j ) {
 	  const pat::Muon& patMuon2( (*muonHandle_)[j] );
-	  if ( not isGoodMuon(patMuon2) ) continue;
 	  if ( patMuon1.charge()*patMuon2.charge() >= 0 ) continue;
+	  if ( not isGoodMuon(patMuon2) ) continue;
 
 	  //	  if ( not isGoodTrack(pfCand2) ) continue;
 	  //	  if ( not isGoodPair(pfCand1,pfCand2) ) continue;

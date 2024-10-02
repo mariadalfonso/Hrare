@@ -7,6 +7,44 @@ def nanoAOD_customizeMesons_Run3(process):
     process.load('Hrare.NanoAOD.MesonsReco_cff')
     process.load('Hrare.NanoAOD.DiMuonReco_cff')
 
+
+    if hasattr(process.triggerObjectTable, 'selections') and hasattr(process.triggerObjectTable.selections, 'id') and process.triggerObjectTable.selections.id.value() == 22:
+        process.triggerObjectTable.selections.name = cms.string("Photon")
+        process.triggerObjectTable.selections.sel = cms.string("type(92) && pt > 20 && coll('hltEgammaCandidates')")
+        process.triggerObjectTable.selections.qualityBits = cms.string(
+            "filter('hltEG33L1EG26HEFilter') + " \
+            "2*filter('hltEG50HEFilter') + " \
+            "4*filter('hltEG75HEFilter') + " \
+            "8*filter('hltEG90HEFilter') + " \
+            "16*filter('hltEG120HEFilter') + " \
+            "32*filter('hltEG150HEFilter') + " \
+            "64*filter('hltEG175HEFilter') + " \
+            "128*filter('hltEG200HEFilter') + " \
+            "256*filter('hltHtEcal800') + " \
+            "512*filter('hltEG110EBTightIDTightIsoTrackIsoFilter') + " \
+            "1024*filter('hltEG120EBTightIDTightIsoTrackIsoFilter')+ " \
+            "2048*filter('hltMu17Photon30IsoCaloIdPhotonlegTrackIsoFilter')")
+        process.triggerObjectTable.selections.qualityBitsDoc = cms.string("Single Photon filters: 1 = hltEG33L1EG26HEFilter, 2 = hltEG50HEFilter, 4 = hltEG75HEFilter, 8 = hltEG90HEFilter, 16 = hltEG120HEFilter, 32 = hltEG150HEFilter, 64 = hltEG175HEFilter, 128 = hltEG200HEFilter, 256 = hltHtEcal800, 512 = hltEG110EBTightIDTightIsoTrackIsoFilter, 1024 = hltEG120EBTightIDTightIsoTrackIsoFilter, 2048 = 1mu-1photon")
+
+
+    process.photonTable.variables.x_calo = Var("superCluster().seed().position().x()",float,doc="photon supercluster position on calorimeter, x coordinate (cm)",precision=10),
+    process.photonTable.variables.y_calo = Var("superCluster().seed().position().y()",float,doc="photon supercluster position on calorimeter, y coordinate (cm)",precision=10),
+    process.photonTable.variables.z_calo = Var("superCluster().seed().position().z()",float,doc="photon supercluster position on calorimeter, z coordinate (cm)",precision=10),
+
+    process.genParticleTable.src = "prunedGenParticles"
+    process.genParticleTable.variables.pt.precision=Var("pt",  float, precision=-1)
+    process.genParticleTable.variables.phi.precision=Var("phi",  float, precision=-1)
+    process.genParticleTable.variables.eta.precision=Var("eta",  float, precision=-1)
+    process.genParticleTable.variables.px.precision=Var("px",  float, precision=-1)
+    process.genParticleTable.variables.py.precision=Var("py",  float, precision=-1)
+    process.genParticleTable.variables.pz.precision=Var("pz",  float, precision=-1)
+    process.genParticleTable.variables.energy.precision=Var("energy",  float, precision=-1)
+    process.genParticleTable.variables.mass.precision=Var("mass",  float, precision=-1)
+
+    finalGenParticles.select +=[
+        "keep (4 <= abs(pdgId) <= 5) && statusFlags().isLastCopy()", # BTV: keep b/c quarks in their last copy
+    ]
+
     # Data
 #    process.nanoSequence   = cms.Sequence(process.slimmedMuons + process.nanoSequence + process.V0Sequence + process.V0ForMuonFakeTables)
     process.nanoSequence   = cms.Sequence(process.nanoSequence + process.V0Sequence + process.V0Tables + process.DiMuProdSequence + process.DiMuTables )
