@@ -1,0 +1,6 @@
+/JPsiMuMu_JPsiNoFilter_2MuPtEtaFilter_TuneCP5_13p6TeV-pythia8-evtgen/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v15-v3/MINIAODSIM
+#/JPsito2Mu_JPsiFilter_2MuFilter_TuneCP5_13p6TeV_pythia8
+/Jpsito2Mu_JpsiPT8_TuneCP5_13p6TeV_pythia8/Run3Summer23MiniAODv4-MUO_POG_130X_mcRun3_2023_realistic_v14-v2/MINIAODSIM
+
+
+#Missing something like /BToJpsi_JPsiToMuMu_BMuonFilter_HardQCD_TuneCP5_13TeV-pythia8-evtgen/
