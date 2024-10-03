@@ -32,10 +32,10 @@ def nanoAOD_customizeMesons_Run3(process):
     process.photonTable.variables.z_calo = Var("superCluster().seed().position().z()",float,doc="photon supercluster position on calorimeter, z coordinate (cm)",precision=10),
 
     process.genParticleTable.src = "prunedGenParticles"
-    process.genParticleTable.variables.pt.precision=Var("pt",  float, precision=-1)
-    process.genParticleTable.variables.phi.precision=Var("phi",  float, precision=-1)
-    process.genParticleTable.variables.eta.precision=Var("eta",  float, precision=-1)
-    process.genParticleTable.variables.mass.precision=Var("mass",  float, precision=-1)
+    process.genParticleTable.variables.pt=Var("pt",  float, precision=-1)
+    process.genParticleTable.variables.phi=Var("phi",  float, precision=-1)
+    process.genParticleTable.variables.eta=Var("eta",  float, precision=-1)
+    process.genParticleTable.variables.mass=Var("mass",  float, precision=-1)
 
     finalGenParticles.select +=[
         "keep (4 <= abs(pdgId) <= 5) && statusFlags().isLastCopy()", # BTV: keep b/c quarks in their last copy
