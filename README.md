@@ -3,9 +3,9 @@
 *==================  below is for Run3 =================
 
 
-scram p CMSSW_13_0_10
+scram p CMSSW_13_0_13
 
-cd CMSSW_13_0_10/src/
+cd CMSSW_13_0_13/src/
 
 cmsenv
 
