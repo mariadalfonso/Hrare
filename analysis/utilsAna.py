@@ -5,6 +5,28 @@ import sys
 import json
 import os
 
+lumisMgamma={
+    '12016': 19.52, #APV #(B-F for 2016 pre)
+    '22016': 16.80, #postVFP
+    '2016': 35.9,
+    '2017': 41.5,
+    '12017': 7.7, #(F for 2017)
+    '2018': 59.70,
+    '12018': 39.54,
+    'all': 86.92,      #19.52 + 7.7 + 59.70
+}
+
+lumisJpsiCC={
+    '12016': 19.52, #APV #(B-F for 2016 pre)
+    '22016': 16.80, #postVFP
+    '2017': 41.5,
+    '2018': 59.70,
+    '12022':7.98, # C-D
+    '22022':26.67, # E, F, G
+    '12023':17.794, #C
+    '22023':9.451, #D
+}
+
 def loadUserCode():
     print('loadUserCode()')
     ROOT.gSystem.AddDynamicPath("./.")
@@ -47,6 +69,8 @@ def loadCorrectionSet(year):
 
 def loadJSON(fIn):
 
+#    print('JSON=',fIn)
+
     if not os.path.isfile(fIn):
         print("JSON file %s does not exist" % fIn)
         return
@@ -66,13 +90,22 @@ def loadJSON(fIn):
             ROOT.jsonMap[int(k)] = vec
 
 def readDataQuality(year):
+    print('HELLO readDataQuality', year)
     dirJson = "./config"
-    if(year == 2018):
+    if(year == '2018'):
         loadJSON("{}/cert/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt".format(dirJson))
-    if(year == 2017):
+    if(year == '2017'):
         loadJSON("{}/cert/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt".format(dirJson))
-    if(year == 22016 or year == 12016):
+    if(year == '22016' or year == '12016'):
         loadJSON("{}/cert/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
+    if(year == '12022'):
+        loadJSON("{}/cert/Cert_Collisions2022_355100_357900_eraBCD_Golden.json".format(dirJson))
+    if(year == '22022'):
+        loadJSON("{}/cert/Cert_Collisions2022_359022_362760_eraEFG_Golden.json".format(dirJson))
+    if(year == '12023'):
+        loadJSON("{}/cert/Cert_Collisions2023_366403_369802_eraBC_Golden.json".format(dirJson))
+    if(year == '22023'):
+        loadJSON("{}/cert/Cert_Collisions2023_369803_370790_eraD_Golden.json".format(dirJson))
 
 ## I have two here
 def findDIR(directory,useXROOTD=False):
@@ -129,30 +162,98 @@ def listDir(isT2,xrdpath):
     print(len(rootFiles))
     return rootFiles
 
-def BuildDictJpsiCC():
+def BuildDictJpsiCC(year):
 
     # cross section from  https://cms-gen-dev.cern.ch/xsdb  (normally in /fb)
     useXcache=False
     isT2=False
-    dirNameSig="/data/submit/cms/store/user/mariadlf/nano/GluGluH_HJPsiCC/NANOAOD_D04"
-    dirNameData="/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D04/BPH/2018/"
-    dirNameBKG="/data/submit/kyoon/D04/"
+    dirNameSig="/ceph/submit/data/group/cms/store/user/mariadlf/nano/"
+    #    dirNameSig="/data/submit/cms/store/user/mariadlf/nano/GluGluH_HJPsiCC/NANOAOD_D04"
+    dirNameData="/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D04/BPH/"
+    dirNameData2="/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D04-MoreTRG/BPH/"
+    dirNameBKG="/ceph/submit/data/user/k/kyoon/D04/"
     dirNameBKG2="/data/submit/mariadlf/D04/"
-    campaignv1="RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM"
-    campaignv2="RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM"
+    dirNameBKG3="/ceph/submit/data/user/m/mariadlf/Hrare_psiCC/D05/"
+#    campaignv1="RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM"
+#    campaignv2="RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM"
+    campaign = ""
+    if(year == '2018'): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
+    if(year == '2017'): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
+    if(year == '22016'): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
+    if(year == '12016'): campaign = "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*"
+    if(year == '12022'): campaign = "Run3Summer22MiniAODv4-validDigi_130X_mcRun3_2022_realistic_v5*"
 
     thisdict = {
-        -1: (findDIR(dirNameData+"Charmonium+RunA"),-1),
-        -2: (findDIR(dirNameData+"Charmonium+RunB"),-1),
-        -3: (findDIR(dirNameData+"Charmonium+RunC"),-1),
-        -4: (findDIR(dirNameData+"Charmonium+RunD"),-1),
-        10: (findDIR(dirNameBKG+"JpsiToMuMu_JpsiPt8_TuneCP5_13TeV-pythia8+"+campaignv2),868900.0*1000*0.0593), # BR for Jpsi to MuMu 5.93% (PHYTHIA was forced all with JpsiMuMu) + from cards filterEff = 0.26 and total xsection (30560000.0)
-        11: (findDIR(dirNameBKG+"BToJpsi_JPsiToMuMu_BMuonFilter_HardQCD_TuneCP5_13TeV-pythia8-evtgen+"+campaignv1),146300.0*1000), # EvtJen has exclusive processes
+        12: (findDIR(dirNameBKG3+"InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8+"+campaign),55960000000.0*1000),
+        10: (findDIR(dirNameBKG+"JpsiToMuMu_JpsiPt8_TuneCP5_13TeV-pythia8+"+campaign),868900.0*1000*0.0593), # BR for Jpsi to MuMu 5.93% (PHYTHIA was forced all with JpsiMuMu) + from cards filterEff = 0.26 and total xsection (30560000.0)
+        11: (findDIR(dirNameBKG+"BToJpsi_JPsiToMuMu_BMuonFilter_HardQCD_TuneCP5_13TeV-pythia8-evtgen+"+campaign),146300.0*1000), # EvtJen has exclusive processes
 #        12: (findDIR(dirNameBKG2+"BuToJpsiK_BMuonFilter_TuneCP5_13TeV-pythia8-evtgen+"+campaignv2),21930000.0*1000),
 #        12: (findDIR(dirNameBKG2+"BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen+"+campaignv1),4207000.0*1000),        # there are 3 datasets with extentions
 #        13: (findDIR(dirNameBKG2+"LambdaBToJpsiLambda_JpsiToMuMu_TuneCP5_13TeV-pythia8-evtgen+"+campaignv1),2148000.0*1000),
-        1000: (findDIR(dirNameSig),48580*2*0.00001*0.0593) # 48580 is the ggH xsec, 0.0593 is the BR for rhe Jpsi->mumu, 2 x 10^-5 is the BR from the theorists
+        1000: (findDIR(dirNameSig+"GluGluH_HJPsiCC/NANOAOD_D04"),48580*2*0.00001*0.0593), # 48580 is the ggH xsec, 0.0593 is the BR for rhe Jpsi->mumu, 2 x 10^-5 is the BR from the theorists
+        1001: (findDIR(dirNameSig+"ZJets_ZJPsiCC/NANOAOD_D04"),(6067*1000*10.09)*2*0.00001*0.0593) # 6067 is the NNLO DYJetsToLL_M-50 xsec 10.09 is to correct the BR ToLL, 0.0593 is the BR for rhe Jpsi->mumu, 2 x 10^-5 is the BR for the HIggs to be checked later
     }
+
+    if(year == '12016'):
+        dict_ = {
+            -1: (findDIR(dirNameData2+str(year)+"/Charmonium+RunB-ver1"),-1),
+            -2: (findDIR(dirNameData2+str(year)+"/Charmonium+RunB-ver2"),-1),
+            -3: (findDIR(dirNameData2+str(year)+"/Charmonium+RunC"),-1),
+            -4: (findDIR(dirNameData2+str(year)+"/Charmonium+RunD"),-1),
+            -5: (findDIR(dirNameData2+str(year)+"/Charmonium+RunE"),-1),
+            -6: (findDIR(dirNameData2+str(year)+"/Charmonium+RunF"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(year == '22016'):
+        dict_ = {
+            -6: (findDIR(dirNameData2+str(year)+"/Charmonium+RunF"),-1),
+            -7: (findDIR(dirNameData2+str(year)+"/Charmonium+RunG"),-1),
+            -8: (findDIR(dirNameData2+str(year)+"/Charmonium+RunH"),-1),
+            }
+        thisdict.update(dict_)
+
+    if(year == '2018' or year == '2017'):
+        dict_ = {
+            -1: (findDIR(dirNameData2+str(year)+"/Charmonium+RunA"),-1),
+            -2: (findDIR(dirNameData2+str(year)+"/Charmonium+RunB"),-1),
+            -3: (findDIR(dirNameData2+str(year)+"/Charmonium+RunC"),-1),
+            -4: (findDIR(dirNameData2+str(year)+"/Charmonium+RunD"),-1),
+            -5: (findDIR(dirNameData2+str(year)+"/Charmonium+RunE"),-1),
+            -6: (findDIR(dirNameData2+str(year)+"/Charmonium+RunF"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(year == '12022'):
+        dict_ = {
+            -13: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*+RunC"),-1),
+            -14: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*+RunD"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(year == '22022'):
+        dict_ = {
+            -15: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*+RunE"),-1),
+            -16: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*+RunF"),-1),
+            -17: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*+RunG"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(year == '12023'):
+        dict_ = {
+            -21: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*v1+RunC"),-1),
+            -22: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*v2+RunC"),-1),
+            -23: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*v3+RunC"),-1),
+            -24: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*v4+RunC"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(year == '22023'):
+        dict_ = {
+            -31: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*v1+RunD"),-1),
+            -32: (findDIR(dirNameData2+str(year)+"/ParkingDoubleMuonLowMass*v2+RunD"),-1),
+        }
+        thisdict.update(dict_)
 
     #BToJpsi
     #https://github.com/cms-data/GeneratorInterface-EvtGenInterface/blob/master/incl_BtoJpsi_mumu.dec
@@ -222,8 +323,8 @@ def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv,isBPH):
         if (PDType== "Tau"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)
         elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)    # MC seems the same
 
-    if(year == 2018 and isBPH):
-        if (PDType== "Charmonium"): TRIGGER=getTriggerFromJson(overall, "isBPH", year)
+    if(isBPH):
+        if (PDType== "Charmonium" or PDType=="ParkingDoubleMuonLowMass"): TRIGGER=getTriggerFromJson(overall, "isBPH", year)
         elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isBPH", year)    # MC seems the same
 
     if(year == 2017 and isVBF):

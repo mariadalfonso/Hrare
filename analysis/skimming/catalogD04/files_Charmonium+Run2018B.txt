@@ -466,3 +466,4 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D04/Charmonium+Run2018B-UL20
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D04/Charmonium+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/FDB42432-163E-C847-A58C-3D8450D9AC72.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D04/Charmonium+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/FDF1E0F1-D9E7-B541-911F-9CEAB1109996.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D04/Charmonium+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/FE7D44EB-53D0-D547-AD7D-5ECB01C2E9E3.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D04/Charmonium+Run2018B-UL2018_MiniAODv2-v1+MINIAOD/85045026-31C3-3D4B-96E6-E008B04F80B8.root
