@@ -3,9 +3,9 @@
 *==================  below is for Run3 =================
 
 
-scram p CMSSW_13_0_10
+scram p CMSSW_13_0_13
 
-cd CMSSW_13_0_10/src/
+cd CMSSW_13_0_13/src/
 
 cmsenv
 
@@ -21,15 +21,14 @@ https://gitlab.cern.ch/cms-nanoAOD/nanoaod-doc/-/wikis/Releases/NanoAODv12
 | Run3Summer22EE | 130X_mcRun3_2022_realistic_postEE_v6 | Run3 |
 | Run3Summer23 | 130X_mcRun3_2023_realistic_v14 | Run3_2023 |
 | Run3Summer23BPix | 130X_mcRun3_2023_realistic_postBPix_v2 | Run3_2023 |
-
 | 2022-CDE | 130X_dataRun3_Prompt_v3 | Run3 |
 | 2022-FG |  130X_dataRun3_PromptAnalysis_v1  | Run3 |
 | 2023-BCD | 130X_dataRun3_PromptAnalysis_v1 | Run3 |
 
-# PPD pointers
-# Run2022  https://docs.google.com/presentation/d/1F4ndU7DBcyvrEEyLfYqb29NGkBPs20EAnBxe_l7AEII/edit
-# Run2023  https://docs.google.com/presentation/d/1TjPem5jX0fzqvTGl271_nQFoVBabsrdrO0i8Qo1uD5E/edit#slide=id.g289f499aa6b_2_58
-# see status of production here https://pdmv-pages.web.cern.ch/run_3_data/full_table.html
+* PPD pointers
+* Run2022  https://docs.google.com/presentation/d/1F4ndU7DBcyvrEEyLfYqb29NGkBPs20EAnBxe_l7AEII/edit
+* Run2023  https://docs.google.com/presentation/d/1TjPem5jX0fzqvTGl271_nQFoVBabsrdrO0i8Qo1uD5E/edit#slide=id.g289f499aa6b_2_58
+* see status of production here https://pdmv-pages.web.cern.ch/run_3_data/full_table.html
 
 # cmsDriver Options
 --customise=Hrare/NanoAOD/nano_cff.nanoAOD_customizeMesonsRun3
