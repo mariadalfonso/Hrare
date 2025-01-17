@@ -16,10 +16,10 @@ AF="MIT-daskgateway"
 #MIT
 if AF=="MIT-dask" or AF=="MIT-daskgateway" or AF=="MIT": myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AFTEST/'
 #FNAL-EAF
-#if AF=="EAF-daskgateway": myDir = '/home/dalfonso/Hrare/analysis/AFTEST/'
+if AF=="EAF-daskgateway": myDir = '/home/dalfonso/Hrare/analysis/AFTEST/'
 #Purdue
-#if AF=="Purdue": myDir = '/home/dalfonso-cern/Hrare/analysis/AFTEST/'
-#if AF=="cern-dask" or AF=="cern-spark": myDir = '/eos/user/d/dalfonso/SWAN_projects/Hrare/JULY_exp/'
+if AF=="Purdue": myDir = '/home/dalfonso-cern/Hrare/analysis/AFTEST/'
+if AF=="cern-dask" or AF=="cern-spark": myDir = '/eos/user/d/dalfonso/SWAN_projects/Hrare/JULY_exp/'
 
 sys.path.insert(0, myDir)
 
@@ -448,6 +448,7 @@ if __name__ == "__main__":
             else:
                 if AF=="MIT-dask": outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster_Dask.root"
                 elif AF=="MIT-daskgateway": outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster_Gateway.root"
+                else: outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster.root"
 
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
         myfile.ls()
