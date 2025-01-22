@@ -2667,3 +2667,13 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/ffcba97c-dac2-409b-af1a-cfdb12db141b.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/ffd1ec0a-dcd8-46d6-bac1-edd1475ee08c.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/ffde75ca-bbb4-4403-9a87-7dcdbffa0c06.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/21a099f7-3231-4b0e-a523-2b98e5576ee3.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/acf4e255-9547-428c-8d9d-df43f37caff2.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/ba4c6ffb-ef8b-4d2c-8d3d-9d54bd14d85b.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/bf93b220-87c6-4326-bf62-3265ab6a9a56.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/cad37358-632f-4e2e-bd73-8da0a8d472b1.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/cb1d559a-1523-410b-918f-7a21bef26ac4.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/d2ca958b-b5df-45f4-b9c4-eee3f2286d5f.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/d2cb9645-3dce-442d-a3e9-93c0e5ec0e15.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/d8439995-5af0-4e43-936c-fa33b1c96589.root
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2022F-22Sep2023-v1+MINIAOD/e11eaf31-822c-494e-8c9d-3ccf81213649.root

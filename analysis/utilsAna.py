@@ -191,7 +191,7 @@ def BuildDictJpsiCC(year):
 #        12: (findDIR(dirNameBKG2+"BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen+"+campaignv1),4207000.0*1000),        # there are 3 datasets with extentions
 #        13: (findDIR(dirNameBKG2+"LambdaBToJpsiLambda_JpsiToMuMu_TuneCP5_13TeV-pythia8-evtgen+"+campaignv1),2148000.0*1000),
         1000: (findDIR(dirNameSig+"GluGluH_HJPsiCC/NANOAOD_D04"),48580*2*0.00001*0.0593), # 48580 is the ggH xsec, 0.0593 is the BR for rhe Jpsi->mumu, 2 x 10^-5 is the BR from the theorists
-        1001: (findDIR(dirNameSig+"ZJets_ZJPsiCC/NANOAOD_D04"),(6067*1000*10.09)*2*0.00001*0.0593) # 6067 is the NNLO DYJetsToLL_M-50 xsec 10.09 is to correct the BR ToLL, 0.0593 is the BR for rhe Jpsi->mumu, 2 x 10^-5 is the BR for the HIggs to be checked later
+        1001: (findDIR(dirNameSig+"ZJets_ZJPsiCC/NANOAOD_D04"),(6067*1000*10.09)*7.3*0.00001*0.0593) # 6067 is the NNLO DYJetsToLL_M-50 xsec 10.09 is to correct the BR ToLL, 0.0593 is the BR for rhe Jpsi->mumu, 7.3 x 10^-5 is the BR
     }
 
     if(year == '12016'):

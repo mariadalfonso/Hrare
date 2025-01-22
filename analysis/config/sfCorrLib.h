@@ -72,7 +72,7 @@ MyCorrections::MyCorrections(int year) {
   if(year == 12022) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
   if(year == 22022) corrNameLUM = "Collisions2022_359022_362760_eraEFG_GoldenJson";
   if(year == 12023) corrNameLUM = "Collisions2023_366403_369802_eraBC_GoldenJson";
-  if(year == 12023) corrNameLUM = "Collisions2023_369803_370790_eraD_GoldenJson";
+  if(year == 22023) corrNameLUM = "Collisions2023_369803_370790_eraD_GoldenJson";
 
   auto csetPU = correction::CorrectionSet::from_file(fileNameLUM);
   puSF_ = csetPU->at(corrNameLUM);
@@ -81,8 +81,8 @@ MyCorrections::MyCorrections(int year) {
   auto csetPH = correction::CorrectionSet::from_file(fileNamePH);
   std::string corrNamePH = "Photon-ID-SF";
   std::string corrNamePH2 = "Photon-PixVeto-SF";
-  if(year == 2018 or year == 2017 or year == 12016 or 22016) corrNamePH = "UL-Photon-ID-SF";
-  if(year == 2018 or year == 2017 or year == 12016 or 22016) corrNamePH2 = "UL-Photon-PixVeto-SF";
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) corrNamePH = "UL-Photon-ID-SF";
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) corrNamePH2 = "UL-Photon-PixVeto-SF";
   photonSF_ = csetPH->at(corrNamePH);
   photonPixVetoSF_ = csetPH->at(corrNamePH2);
   // note scale and smearing need to be applied in Run3 from the JSON file
@@ -90,11 +90,11 @@ MyCorrections::MyCorrections(int year) {
   const std::string fileNameELE = dirName+"EGM/"+subDirName+"electron.json.gz";
   auto csetELE = correction::CorrectionSet::from_file(fileNameELE);
   std::string corrNameEGM = "Electron-ID-SF";
-  if(year == 2018 or year == 2017 or year == 12016 or 22016) corrNameEGM = "UL-Electron-ID-SF";
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) corrNameEGM = "UL-Electron-ID-SF";
   electronSF_ = csetELE->at(corrNameEGM);
 
   std::string fileNameMU = dirName+"MUO/"+subDirName+"muon_Z_v2.json.gz";
-  if(year == 2018 or year == 2017 or year == 12016 or 22016) fileNameMU = "config/POG/MUO/"+subDirName+"muon_Z.json.gz";
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) fileNameMU = "config/POG/MUO/"+subDirName+"muon_Z.json.gz";
   if(year == 12022) fileNameMU = dirName+"MUO/"+"2022_27Jun2023/"+"muon_Z.json.gz";
   if(year == 22022) fileNameMU = dirName+"MUO/"+"2022EE_27Jun2023/"+"muon_Z.json.gz";
 

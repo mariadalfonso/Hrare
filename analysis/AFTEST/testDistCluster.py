@@ -4,15 +4,24 @@ import sys
 import os
 from datetime import datetime
 
+
+#AF="MIT"
+#AF="MIT-dask"
+AF="MIT-daskgateway"
+#AF="EAF-daskgateway"
+#AF="Purdue"
+#AF="cern-dask"
+#AF="cern-spark"
+
 #MIT
-myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AFTEST'
+if AF=="MIT-dask" or AF=="MIT-daskgateway" or AF=="MIT": myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/AFTEST/'
 #FNAL-EAF
-#myDir = '/home/dalfonso/Hrare/analysis/AFTEST'
+if AF=="EAF-daskgateway": myDir = '/home/dalfonso/Hrare/analysis/AFTEST/'
 #Purdue
-#myDir = '/home/dalfonso-cern/Hrare/analysis/AFTEST'
+if AF=="Purdue": myDir = '/home/dalfonso-cern/Hrare/analysis/AFTEST/'
+if AF=="cern-dask" or AF=="cern-spark": myDir = '/eos/user/d/dalfonso/SWAN_projects/Hrare/JULY_exp/'
 
 sys.path.insert(0, myDir)
-
 
 from utilsAna import pickTRG,findDIR,getMesonFromJson,getMVAFromJson
 from utilsAna import loadUserCode, loadCorrectionSet, loadUserCodeGateway
@@ -24,10 +33,6 @@ doLocalCluster=False
 
 doLocalDisk=True
 doRemoteAccess=False
-
-#AF="MIT-dask"
-AF="MIT-daskgateway"
-
 
 ###-----------------------------------------
 ###-----------------------------------------
@@ -79,19 +84,33 @@ lumis={
 ###-----------------------------------------
 ###-----------------------------------------
 
+def initSpark():
+    from pathlib import Path
+    from pyspark import SparkFiles
+    print('loadUserCode.h')
+    localdir = SparkFiles.getRootDirectory()
+    lib_path = Path(localdir) / "functions.h"
+#    lib_path = Path(localdir) / "myLibrary.h"
+    ROOT.gInterpreter.ProcessLine(f'#include "{lib_path}"')
+#    ROOT.gInterpreter.Declare(f'#include "{lib_path}"')
+    loadCorrectionSet(2018)
+
 def init():
 
-    if AF=="MIT-daskgateway":
-        loadUserCodeGateway("functions.h")
-        loadUserCodeGateway("sfCorrLib.h")
-    else:
+    if doINTERACTIVE or doLocalCluster:
         loadUserCode()
         loadCorrectionSet(2018)
-#    readDataQuality(2018)
+    else:
+        if AF=="MIT-daskgateway"  or AF=="Purdue" or AF=="EAF-daskgateway":
+            loadUserCodeGateway("functions.h")
+#            loadUserCodeGateway("sfCorrLib.h") # comment becuase of #include "correction.h"
+        else:
+            loadUserCode()
+            loadCorrectionSet(2018)
+            #    readDataQuality(2018)
 
 ###-----------------------------------------
 ###-----------------------------------------
-
 
 if doINTERACTIVE:
     ROOT.ROOT.EnableImplicitMT()
@@ -99,19 +118,22 @@ if doINTERACTIVE:
     RunGraphs = ROOT.RDF.RunGraphs
 else:
 #    import pkg_resources
+
+    if AF=="cern-spark":
+        import pyspark
+        RDataFrame = ROOT.RDF.Experimental.Distributed.Spark.RDataFrame # for CERN
+    else:
+        RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+    RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
     if doLocalCluster:
         print('Hello doing Local Cluster')
-        RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
-        RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
         from utilsDask import create_local_connection
     else:
 #
-        from utilsDask import create_DaskGateway_MIT
         if AF=="MIT-dask": from utilsDask import create_remote_Dask
         elif AF=="MIT-daskgateway": from utilsDask import create_DaskGateway_MIT
-        RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
-        RunGraphs = ROOT.RDF.Experimental.Distributed.RunGraphs
-#        from utilsDask import client
+        elif AF=="EAF-daskgateway": from utilsDask import create_EAF_connection
+        elif AF=="Purdue": from utilsDask import create_Purdue_connection
 
 def makeRDF(files):
 
@@ -133,23 +155,44 @@ def makeRDF(files):
         else:
 
             #Create the client
-            if AF=="MIT-dask": client = create_remote_Dask()
-            elif AF=="MIT-daskgateway":
-                client = create_DaskGateway_MIT()
-                client.upload_file("utilsAna.py")
+            if AF=="cern-spark":
+                sc.addPyFile(myDir+"utilsAna.py")
+            else:
+                if AF=="MIT-dask": client = create_remote_Dask()
+                elif AF=="MIT-daskgateway": client = create_DaskGateway_MIT()
+                elif AF=="EAF-daskgateway": client = create_EAF_connection()
+                elif AF=="cern-dask":
+                    from dask.distributed import Client
+                    client = Client("tls://10.100.18.182:31037")
+                client.upload_file(myDir+"utilsAna.py")
+
             print(client)
             NPARTITIONS=5 # assuming one launch 10 Graphs (10*30 = 200 cores)
 
             #Create the RDF and initialize user lib
-            df = RDataFrame("Events", files, daskclient=client, npartitions=NPARTITIONS)
-            if AF=="MIT-daskgateway":
+            if AF=="cern-spark":
+                df = RDataFrame("Events", files, sparkcontext=sc, npartitions=NPARTITIONS) # at CERN
+            else:
+                df = RDataFrame("Events", files, daskclient=client, npartitions=NPARTITIONS)
+
+            if AF=="cern-spark" or AF=="cern-dask":
                 df._headnode.backend.distribute_unique_paths(
                     [
-                        "../config/functions.h",
-#                        "../config/sfCorrLib.h",
+                        myDir+"config/functions.h",
                     ]
                 )
-            ROOT.RDF.Experimental.Distributed.initialize(init)
+            else:
+                df._headnode.backend.distribute_unique_paths(
+                    [
+                        myDir+"../config/functions.h",
+#                        myDir+"../config/sfCorrLib.h",
+                    ]
+                )
+
+            if AF=="cern-spark":
+                ROOT.RDF.Experimental.Distributed.initialize(initSpark)
+            else:
+                ROOT.RDF.Experimental.Distributed.initialize(init)
 
     return df
     
@@ -323,6 +366,7 @@ def loopRemoteDataset():
 
     year=2018
     mc = [1017,1010,10,11,12,13,14]
+#    mc = []
 
     for sampleNOW in mc:
         files = SwitchSample(thisdict,sampleNOW)[0]
@@ -333,6 +377,7 @@ def loopRemoteDataset():
         analysis(files,year,sampleNOW,sumW)
 
     data = [-62,-63,-64]
+#    data = []
 
     for datasetNumber in data:
         files = SwitchSample(thisdict,datasetNumber)[0]
@@ -379,8 +424,13 @@ if __name__ == "__main__":
     now = datetime.now()
     print('==> very beginning: ',now)
 
-    if doLocalDisk: loopOnDatasetLocalMIT()
-    elif doRemoteAccess: loopRemoteDataset()
+    try:
+        if doLocalDisk: loopOnDatasetLocalMIT()
+        elif doRemoteAccess: loopRemoteDataset()
+    except:
+        print("exception caught, sleeping for 10 minutes")
+        import time
+        time.sleep(600)
 
 
     if True:
@@ -398,6 +448,7 @@ if __name__ == "__main__":
             else:
                 if AF=="MIT-dask": outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster_Dask.root"
                 elif AF=="MIT-daskgateway": outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster_Gateway.root"
+                else: outputFileHisto = "DASKlogs/histoOUTname_test_RemoteCluster.root"
 
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
         myfile.ls()

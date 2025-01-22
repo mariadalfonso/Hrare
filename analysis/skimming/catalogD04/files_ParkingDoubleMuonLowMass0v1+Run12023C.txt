@@ -617,4 +617,4 @@ root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2023C-22Sep2023_v1-v1+MINIAOD/fdc53d3d-3724-47eb-8051-7c9d3bf1d20d.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2023C-22Sep2023_v1-v1+MINIAOD/fe439bbb-84dc-492e-9719-7face1a4c76c.root
 root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2023C-22Sep2023_v1-v1+MINIAOD/ff4dfea5-710b-4b3e-a63a-88b634fc48ac.root
-
+root://xrootd.cmsaf.mit.edu//store/user/paus/nanohr/D05/ParkingDoubleMuonLowMass0+Run2023C-22Sep2023_v1-v1+MINIAOD/68f7b5c2-0e89-46ea-ac2d-7d3c8e6978dc.root
