@@ -1286,7 +1286,7 @@ MesonProducer::getD0ToKPi(const edm::Event& iEvent,
 		       const pat::PackedCandidate& ikaon,
 		       const pat::PackedCandidate& ipion)
 {
-  float ptPhotonSignal_ = 5.;
+  float ptPhotonSignal_ = 3.; // based on Marti's plots
   float signalCone_ = 0.05; // to collect the pi0
 
   pat::CompositeCandidate d0Cand;
