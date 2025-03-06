@@ -2,8 +2,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
-//#include "FWCore/Framework/interface/EDProducer.h"
+//#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -221,8 +221,8 @@ using namespace std;
 ///                             P L U G I N
 ///////////////////////////////////////////////////////////////////////////
 
-class DiMuonProducer : public edm::stream::EDProducer<> {
-//class DiMuonProducer : public edm::EDProducer {
+//class DiMuonProducer : public edm::stream::EDProducer<> {
+class DiMuonProducer : public edm::EDProducer {
 
 public:
     
@@ -364,11 +364,11 @@ private:
 };
 
 DiMuonProducer::DiMuonProducer(const edm::ParameterSet &iConfig):
-//theTTBuilderToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
-theTTBuilderToken_(esConsumes<>(edm::ESInputTag("", "TransientTrackBuilder"))),
+theTTBuilderToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
+//theTTBuilderToken_(esConsumes<>(edm::ESInputTag("", "TransientTrackBuilder"))),
 theTTBuilder_(nullptr),
-//idealMagneticFieldRecordToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
-idealMagneticFieldRecordToken_(esConsumes<>()),
+idealMagneticFieldRecordToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+//idealMagneticFieldRecordToken_(esConsumes<>()),
 magField_(nullptr),
 beamSpotToken_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
 beamSpot_(nullptr),
