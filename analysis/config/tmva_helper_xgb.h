@@ -1,6 +1,12 @@
 #ifndef HELPER_TMVA_H
 #define HELPER_TMVA_H
 
+// ROOT                                                                                                                                                                                                                                                                                                                  
+#include "ROOT/RVec.hxx"
+
+using Vec_f = ROOT::VecOps::RVec<float>;
+
+
 class tmva_helper_xgb {
     public:
         tmva_helper_xgb(const std::string &filename, const std::string &name, const unsigned &nvars, const unsigned int nslots = 1) :

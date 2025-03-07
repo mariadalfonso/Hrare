@@ -2,7 +2,7 @@ import ROOT
 
 ROOT.EnableThreadSafety()
 
-ROOT.gInterpreter.ProcessLine('#include "config/helper_tmva.h"')
+ROOT.gInterpreter.ProcessLine('#include "config/tmva_helper_xgb.h"')
 
 class TMVAHelperXGB():
 
@@ -38,29 +38,35 @@ class TMVAHelperXGB():
 #        df = df.Define(col_name, self.tmva_helper, [self.var_col])
         return df
 
-ROOT.gInterpreter.ProcessLine('#include "config/tmva_helper_xml.h"')
+ROOT.gInterpreter.ProcessLine('#include "./config/tmva_helper_xml.h"')
 
 class TMVAHelperXML():
 
     def __init__(self, model_input, model_name=""):
         model_tmp = ROOT.TMVA.Experimental.RReader(model_input)
-        self.variables = [str(var) for var in model_tmp.GetVariableNames()] 
+        self.variables = [str(var) for var in model_tmp.GetVariableNames()]
         self.model_input = model_input
         self.model_name = model_name
-        self.nthreads = ROOT.GetThreadPoolSize() 
+        self.nthreads = ROOT.GetThreadPoolSize()
+        print('self.nthreads',self.nthreads)
 
         self.tmva_helper = ROOT.tmva_helper_xml(self.model_input, self.nthreads)
         self.var_col = f"tmva_vars_{self.model_name}"
 
+#    def run_inference(self, df, doInteractive, col_name = "mva_score"):
     def run_inference(self, df, col_name = "mva_score"):
 
+        doInteractive=True
         # check if columns exist in the dataframe
-        cols = df.GetColumnNames()
-        for var in self.variables:
-            if not var in cols:
-                raise Exception(f"Variable {var} not defined in dataframe.")
+
+        if doInteractive:
+            cols = df.GetColumnNames()
+            for var in self.variables:
+                if not var in cols:
+                    raise Exception(f"Variable {var} not defined in dataframe.")
 
         vars_str = ', '.join(self.variables)
         df = df.Define(self.var_col, f"ROOT::VecOps::RVec<float>{{{vars_str}}}")
-        df = df.DefineSlot(col_name, self.tmva_helper, [self.var_col])
+        if doInteractive: df = df.DefineSlot(col_name, self.tmva_helper, [self.var_col])
+        else: df = df.Define(col_name, self.tmva_helper, [self.var_col])
         return df

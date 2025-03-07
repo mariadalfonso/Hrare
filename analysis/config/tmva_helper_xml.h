@@ -1,6 +1,10 @@
 #ifndef tmva_xml_h
 #define tmva_xml_h
 
+// ROOT
+#include "ROOT/RVec.hxx"
+
+
 using Vec_f = ROOT::VecOps::RVec<float>;
 
 class tmva_xml {
@@ -24,7 +28,8 @@ class tmva_xml {
             fReader->BookMVA(name, filename.c_str());
 
         }
-
+        ~tmva_xml() {};
+  
         std::vector<float> Compute(const Vec_f &x) {
 
             if (x.size() != fVariables.size())
@@ -70,6 +75,9 @@ class tmva_xml {
 #ifndef tmva_helper_xml_h
 #define tmva_helper_xml_h
 
+// ROOT                                                                                                                                                                                           
+#include "ROOT/RVec.hxx"
+
 using Vec_f = ROOT::VecOps::RVec<float>;
 
 class tmva_helper_xml {
@@ -84,8 +92,9 @@ class tmva_helper_xml {
             }
         }
 
-        std::vector<float> operator()(unsigned int slot, const Vec_f vars) {
-			return interpreters_[slot]->Compute(vars);
+    ~tmva_helper_xml() {};
+    std::vector<float> operator()(unsigned int slot, const Vec_f vars) {
+ 			return interpreters_[slot]->Compute(vars);
         }
 
     private:

@@ -62,6 +62,9 @@ def loadPolarizationTree(mc,year):
 def loadtmvahelper():
     print('loadtmvahelper()')
     ROOT.gInterpreter.ProcessLine('#include "./config/tmva_helper_xml.h"')
+    print('./config/tmva_helper_xml.h')
+    ROOT.gInterpreter.ProcessLine('#include "./config/tmva_helper_xgb.h"')
+    print('./config/tmva_helper_xgb.h')
 
 def loadCorrectionSet(year):
     print('loadCorrectionSet()')
