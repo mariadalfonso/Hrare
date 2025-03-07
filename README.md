@@ -44,6 +44,7 @@ cd CMSSW_10_6_27/src/
 cmsenv
 
 ~git clone git@github.com:mariadalfonso/Hrare.git --branch D02~
+
 git clone git@github.com:mariadalfonso/Hrare.git --branch D06Run2
 
 # nanoV9 GT and campaigns for data and MC
