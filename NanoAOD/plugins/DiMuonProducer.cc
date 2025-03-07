@@ -2,7 +2,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
+//#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -220,7 +221,8 @@ using namespace std;
 ///                             P L U G I N
 ///////////////////////////////////////////////////////////////////////////
 
-class DiMuonProducer : public edm::stream::EDProducer<> {
+//class DiMuonProducer : public edm::stream::EDProducer<> {
+class DiMuonProducer : public edm::EDProducer {
 
 public:
     
@@ -241,6 +243,8 @@ private:
   bool isGoodPair(const pat::PackedCandidate& track1,
 		  const pat::PackedCandidate& track2);
     
+  bool match_to_muon(const pat::PackedCandidate& pfCand, const pat::Muon & patMuon);
+
   float
   trackImpactParameterSignificance( const pat::PackedCandidate& track);
   
@@ -360,9 +364,11 @@ private:
 };
 
 DiMuonProducer::DiMuonProducer(const edm::ParameterSet &iConfig):
-theTTBuilderToken_(esConsumes<>(edm::ESInputTag("", "TransientTrackBuilder"))),
+theTTBuilderToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
+//theTTBuilderToken_(esConsumes<>(edm::ESInputTag("", "TransientTrackBuilder"))),
 theTTBuilder_(nullptr),
-idealMagneticFieldRecordToken_(esConsumes<>()),
+idealMagneticFieldRecordToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+//idealMagneticFieldRecordToken_(esConsumes<>()),
 magField_(nullptr),
 beamSpotToken_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
 beamSpot_(nullptr),
@@ -397,6 +403,7 @@ minVtxProb_( iConfig.getParameter<double>( "minVtxProb" ) )
 {
     produces<pat::CompositeCandidateCollection>("Jpsi");
     produces<pat::CompositeCandidateCollection>("Upsilon");
+    produces<pat::PackedCandidateCollection>("PFCandNoMeson");
 }
 
 bool DiMuonProducer::isGoodTrack(const pat::PackedCandidate& track){
@@ -514,9 +521,45 @@ DiMuonProducer::fillInfo(pat::CompositeCandidate& v0Cand,
   v0Cand.addUserFloat( "leadingCharged3dSignMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,0.9,0.4,0,  9)); //minPt and DR=0.4 as for muons
   v0Cand.addUserFloat( "leadingChargedDxyMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  10)); //minPt and DR=0.4 as for muons
   v0Cand.addUserFloat( "leadingChargedDzMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,    0.9,0.4,0,  11)); //minPt and DR=0.4 as for muons
+  //
+  v0Cand.addUserFloat( "leadingChargedEtaMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  12)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedPhiMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  13)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedChargeMaxPt1", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  14)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedEtaMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  15)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedPhiMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  16)); //minPt and DR=0.4 as for muons
+  v0Cand.addUserFloat( "leadingChargedChargeMaxPt2", computeCandIsolation(cand1,cand2,pvIndex,   0.9,0.4,0,  17)); //minPt and DR=0.4 as for muons
 
-  v0Cand.addUserInt( "muon1_isTightMuon", (pvIndex!=-1) ? cand1.isTightMuon((*primaryVertices_).at(pvIndex)): false );
-  v0Cand.addUserInt( "muon2_isTightMuon", (pvIndex!=-1) ? cand2.isTightMuon((*primaryVertices_).at(pvIndex)): false );
+  auto b_p4 = cand1.p4()+cand2.p4();
+  auto b_dir = GlobalVector(b_p4.x(),b_p4.y(),b_p4.z());
+  auto vtx_point = (*primaryVertices_).at(pvIndex);
+
+  v0Cand.addUserInt( "muon1_isTightMuon", (pvIndex!=-1) ? cand1.isTightMuon(vtx_point): false );
+  v0Cand.addUserInt( "muon2_isTightMuon", (pvIndex!=-1) ? cand2.isTightMuon(vtx_point): false );
+
+  v0Cand.addUserFloat( "muon1_dz", cand1.innerTrack()->dz(vtx_point.position()));
+  v0Cand.addUserFloat( "muon2_dz", cand2.innerTrack()->dz(vtx_point.position()));
+  v0Cand.addUserFloat( "muon1_dxy", cand1.innerTrack()->dxy(vtx_point.position()));
+  v0Cand.addUserFloat( "muon2_dxy", cand2.innerTrack()->dxy(vtx_point.position()));
+
+  const reco::TransientTrack trackCand_1((*(cand1.bestTrack())), (magField_));
+  auto signedIP3d_1 = IPTools::signedImpactParameter3D(trackCand_1, b_dir, vtx_point);
+  v0Cand.addUserFloat( "muon1_Sip3dSig", signedIP3d_1.second.significance());
+  v0Cand.addUserFloat( "muon1_Sip3dVal", signedIP3d_1.second.value());
+  auto signedIP2d_1 = IPTools::signedTransverseImpactParameter(trackCand_1, b_dir, vtx_point);
+  v0Cand.addUserFloat( "muon1_Sip2dSig", signedIP2d_1.second.significance());
+  v0Cand.addUserFloat( "muon1_Sip2dVal", signedIP2d_1.second.value());
+  auto jetdist_1 = IPTools::jetTrackDistance(trackCand_1, b_dir, vtx_point);
+  v0Cand.addUserFloat( "muon1_DistVal", jetdist_1.second.value());
+
+  const reco::TransientTrack trackCand_2((*(cand2.bestTrack())), (magField_));
+  auto signedIP3d_2 = IPTools::signedImpactParameter3D(trackCand_2, b_dir, vtx_point);
+  v0Cand.addUserFloat( "muon2_Sip3dSig", signedIP3d_2.second.significance());
+  v0Cand.addUserFloat( "muon2_Sip3dVal", signedIP3d_2.second.value());
+  auto signedIP2d_2 = IPTools::signedTransverseImpactParameter(trackCand_2, b_dir, vtx_point);
+  v0Cand.addUserFloat( "muon2_Sip2dSig", signedIP2d_2.second.significance());
+  v0Cand.addUserFloat( "muon2_Sip2dVal", signedIP2d_2.second.value());
+  auto jetdist_2 = IPTools::jetTrackDistance(trackCand_2, b_dir, vtx_point);
+  v0Cand.addUserFloat( "muon2_DistVal", jetdist_2.second.value());
 
   if (isMC_){
     auto gen_tt = getGenMatchInfo( cand1, cand2 );
@@ -630,18 +673,16 @@ namespace {
 
 }
 
-/*
-namespace{
-  int match_to_muon(const pat::PackedCandidate& pfCand,
-		    const std::vector<pat::Muon>& muons){
-    if ( abs(pfCand.pdgId())!=13 ) return -1;
-    for ( unsigned int i=0; i<muons.size(); ++i ){
-      if ( deltaR(muons.at(i), pfCand) < 0.01 ) return i;
-    }
-    return -1;
-  }
+bool DiMuonProducer::match_to_muon(const pat::PackedCandidate& pfCand,
+				   const pat::Muon & patMuon){
+
+  if ( abs(pfCand.pdgId())!=13 ) return false;
+  float delta = abs((patMuon.p4()-pfCand.p4()).mag());
+  if( (patMuon.pdgId()==pfCand.pdgId()) and delta < 0.005) return true;
+  // possibly add the DR
+
+  return false;
 }
-*/
 
 void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
@@ -684,8 +725,14 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     // Output collection
     auto jpsis = std::make_unique<pat::CompositeCandidateCollection>();
     auto upsilons = std::make_unique<pat::CompositeCandidateCollection>();
+    auto pfCandNoMeson = std::make_unique<pat::PackedCandidateCollection>();
 
     // Build V0 candidates first from Muon Collections
+
+    int idx1=-1;
+    int idx2=-1;
+
+    auto nPFCands = pfCands_->size();
 
     if ( nMuons > 1 ){
       for ( unsigned int i = 0; i < nMuons; ++i ) {
@@ -718,16 +765,24 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
 	  if (jpsiCand.numberOfDaughters() > 0){
 	    jpsiCand.addUserFloat( "doca", tt_doca);
 	    jpsis->push_back(jpsiCand);
-	  }
 
-	  // Upsilon
-	  auto upsilonCand = getUpsilonToMuMu(iEvent, patMuon1, patMuon2);
-	  if (upsilonCand.numberOfDaughters() > 0){
-	    upsilonCand.addUserFloat( "doca", tt_doca);
-	    upsilons->push_back(upsilonCand);
+	    for ( unsigned int k = 0; k < nPFCands; ++k ) {
+	      const pat::PackedCandidate& pfCand( (*pfCandHandle_)[k] );
+	      if(match_to_muon(pfCand, patMuon1)) idx1 = k;
+	      if(match_to_muon(pfCand, patMuon2)) idx2 = k;
+	    }
 	  }
 
 	}
+      }
+    }
+
+    for ( unsigned int k = 0; k < nPFCands; ++k ) {
+      const pat::PackedCandidate& pfCand( (*pfCandHandle_)[k] );
+      if(idx1!=-1 and idx1!=-1) {
+	if(int(k)!=idx1 and int(k)!=idx2) pfCandNoMeson->push_back(pfCand);
+      } else {
+	pfCandNoMeson->push_back(pfCand);
       }
     }
 
@@ -763,6 +818,7 @@ void DiMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     
     iEvent.put(std::move(jpsis), "Jpsi");
     iEvent.put(std::move(upsilons), "Upsilon");
+    iEvent.put(std::move(pfCandNoMeson), "PFCandNoMeson");
 
 }
 
@@ -1033,12 +1089,18 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
     float dzForMaxPt1(-999.);
     float signedIP2dSignMaxPt1(-999.);
     float signedIP3dSignMaxPt1(-999.);
+    float etaForMaxPt1(-999.);
+    float phiForMaxPt1(-999.);
+    float chargeForMaxPt1(-999.);
 
     float maxPt2(0);
     float dxyForMaxPt2(-999.);
     float dzForMaxPt2(-999.);
     float signedIP2dSignMaxPt2(-999.);
     float signedIP3dSignMaxPt2(-999.);
+    float etaForMaxPt2(-999.);
+    float phiForMaxPt2(-999.);
+    float chargeForMaxPt2(-999.);
 
     auto b_p4 = muon1.p4()+muon2.p4();
     auto b_dir = GlobalVector(b_p4.x(),b_p4.y(),b_p4.z());
@@ -1061,6 +1123,9 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
 	//	if (pfCandIso.vertexRef().key()!=primaryVertexIndex) continue; // check what happens for displaced
 	if (pfCandIso.pt() > maxPt1 ) {
 	  maxPt1 = pfCandIso.pt();
+	  etaForMaxPt1 = pfCandIso.eta();
+	  phiForMaxPt1 = pfCandIso.phi();
+	  chargeForMaxPt1 = pfCandIso.charge();
 	  if (returnType==4) {
 	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), (magField_));
 	    auto signedIP3d = IPTools::signedImpactParameter3D(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
@@ -1076,6 +1141,9 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
 	  }
 	} else if (pfCandIso.pt() > maxPt2) {
 	  maxPt2 = pfCandIso.pt();
+	  etaForMaxPt2 = pfCandIso.eta();
+	  phiForMaxPt2 = pfCandIso.phi();
+	  chargeForMaxPt2 = pfCandIso.charge();
 	  if (returnType==9) {
 	    const reco::TransientTrack trackCand((*(pfCandIso.bestTrack())), (magField_));
 	    auto signedIP3d = IPTools::signedImpactParameter3D(trackCand, b_dir, (*primaryVertices_).at(primaryVertexIndex));
@@ -1112,6 +1180,14 @@ DiMuonProducer::computeCandIsolation(const pat::Muon& muon1, const pat::Muon& mu
     else if (returnType==9) return signedIP3dSignMaxPt2;
     else if (returnType==10) return dxyForMaxPt2;
     else if (returnType==11) return dzForMaxPt2;
+
+    else if (returnType==12) return etaForMaxPt1;
+    else if (returnType==13) return phiForMaxPt1;
+    else if (returnType==14) return chargeForMaxPt1;
+    else if (returnType==15) return etaForMaxPt2;
+    else if (returnType==16) return phiForMaxPt2;
+    else if (returnType==17) return chargeForMaxPt2;
+
     return b_p4.pt()/(b_p4.pt()+sumPt);
 }
 

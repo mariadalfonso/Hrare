@@ -24,6 +24,9 @@
 <use   name="TrackingTools/Records"/>
 <use   name="CommonTools/CandUtils"/>
 <use   name="TrackingTools/IPTools"/>
+<use   name="DataFormats/BTauReco"/>
+<use   name="DataFormats/VertexReco"/>
+<use   name="RecoBTag/FeatureTools"/>
 <use   name="PhysicsTools/PatAlgos"/>
 <use   name="Hrare/NanoAOD"/>
 <library   file="*.cc" name="HrareNanoAODPlugins">
