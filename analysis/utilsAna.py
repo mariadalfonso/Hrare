@@ -14,6 +14,10 @@ lumisMgamma={
     '2018': 59.70,
     '12018': 39.54,
     'all': 86.92,      #19.52 + 7.7 + 59.70
+    '12022':7.98, # C-D
+    '22022':26.67, # E, F, G
+    '12023':17.794, #C
+    '22023':9.451, #D
 }
 
 lumisJpsiCC={
@@ -25,6 +29,19 @@ lumisJpsiCC={
     '22022':26.67, # E, F, G
     '12023':17.794, #C
     '22023':9.451, #D
+}
+
+xsecRun2={
+    'ggH':48580,
+    'VBFH':3781.7,
+    'Z':61216030, #(6067*1000*10.09) ## 6067 is the NNLO DYJetsToLL_M-50 xsec 10.09 is to correct the BR ToLL,
+}
+
+#https://arxiv.org/pdf/2402.09955
+xsecRun3={
+    'ggH':52230, # 0.4 × σ(13 TeV) + 0.6 × σ(14 TeV)
+    'VBFH':4078,
+    'Z':61216030, # same as Run2 for now
 }
 
 def loadUserCode():
@@ -44,7 +61,7 @@ def loadPolarizationTree(mc,year):
 
 def loadtmvahelper():
     print('loadtmvahelper()')
-    ROOT.gInterpreter.ProcessLine('#include "./tmva_helper_xml.h"')
+    ROOT.gInterpreter.ProcessLine('#include "./config/tmva_helper_xml.h"')
 
 def loadCorrectionSet(year):
     print('loadCorrectionSet()')
@@ -92,19 +109,19 @@ def loadJSON(fIn):
 def readDataQuality(year):
     print('HELLO readDataQuality', year)
     dirJson = "./config"
-    if(year == '2018'):
+    if(str(year) == '2018'):
         loadJSON("{}/cert/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt".format(dirJson))
-    if(year == '2017'):
+    if(str(year) == '2017'):
         loadJSON("{}/cert/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt".format(dirJson))
-    if(year == '22016' or year == '12016'):
+    if(str(year) == '22016' or year == '12016'):
         loadJSON("{}/cert/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
-    if(year == '12022'):
+    if(str(year) == '12022'):
         loadJSON("{}/cert/Cert_Collisions2022_355100_357900_eraBCD_Golden.json".format(dirJson))
-    if(year == '22022'):
+    if(str(year) == '22022'):
         loadJSON("{}/cert/Cert_Collisions2022_359022_362760_eraEFG_Golden.json".format(dirJson))
-    if(year == '12023'):
+    if(str(year) == '12023'):
         loadJSON("{}/cert/Cert_Collisions2023_366403_369802_eraBC_Golden.json".format(dirJson))
-    if(year == '22023'):
+    if(str(year) == '22023'):
         loadJSON("{}/cert/Cert_Collisions2023_369803_370790_eraD_Golden.json".format(dirJson))
 
 ## I have two here
@@ -190,8 +207,8 @@ def BuildDictJpsiCC(year):
 #        12: (findDIR(dirNameBKG2+"BuToJpsiK_BMuonFilter_TuneCP5_13TeV-pythia8-evtgen+"+campaignv2),21930000.0*1000),
 #        12: (findDIR(dirNameBKG2+"BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen+"+campaignv1),4207000.0*1000),        # there are 3 datasets with extentions
 #        13: (findDIR(dirNameBKG2+"LambdaBToJpsiLambda_JpsiToMuMu_TuneCP5_13TeV-pythia8-evtgen+"+campaignv1),2148000.0*1000),
-        1000: (findDIR(dirNameSig+"GluGluH_HJPsiCC/NANOAOD_D04"),48580*2*0.00001*0.0593), # 48580 is the ggH xsec, 0.0593 is the BR for rhe Jpsi->mumu, 2 x 10^-5 is the BR from the theorists
-        1001: (findDIR(dirNameSig+"ZJets_ZJPsiCC/NANOAOD_D04"),(6067*1000*10.09)*7.3*0.00001*0.0593) # 6067 is the NNLO DYJetsToLL_M-50 xsec 10.09 is to correct the BR ToLL, 0.0593 is the BR for rhe Jpsi->mumu, 7.3 x 10^-5 is the BR
+        1000: (findDIR(dirNameSig+"GluGluH_HJPsiCC/NANOAOD_D04"),xsecRun2['ggH']*2*0.00001*0.0593), # 2 x 10^-5 is the BR from the theorists
+        1001: (findDIR(dirNameSig+"ZJets_ZJPsiCC/NANOAOD_D04"),xsecRun2['Z']*7.3*0.00001*0.0593) # 0.0593 is the BR for rhe Jpsi->mumu, 7.3 x 10^-5 is the BR
     }
 
     if(year == '12016'):
@@ -277,8 +294,8 @@ def BuildDictMgamma():
     campaignFIX = "RunIISummer20UL18MiniAODv2-4cores5k_106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM/"
 
     thisdict = {
-        1010: (listDir(isT2,dirName+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv1),3781.7*0.49),
-        1017: (listDir(isT2,dirName+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv3),48580*0.49),
+        1010: (listDir(isT2,dirName+"VBF_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv1),xsecRun2['VBFH']*0.49),
+        1017: (listDir(isT2,dirName+"GluGlu_HToPhiGamma_M125_TuneCP5_PSWeights_13TeV_powheg_pythia8+"+campaignv3),xsecRun2['ggH']*0.49),
         10: (listDir(isT2,dirName+"GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),18540.0*1000*1.26), #LO *1.26
         11: (listDir(isT2,dirName+"GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignFIX),8644.0*1000*1.26), #LO *1.26
         12: (listDir(isT2,dirName+"GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8+"+campaignv2),2183.0*1000*1.26), #LO *1.26
@@ -288,6 +305,87 @@ def BuildDictMgamma():
         -63: (listDir(isT2,dirName+"Tau+Run2018C-UL2018_MiniAODv2-v1+MINIAOD"),-1),
         -64: (listDir(isT2,dirName+"Tau+Run2018D-UL2018_MiniAODv2-v1+MINIAOD"),-1)
     }
+
+    return thisdict
+
+def BuildDictMgammaRun3(year):
+
+    # Run3 xsection from https://xsecdb-xsdb-official.app.cern.ch/xsdb/
+    dirCeph = '/ceph/submit/data/user/m/mariadlf/Hrare_gammaM/D05/2024/'
+    dirCephGroup = '/ceph/submit/data/group/cms/store/user/mariadlf/D05/'
+    dirNameDataSkims = '/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D05/Zinv/'
+
+    isT2=True
+    dirName = "/store/user/paus/nanohr/D05/"
+    campaign = ""
+    #if(year == '2018'): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
+    #if(year == '2017'): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
+    #if(year == '22016'): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
+    #if(year == '12016'): campaign = "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*"
+
+    if(str(year) == '12022'): campaign = "Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_*"
+    if(str(year) == '22022'): campaign = "Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_*"
+    if(str(year) == '12023'): campaign = "Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14*"
+    if(str(year) == '22023'): campaign = "Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v*"
+
+    print(campaign,'campaign')
+    sampleName = 'G-4Jets'
+    if (str(year) == '12023' or str(year) == '22023'): sampleName = 'GJ-4Jets'
+
+    # need to be the xsection
+    thisdict = {
+        1010: (findDIR(dirCeph+"VBFHphigamma"),xsecRun3['VBFH']*0.49),
+        1020: (findDIR(dirCeph+"VBFHrhogamma"),xsecRun3['VBFH']),
+        1030: (findDIR(dirCeph+"VBFHkstgamma"),xsecRun3['VBFH']*(2./3)),
+        1040: (findDIR(dirCeph+"VBFHDstgamma"),xsecRun3['VBFH']*0.0389),
+        #
+        1017: (findDIR(dirCeph+"ggHphigamma"),xsecRun3['ggH']*0.49),
+        1027: (findDIR(dirCeph+"ggHrhogamma"),xsecRun3['ggH']),
+        1037: (findDIR(dirCeph+"ggHkstgamma"),xsecRun3['ggH']*(2./3)),
+        1047: (findDIR(dirCeph+"ggHDstgamma"),xsecRun3['ggH']*0.0389),
+        #
+        1019: (findDIR(dirCeph+"Zphigamma_MadGraph"),xsecRun3['Z']*0.49),
+        1029: (findDIR(dirCeph+"Zrhogamma_MadGraph"),xsecRun3['Z']),
+        1039: (findDIR(dirCeph+"Zkstgamma"),xsecRun3['Z']*(2./3)),
+        1049: (findDIR(dirCeph+"ZDstgamma"),xsecRun3['Z']*0.0389),
+        9: (findDIR(dirCephGroup+sampleName+"_HT-40to70_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),15310*1000*1.26), #LO *1.26
+        10: (findDIR(dirCephGroup+sampleName+"_HT-70to100_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),8111.0*1000*1.26), #LO *1.26
+        11: (findDIR(dirCephGroup+sampleName+"_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),7373.0*1000*1.26), #LO *1.26
+        12: (findDIR(dirCephGroup+sampleName+"_HT-200to400_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),1539.0*1000*1.26), #LO *1.26
+        13: (findDIR(dirCephGroup+sampleName+"_HT-400to600_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),167.7*1000*1.26), #LO *1.26
+        14: (findDIR(dirCephGroup+sampleName+"_HT-600_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),54.48*1000*1.26) #LO *1.26
+    }
+
+    if(str(year) == '12022'):
+        dict_ = {
+            -61: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunC"),-1),
+            -62: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunD"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(str(year) == '22022'):
+        dict_ = {
+            -63: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunE"),-1),
+            -64: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunF"),-1),
+            -65: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunG"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(str(year) == '12023'):
+        dict_ = {
+            -61: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv1"),-1),
+            -62: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv2"),-1),
+            -63: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv3"),-1),
+            -64: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv4"),-1),
+        }
+        thisdict.update(dict_)
+
+    if(str(year) == '22023'):
+        dict_ = {
+            -65: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunDv1"),-1),
+            -66: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunDv2"),-1),
+        }
+        thisdict.update(dict_)
 
     return thisdict
 
@@ -305,6 +403,9 @@ def computeWeigths(rdf,xsec):
 
     weight = xsec / genEventSumWeight
 
+    lumiEq = (genEventSumNoWeight / xsec)
+    print("lumi equivalent fb %s" %lumiEq)
+
     # neglecting the lumi
     #    weight = (1./genEventSumWeight)
     print('weight',weight)
@@ -319,9 +420,12 @@ def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv,isBPH):
         elif (PDType== "Tau"): TRIGGER="{0} and not {1}".format(getTriggerFromJson(overall, "isZinv", year),getTriggerFromJson(overall, "isVBF", year))
         elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isVBFor", year)   # MC seems the same
 
-    if(year == 2018 and isZinv):
+    if((year == 2018 or year == 12022 or year == 22022 or year == 12023 or year == 22023) and isZinv):
+        print('hello')
         if (PDType== "Tau"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)
         elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isZinv", year)    # MC seems the same
+        print('PDType=',PDType)
+        print('year=',year)
 
     if(isBPH):
         if (PDType== "Charmonium" or PDType=="ParkingDoubleMuonLowMass"): TRIGGER=getTriggerFromJson(overall, "isBPH", year)

@@ -78,6 +78,7 @@ MyCorrections::MyCorrections(int year) {
   puSF_ = csetPU->at(corrNameLUM);
 
   const std::string fileNamePH = dirName+"EGM/"+subDirName+"photon.json.gz";
+
   auto csetPH = correction::CorrectionSet::from_file(fileNamePH);
   std::string corrNamePH = "Photon-ID-SF";
   std::string corrNamePH2 = "Photon-PixVeto-SF";
@@ -93,41 +94,50 @@ MyCorrections::MyCorrections(int year) {
   if(year == 2018 or year == 2017 or year == 12016 or year == 22016) corrNameEGM = "UL-Electron-ID-SF";
   electronSF_ = csetELE->at(corrNameEGM);
 
-  std::string fileNameMU = dirName+"MUO/"+subDirName+"muon_Z_v2.json.gz";
-  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) fileNameMU = "config/POG/MUO/"+subDirName+"muon_Z.json.gz";
-  if(year == 12022) fileNameMU = dirName+"MUO/"+"2022_27Jun2023/"+"muon_Z.json.gz";
-  if(year == 22022) fileNameMU = dirName+"MUO/"+"2022EE_27Jun2023/"+"muon_Z.json.gz";
+  std::cout << " ELE done " << std::endl;
+
+  std::string fileNameMU = dirName+"MUO/"+subDirName+"muon_Z.json.gz";
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) fileNameMU = dirName+"MUO/"+subDirName+"muon_Z_v2.json.gz";
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) fileNameMU = "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/POG/MUO/"+subDirName+"muon_Z.json.gz";
 
   auto csetMu = correction::CorrectionSet::from_file(fileNameMU);
-  muonTRKSF_ = csetMu->at("NUM_TrackerMuons_DEN_genTracks");
-  muonIDTSF_ = csetMu->at("NUM_TightID_DEN_genTracks");
-  muonIDMSF_ = csetMu->at("NUM_MediumID_DEN_genTracks");
-  muonISOTSF_ = csetMu->at("NUM_TightRelIso_DEN_TightIDandIPCut");
-  muonISOLSF_ = csetMu->at("NUM_LooseRelIso_DEN_MediumID");
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) {
+    muonTRKSF_ = csetMu->at("NUM_TrackerMuons_DEN_genTracks");
+    muonIDTSF_ = csetMu->at("NUM_TightID_DEN_genTracks");
+    muonIDMSF_ = csetMu->at("NUM_MediumID_DEN_genTracks");
+    muonISOTSF_ = csetMu->at("NUM_TightRelIso_DEN_TightIDandIPCut");
+    muonISOLSF_ = csetMu->at("NUM_LooseRelIso_DEN_MediumID");
+  }
 
-  const std::string fileNameJEC = dirName+"JME/"+subDirName+"jet_jerc.json.gz";
-  auto csetJEC = correction::CorrectionSet::from_file(fileNameJEC);
+  std::cout << " MUO to do for Run3 " << std::endl;
 
-  std::string tagName = "Summer19"+dataName+"_V5_MC_L1L2L3Res_AK4PFchs";
-  if(year == 22016 or year == 12016) tagName = "Summer19"+dataName+"_V7_MC_L1L2L3Res_AK4PFchs";
-  if(year == 12022)  tagName = "Summer22_22Sep2023_V2_MC_L1L2L3Res_AK4PFPuppi";
-  if(year == 22022)  tagName = "Summer22EE_22Sep2023_V2_MC_L1L2L3Res_AK4PFPuppi";
-  // likely also the data are needed for 2022
-  JEC_ = csetJEC->compound().at(tagName);
+  if(year == 2018 or year == 2017 or year == 12016 or year == 22016) {
+    const std::string fileNameJEC = dirName+"JME/"+subDirName+"jet_jerc.json.gz";
+    auto csetJEC = correction::CorrectionSet::from_file(fileNameJEC);
 
-  std::string tagNameUnc = "Summer19"+dataName+"_V5_MC_Total_AK4PFchs";
-  if(year == 22016 or year == 12016) tagNameUnc = "Summer19"+dataName+"_V7_MC_Total_AK4PFchs";
-  if(year == 12022)  tagNameUnc = "Summer22_22Sep2023_V2_MC_L1L2L3Res_AK4PFPuppi";
-  if(year == 22022)  tagNameUnc = "Summer22EE_22Sep2023_V2_MC_Total_AK4PFPuppi";
-  jesUnc_ = csetJEC->at(tagNameUnc);
+    std::string tagName = "Summer19"+dataName+"_V5_MC_L1L2L3Res_AK4PFchs";
+    if(year == 22016 or year == 12016) tagName = "Summer19"+dataName+"_V7_MC_L1L2L3Res_AK4PFchs";
+    if(year == 12022)  tagName = "Summer22_22Sep2023_V2_MC_L1L2L3Res_AK4PFPuppi";
+    if(year == 22022)  tagName = "Summer22EE_22Sep2023_V2_MC_L1L2L3Res_AK4PFPuppi";
+    // likely also the data are needed for 2022
+    JEC_ = csetJEC->compound().at(tagName);
 
-  std::string tagNameR = "Summer19"+dataName+"_JRV2_MC_PtResolution_AK4PFchs";
-  if(year == 22016 or year == 12016) tagNameR = "Summer20"+dataName+"_JRV3_MC_PtResolution_AK4PFchs";
-  JER_ = csetJEC->at(tagNameR);
+    std::string tagNameUnc = "Summer19"+dataName+"_V5_MC_Total_AK4PFchs";
+    if(year == 22016 or year == 12016) tagNameUnc = "Summer19"+dataName+"_V7_MC_Total_AK4PFchs";
+    if(year == 12022)  tagNameUnc = "Summer22_22Sep2023_V2_MC_L1L2L3Res_AK4PFPuppi";
+    if(year == 22022)  tagNameUnc = "Summer22EE_22Sep2023_V2_MC_Total_AK4PFPuppi";
+    jesUnc_ = csetJEC->at(tagNameUnc);
 
-  std::string tagNameRsf = "Summer19"+dataName+"_JRV2_MC_ScaleFactor_AK4PFchs";
-  if(year == 22016 or year == 12016) tagNameRsf = "Summer20"+dataName+"_JRV3_MC_ScaleFactor_AK4PFchs";
-  JERsf_ = csetJEC->at(tagNameRsf);
+    std::string tagNameR = "Summer19"+dataName+"_JRV2_MC_PtResolution_AK4PFchs";
+    if(year == 22016 or year == 12016) tagNameR = "Summer20"+dataName+"_JRV3_MC_PtResolution_AK4PFchs";
+    JER_ = csetJEC->at(tagNameR);
+
+    std::string tagNameRsf = "Summer19"+dataName+"_JRV2_MC_ScaleFactor_AK4PFchs";
+    if(year == 22016 or year == 12016) tagNameRsf = "Summer20"+dataName+"_JRV3_MC_ScaleFactor_AK4PFchs";
+    JERsf_ = csetJEC->at(tagNameRsf);
+
+  }
+  std::cout << " JEC to do for Run3 " << std::endl;
 
   /*
   // veto the jet

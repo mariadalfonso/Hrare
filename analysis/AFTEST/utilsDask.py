@@ -4,7 +4,7 @@ import time
 
 def create_Purdue_connection():
 
-    print("inside create_remote_connection")
+    print("inside create_Purdue_connection")
     import dask_gateway
     from dask_gateway import Gateway
     from distributed import Client
@@ -18,6 +18,13 @@ def create_Purdue_connection():
     )
     print(gateway)
 
+    cluster_name = "cms.34bb23f7ce344c29951f0cd536bf390c"
+    client = gateway.connect(cluster_name).get_client()
+
+    print(client)
+    return client
+
+    '''
     clusters = gateway.list_clusters()
     cluster_name = clusters[0].name
     print("cluster_name",cluster_name)
@@ -27,10 +34,9 @@ def create_Purdue_connection():
     print("options.worker_memory",options.worker_memory)
     print("options.environment",options.environment)
 
-
     # Create the cluster                                                                                                                                                                                
     cluster = gateway.new_cluster(
-        conda_env = "/depot/cms/kernels/root632", # path to conda env
+        conda_env = "/depot/cms/kernels/python3", # path to conda env
         worker_cores = 1,    # cores per worker
         worker_memory = 10,   # memory per worker in GB
         env = dict(os.environ), # pass environment as a dictionary
@@ -41,8 +47,18 @@ def create_Purdue_connection():
     client = Client(cluster)
     print(client)
     return client
+    '''
 
-def create_DaskGateway_MIT():
+def close_DaskGateway_MIT(gateway):
+
+    clusters = gateway.list_clusters()
+    for cl in clusters:
+        cluster_name = cl.name
+        print("old cluster_name",cluster_name)
+        cluster = gateway.connect(cluster_name)
+        cluster.shutdown()
+
+def create_DaskGateway_MIT(nclusters):
 
     print('HELLO -- inside create_DaskGateway_MIT')
 
@@ -53,10 +69,12 @@ def create_DaskGateway_MIT():
 
     options = gateway.cluster_options()
     options['environment'] = "/work/submit/mariadlf/miniforge3/envs/myenvAF"
-    options['worker_memory'] = 8.0
+    options['worker_memory'] = 2.0
+    options['worker_cores'] = 1
 
     cluster = gateway.new_cluster(options)
-    cluster.scale(10)
+    cluster.scale(nclusters)
+    print('HELLO -- scaling with ',nclusters,' clusters')
 
    # need to close all the old clusters first
     clusters = gateway.list_clusters()

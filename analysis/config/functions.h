@@ -36,6 +36,8 @@ using Vec_i = ROOT::VecOps::RVec<int>;
 using Vec_ui = ROOT::VecOps::RVec<unsigned int>;
 
 using stdVec_i = std::vector<int>;
+using stdVec_b = std::vector<bool>;
+using stdVec_f = std::vector<float>;
 
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<float> > XYZVectorF;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PtEtaPhiMVector;
@@ -43,8 +45,11 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > PxPyPzEVector;
 
 std::unordered_map< UInt_t, std::vector< std::pair<UInt_t,UInt_t> > > jsonMap;
 
-float massTheoK0Star = 0.892;
-float muon_mass=0.10566;
+const float massTheoK0Star_ = 0.892;
+const float muon_mass_ = 0.10566;
+const float electron_mass_ = 0.000548;
+const float pion_mass_ = 0.139570;
+const float pion0_mass_ = 0.1349768;
 const double PI = 3.141592653589793238463;
 
 Vec_b cleaningPair(const ULong64_t event, const UInt_t nK0Star,
@@ -69,7 +74,7 @@ Vec_b cleaningPair(const ULong64_t event, const UInt_t nK0Star,
   // Result vector to store selected elements, pick one element from each pair
   std::vector<unsigned int> selectedElements;
   for (const auto& pair : idxPair) {
-    if (abs(K0Star_kin_mass[pair.first] - massTheoK0Star) < abs(K0Star_kin_mass[pair.second]-massTheoK0Star)) {
+    if (abs(K0Star_kin_mass[pair.first] - massTheoK0Star_) < abs(K0Star_kin_mass[pair.second]-massTheoK0Star_)) {
       selectedElements.push_back(pair.second);
     } else {
       selectedElements.push_back(pair.first);
@@ -328,7 +333,7 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
   float ptCandMax=0;
   PtEtaPhiMVector p_ph(ph_pt[0], ph_eta[0], ph_phi[0], 0);
   unsigned int indexPhoton = 0;
-  stdVec_i idx(2, -1); // initialize with -1 a vector of size 2
+  stdVec_i idx_(2, -1); // initialize with -1 a vector of size 2
 
   if(ph_pt.size()> 1) {
     if(ph_pt[1] > ph_pt[0]) p_ph.SetPt(ph_pt[1]);
@@ -366,11 +371,11 @@ stdVec_i HiggsCandFromRECO(const Vec_f& meson_pt, const Vec_f& meson_eta, const 
     if(ptCandMax < ptWrong2Max) continue; // we want the leading meson to the of the right flavor
     Minv = (p_meson + p_ph).M();
     ptHiggs = (p_meson + p_ph).pt();
-    idx[0] = i;
-    idx[1] = indexPhoton;
+    idx_[0] = i;
+    idx_[1] = indexPhoton;
   }
 
-  return idx;
+  return idx_;
 }
 
 int topology(float eta1, float eta2) {
@@ -445,7 +450,6 @@ float mt(float pt1, float phi1, float pt2, float phi2) {
 Vec_f sum2BodyMass(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1, const Vec_f& m1,
 		   const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
 
-  const float pion_mass_ = 0.139570;
   Vec_f mass(pt1.size());
 
   for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
@@ -465,7 +469,6 @@ float Minv(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m) 
 Vec_f Pair12PT(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
 	       const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
 
-  const float pion_mass_     = 0.139570;
   Vec_f pair(pt1.size(), true);
 
   for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
@@ -479,7 +482,6 @@ Vec_f Pair12PT(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
 Vec_f Pair12ETA(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
 		const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
 
-  const float pion_mass_     = 0.139570;
   Vec_f pair(pt1.size(), true);
 
   for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
@@ -493,7 +495,6 @@ Vec_f Pair12ETA(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
 Vec_f Pair12PHI(const Vec_f& pt1, const Vec_f& eta1, const Vec_f& phi1,
 		const Vec_f& pt2, const Vec_f& eta2, const Vec_f& phi2) {
 
-  const float pion_mass_     = 0.139570;
   Vec_f pair(pt1.size(), true);
 
   for (unsigned int idx = 0; idx < pt1.size(); ++idx) {
@@ -517,15 +518,17 @@ float Minv3massive(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Ve
 
 float Minv3body(const float& jetClose_pt, const float& jetClose_eta, const float& jetClose_phi, const float& jetClose_m,
 		const float& jetFar_pt, const float& jetFar_eta, const float& jetFar_phi, const float& jetFar_m,
-		const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m) {
+		const Vec_f& jpsi_pt, const Vec_f& jpsi_eta, const Vec_f& jpsi_phi, const Vec_f& jpsi_m,
+		unsigned int var) {
 
   PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
   PtEtaPhiMVector jetClose(jetClose_pt, jetClose_eta, jetClose_phi, jetClose_m);
   PtEtaPhiMVector jetFar(jetFar_pt, jetFar_eta, jetFar_phi , jetFar_m);
 
   PtEtaPhiMVector HiggsCand = p_jpsi+jetClose+jetFar;
-  return HiggsCand.M();
-
+  if (var==0) return HiggsCand.M();
+  if (var==1) return HiggsCand.Pt();
+  return 0.;
 }
 
 
@@ -541,8 +544,8 @@ float Minv3massiveCorr(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& j
   const float jetCloseScale_ = 0.90;
 
   float invMass = 0.;
-  PtEtaPhiMVector mu1(muon_pt[jet_muonIdx1], muon_eta[jet_muonIdx1], muon_phi[jet_muonIdx1], muon_mass);
-  PtEtaPhiMVector mu2(muon_pt[jet_muonIdx2], muon_eta[jet_muonIdx2], muon_phi[jet_muonIdx2], muon_mass);
+  PtEtaPhiMVector mu1(muon_pt[jet_muonIdx1], muon_eta[jet_muonIdx1], muon_phi[jet_muonIdx1], muon_mass_);
+  PtEtaPhiMVector mu2(muon_pt[jet_muonIdx2], muon_eta[jet_muonIdx2], muon_phi[jet_muonIdx2], muon_mass_);
   PtEtaPhiMVector p_jpsi(jpsi_pt[0], jpsi_eta[0], jpsi_phi[0], jpsi_m[0]);
 
   // to add is a DR between the two muons
@@ -579,9 +582,9 @@ float Minv3(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m,
   
 }
 
-float PT(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, Vec_i idx) {
-  PtEtaPhiMVector p1(pt[idx[0]], eta[idx[0]], phi[idx[0]], m[idx[0]]);
-  PtEtaPhiMVector p2(pt[idx[1]], eta[idx[1]], phi[idx[1]], m[idx[1]]);
+float PT12(const Vec_f& pt, const Vec_f& eta, const Vec_f& phi, const Vec_f& m, unsigned int idx1, unsigned int idx2) {
+  PtEtaPhiMVector p1(pt[idx1], eta[idx1], phi[idx1], m[idx1]);
+  PtEtaPhiMVector p2(pt[idx2], eta[idx2], phi[idx2], m[idx2]);
   return (p1 + p2).pt();
 }
 
@@ -674,7 +677,6 @@ float compute_HiggsVars_var_VtxCorr(const float mes_pt, const float mes_eta, con
   return theVar;
 
 }
-
 
 float compute_HiggsVars_var(const float mes_pt, const float mes_eta, const float mes_phi, const float mes_mass,
 			    const float ph_pt, const float ph_eta, const float ph_phi,
@@ -1042,12 +1044,12 @@ stdVec_i jetCloseFar(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet
     if (drJetPhi < 0.4 and indexClose==-1) indexClose=idx;
   }
 
-  stdVec_i idx(2, -1); // initialize with -1 a vector of size 2
+  stdVec_i idx_(2, -1); // initialize with -1 a vector of size 2
 
-  idx[0] = indexClose;
-  idx[1] = (indexClose==1) ? 0 : 1 ;
+  idx_[0] = indexClose;
+  idx_[1] = (indexClose==1) ? 0 : 1 ;
 
-  return idx;
+  return idx_;
 
 }
 
@@ -1070,15 +1072,94 @@ float buildCloseJets(const Vec_f& jet_pt, const Vec_f& jet_eta, const Vec_f& jet
 
 }
 
+// BELOW to build the constituents for trainings
 
+unsigned int  buildConstN(const ULong64_t event, const float muon1, const float muon2, const Vec_f& JetPFCands_var, const Vec_i& JetPFCands_jetIdx, const int idx_close) {
 
-/// BELOW all the angles from Charlotte
+  unsigned int indexOfTheFinalJet=2; // to have the offset of two muons
+
+  for (size_t idx = 0; idx < JetPFCands_jetIdx.size(); ++idx) {
+    if(JetPFCands_jetIdx[idx]==idx_close) indexOfTheFinalJet++;
+  }
+
+  return indexOfTheFinalJet;
+}
+
+stdVec_f  buildConstVarJet(const float muon1, const float muon2, const Vec_f& JetPFCands_var, const Vec_f& JetPFCands_jetIdx, const unsigned int idx_close) {
+
+  stdVec_f output;
+
+  for (size_t idx = 0; idx < JetPFCands_jetIdx.size(); ++idx) {
+    if(JetPFCands_jetIdx[idx]==idx_close) {
+      output.push_back(JetPFCands_var[idx]);
+    }
+  }
+
+  return output;
+}
+
+stdVec_f buildConstPDG(const float muon1charge, const float muon2charge, const Vec_f& var, const Vec_f& JetPFCands_candIdx, const Vec_f& JetPFCands_jetIdx, const unsigned int idx_close, const int pid) {
+
+  stdVec_f output;
+  output.push_back(13*muon1charge);
+  output.push_back(13*muon2charge);
+
+  for (size_t idx = 0; idx < JetPFCands_jetIdx.size(); ++idx) {
+    if(JetPFCands_jetIdx[idx]==idx_close) {
+      size_t index_ = JetPFCands_candIdx[idx];
+      output.push_back(float(std::abs(var[index_]) == pid)); // return the PDGid isMu,isEle ...
+    }
+  }
+
+  return output;
+
+}
+
+stdVec_f  buildConstVar(const float muon1, const float muon2, const Vec_f& Cand_var, const Vec_f& JetPFCands_candIdx, const Vec_f& JetPFCands_jetIdx, const unsigned int idx_close, float Jet_var=0, unsigned int varType=-1) {
+
+  stdVec_f output;
+  const float etasign = Jet_var > 0 ? 1 : -1;
+
+  if(varType == -1 or varType == 3) { output.push_back(muon1); output.push_back(muon2); }
+  else if(varType == 0) { output.push_back(std::log(muon1/Jet_var)); output.push_back(std::log(muon2/Jet_var)); }
+  else if(varType == 1) { output.push_back(deltaPhi(muon1,Jet_var)); output.push_back(deltaPhi(muon2,Jet_var)); }
+  else if(varType == 2) { output.push_back(etasign * (muon1 - Jet_var)); output.push_back(etasign * (muon2 - Jet_var)); }
+  else if(varType == 3) { output.push_back(muon_mass_); output.push_back(muon_mass_); }
+
+  for (size_t idx = 0; idx < JetPFCands_jetIdx.size(); ++idx) {
+    if(JetPFCands_jetIdx[idx]==idx_close) {
+      size_t index_ = JetPFCands_candIdx[idx];
+
+	float theVar = 0;
+        if     (varType == -1) theVar = Cand_var[index_];
+	else if(varType == 0) theVar = std::log(Cand_var[index_]/Jet_var); // ptrel_log
+        else if(varType == 1) theVar = deltaPhi(Cand_var[index_],Jet_var); // phirel
+        else if(varType == 2) theVar = etasign * (Cand_var[index_] - Jet_var); // etarel
+	else if(varType == 3) {
+	  if (abs(Cand_var[index_]) == 11 || abs(Cand_var[index_]) == 13 || abs(Cand_var[index_]) == 211) {
+	    theVar = Cand_var[index_] > 0 ? +1 : -1;
+	  }
+	} else if(varType == 4) {
+	  // https://github.com/cms-sw/cmssw/blob/master/DataFormats/ParticleFlowCandidate/interface/PFCandidate.h#L151
+          if (abs(Cand_var[index_]) == 11) theVar = muon_mass_;
+          if (abs(Cand_var[index_]) == 12) theVar = electron_mass_;
+          if (abs(Cand_var[index_]) == 211) theVar = pion_mass_;
+          if (abs(Cand_var[index_]) == 22) theVar = 0;
+        }
+        output.push_back(theVar);
+    }
+  }
+
+  return output;
+
+}
+
+/// BELOW all the angles from Charlotte (initial version)
 
 float azimuthal_plane_plane_angle(const ROOT::Math::SVector<double, 3>& plane1_vec1,
                                  const ROOT::Math::SVector<double, 3>& plane1_vec2,
                                  const ROOT::Math::SVector<double, 3>& plane2_vec1,
                                  const ROOT::Math::SVector<double, 3>& plane2_vec2) {
-
 
    // returns in range [0, pi]
 
@@ -1231,11 +1312,10 @@ float azimuthal_plane_plane_angle_pihalf(const ROOT::Math::SVector<double, 3>& p
  }
 
 
-
 float get_cos_theta_jpsi(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta,float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
 
-   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
-   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass_);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass_);
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
    PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
@@ -1264,8 +1344,8 @@ float get_cos_theta_jpsi(float muon1_pt, float muon1_eta, float muon1_phi, float
 
 float get_cos_theta_dicharm(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float  c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
 
-   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
-   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass_);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass_);
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
    PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
@@ -1297,8 +1377,8 @@ float get_cos_theta_dicharm(float muon1_pt, float muon1_eta, float muon1_phi, fl
 
 float get_phi1(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
 
-   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
-   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass_);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass_);
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
    PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
@@ -1331,8 +1411,8 @@ float get_phi1(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt,
 
 float get_phi2(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
 
-   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
-   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass_);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass_);
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
    PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
@@ -1409,8 +1489,8 @@ float get_phi4(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt,
 
    // azimuthal angle between charm decay plane and muon decay plane (cplane_muonplane_angle_az)
 
-   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
-   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass_);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass_);
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
    PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
@@ -1443,8 +1523,8 @@ float get_phi4(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt,
 
 float get_cos_delta_m_min(float muon1_pt, float muon1_eta, float muon1_phi, float muon2_pt, float muon2_eta, float muon2_phi, float c1_pt, float c1_eta, float c1_phi, float c1_mass, float c2_pt, float c2_eta, float c2_phi, float c2_mass, float jpsi_pt, float jpsi_eta, float jpsi_phi, float jpsi_mass) {
 
-   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass);
-   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass);
+   PtEtaPhiMVector muon1_tlv(muon1_pt, muon1_eta, muon1_phi, muon_mass_);
+   PtEtaPhiMVector muon2_tlv(muon2_pt, muon2_eta, muon2_phi, muon_mass_);
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
    PtEtaPhiMVector c2_tlv(c2_pt, c2_eta, c2_phi, c2_mass);
@@ -1487,9 +1567,9 @@ float get_cos_delta_m(float muon1_pt, float muon1_eta, float muon1_phi, float mu
 
    PtEtaPhiMVector neg_muon_tlv;
    if (muon1_charge < 0){
-       neg_muon_tlv = PtEtaPhiMVector(muon1_pt, muon1_eta, muon1_phi, muon_mass);}
+       neg_muon_tlv = PtEtaPhiMVector(muon1_pt, muon1_eta, muon1_phi, muon_mass_);}
    else{
-       neg_muon_tlv = PtEtaPhiMVector(muon2_pt, muon2_eta, muon2_phi, muon_mass);}
+       neg_muon_tlv = PtEtaPhiMVector(muon2_pt, muon2_eta, muon2_phi, muon_mass_);}
 
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);
@@ -1528,9 +1608,9 @@ float get_cos_delta_m(float muon1_pt, float muon1_eta, float muon1_phi, int muon
 
    PtEtaPhiMVector neg_muon_tlv;
    if (muon1_charge < 0){
-       neg_muon_tlv = PtEtaPhiMVector(muon1_pt, muon1_eta, muon1_phi, muon_mass);}
+       neg_muon_tlv = PtEtaPhiMVector(muon1_pt, muon1_eta, muon1_phi, muon_mass_);}
    else{
-       neg_muon_tlv = PtEtaPhiMVector(muon2_pt, muon2_eta, muon2_phi, muon_mass);}
+       neg_muon_tlv = PtEtaPhiMVector(muon2_pt, muon2_eta, muon2_phi, muon_mass_);}
 
 
    PtEtaPhiMVector c1_tlv(c1_pt, c1_eta, c1_phi, c1_mass);

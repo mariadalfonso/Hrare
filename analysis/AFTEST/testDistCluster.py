@@ -161,6 +161,7 @@ def makeRDF(files):
                 if AF=="MIT-dask": client = create_remote_Dask()
                 elif AF=="MIT-daskgateway": client = create_DaskGateway_MIT()
                 elif AF=="EAF-daskgateway": client = create_EAF_connection()
+                elif AF=="Purdue": client = create_Purdue_connection()
                 elif AF=="cern-dask":
                     from dask.distributed import Client
                     client = Client("tls://10.100.18.182:31037")
