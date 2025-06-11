@@ -77,6 +77,15 @@ def loadCorrectionSet(year):
     ROOT.gInterpreter.Declare('''
         #ifndef MYFUN
         #define MYFUN
+        Vec_f computeJECcorrection(MyCorrections corrSFs, Vec_f jet_pt, Vec_f jet_rawFactor, Vec_f jet_eta, Vec_f jet_phi, Vec_f jet_area, float rho, bool isData, string year){
+        Vec_f new_jet(jet_pt.size(), 1.0);
+        Vec_f raw_jet(jet_pt.size(), 1.0);
+        for (unsigned int idx = 0; idx < jet_pt.size(); ++idx) {
+             raw_jet[idx] = jet_pt[idx] * (1.0 - jet_rawFactor[idx]);
+             new_jet[idx] = raw_jet[idx] * corrSFs.eval_jetCORR(jet_area[idx], jet_eta[idx], jet_phi[idx], raw_jet[idx], rho, isData, year);
+        }
+        return new_jet;
+        }
         Vec_f computeJECuncertainties(MyCorrections corrSFs, Vec_f jet_pt, Vec_f jet_eta){
         Vec_f new_jet_delta(jet_pt.size(), 1.0);
         int type = 0;

@@ -5,9 +5,11 @@ channels:
 dependencies:
   - python=3.11.9
   - root=6.32.08
+  - pandas
+  - py-xgboost
   - pip
   - pip:
-      - correctionlib
+      - correctionlib --no-binary=correctionlib
       - distributed==2025.1.0
       - dask_gateway==2024.1.0
       - matplotlib

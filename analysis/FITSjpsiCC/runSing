@@ -1,0 +1,1 @@
+singularity shell -B /work -B /ceph --nv /work/submit/jaeyserm/software/docker/combine-standalone_v9.2.1.sif
