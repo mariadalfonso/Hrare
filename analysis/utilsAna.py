@@ -74,27 +74,7 @@ def loadCorrectionSet(year):
 #    ROOT.gInterpreter.Declare('#include "config/mysf.h"')
 #    ROOT.gInterpreter.Load("config/mysf.so")
     ROOT.gInterpreter.ProcessLine('auto corr_sf = MyCorrections(%d);' % (year))
-    ROOT.gInterpreter.Declare('''
-        #ifndef MYFUN
-        #define MYFUN
-        Vec_f computeJECcorrection(MyCorrections corrSFs, Vec_f jet_pt, Vec_f jet_rawFactor, Vec_f jet_eta, Vec_f jet_phi, Vec_f jet_area, float rho, bool isData, string year){
-        Vec_f new_jet(jet_pt.size(), 1.0);
-        Vec_f raw_jet(jet_pt.size(), 1.0);
-        for (unsigned int idx = 0; idx < jet_pt.size(); ++idx) {
-             raw_jet[idx] = jet_pt[idx] * (1.0 - jet_rawFactor[idx]);
-             new_jet[idx] = raw_jet[idx] * corrSFs.eval_jetCORR(jet_area[idx], jet_eta[idx], jet_phi[idx], raw_jet[idx], rho, isData, year);
-        }
-        return new_jet;
-        }
-        Vec_f computeJECuncertainties(MyCorrections corrSFs, Vec_f jet_pt, Vec_f jet_eta){
-        Vec_f new_jet_delta(jet_pt.size(), 1.0);
-        int type = 0;
-        for (unsigned int idx = 0; idx < jet_pt.size(); ++idx) new_jet_delta[idx] = corrSFs.eval_jesUnc(jet_eta[idx], jet_pt[idx], type );
-        return new_jet_delta;
-        }
-        #endif
-        '''
-    )
+    ROOT.gInterpreter.Declare('#include "./config/functionsObjCor.h"')
 
 def loadJSON(fIn):
 
@@ -127,14 +107,13 @@ def readDataQuality(year):
         loadJSON("{}/cert/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt".format(dirJson))
     if(str(year) == '22016' or year == '12016'):
         loadJSON("{}/cert/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
-    if(str(year) == '12022'):
-        loadJSON("{}/cert/Cert_Collisions2022_355100_357900_eraBCD_Golden.json".format(dirJson))
-    if(str(year) == '22022'):
-        loadJSON("{}/cert/Cert_Collisions2022_359022_362760_eraEFG_Golden.json".format(dirJson))
-    if(str(year) == '12023'):
-        loadJSON("{}/cert/Cert_Collisions2023_366403_369802_eraBC_Golden.json".format(dirJson))
-    if(str(year) == '22023'):
-        loadJSON("{}/cert/Cert_Collisions2023_369803_370790_eraD_Golden.json".format(dirJson))
+    ##
+    if((str(year) == '12022') or (str(year) == '22022')):
+        loadJSON("{}/cert/Cert_Collisions2022_355100_362760_Golden.json".format(dirJson))
+    if((str(year) == '12023') or (str(year) == '22023')):
+        loadJSON("{}/cert/Cert_Collisions2023_366442_370790_Golden.json".format(dirJson))
+    if(str(year) == '2024'):
+        loadJSON("{}/cert/Cert_Collisions2024_378981_386951_Golden.json".format(dirJson))
 
 ## I have two here
 def findDIR(directory,useXROOTD=False):
@@ -350,11 +329,13 @@ def BuildDictMgammaRun3(year):
         1020: (findDIR(dirCeph+"VBFHrhogamma"),xsecRun3['VBFH']),
         1030: (findDIR(dirCeph+"VBFHkstgamma"),xsecRun3['VBFH']*(2./3)),
         1040: (findDIR(dirCeph+"VBFHDstgamma"),xsecRun3['VBFH']*0.0389),
+        1050: (findDIR(dirCeph+"VBFHomegagamma"),xsecRun3['VBFH']*0.0389),
         #
         1017: (findDIR(dirCeph+"ggHphigamma"),xsecRun3['ggH']*0.49),
         1027: (findDIR(dirCeph+"ggHrhogamma"),xsecRun3['ggH']),
         1037: (findDIR(dirCeph+"ggHkstgamma"),xsecRun3['ggH']*(2./3)),
         1047: (findDIR(dirCeph+"ggHDstgamma"),xsecRun3['ggH']*0.0389),
+        1057: (findDIR(dirCeph+"ggHomegagamma"),xsecRun3['ggH']*0.0389),
         #
         1019: (findDIR(dirCeph+"Zphigamma_MadGraph"),xsecRun3['Z']*0.49),
         1029: (findDIR(dirCeph+"Zrhogamma_MadGraph"),xsecRun3['Z']),

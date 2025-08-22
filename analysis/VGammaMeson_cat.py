@@ -7,6 +7,7 @@ ROOT.ROOT.EnableImplicitMT()
 from utilsHrare import getMClist, getDATAlist, getSkims, computeWeigths
 from utilsAna import getMesonFromJson, pickTRG, getMVAFromJson, getTriggerFromJson
 from utilsAna import loadCorrectionSet, loadPolarizationTree, loadSFhisto, loadUserCode, loadtmva_helper
+from utilsAna import lumisMgamma
 import tmva_helper_xml
 
 doSyst = True
@@ -63,17 +64,11 @@ if sys.argv[4]=='2018': year = 2018
 if sys.argv[4]=='2017': year = 2017
 if sys.argv[4]=='22016': year = 22016 #F-H
 if sys.argv[4]=='12016': year = 12016 #B-F
-
-lumis={
-    '12016': 19.52, #APV #(B-F for 2016 pre)
-    '22016': 16.80, #postVFP
-    '2016': 35.9,
-    '2017': 41.5,
-    '12017': 7.7, #(F for 2017)
-    '2018': 59.70,
-    '12018': 39.54,
-    'all': 86.92,      #19.52 + 7.7 + 59.70
-}
+#
+if sys.argv[4]=='12022': year = 12022 #B-F
+if sys.argv[4]=='22022': year = 22022 #B-F
+if sys.argv[4]=='12023': year = 12023 #B-F
+if sys.argv[4]=='22023': year = 22023 #B-F
 
 DEEP_B_LOOSE={
     '2018': 0.1208,
@@ -419,6 +414,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_trk2_pt", "phi_trk2_pt[goodMeson]")
                   .Define("goodMeson_trk1_eta", "phi_trk1_eta[goodMeson]")
                   .Define("goodMeson_trk2_eta", "phi_trk2_eta[goodMeson]")
+                  .Define("goodMeson_trk1_phi", "phi_trk1_phi[goodMeson]")
+                  .Define("goodMeson_trk2_phi", "phi_trk2_phi[goodMeson]")
                   .Define("goodMeson_DR","DeltaR(phi_trk1_eta[goodMeson],phi_trk2_eta[goodMeson],phi_trk1_phi[goodMeson],phi_trk2_phi[goodMeson])")
                   .Define("wrongMeson","({}".format(GOODRHO)+")")
                   .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? rho_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
@@ -451,6 +448,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_trk2_pt", "rho_trk2_pt[goodMeson]")
                   .Define("goodMeson_trk1_eta", "rho_trk1_eta[goodMeson]")
                   .Define("goodMeson_trk2_eta", "rho_trk2_eta[goodMeson]")
+                  .Define("goodMeson_trk1_phi", "rho_trk1_phi[goodMeson]")
+                  .Define("goodMeson_trk2_phi", "rho_trk2_phi[goodMeson]")
                   .Define("goodMeson_DR","DeltaR(rho_trk1_eta[goodMeson],rho_trk2_eta[goodMeson],rho_trk1_phi[goodMeson],rho_trk2_phi[goodMeson])")
                   .Define("wrongMeson","({}".format(GOODPHI)+")")
                   .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? phi_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
@@ -520,6 +519,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_trk2_pt", "omega_trk2_pt[goodMeson]")
                   .Define("goodMeson_trk1_eta", "omega_trk1_eta[goodMeson]")
                   .Define("goodMeson_trk2_eta", "omega_trk2_eta[goodMeson]")
+                  .Define("goodMeson_trk1_phi", "omega_trk1_phi[goodMeson]")
+                  .Define("goodMeson_trk2_phi", "omega_trk2_phi[goodMeson]")
                   .Define("goodMeson_DR","DeltaR(omega_trk1_eta[goodMeson],omega_trk2_eta[goodMeson],omega_trk1_phi[goodMeson],omega_trk2_phi[goodMeson])")
                   .Define("goodMeson_photon_pt", "(Sum(omega_Nphotons[goodMeson]) >= 1) ? omega_photon_pt[goodMeson] : Vec_f {0.0}")
                   .Define("goodMeson_photon2_pt", "(Sum(omega_Nphotons[goodMeson]) >= 2) ? omega_photon2_pt[goodMeson] : Vec_f {0.0}")
@@ -886,13 +887,19 @@ def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
 
     lumiIntegrated = 1.
     print('isData = ',isData)
+
     if (isData == "false"):
-        if((isVBF or isW or isZ) and year == 2018): lumiIntegrated = lumis['2018']
-        if((isW or isZ) and year == 2017): lumiIntegrated = lumis['2017']
-        if((isVBF) and year == 2017): lumiIntegrated = lumis['12017']
-        if((isVBF or isW or isZ) and year == 12016): lumiIntegrated = lumis['12016']
-        if((isW or isZ) and year == 22016): lumiIntegrated = lumis['22016']
-        if((isVBFlow or isGF or isZinv) and year == 2018): lumiIntegrated = lumis['12018']
+        if(isGF and year == 12022): lumiIntegrated = lumisMgamma['12022']
+        if(isGF and year == 22022): lumiIntegrated = lumisMgamma['22022']
+        if(isGF and year == 12023): lumiIntegrated = lumisMgamma['12023']
+        if(isGF and year == 22023): lumiIntegrated = lumisMgamma['22023']
+        #
+        if((isVBF or isW or isZ) and year == 2018): lumiIntegrated = lumisMgamma['2018']
+        if((isW or isZ) and year == 2017): lumiIntegrated = lumisMgamma['2017']
+        if((isVBF) and year == 2017): lumiIntegrated = lumisMgamma['12017']
+        if((isVBF or isW or isZ) and year == 12016): lumiIntegrated = lumisMgamma['12016']
+        if((isW or isZ) and year == 22016): lumiIntegrated = lumisMgamma['22016']
+        if((isVBFlow or isGF or isZinv) and year == 2018): lumiIntegrated = lumisMgamma['12018']
         print('lumiIntegrated=',lumiIntegrated, ' year=',year)
 
     dfComm = (df

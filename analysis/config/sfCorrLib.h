@@ -16,10 +16,11 @@ class MyCorrections {
 public:
   MyCorrections(int year);
 
-  double eval_jetCORR   (double area, double eta, double phi, double pt, double rho, bool isData, std::string year);
+  double eval_jetCORR   (double area, double eta, double phi, double pt, double rho, bool isData, int run, std::string year, std::string mc);
   double eval_jesUnc    (double eta, double pt, int type);
   double eval_jer       (double pt, double eta, double rho, double area);
-  double eval_jetVeto   (std::string str1, double pt, double eta);
+  double eval_jetID     (float eta, float chHEF, float neHEF, float chEmEF, float neEmEF, float muEF, int chMultiplicity, int neMultiplicity);
+  double eval_jetVeto   (double eta, double phi);
   double eval_puSF      (double NumTrueInteractions, std::string weights);
   double eval_photonSF  (std::string year, std::string valType, std::string workingPoint, double eta, double pt);
   double eval_photonPixVetoSF  (std::string year, std::string valType, std::string workingPoint, double eta, double pt);
@@ -44,6 +45,7 @@ private:
   correction::CompoundCorrection::Ref JECdata_;
   correction::Correction::Ref jesUnc_;
   correction::Correction::Ref vetoMaps_;
+  correction::Correction::Ref jetTightID_;
 
 };
 
@@ -63,7 +65,7 @@ MyCorrections::MyCorrections(int year) {
   if(year == 22022)  { subDirName += "2022_Summer22EE/"; }
   if(year == 12023)  { subDirName += "2023_Summer23/"; }
   if(year == 22023)  { subDirName += "2023_Summer23BPix/"; }
-  if(year == 2024)   { subDirName += "2024_Winter24/"; }
+  if(year == 2024)   { subDirName += "2024_Summer24/"; }
 
   const std::string fileNameLUM = dirName+"LUM/"+subDirName+"puWeights.json.gz";
 
@@ -140,29 +142,30 @@ MyCorrections::MyCorrections(int year) {
   if(year == 2018 or year == 2017 or year == 12016 or year == 22016) {
 
     const std::string jetType="AK4PFchs";
+    const std::string prefix="Summer19";
 
-    std::string tagName = "Summer19"+dataName+"_RunA_V5";
-    //    if(year == 22016 or year == 12016) tagName = "Summer19"+dataName+"_V7";
-    if(year == 12016) tagName = "Summer19"+dataName+"_RunBCD_V7";
-    if(year == 22016) tagName = "Summer19"+dataName+"_RunFGH_V7";
-    if(year == 2017) tagName = "Summer19"+dataName+"_RunB_V5";
+    std::string tagName = prefix+dataName+"_RunA_V5";
+    //    if(year == 22016 or year == 12016) tagName = prefix+dataName+"_V7";
+    if(year == 12016) tagName = prefix+dataName+"_RunBCD_V7";
+    if(year == 22016) tagName = prefix+dataName+"_RunFGH_V7";
+    if(year == 2017) tagName = prefix+dataName+"_RunB_V5";
     // likely also the data are needed for 2022
     JECdata_ = csetJEC->compound().at(tagName+"_DATA_L1L2L3Res_"+jetType);
 
-    std::string tagNameMC = "Summer19"+dataName+"_V5";
-    if(year == 22016 or year == 12016) tagNameMC = "Summer19"+dataName+"_V7";
+    std::string tagNameMC = prefix+dataName+"_V5";
+    if(year == 22016 or year == 12016) tagNameMC = prefix+dataName+"_V7";
     // likely also the data are needed for 2022
     JEC_ = csetJEC->compound().at(tagNameMC+"_MC_L1L2L3Res_"+jetType);
 
     std::string tagNameUnc = "Summer19"+dataName+"_V5";
-    if(year == 22016 or year == 12016) tagNameUnc = "Summer19"+dataName+"_V7";
+    if(year == 22016 or year == 12016) tagNameUnc = prefix+dataName+"_V7";
     jesUnc_ = csetJEC->at(tagNameUnc+"_MC_Total_"+jetType);
 
-    std::string tagNameR = "Summer19"+dataName+"_JRV2";
+    std::string tagNameR = prefix+dataName+"_JRV2";
     if(year == 22016 or year == 12016) tagNameR = "Summer20"+dataName+"_JRV3";
     JER_ = csetJEC->at(tagNameR+"_MC_PtResolution_"+jetType);
 
-    std::string tagNameRsf = "Summer19"+dataName+"_JRV2";
+    std::string tagNameRsf = prefix+dataName+"_JRV2";
     if(year == 22016 or year == 12016) tagNameRsf = "Summer20"+dataName+"_JRV3";
     JERsf_ = csetJEC->at(tagNameRsf+"_MC_ScaleFactor_"+jetType);
 
@@ -178,8 +181,15 @@ MyCorrections::MyCorrections(int year) {
   if(year == 22022) tagNameVeto = "Summer22EE_23Sep2023_RunEFG_V1";
   if(year == 12023) tagNameVeto = "Summer23Prompt23_RunC_V1";
   if(year == 22023) tagNameVeto = "Summer23BPixPrompt23_RunD_V1";
-
+  if(year == 2024) tagNameVeto = "Summer24Prompt24_RunBCDEFGHI_V1";
   vetoMaps_ = csetVeto->at(tagNameVeto);
+
+  // jetID
+  std::string fileNameJetID = dirName+"JME/"+subDirName+"jetid.json.gz";
+  auto csetJetID = correction::CorrectionSet::from_file(fileNameJetID);
+  const std::string tagNameJetID = "AK4PUPPI_Tight";
+  //  std::string tagNameJetID = "AK4PUPPI_TightLeptonVeto";
+  jetTightID_           = csetJetID->at(tagNameJetID);
 
   /*
   // puJetID
@@ -190,26 +200,26 @@ MyCorrections::MyCorrections(int year) {
 
 };
 
-double MyCorrections::eval_jetCORR(double area, double eta, double phi, double pt, double rho, bool isData, std::string year) {
-
-  /*
-
-  // from Guillelmo 2024 Summer
-    for 2024 MC the jet input parameters are (area, eta, pt, rho, phi);
-
-  if (yearString == “2023_BPix”) return JECDATA_[type]->evaluate({area,eta,phi,pt,rho});
-  else if(yearString == “2024”) return JECDATA_[type]->evaluate({area,eta, pt,rho,phi,run});
-  else return JECDATA_[type]->evaluate({area,eta,pt,rho});
-  */
+double MyCorrections::eval_jetCORR(double area, double eta, double phi, double pt, double rho, bool isData, int run, std::string year, std::string mc) {
 
   if (year == "2024" or year == "22023") {
-    if(isData) return JECdata_->evaluate({area, eta, phi, pt, rho});
-    else JEC_->evaluate({area, eta, phi, pt, rho});
+    if(isData) return JECdata_->evaluate({area, eta,  pt, rho, phi, (float) run});
+    else JEC_->evaluate({area, eta, pt, rho, phi});
+  } else if (year == "12023") {
+    if(isData) return JECdata_->evaluate({area, eta, pt, rho, (float) run});
+    else return JEC_->evaluate({area, eta, pt, rho});
+    /*
+  } else if (year == "22022") {
+    if(isData and mc == "-15") return JECdata22E_->evaluate({area, eta, pt, rho});
+    if(isData and mc == "-16") return JECdata22F_->evaluate({area, eta, pt, rho});
+    if(isData and mc == "-17") return JECdata22G_->evaluate({area, eta, pt, rho});
+    else return JEC_->evaluate({area, eta, pt, rho});
+    */
   } else {
     if(isData) return JECdata_->evaluate({area, eta, pt, rho});
     else return JEC_->evaluate({area, eta, pt, rho});
   }
-    
+
   return 1.0;
 
 };
@@ -223,8 +233,16 @@ double MyCorrections::eval_jer(double double1, double double2, double double3, d
   return JER_->evaluate({double1, double2, double3, double4});
 };
 
-double MyCorrections::eval_jetVeto(std::string str1, double double1, double double2) {
-  return vetoMaps_->evaluate({str1,double1, double2});
+double MyCorrections::eval_jetVeto(double eta, double phi) {
+  std::string typeMaps = "jetvetomap";
+  return vetoMaps_->evaluate({typeMaps,eta, phi});
+};
+
+double MyCorrections::eval_jetID(float eta, float chHEF, float neHEF, float chEmEF, float neEmEF, float muEF, int chMultiplicity, int neMultiplicity) {
+  eta = fabs(eta);
+  int multiplicity = chMultiplicity + neMultiplicity;
+  //"chEmEF" and "muEF" unused in 2024 but still needed
+  return jetTightID_->evaluate({eta, chHEF, neHEF, chEmEF, neEmEF, muEF, chMultiplicity, neMultiplicity, multiplicity});
 };
 
 double MyCorrections::eval_electronSF(std::string year, std::string valType,  std::string workingPoint, double eta, double pt, double minVal) {

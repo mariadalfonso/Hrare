@@ -84,26 +84,29 @@ def callMVAclassification(df):
 
     return dfWithMVA
 
-def addPfCands(df,mc):
+def addPfCands(df,mc,jetType):
 
-    df = (df.Define("pfcand_close_pt","buildConstVar(Jpsi_muon1_pt[0],Jpsi_muon2_pt[0],PFCand_pt,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],-1)")
-          .Define("pfcand_close_eta","buildConstVar(Jpsi_muon1_eta[0],Jpsi_muon2_eta[0],PFCand_eta,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],-1)")
-          .Define("pfcand_close_phi","buildConstVar(Jpsi_muon1_phi[0],Jpsi_muon2_phi[0],PFCand_phi,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],-1)")
-          .Define("pfcand_close_dxy","buildConstVar(Jpsi_muon1_dxy[0],Jpsi_muon2_dxy[0],PFCand_dxy,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],-1)")
-          .Define("pfcand_close_dz","buildConstVar(Jpsi_muon1_dz[0],Jpsi_muon2_dz[0],PFCand_dz,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],-1)")
+    if jetType==0: stringJet = 'close'
+    else: stringJet = 'far'
+
+    df = (df.Define("pfcand_{}_pt".format(stringJet),"buildConstVar(Jpsi_muon1_pt[0],Jpsi_muon2_pt[0],PFCand_pt,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],-1)".format(jetType))
+          .Define("pfcand_{}_eta".format(stringJet),"buildConstVar(Jpsi_muon1_eta[0],Jpsi_muon2_eta[0],PFCand_eta,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],-1)".format(jetType))
+          .Define("pfcand_{}_phi".format(stringJet),"buildConstVar(Jpsi_muon1_phi[0],Jpsi_muon2_phi[0],PFCand_phi,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],-1)".format(jetType))
+          .Define("pfcand_{}_dxy".format(stringJet),"buildConstVar(Jpsi_muon1_dxy[0],Jpsi_muon2_dxy[0],PFCand_dxy,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],-1)".format(jetType))
+          .Define("pfcand_{}_dz".format(stringJet),"buildConstVar(Jpsi_muon1_dz[0],Jpsi_muon2_dz[0],PFCand_dz,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],-1)".format(jetType))
           ## add the dzsig = dz dzerror (same for dx)
           ## need to fix those  pdg for muons for the muons
-          .Define("pfcand_close_isMu","buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],13)")
-          .Define("pfcand_close_isEl","buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],11)")
-          .Define("pfcand_close_isChargedHad","buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],211)")
-          .Define("pfcand_close_isGamma","buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],22)")
-          .Define("pfcand_close_isNeutralHad","buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],130)")
+          .Define("pfcand_{}_isMu".format(stringJet),"buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],13)".format(jetType))
+          .Define("pfcand_{}_isEl".format(stringJet),"buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],11)".format(jetType))
+          .Define("pfcand_{}_isChargedHad".format(stringJet),"buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],211)".format(jetType))
+          .Define("pfcand_{}_isGamma".format(stringJet),"buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],22)".format(jetType))
+          .Define("pfcand_{}_isNeutralHad".format(stringJet),"buildConstPDG(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],130)".format(jetType))
           #
-          .Define("jet_npfcand_close","buildConstN(event,1,1,PFCand_pt[JetPFCands_candIdx],JetPFCands_jetIdx,index_CloseFar[0])")
+          .Define("jet_npfcand_{}".format(stringJet),"buildConstN(event,1,1,PFCand_pt[JetPFCands_candIdx],JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
           # need to fix those btag for the muons
-          .Define("pfcand_close_btagEtaRel","buildConstVarJet(0.f,0.f,JetPFCands_btagEtaRel,JetPFCands_jetIdx,index_CloseFar[0])")
-          .Define("pfcand_close_btagPtRatio","buildConstVarJet(0.f,0.f,JetPFCands_btagPtRatio,JetPFCands_jetIdx,index_CloseFar[0])")
-          .Define("pfcand_close_btagPParRatio","buildConstVarJet(0.f,0.f,JetPFCands_btagPParRatio,JetPFCands_jetIdx,index_CloseFar[0])")
+          .Define("pfcand_{}_btagEtaRel".format(stringJet),"buildConstVarJet(0.f,0.f,JetPFCands_btagEtaRel,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
+          .Define("pfcand_{}_btagPtRatio".format(stringJet),"buildConstVarJet(0.f,0.f,JetPFCands_btagPtRatio,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
+          .Define("pfcand_{}_btagPParRatio".format(stringJet),"buildConstVarJet(0.f,0.f,JetPFCands_btagPParRatio,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
           #
           #https://github.com/cms-sw/cmssw/blob/862b9fd82f99aae6090c6abe750de9f312432d45/DataFormats/BTauReco/interface/TaggingVariable.h#L22
           #trackEtaRel_ = reco::btau::etaRel(jetDir, candidate->momentum());
@@ -113,21 +116,22 @@ def addPfCands(df,mc):
           #trackPtRel_ = trackMom3.Perp(jetDir3);
           #trackPParRatio_ = jetDir.Dot(candidate->momentum()) / candidate->p();
           #
-          .Define("pfcand_close_btagSip3dSig","buildConstVarJet(Jpsi_muon1_Sip3dSig[0],Jpsi_muon2_Sip3dSig[0],JetPFCands_btagSip3dSig,JetPFCands_jetIdx,index_CloseFar[0])")
-          .Define("pfcand_close_btagSip3dVal","buildConstVarJet(Jpsi_muon1_Sip3dVal[0],Jpsi_muon2_Sip3dVal[0],JetPFCands_btagSip3dVal,JetPFCands_jetIdx,index_CloseFar[0])")
-          .Define("pfcand_close_btagSip2dSig","buildConstVarJet(Jpsi_muon1_Sip2dSig[0],Jpsi_muon2_Sip2dSig[0],JetPFCands_btagSip2dSig,JetPFCands_jetIdx,index_CloseFar[0])")
-          .Define("pfcand_close_btagSip2dVal","buildConstVarJet(Jpsi_muon1_Sip2dVal[0],Jpsi_muon2_Sip2dVal[0],JetPFCands_btagSip2dVal,JetPFCands_jetIdx,index_CloseFar[0])")
-          .Define("pfcand_close_btagJetDistVal","buildConstVarJet(Jpsi_muon1_DistVal[0],Jpsi_muon2_DistVal[0],JetPFCands_btagJetDistVal,JetPFCands_jetIdx,index_CloseFar[0])")
+          .Define("pfcand_{}_btagSip3dSig".format(stringJet),"buildConstVarJet(Jpsi_muon1_Sip3dSig[0],Jpsi_muon2_Sip3dSig[0],JetPFCands_btagSip3dSig,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
+          .Define("pfcand_{}_btagSip3dVal".format(stringJet),"buildConstVarJet(Jpsi_muon1_Sip3dVal[0],Jpsi_muon2_Sip3dVal[0],JetPFCands_btagSip3dVal,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
+          .Define("pfcand_{}_btagSip2dSig".format(stringJet),"buildConstVarJet(Jpsi_muon1_Sip2dSig[0],Jpsi_muon2_Sip2dSig[0],JetPFCands_btagSip2dSig,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
+          .Define("pfcand_{}_btagSip2dVal".format(stringJet),"buildConstVarJet(Jpsi_muon1_Sip2dVal[0],Jpsi_muon2_Sip2dVal[0],JetPFCands_btagSip2dVal,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
+          .Define("pfcand_{}_btagJetDistVal".format(stringJet),"buildConstVarJet(Jpsi_muon1_DistVal[0],Jpsi_muon2_DistVal[0],JetPFCands_btagJetDistVal,JetPFCands_jetIdx,index_CloseFar[{}])".format(jetType))
           ##
-          .Define("pfcand_close_ptrel_log","buildConstVar(Jpsi_muon1_pt[0],Jpsi_muon2_pt[0],PFCand_pt,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],jetClose_Pt,0)")
-          .Define("pfcand_close_phirel","buildConstVar(Jpsi_muon1_phi[0],Jpsi_muon2_phi[0],PFCand_phi,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],jetClose_Phi,1)")
-          .Define("pfcand_close_etarel","buildConstVar(Jpsi_muon1_eta[0],Jpsi_muon2_eta[0],PFCand_eta,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],jetClose_Eta,2)")
-          .Define("pfcand_close_charge","buildConstVar(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],3)")
-          .Define("pfcand_close_mass","buildConstVar(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[0],4)")
+          .Define("pfcand_{}_ptrel_log".format(stringJet),"buildConstVar(Jpsi_muon1_pt[0],Jpsi_muon2_pt[0],PFCand_pt,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],jetClose_Pt,0)".format(jetType))
+          .Define("pfcand_{}_phirel".format(stringJet),"buildConstVar(Jpsi_muon1_phi[0],Jpsi_muon2_phi[0],PFCand_phi,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],jetClose_Phi,1)".format(jetType))
+          .Define("pfcand_{}_etarel".format(stringJet),"buildConstVar(Jpsi_muon1_eta[0],Jpsi_muon2_eta[0],PFCand_eta,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],jetClose_Eta,2)".format(jetType))
+          .Define("pfcand_{}_DR".format(stringJet),"buildConstVar(Jpsi_muon1_eta[0],Jpsi_muon2_eta[0],PFCand_eta,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],jetClose_Eta,5)".format(jetType))
+          .Define("pfcand_{}_charge".format(stringJet),"buildConstVar(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],3)".format(jetType))
+          .Define("pfcand_{}_mass".format(stringJet),"buildConstVar(Jpsi_muon1_charge[0],Jpsi_muon2_charge[0],PFCand_pdgId,JetPFCands_candIdx,JetPFCands_jetIdx,index_CloseFar[{}],4)".format(jetType))
           #####
-          .Define("recojet_close_isSig", "mc==1000 ? 1 : 0 ")
+          .Define("recojet_{}_isSig".format(stringJet), "(mc==1000 or mc==1001 or mc==1002 or mc==1003) ? 1 : 0 ")
 #          .Define("recojet_close_isSig", "mc==1000 ? 0 : 1 ")
-          .Define("recojet_close_isB", "mc==11 ? 1 : 0 ") #BToJpsi_JPsiToMuMu_BMuonFilter
+          .Define("recojet_{}_isB".format(stringJet), "(mc==11 or mc==10) ? 1 : 0 ") #BToJpsi_JPsiToMuMu_BMuonFilter
 #          .Define("recojet_close_isB", "1") #BToJpsi_JPsiToMuMu_BMuonFilter
           )
     return df
@@ -157,6 +161,10 @@ def addJetProperties(df,mc):
           .Define("jetFar_CvL","{0}_btag{1}CvL[goodJets][index_CloseFar[1]]".format(jetDef,tagger))
           .Define("jetClose_CvB","{0}_btag{1}CvB[goodJets][index_CloseFar[0]]".format(jetDef,tagger))
           .Define("jetFar_CvB","{0}_btag{1}CvB[goodJets][index_CloseFar[1]]".format(jetDef,tagger))
+          .Define("jetClose_PNetCvL","{0}_btagPNetCvL[goodJets][index_CloseFar[0]]".format(jetDef,tagger))
+          .Define("jetFar_PNetCvL","{0}_btagPNetCvL[goodJets][index_CloseFar[1]]".format(jetDef,tagger))
+          .Define("jetClose_PNetCvB","{0}_btagPNetCvB[goodJets][index_CloseFar[0]]".format(jetDef,tagger))
+          .Define("jetFar_PNetCvB","{0}_btagPNetCvB[goodJets][index_CloseFar[1]]".format(jetDef,tagger))
           .Define("jetClose_nConst","{0}_nConstituents[goodJets][index_CloseFar[0]]-2.0".format(jetDef))
           .Define("jetFar_nConst","{0}_nConstituents[goodJets][index_CloseFar[1]]".format(jetDef))
           .Define("jetClose_nMuons","{0}_nMuons[goodJets][index_CloseFar[0]]".format(jetDef))
@@ -286,7 +294,9 @@ def analysis(files,year,mc,sumW):
          )
 
     df = addJetProperties(df,mc)
-    df = addPfCands(df,mc)
+    # only for MC now
+    if mc>0:
+        df = addPfCands(df,mc,0) # 0 is for close while 1 is for far
 
     if mc==1000 or mc==1001:
         df= (df.Define("idxs", "genMatch_indices(GenPart_pdgId, GenPart_genPartIdxMother)")
@@ -433,7 +443,7 @@ def analysis(files,year,mc,sumW):
             histos.append(h1d)
 #            print("h1d append",h1d.GetName(),' integral',h1d.Integral())
 
-        if False and (mc==1000 or mc==1001):
+        if True and (mc==1000 or mc==1001 or mc==1002 or mc==1003):
             for h in histos:
                 canv = ROOT.TCanvas("stackcanvas","Stack canvas",800,800)
                 #        canv.SetLogy(1)
@@ -441,11 +451,14 @@ def analysis(files,year,mc,sumW):
 
                 canv.Draw()
                 #        canv.SaveAs("~/public_html/Hrare_Jpsi/"+h.GetName()+".png")
-                if mc==1000: canv.SaveAs("~/public_html/Hrare_JpsiSept25/"+h.GetName()+"_H.png")
-                if mc==1001: canv.SaveAs("~/public_html/Hrare_JpsiSept25/"+h.GetName()+"_Z.png")
+                if mc==1000: canv.SaveAs("~/public_html/Hrare_JpsiMarch25/"+h.GetName()+"_H_powheg.png")
+                if mc==1002: canv.SaveAs("~/public_html/Hrare_JpsiMarch25/"+h.GetName()+"_H_aMCnlo.png")
+                if mc==1003: canv.SaveAs("~/public_html/Hrare_JpsiMarch25/"+h.GetName()+"_VBFH_aMCnlo.png")
+                if mc==1001: canv.SaveAs("~/public_html/Hrare_JpsiMarch25/"+h.GetName()+"_Z.png")
+
+        myDir='/work/submit/mariadlf/Hrare_JPsiCC/MARCH2025/'
 
         if True:
-            myDir='/work/submit/mariadlf/Hrare_JPsiCC/Sept25/'
             outputFileHisto = myDir+"histoOUTname_"+str(mc)+"_"+str(year)+".root"
             print(outputFileHisto )
             myfile = ROOT.TFile(outputFileHisto,"RECREATE")
@@ -457,11 +470,12 @@ def analysis(files,year,mc,sumW):
             myfile.Close()
             myfile.Write()
 
-        if False:
+        if True:
             branchList = ROOT.vector('string')()
             for branchName in [
                     "mc",
                     "w",
+                    "lumiIntegrated",
                     "PV_npvsGood",
                     "triggerAna",
                     "run",
@@ -488,6 +502,10 @@ def analysis(files,year,mc,sumW):
                     "Jpsi_muon2_phi",
                     # for the classification
                     "nGoodJets",
+                    "jetClose_PNetCvL",
+                    "jetFar_PNetCvL",
+                    "jetClose_PNetCvB",
+                    "jetFar_PNetCvB",
                     "jetClose_CvL",
                     "jetFar_CvL",
                     "jetClose_CvB",
@@ -604,6 +622,7 @@ def analysis(files,year,mc,sumW):
                     "pfcand_close_ptrel_log",
                     "pfcand_close_phirel",
                     "pfcand_close_etarel",
+                    "pfcand_close_DR",
                     "pfcand_close_charge",
                     "pfcand_close_mass",
                     #
