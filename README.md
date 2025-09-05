@@ -1,7 +1,24 @@
 # Hrare
 
-*==================  below is for Run3 =================
+*==================  below is for Run3 2024 v15 VGamma  =================
 
+scram p CMSSW_15_0_6
+
+cd CMSSW_15_0_6/src/
+
+cmsenv
+
+git clone git@github.com:mariadalfonso/Hrare.git --branch D07Run3
+
+# nanoV15 GT and campaigns for data and MC
+
+| Input dataset | GT | Era |
+| ------ | ------ | ------ |
+| RunIII2024Summer24MiniAODv6 | 150X_mcRun3_2024_realistic | Run3_2024 |
+| Run2024C-MINIv6NANOv15 C-I | 150X_dataRun3_v2 | Run3_2024 |
+
+
+*==================  below is for Run3 early =================
 
 scram p CMSSW_13_0_13
 
