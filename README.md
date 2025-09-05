@@ -10,6 +10,8 @@ cmsenv
 
 git clone git@github.com:mariadalfonso/Hrare.git --branch D07Run3
 
+--customise=Hrare/NanoAOD/nano_cff.nanoAOD_customizeMesons_Run3
+
 # nanoV15 GT and campaigns for data and MC
 
 | Input dataset | GT | Era |
