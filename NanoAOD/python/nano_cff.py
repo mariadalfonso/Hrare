@@ -8,11 +8,36 @@ def nanoAOD_customizeMesons_Run3(process):
     process.load('Hrare.NanoAOD.MesonsReco_cff')
     process.load('Hrare.NanoAOD.DiMuonReco_cff')
 
+    ##
+    process.triggerObjectTable.selections.Tau.qualityBits.append(
+        cms.PSet(
+            doc = cms.string("TwoProng"),
+            selection = cms.string("filter(\'*TwoProng*\')")
+        )
+    )
+
+    process.triggerObjectTable.selections.Tau.sel = cms.string(
+        process.triggerObjectTable.selections.Tau.sel.value() + " || filter(\'*TwoProng*\')"
+    )
+
+    process.triggerObjectTable.selections.Tau.qualityBits.append(
+        cms.PSet(
+            doc = cms.string("hltPFTau35TrackMediumChargedIso"),
+            selection = cms.string("filter(\'*hltPFTau35TrackMediumChargedIso*\')")
+        )
+    )
+
+    process.triggerObjectTable.selections.Tau.sel = cms.string(
+        process.triggerObjectTable.selections.Tau.sel.value() + " || filter(\'*hltPFTau35TrackMediumChargedIso*\')"
+    )
+
+    ###
+
     finalGenParticles.select +=[
         "keep (4 <= abs(pdgId) <= 5) && statusFlags().isLastCopy()", # BTV: keep b/c quarks in their last copy
     ]
+    process.finalGenParticles.select = cms.vstring('keep *')
 
-#    process.genParticleTable.src = "prunedGenParticles"
     process.genParticleTable.variables.pt=Var("pt",  float, precision=-1)
     process.genParticleTable.variables.phi=Var("phi",  float, precision=-1)
     process.genParticleTable.variables.eta=Var("eta",  float, precision=-1)
