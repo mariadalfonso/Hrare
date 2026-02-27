@@ -1,0 +1,30 @@
+#!/bin/sh
+
+echo" -------------------- "
+echo" -- SUBMITTING BPH --- "
+echo" -------------------- "
+
+era="F"
+year="2024"
+PDType="Tau"
+ParkingChunk=""
+len=$(cat catalogD07/files_$PDType+Run$year$era.txt | wc -l)
+
+echo 'number of files = ' $len
+
+for (( c=0; c<=$len; c++ ))    
+do
+
+#----
+    
+    yourfilenames=`ls -ltrah /scratch/submit/cms/mariadlf/Hrare/newSKIMS/D07/2024/$PDType+Run$era/output\_$PDType$era\_$year\_$c.root | wc -l`
+    if [[ "$yourfilenames" == '1' ]]; then
+        continue
+    fi
+    echo $yourfilenames
+
+#----
+
+    python3 skim.py --year=$year --era=$era --PDType=$PDType --SkimType="GGH" --whichJob=$c --whichFile="catalogD05/files_"$PDType"+Run"$year$era".txt"
+    
+done

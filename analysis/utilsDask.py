@@ -1,90 +1,184 @@
 import os 
 import socket
 import time
+import sys
+import ROOT
 
-def create_Purdue_connection():
+from utilsAna import loadCorrectionSet, loadUserCode, loadtmvahelper
 
-    print("inside create_remote_connection")
-    import dask_gateway
-    from dask_gateway import Gateway
-    from distributed import Client
+AF="MIT-daskgateway"
 
-    os.environ["X509_USER_PROXY"] = "/home/dalfonso-cern/JULY_ex/x509up_u146312"
-    print("done with environ")
+#MIT
+if AF=="MIT-daskgateway": myDir = '/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/'
+sys.path.insert(0, myDir)
 
-    gateway = Gateway(
-        "http://dask-gateway-k8s.geddes.rcac.purdue.edu/",
-        proxy_address="traefik-dask-gateway-k8s.cms.geddes.rcac.purdue.edu:8786",
-    )
-    print(gateway)
+doINTERACTIVE=True
+doLocalCluster=False
+
+def loadUserCodeGateway(fileName):
+    print('loadUserCodeGateway for ', fileName)
+
+    from pathlib import Path
+    from dask.distributed import get_worker
+
+    try:
+        #this try is needed at CERN Swan-Dask
+        # Get the local directory where the file is stored
+
+        worker = get_worker()
+        localdir = worker.local_directory
+
+        # Define the path to the file
+        lib_path = Path(localdir) / fileName
+        #    ROOT.gInterpreter.Declare(f'#include "{lib_path}"')
+
+        ROOT.gInterpreter.ProcessLine(f'#include "{lib_path}"')
+    except:
+        pass
+
+
+def init():
+
+    if doINTERACTIVE or doLocalCluster:
+        loadUserCode()
+        year = 2024
+        loadCorrectionSet(year)
+        loadtmvahelper()
+    else:
+        if AF=="MIT-daskgateway":
+            loadUserCodeGateway("functions.h")
+            loadUserCodeGateway("sfCorrLib.h")
+            loadUserCodeGateway("tmva_helper_xml.h")
+            loadUserCodeGateway("tmva_helper_xgb.h")
+        else:
+            loadUserCode()
+            year = 2024
+            loadCorrectionSet(year)
+            #    readDataQuality(2018)
+
+def makeRDF(files,year):
+
+    if doINTERACTIVE:
+        RDataFrame = ROOT.RDataFrame
+        df = RDataFrame("Events", files)
+        init()
+    else:
+        RDataFrame = ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+        if doLocalCluster:
+            from utilsDask import create_local_connection
+            NPARTITIONS=10 # assuming one launch 7 Graphs (7*15 = 105 cores)
+            nCLUSTER=10 #(like scale for remote)
+            connection = create_local_connection(nCLUSTER)
+            print(connection)
+            # The `npartitions` optional argument tells the RDataFrame how many tasks are desired
+
+            df = RDataFrame("Events", files, daskclient=connection, npartitions=NPARTITIONS)
+            ROOT.RDF.Experimental.Distributed.initialize(init)  # this load the .h files
+
+            df._headnode.backend.distribute_unique_paths(
+                [
+                    myDir+"./config/functions.h",
+                    myDir+"./config/sfCorrLib.h",
+                    myDir+"./config/tmva_helper_xml.h",
+                    myDir+"./config/tmva_helper_xgb.h",
+                    myDir+"helper_tmva.py",
+                    myDir+"utilsAna.py",
+                ]
+            )
+            print('DONE with LocalCluster')
+        else:
+            # this is set up for AF=="MIT-daskgateway"
+            from utilsDask import create_DaskGateway_MIT
+            client = create_DaskGateway_MIT()
+            client.upload_file(myDir+"utilsAna.py")
+
+            print(client)
+            NPARTITIONS=5 # assuming one launch 10 Graphs (10*30 = 200 cores)
+
+            #Create the RDF and initialize user lib
+
+            df = RDataFrame("Events", files, daskclient=client, npartitions=NPARTITIONS)
+            df._headnode.backend.distribute_unique_paths(
+                [
+                    myDir+"./config/functions.h",
+                    myDir+"./config/sfCorrLib.h",
+                    myDir+"./config/tmva_helper_xml.h",
+                    myDir+"./config/tmva_helper_xgb.h",
+                    #                        "../weights_mva_oct/ggH_rho/TMVAClassification_wp80_6vars_mh110-160_BDTG.weights.xml"
+                ]
+            )
+
+            ROOT.RDF.Experimental.Distributed.initialize(init)
+
+    return df
+
+def close_DaskGateway_MIT(gateway):
 
     clusters = gateway.list_clusters()
-    cluster_name = clusters[0].name
-    print("cluster_name",cluster_name)
+    print(clusters)
+    print(' -- inside close_DaskGateway_MIT')
+    for cl in clusters:
+        cluster_name = cl.name
+        print("old cluster_name",cluster_name)
+        cluster = gateway.connect(cluster_name)
+        cluster.shutdown()
 
-    options = gateway.cluster_options()
-    print("options.worker_cores",options.worker_cores)
-    print("options.worker_memory",options.worker_memory)
-    print("options.environment",options.environment)
+def create_DaskGateway_MIT():
 
-    # Create the cluster                                                                                                                                                                                
-    cluster = gateway.new_cluster(
-        conda_env = "/depot/cms/kernels/root632", # path to conda env
-        worker_cores = 1,    # cores per worker
-        worker_memory = 10,   # memory per worker in GB
-        env = dict(os.environ), # pass environment as a dictionary
-    )
-    cluster.scale(10)
-    print(cluster)
-
-    client = Client(cluster)
-    print(client)
-    return client
-
-def set_env():
-    os.environ["X509_USER_PROXY"] = "/tmp/x509up_u7592"
-
-def create_remote_DaskGateway():
+    print('HELLO -- inside create_DaskGateway_MIT')
 
     from dask_gateway import Gateway, GatewayCluster, BasicAuth
 
     gateway = Gateway(address="http://submit.mit.edu:6820",
                       proxy_address="http://submit.mit.edu:6821")
 
+    close_DaskGateway_MIT(gateway)
+
+    options = gateway.cluster_options()
+    options['environment'] = "/work/submit/mariadlf/miniforge3/envs/myenv"
+    options['worker_memory'] = 8.0
+    options['worker_cores'] = 4
+
+    cluster = gateway.new_cluster(options)
+    cluster.scale(64)
+
+    # need to close all the old clusters first
     clusters = gateway.list_clusters()
     for cl in clusters:
         cluster_name = cl.name
         print("cluster_name",cluster_name)
 
-    # make a new cluster
-    cluster = gateway.new_cluster(
-#        env = "/work/submit/mariadlf/miniforge3/envs/myenvAF", # path to conda env
-        worker_cores = 1,    # cores per worker
-        worker_memory = 6,   # memory per worker in GB
-    )
-
-    cluster.scale(10)
-
-    options = gateway.cluster_options()
-    print("options.worker_cores",options.worker_cores)
-    print("options.worker_memory",options.worker_memory)
-
-    # get a client
     client = cluster.get_client()
-    client.run(set_env)
+#    print('HELLO -- total numer of cores (64x4 ? ) ',client.get_ncores())
+    # Get the number of workers
+
+    cluster_info = client.scheduler_info()
+    num_workers = len(cluster_info['workers'])
+
+    # Calculate the total number of cores
+    total_cores = num_workers * options['worker_cores']
+    print('num_workers=',num_workers,' total_cores=',total_cores)
+
+    print(client)
 
     return client
 
+#    print(cluster.scheduler_info)
+#    cluster = gateway.connect(cluster_name)
+#    cluster.shutdown()
 
 def create_remote_Dask():
 
+    print('setting up Dask + SLURM')
     slurm_env = [
         'export DASK_DISTRIBUTED__COMM__ALLOWED_TRANSPORTS=["tcp://[::]:0"]',
         'export XRD_RUNFORKHANDLER=1',
         'export XRD_STREAMTIMEOUT=10',
         'echo "Landed on $HOSTNAME"',
+        #'export DASK_CONFIG=dask/dask.yaml',
+        #~/.config/dask/dask.yaml
         f'source {os.getenv("HOME")}/.bashrc',
-        f'conda activate myenvLuca',
+        f'conda activate myenvAF',
     ]
 
     extra_args=[

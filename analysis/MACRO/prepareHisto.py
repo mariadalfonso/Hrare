@@ -33,12 +33,14 @@ MVAbinPhi={
 ROOT.ROOT.EnableImplicitMT()
 RDataFrame = ROOT.RDataFrame
     
-def getHisto(mytree, category, mesonCat, item, nbin, low, high):
+def getHisto(mytree, category, mesonCat, item, nbin, low, high, year):
 
+   print('getHisto: ',year)
    if mesonCat=='_PhiCat': MVAbin = MVAbinPhi
    if mesonCat=='_RhoCat': MVAbin = MVAbinRho
    if mesonCat=='_K0StarCat': MVAbin = MVAbinRho
 
+   redBlue = (0, 0, 255)
    redDark = (191, 34, 41)
 #   redMed = (255, 40, 0)
    redMed = (237, 41, 57)
@@ -75,7 +77,8 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
 #       offline = "photon_pt>38 and meson_pt>38 and (classify==1 or classify==3)" #endcap
 
    if(category =='_VBFcat'):
-       offline = "jet1Pt>40 and jet2Pt>20 and mJJ>400"
+#       offline = "jet1Pt>40 and jet2Pt>20 and mJJ>400"
+       offline = "jet1Pt>40"
 
    if(category =='_VBFcatlow'):
        offline = "jet1Pt>30 and jet2Pt>20 and mJJ>300"
@@ -190,6 +193,7 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 57 : var = "jet1hfsigmaEtaEta"
    if item == 58 : var = "jet2hfsigmaPhiPhi"
    if item == 59 : var = "jet2hfsigmaEtaEta"
+   if item == 60 : var = "Rpt"
    if item == 13 : var = "DeepMETResolutionTune_pt"
    #         var = ev.MET_pt
    if item == 25 : var = "DeepMETResolutionTune_phi"
@@ -211,12 +215,24 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    if item == 95: var = "PV_npvsGood"
    if item == 96: var = "goodMeson_bestVtx_idx[index_pair[0]]"
 
+   # angles
+   if item == 101: var = "cos_Jpsi_z_angle"
+
    if mesonCat=='_D0StarCat' or mesonCat=='_D0Pi0StarCat' or mesonCat=='_Phi3PiCat' or mesonCat=='_Omega3PiCat':
        weightPol = "1."
    else:
-       weightPol = "(3./2)*sin(theta)*sin(theta)"
+       if ( year =='_2024' or year =='_22023' or year =='_12023' or year =='_22022' or year =='_12022'): weightPol = "1."  # this is needed for Run3
+       else: weightPol = "(TMath::IsNaN(theta) ? 1 : (3./2)*sin(theta)*sin(theta))"  # this is needed for Run2
 
-   df_common = df.Define("var","{}".format(var)).Define("offlineSel","{}".format(offline)).Define("weight","(mc>=0 and mc < 1000) ? w_allSF*lumiIntegrated: (mc>=1000 and mc<=1039) ? w_allSF*lumiIntegrated*{0}:1".format(weightPol)).Filter("offlineSel")
+###       if math.isnan(int(weightPol)):
+###           print('found Nan in mc=',mc)
+###    if TMath::IsNan(theta):
+###           weightPol = "1."
+###    if TMath::IsNan(theta):
+###        print('found Nan in mc=',mc)
+###        weightPol = "1."
+
+   df_common = df.Define("var","{}".format(var)).Define("offlineSel","{}".format(offline)).Define("weight","(mc>=0 and mc < 1000) ? w_allSF*lumiIntegrated: (mc>=1000 and mc<=1049) ? w_allSF*lumiIntegrated*{0}:1".format(weightPol)).Filter("offlineSel")
 
    hZinv = df_common.Filter("mc>=37 and mc<=44").Histo1D(("hZinv","h",nbin, low, high),"var","weight")
    hDY = df_common.Filter("mc==34 or mc==35 or mc==36 or mc==0").Histo1D(("hDY","h",nbin, low, high),"var","weight")
@@ -226,7 +242,12 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
 
    hTTG = df_common.Filter("mc==47 or mc==49 or mc==51").Histo1D(("hTTG","h",nbin, low, high),"var","weight")
    hTT12L = df_common.Filter("mc==4 or mc==5").Histo1D(("hTT12L","h",nbin, low, high),"var","weight")
-   hGJet = df_common.Filter("(mc==15 or mc==16 or mc==17 or mc==18 or mc==19) or (mc==10 or mc==11 or mc==12 or mc==13 or mc==14)").Histo1D(("hGJet","h",nbin, low, high),"var","weight")
+   if ( year =='_2024' ):
+       hGJet = df_common.Filter("mc>9 and mc<26").Histo1D(("hGJet","h",nbin, low, high),"var","weight")
+       print('integral hGJet = ',hGJet.Integral())
+   else:
+       hGJet = df_common.Filter("(mc==15 or mc==16 or mc==17 or mc==18 or mc==19) or (mc==9 or mc==10 or mc==11 or mc==12 or mc==13 or mc==14)").Histo1D(("hGJet","h",nbin, low, high),"var","weight")
+
    hVBFGJet = df_common.Filter("mc==9").Histo1D(("hVBFGJet","h",nbin, low, high),"var","weight")
    hJet = df_common.Filter("mc==20 or mc==21 or mc==22 or mc==23 or mc==24 or mc==25").Histo1D(("hJet","h",nbin, low, high),"var","weight")
 
@@ -234,21 +255,31 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    hZinvH = df_common.Filter("mc==1015 or mc==1025 or mc==1016 or mc==1026").Histo1D(("hZinvH","h",nbin, low, high),"var","weight")
    hWH = df_common.Filter("mc==1011 or mc==1012 or mc==1021 or mc==1022 or mc==1031 or mc==1032").Histo1D(("hWH","h",nbin, low, high),"var","weight")
    hTTH = df_common.Filter("mc==1018 or mc==1028 or mc==1038").Histo1D(("hTTH","h",nbin, low, high),"var","weight")
-   hVBFH = df_common.Filter("(mc==1010 or mc==1020 or mc==1030 or mc==1045 or mc==1046 or mc==1047 or mc==1048)").Histo1D(("hVBFH","h",nbin, low, high),"var","weight")
-   hggH = df_common.Filter("(mc==1017 or mc==1027 or mc==1037 or mc==1040 or mc==1041 or mc==1042 or mc==1043)").Histo1D(("hggH ","h",nbin, low, high),"var","weight")
-   if False: hData = df_common.Filter("mc<0").Histo1D(("hData","h",nbin, low, high),"var","weight")
+   hVBFH = df_common.Filter("(mc==1010 or mc==1020 or mc==1030 or mc==1040 or mc==1045 or mc==1046 or mc==1048)").Histo1D(("hVBFH","h",nbin, low, high),"var","weight")
+   hggH = df_common.Filter("(mc==1017 or mc==1027 or mc==1037 or mc==1047 or mc==1041 or mc==1042 or mc==1043)").Histo1D(("hggH ","h",nbin, low, high),"var","weight")
+   hZmg = df_common.Filter("(mc==1019 or mc==1029)").Histo1D(("hZmg ","h",nbin, low, high),"var","weight")
+
+#   # temporaty Run2 bug fixes NO1-->FEB
+#   if mesonCat=='_PhiCat' and hWH: hWH.Scale(2)
+#   if mesonCat=='_RhoCat' and hTTH: hTTH.Scale(1.93)
+
+   if True: hData = df_common.Filter("mc<0").Histo1D(("hData","h",nbin, low, high),"var","weight")
    else:
        print('HELLO')
-       if (item==4 or item==43): hData = df_common.Filter("mc<0 and (var<115 or var>135)").Histo1D(("hData","h",nbin, low, high),"var","weight")
+       #100<var0<115
+#       if (item==4 or item==43): hData = df_common.Filter("mc<0 and (var<115 or var>135)").Histo1D(("hData","h",nbin, low, high),"var","weight")
+       if (item==4 or item==43): hData = df_common.Filter("mc<0 and (var<85 or var>130 or (var>100 and var<115))").Histo1D(("hData","h",nbin, low, high),"var","weight")
        elif (item==42): hData = df_common.Filter("mc<0 and var<{}".format(MVAbin[category])).Histo1D(("hData","h",nbin, low, high),"var","weight")
        else: hData = df_common.Filter("mc<0").Histo1D(("hData","h",nbin, low, high),"var","weight")
 
    if hData: hData.SetMarkerStyle(20)
    if hData: hData.SetMarkerSize(1.2)
    if hData: hData.SetLineWidth(2)      
+   if hData: hData.SetLineColor(ROOT.kBlack)
+   if hData: hData.Integral()
 
 #   for h, color in zip([hZH, hWH, hVBFH, hZinvH, hggH], [redDark, redMed, redLight, redDark, redDark]):
-   for h, color in zip([hZG, hDY, hTT12L, hWG, hW, hTTG, hGJet, hVBFGJet, hJet, hZinv, hZH, hWH, hTTH, hVBFH, hZinvH, hggH], [azure, azureDark, gray, green, greenDark, gray, orange, orangeDark, gold, violet, redMed, redDark, redLight, redLight, redMed, redDark]):
+   for h, color in zip([hZG, hDY, hTT12L, hWG, hW, hTTG, hGJet, hVBFGJet, hJet, hZinv, hZH, hWH, hTTH, hVBFH, hZinvH, hggH, hZmg], [azure, azureDark, gray, green, greenDark, gray, orange, orangeDark, gold, violet, redMed, redDark, redLight, redLight, redMed, redDark, redBlue]):
        if h:
            h.SetLineWidth(3)
            h.SetLineColor(ROOT.TColor.GetColor(*color))
@@ -266,13 +297,14 @@ def getHisto(mytree, category, mesonCat, item, nbin, low, high):
    hJet_ = MyHisto('hJet', hJet)
    hVBFH_ = MyHisto('hVBFH', hVBFH)
    hggH_ = MyHisto('hggH', hggH)
+   hZmg_ = MyHisto('hZmg', hZmg)
    hZH_ = MyHisto('hZH', hZH)
    hZinvH_ = MyHisto('hZinvH', hZinvH)   
    hWH_ = MyHisto('hWH', hWH)
    hTTH_ = MyHisto('hTTH', hTTH)   
    hData_ = MyHisto('hData', hData)
-   
-   listHisto = [hZG_, hDY_, hWG_, hW_, hTT12L_, hTTG_, hVBFGJet_, hGJet_, hJet_, hZinv_, hZH_, hWH_, hTTH_, hVBFH_, hZinvH_, hggH_, hData_]
-   print(item)
+
+   listHisto = [hZG_, hDY_, hWG_, hW_, hTT12L_, hTTG_, hVBFGJet_, hGJet_, hJet_, hZinv_, hZH_, hWH_, hTTH_, hVBFH_, hZinvH_, hggH_, hZmg_, hData_]
+#   print(item)
 
    return listHisto

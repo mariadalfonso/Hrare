@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+YEAR=2024
+SCRIPT="VGammaMeson_cat.py"
+#TAG="isGFtag"
+TAG="isVBFtag"
+
+# Dictionary: category → SIG IDs
+declare -A CAT_SIG_IDS=(
+    [isPhiCat]="1017 1010 1019"
+    [isRhoCat]="1027 1020 1029"
+    [isD0StarCat]="1037 1030"
+    [isK0StarCat]="1047 1040"
+)
+
+# BKG and DATA IDs (same for all categories)
+IDS_BKG=(10 11 12 13 14 15 16 17 18 19 20 21 22 23 24)
+IDS_DATA=(-51 -52 -53 -54 -55 -56 -57 -58 -59 -60 -61 -62 -63 -64)
+
+run_job () {
+    local cat="$1"
+    local id="$2"
+    echo "Running: $SCRIPT $TAG $cat $id $YEAR"
+    python3 "$SCRIPT" "$TAG" "$cat" "$id" "$YEAR" &
+}
+
+########################
+# SIG (categories sequential)
+########################
+#for cat in isPhiCat isRhoCat isD0StarCat isK0StarCat; do
+for cat in isRhoCat; do    
+    echo "==== Starting category: $cat ===="
+
+
+    ########################
+    # SIG
+    ########################
+    for id in ${CAT_SIG_IDS[$cat]}; do
+        run_job "$cat" "$id"
+    done
+
+    wait
+
+    ########################
+    # BKG
+    ########################
+    for id in "${IDS_BKG[@]}"; do
+        run_job "$cat" "$id"
+    done
+
+    wait
+
+    ########################
+    # DATA
+    ########################
+    for id in "${IDS_DATA[@]}"; do
+        run_job "$cat" "$id"
+    done
+
+    wait
+    echo "==== Finished category: $cat ===="
+
+done
+
+echo "All jobs finished."
+
+exit
+exit
+exit
+exit
+
+
+#python3 VGammaMeson_cat.py isGFtag isPhiCat 1017 2024 & 

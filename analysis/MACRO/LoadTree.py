@@ -1,8 +1,83 @@
 import ROOT
 import os
 
+def loadTreeRun3(mytree, directory, category, mesonCat, year):
+
+    # -------------------------
+    # Signal samples by meson
+    # -------------------------
+    signal_map = {
+        "_RhoCat": {
+            "VBF": ["1020"],
+            "GF":  ["1027", "1029"],
+        },
+        "_PhiCat": {
+            "VBF": ["1010"],
+            "GF":  ["1017", "1019"],
+        },
+        "_K0StarCat": {
+            "VBF": ["1030"],
+            "GF":  ["1037"],
+        },
+        "_D0StarCat": {
+            "VBF": ["1040"],
+            "GF":  ["1047"],
+        },
+    }
+
+    if mesonCat in signal_map:
+        # Always add VBF-like samples
+        for tag in signal_map[mesonCat]["VBF"]:
+            mytree.Add(
+                f"{directory}outname_mc{tag}{category}{mesonCat}{year}.root"
+            )
+
+        # Add GF-only samples
+        if category == "_GFcat" or category == "_VBFcat":
+            for tag in signal_map[mesonCat].get("GF", []):
+                mytree.Add(
+                    f"{directory}outname_mc{tag}{category}{mesonCat}{year}.root"
+                )
+
+    # -------------------------
+    # GJets background samples
+    # -------------------------
+
+    gjets_ids  = {
+        "_12022" : [str(i) for i in range(10, 16, 1)],
+        "_22022" : [str(i) for i in range(10, 16, 1)],
+        "_12023" : [str(i) for i in range(10, 16, 1)],
+        "_22023" : [str(i) for i in range(10, 16, 1)],
+        "_2024" : [str(i) for i in range(10, 25, 1)],
+    }
+
+    for tag in gjets_ids[year]:
+        mytree.Add(
+            f"{directory}outname_mc{tag}{category}{mesonCat}{year}.root"
+        )
+
+    # -------------------------
+    # Data samples
+    # -------------------------
+    data_samples = {
+        "_12022": ["-61", "-62"],
+        "_22022": ["-63", "-64", "-65"],
+        "_12023": ["-61", "-62", "-63", "-64"],
+        "_22023": ["-65", "-66"],
+#        "_2024" : [str(i) for i in range(-71, -78, -1)],  # -71 … -77 Tau
+        "_2024" : [str(i) for i in range(-51, -65, -1)],  # -71 … -77 EGamma
+    }
+
+    for tag in data_samples[year]:
+        mytree.Add(
+            f"{directory}outname_mc{tag}{category}{mesonCat}{year}.root"
+        )
+
+    return mytree
+
 def loadTree(mytree, directory , category, mesonCat, year ):
 
+   # VBFcatlow and GFcat are for year == '_2018'
    if category=='_VBFcatlow' or category=='_GFcat':
       if(mesonCat=='_Omega3PiCat'):
          mytree.Add(directory+'outname_mc1045'+category+mesonCat+year+'.root') #vbfH -- Omega3Pi
@@ -79,7 +154,7 @@ def loadTree(mytree, directory , category, mesonCat, year ):
       if(mesonCat=='_K0StarCat'): mytree.Add(directory+'outname_mc1030'+category+mesonCat+localTime+'.root') #VBFH -- K0star
       if(mesonCat=='_RhoCat'): mytree.Add(directory+'outname_mc1020'+category+mesonCat+localTime+'.root') #VBFH -- rho
       if(mesonCat=='_PhiCat'): mytree.Add(directory+'outname_mc1010'+category+mesonCat+localTime+'.root') #VBFH -- phi
-      if((mesonCat=='_K0StarCat') and localTime=='_12016'): mytree.Add(directory+'outname_mc10'+category+mesonCat+localTime+'.root')  #GJets (THIS IS EMPTY for PHI and K0Star)
+#      if((mesonCat=='_RhoCat') and localTime=='_12016'): mytree.Add(directory+'outname_mc10'+category+mesonCat+localTime+'.root')  #GJets (THIS IS EMPTY for PHI and K0Star)
       mytree.Add(directory+'outname_mc11'+category+mesonCat+localTime+'.root')  #GJets
       mytree.Add(directory+'outname_mc12'+category+mesonCat+localTime+'.root')  #GJets
       mytree.Add(directory+'outname_mc13'+category+mesonCat+localTime+'.root')  #GJets

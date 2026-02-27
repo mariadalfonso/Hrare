@@ -5,6 +5,39 @@ import sys
 import json
 import os
 
+DEEP_B_LOOSE={
+    '2018': 0.1208,
+    '2017': 0.1355,
+    '22016': 0.1918,
+    '12016': 0.2027,
+}
+
+DEEP_B_MEDIUM={
+    '2018': 0.4148,
+    '2017': 0.4506,
+    '22016': 0.5847,
+    '12016': 0.6001,
+}
+
+DEEP_B_TIGHT={
+    '2018': 0.7665,
+    '2017': 0.7738,
+    '22016': 0.8767,
+    '12016': 0.8819,
+}
+
+year_map = {
+    "2018": 2018,
+    "2017": 2017,
+    "12016": 12016,  # B-F
+    "22016": 22016,  # F-H
+    "12022": 12022,  # B-F
+    "22022": 22022,  # postEE
+    "12023": 12023,  # pre-BPix
+    "22023": 22023,  # post-BPix
+    "2024": 2024,
+}
+
 lumisMgamma={
     '12016': 19.52, #APV #(B-F for 2016 pre)
     '22016': 16.80, #postVFP
@@ -18,6 +51,7 @@ lumisMgamma={
     '22022':26.67, # E, F, G
     '12023':17.794, #C
     '22023':9.451, #D
+    '2024':108.95,
 }
 
 lumisJpsiCC={
@@ -29,6 +63,7 @@ lumisJpsiCC={
     '22022':26.67, # E, F, G
     '12023':17.794, #C
     '22023':9.451, #D
+    '2024':108.95,
 }
 
 xsecRun2={
@@ -99,21 +134,26 @@ def loadJSON(fIn):
             ROOT.jsonMap[int(k)] = vec
 
 def readDataQuality(year):
-    print('HELLO readDataQuality', year)
+    print("HELLO readDataQuality", year)
     dirJson = "./config"
-    if(str(year) == '2018'):
-        loadJSON("{}/cert/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt".format(dirJson))
-    if(str(year) == '2017'):
-        loadJSON("{}/cert/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt".format(dirJson))
-    if(str(year) == '22016' or year == '12016'):
-        loadJSON("{}/cert/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt".format(dirJson))
-    ##
-    if((str(year) == '12022') or (str(year) == '22022')):
-        loadJSON("{}/cert/Cert_Collisions2022_355100_362760_Golden.json".format(dirJson))
-    if((str(year) == '12023') or (str(year) == '22023')):
-        loadJSON("{}/cert/Cert_Collisions2023_366442_370790_Golden.json".format(dirJson))
-    if(str(year) == '2024'):
-        loadJSON("{}/cert/Cert_Collisions2024_378981_386951_Golden.json".format(dirJson))
+
+    json_map = {
+        "2018":  "Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
+        "2017":  "Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+        "12016": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
+        "22016": "Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
+        "12022": "Cert_Collisions2022_355100_362760_Golden.json",
+        "22022": "Cert_Collisions2022_355100_362760_Golden.json",
+        "12023": "Cert_Collisions2023_366442_370790_Golden.json",
+        "22023": "Cert_Collisions2023_366442_370790_Golden.json",
+        "2024":  "Cert_Collisions2024_378981_386951_Golden.json",
+    }
+
+    fname = json_map.get(str(year))
+    if fname:
+        loadJSON(f"{dirJson}/cert/{fname}")
+    else:
+        print(f"No JSON mapping found for year={year}")
 
 ## I have two here
 def findDIR(directory,useXROOTD=False):
@@ -184,12 +224,15 @@ def BuildDictJpsiCC(year):
     dirNameBKG3="/ceph/submit/data/user/m/mariadlf/Hrare_psiCC/D05/"
 #    campaignv1="RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1+MINIAODSIM"
 #    campaignv2="RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2+MINIAODSIM"
-    campaign = ""
-    if(year == '2018'): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
-    if(year == '2017'): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
-    if(year == '22016'): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
-    if(year == '12016'): campaign = "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*"
-    if(year == '12022'): campaign = "Run3Summer22MiniAODv4-validDigi_130X_mcRun3_2022_realistic_v5*"
+
+    campaign_map = {
+        "2018" : "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*",
+        "2017" : "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*",
+        "22016": "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*",
+        "12016": "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*",
+        "12022": "Run3Summer22MiniAODv4-validDigi_130X_mcRun3_2022_realistic_v5*",
+    }
+    campaign = campaign_map.get(year, "")
 
     thisdict = {
         12: (findDIR(dirNameBKG3+"InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8+"+campaign),55960000000.0*1000),
@@ -302,83 +345,157 @@ def BuildDictMgamma():
 def BuildDictMgammaRun3(year):
 
     # Run3 xsection from https://xsecdb-xsdb-official.app.cern.ch/xsdb/
-    dirCeph = '/ceph/submit/data/user/m/mariadlf/Hrare_gammaM/D05/2024/'
-    dirCephGroup = '/ceph/submit/data/group/cms/store/user/mariadlf/D05/'
-    dirNameDataSkims = '/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D05/Zinv/'
+    dirCephTEST = '/ceph/submit/data/user/m/mariadlf/Hrare_gammaM/D05/ggHomegagammaTEST1'
+    dirCephTEST2 = '/ceph/submit/data/user/m/mariadlf/Hrare_gammaM/D05/ggHomegagammaTEST2'
+
+    #### PRODUZIONE CENTRALE
+    if (str(year) == '2024') :
+        dirCephGroup = '/ceph/submit/data/group/cms/store/user/mariadlf/D07/'
+        dirNameDataSkims = '/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D07/'
+    else:
+        # was private signal
+        dirCeph = '/ceph/submit/data/user/m/mariadlf/Hrare_gammaM/D05/2024/'
+        dirCephGroup = '/ceph/submit/data/group/cms/store/user/mariadlf/D05/'
+        dirNameDataSkims = '/scratch/submit/cms/mariadlf/Hrare/newSKIMS/D05/'
 
     isT2=True
     dirName = "/store/user/paus/nanohr/D05/"
-    campaign = ""
-    #if(year == '2018'): campaign = "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*"
-    #if(year == '2017'): campaign = "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*"
-    #if(year == '22016'): campaign = "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*"
-    #if(year == '12016'): campaign = "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*"
 
-    if(str(year) == '12022'): campaign = "Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_*"
-    if(str(year) == '22022'): campaign = "Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_*"
-    if(str(year) == '12023'): campaign = "Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14*"
-    if(str(year) == '22023'): campaign = "Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v*"
+    campaign_map = {
+        "12016": "RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11*",
+        "22016": "RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17*",
+        "2017":  "RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9*",
+        "2018":  "RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1*",
+        12022: "Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_*",
+        22022: "Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_*",
+        12023: "Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14*",
+        22023: "Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v*",
+        2024: "RunIII2024Summer24MiniAODv6-150X_mcRun3_2024_realistic_v2-v*",
+    }
+    campaign = campaign_map.get(year, "")
 
-    print(campaign,'campaign')
     sampleName = 'G-4Jets'
-    if (str(year) == '12023' or str(year) == '22023'): sampleName = 'GJ-4Jets'
+    if (str(year) == '12023' or str(year) == '22023' or str(year) == '2024'): sampleName = 'GJ-4Jets'
+    SIGBKG = 'TuneCP5_13p6TeV_powheg-pythia8-evtgen'
+    MCBKG = 'TuneCP5_13p6TeV_madgraphMLM-pythia8'
 
-    # need to be the xsection
-    thisdict = {
-        1010: (findDIR(dirCeph+"VBFHphigamma"),xsecRun3['VBFH']*0.49),
-        1020: (findDIR(dirCeph+"VBFHrhogamma"),xsecRun3['VBFH']),
-        1030: (findDIR(dirCeph+"VBFHkstgamma"),xsecRun3['VBFH']*(2./3)),
-        1040: (findDIR(dirCeph+"VBFHDstgamma"),xsecRun3['VBFH']*0.0389),
-        1050: (findDIR(dirCeph+"VBFHomegagamma"),xsecRun3['VBFH']*0.0389),
-        #
-        1017: (findDIR(dirCeph+"ggHphigamma"),xsecRun3['ggH']*0.49),
-        1027: (findDIR(dirCeph+"ggHrhogamma"),xsecRun3['ggH']),
-        1037: (findDIR(dirCeph+"ggHkstgamma"),xsecRun3['ggH']*(2./3)),
-        1047: (findDIR(dirCeph+"ggHDstgamma"),xsecRun3['ggH']*0.0389),
-        1057: (findDIR(dirCeph+"ggHomegagamma"),xsecRun3['ggH']*0.0389),
-        #
-        1019: (findDIR(dirCeph+"Zphigamma_MadGraph"),xsecRun3['Z']*0.49),
-        1029: (findDIR(dirCeph+"Zrhogamma_MadGraph"),xsecRun3['Z']),
-        1039: (findDIR(dirCeph+"Zkstgamma"),xsecRun3['Z']*(2./3)),
-        1049: (findDIR(dirCeph+"ZDstgamma"),xsecRun3['Z']*0.0389),
-        9: (findDIR(dirCephGroup+sampleName+"_HT-40to70_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),15310*1000*1.26), #LO *1.26
-        10: (findDIR(dirCephGroup+sampleName+"_HT-70to100_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),8111.0*1000*1.26), #LO *1.26
-        11: (findDIR(dirCephGroup+sampleName+"_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),7373.0*1000*1.26), #LO *1.26
-        12: (findDIR(dirCephGroup+sampleName+"_HT-200to400_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),1539.0*1000*1.26), #LO *1.26
-        13: (findDIR(dirCephGroup+sampleName+"_HT-400to600_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),167.7*1000*1.26), #LO *1.26
-        14: (findDIR(dirCephGroup+sampleName+"_HT-600_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),54.48*1000*1.26) #LO *1.26
+    if (str(year) == '2024') :
+        # need to be the xsection
+        thisdict = {
+            1010: (findDIR(f"{dirNameDataSkims}{year}/VBFHtoPhiG_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['VBFH']*0.49),
+            1020: (findDIR(f"{dirNameDataSkims}{year}/VBFHtoRhoG_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['VBFH']),
+            1030: (findDIR(f"{dirNameDataSkims}{year}/VBFHtoKStar0G_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['VBFH']*(2./3)),
+            1040: (findDIR(f"{dirNameDataSkims}{year}/VBFHtoDStar0G_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['VBFH']*0.0389),
+            #
+            1017: (findDIR(f"{dirNameDataSkims}{year}/GluGluHtoPhiG_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['ggH']*0.49),
+            1027: (findDIR(f"{dirNameDataSkims}{year}/GluGluHtoRhoG_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['ggH']),
+            1037: (findDIR(f"{dirNameDataSkims}{year}/GluGluHtoKStar0G_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['ggH']*(2./3)),
+            1047: (findDIR(f"{dirNameDataSkims}{year}/GluGluHtoDStar0G_Par-M-125_{SIGBKG}+{campaign}"),xsecRun3['ggH']*0.0389),
+            #
+            1019: (findDIR(f"{dirNameDataSkims}{year}/ZtoPhiG_{MCBKG}+{campaign}"),xsecRun3['Z']*0.49),
+            1029: (findDIR(f"{dirNameDataSkims}{year}/ZtoRhoG_{MCBKG}+{campaign}"),xsecRun3['Z']),
+            #
+            10: (findDIR(dirCephGroup+sampleName+"_Bin-HT-40to100-PTG-10to100_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 123400*1000),
+            11: (findDIR(dirCephGroup+sampleName+"_Bin-HT-100to200-PTG-10to100_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 32190*1000),
+            12: (findDIR(dirCephGroup+sampleName+"_Bin-HT-200to400-PTG-10to100_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 5498*1000),
+
+            13: (findDIR(dirCephGroup+sampleName+"_Bin-HT-40to200-PTG-100to200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 554.3*1000),
+            14: (findDIR(dirCephGroup+sampleName+"_Bin-HT-200to400-PTG-100to200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 200*1000),
+
+            15: (findDIR(dirCephGroup+sampleName+"_Bin-HT-40to400-PTG-200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 43.76*1000),
+
+            16: (findDIR(dirCephGroup+sampleName+"_Bin-HT-400to600-PTG-10to100_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 482.3*1000), # this is being copied
+            17: (findDIR(dirCephGroup+sampleName+"_Bin-HT-400to600-PTG-100to200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 29.77*1000),
+            18: (findDIR(dirCephGroup+sampleName+"_Bin-HT-400to600-PTG-200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 11.75*1000),
+
+            19: (findDIR(dirCephGroup+sampleName+"_Bin-HT-600to1000-PTG-10to100_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 117.5*1000),
+            20: (findDIR(dirCephGroup+sampleName+"_Bin-HT-600to1000-PTG-100to200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 9.666*1000),
+            21: (findDIR(dirCephGroup+sampleName+"_Bin-HT-600to1000-PTG-200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 4.75*1000),
+
+            22: (findDIR(dirCephGroup+sampleName+"_Bin-HT-1000-PTG-10to100_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 15.12*1000),
+            23: (findDIR(dirCephGroup+sampleName+"_Bin-HT-1000-PTG-100to200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 1.628*1000),
+            24: (findDIR(dirCephGroup+sampleName+"_Bin-HT-1000-PTG-200_Par-dRGJ-0p25_"+MCBKG+"+"+campaign), 1.019*1000),
+        }
+    else:
+        # need to be the xsection
+        thisdict = {
+            1010: (findDIR(dirCeph+"VBFHphigamma"),xsecRun3['VBFH']*0.49),
+            1020: (findDIR(dirCeph+"VBFHrhogamma"),xsecRun3['VBFH']),
+            1030: (findDIR(dirCeph+"VBFHkstgamma"),xsecRun3['VBFH']*(2./3)),
+            1040: (findDIR(dirCeph+"VBFHDstgamma"),xsecRun3['VBFH']*0.0389), # to check the BR
+            1050: (findDIR(dirCeph+"VBFHomegagamma"),xsecRun3['VBFH']*0.0389), # to check the BR
+            #
+            1017: (findDIR(dirCeph+"ggHphigamma"),xsecRun3['ggH']*0.49),
+            1027: (findDIR(dirCeph+"ggHrhogamma"),xsecRun3['ggH']),
+            1037: (findDIR(dirCeph+"ggHkstgamma"),xsecRun3['ggH']*(2./3)),
+            1047: (findDIR(dirCeph+"ggHDstgamma"),xsecRun3['ggH']*0.0389), # to check the BR
+            1057: (findDIR(dirCeph+"ggHomegagamma"),xsecRun3['ggH']*0.0389), # to check the BR
+            #
+            1019: (findDIR(dirCeph+"Zphigamma_MadGraph"),xsecRun3['Z']*0.49),
+            1029: (findDIR(dirCeph+"Zrhogamma_MadGraph"),xsecRun3['Z']),
+            1039: (findDIR(dirCeph+"Zkstgamma"),xsecRun3['Z']*(2./3)),
+            1049: (findDIR(dirCeph+"ZDstgamma"),xsecRun3['Z']*0.0389),
+            10: (findDIR(dirCephGroup+sampleName+"_HT-40to70_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),15310*1000*1.26), #LO *1.26
+            11: (findDIR(dirCephGroup+sampleName+"_HT-70to100_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),8111.0*1000*1.26), #LO *1.26
+            12: (findDIR(dirCephGroup+sampleName+"_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),7373.0*1000*1.26), #LO *1.26
+            13: (findDIR(dirCephGroup+sampleName+"_HT-200to400_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),1539.0*1000*1.26), #LO *1.26
+            14: (findDIR(dirCephGroup+sampleName+"_HT-400to600_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),167.7*1000*1.26), #LO *1.26
+            15: (findDIR(dirCephGroup+sampleName+"_HT-600_TuneCP5_13p6TeV_madgraphMLM-pythia8+"+campaign),54.48*1000*1.26) #LO *1.26
+        }
+
+
+    # Tau skim runs per year
+    data_runs = {
+        "12022": {
+            -61: "Tau+RunC",
+            -62: "Tau+RunD",
+        },
+        "22022": {
+            -63: "Tau+RunE",
+            -64: "Tau+RunF",
+            -65: "Tau+RunG",
+        },
+        "12023": {
+            -61: "Tau+RunCv1",
+            -62: "Tau+RunCv2",
+            -63: "Tau+RunCv3",
+            -64: "Tau+RunCv4",
+        },
+        "22023": {
+            -65: "Tau+RunDv1",
+            -66: "Tau+RunDv2",
+        },
+        "2024": {
+            -71: "Tau+RunC",
+            -72: "Tau+RunD",
+            -73: "Tau+RunE",
+            -74: "Tau+RunF",
+            -75: "Tau+RunG", # not ready
+            -76: "Tau+RunH",
+            -77: "Tau+RunI",
+            -51: "EGamma0+RunC",
+            -52: "EGamma1+RunC",
+            -53: "EGamma0+RunD",
+            -54: "EGamma1+RunD",
+            -55: "EGamma0+RunE",
+            -56: "EGamma1+RunE",
+            -57: "EGamma0+RunF",
+            -58: "EGamma1+RunF",
+            -59: "EGamma0+RunG",
+            -60: "EGamma1+RunG",
+            -61: "EGamma0+RunH",
+            -62: "EGamma1+RunH",
+            -63: "EGamma0+RunI",
+            -64: "EGamma1+RunI",
+        },
     }
 
-    if(str(year) == '12022'):
-        dict_ = {
-            -61: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunC"),-1),
-            -62: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunD"),-1),
-        }
-        thisdict.update(dict_)
-
-    if(str(year) == '22022'):
-        dict_ = {
-            -63: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunE"),-1),
-            -64: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunF"),-1),
-            -65: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunG"),-1),
-        }
-        thisdict.update(dict_)
-
-    if(str(year) == '12023'):
-        dict_ = {
-            -61: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv1"),-1),
-            -62: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv2"),-1),
-            -63: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv3"),-1),
-            -64: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunCv4"),-1),
-        }
-        thisdict.update(dict_)
-
-    if(str(year) == '22023'):
-        dict_ = {
-            -65: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunDv1"),-1),
-            -66: (findDIR(dirNameDataSkims+str(year)+"/Tau+RunDv2"),-1),
-        }
-        thisdict.update(dict_)
+    # Apply if year matches
+    if str(year) in data_runs:
+        thisdict.update({
+            k: (findDIR(f"{dirNameDataSkims}{year}/{v}"), -1)
+            for k, v in data_runs[str(year)].items()
+        })
 
     return thisdict
 
@@ -404,6 +521,21 @@ def computeWeigths(rdf,xsec):
     print('weight',weight)
     return weight
 
+def pickTRGRun3(overall,year,PDType,isVBF,isGGH):
+
+    print('HELLO inside pickTRGRun3 year = ', year)
+    TRIGGER=''
+    if(year == 2024):
+        print('HELLO inside pickTRGRun3')
+        if (PDType== "Tau" or PDType== "EGamma0" or PDType== "EGamma1"): TRIGGER=getTriggerFromJson(overall, "isGGH", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isGGH", year)    # MC seems the same
+
+    if((year == 12022 or year == 22022 or year == 12023 or year == 22023) and isGGH):
+        print('HELLO inside pickTRGRun3, need to so likely something different ggH and VBF for 1-2 2022')
+        if (PDType== "Tau" or PDType== "EGamma0" or PDType== "EGamma1"): TRIGGER=getTriggerFromJson(overall, "isGGH", year)
+        elif (PDType== "NULL"): TRIGGER=getTriggerFromJson(overall, "isGGH", year)    # MC seems the same
+
+    return TRIGGER
 
 def pickTRG(overall,year,PDType,isVBF,isW,isZ,isZinv,isBPH):
 

@@ -3,32 +3,49 @@ import os
 import sys
 import json
 
+ROOT.gROOT.SetBatch(True)
 ROOT.ROOT.EnableImplicitMT()
-from utilsHrare import getMClist, getDATAlist, getSkims, computeWeigths
-from utilsAna import getMesonFromJson, pickTRG, getMVAFromJson, getTriggerFromJson
-from utilsAna import loadCorrectionSet, loadPolarizationTree, loadSFhisto, loadUserCode, loadtmva_helper
-from utilsAna import lumisMgamma
-import tmva_helper_xml
+from utilsHrare import getMClist, getDATAlist, getSkims
+from utilsAna import BuildDictMgammaRun3, SwitchSample, computeWeigths
+from utilsHrare import SwitchSampleORG
+from utilsAna import getMesonFromJson, pickTRG, pickTRGRun3, getMVAFromJson, getTriggerFromJson
+from utilsAna import loadCorrectionSet, loadPolarizationTree, loadSFhisto, loadUserCode, loadtmvahelper
+from utilsAna import readDataQuality
+from utilsAna import lumisMgamma, year_map, DEEP_B_MEDIUM
 
-doSyst = True
+from utilsDask import makeRDF
+
+import helper_tmva
+
+outputdir = "/work/submit/mariadlf/HrareRun3/FEB25/"
+
+doSyst = False
 doPol = True
-doMVA = True
-if sys.argv[1]=='isZtag': doMVA = False
-if sys.argv[1]=='isWtag': doMVA = False
-#if sys.argv[2]=='isOmega3PiCat': doMVA = False
-#if sys.argv[2]=='isPhi3PiCat': doMVA = False
-#if sys.argv[2]=='isD0StarCat': doMVA = False
-if sys.argv[2]=='isD0Pi0StarCat': doMVA = False
-if sys.argv[2]=='isOmega3PiCat': doPol = False
-if sys.argv[2]=='isPhi3PiCat': doPol = False
-if sys.argv[2]=='isD0StarCat': doPol = False
-if sys.argv[2]=='isD0Pi0StarCat': doPol = False
+doMVA = False
+
+# tags that disable MVA
+mva_off_tags = {"isZtag", "isWtag", "isD0Pi0StarCat", 'isOmega3PiCat', 'isPhi3PiCat', 'isD0StarCat'}
+# tags that disable Pol
+pol_off_tags = {"isOmega3PiCat", "isPhi3PiCat", "isD0StarCat", "isD0Pi0StarCat"}
+
+arg1, arg2 = sys.argv[1], sys.argv[2]
+
+if arg1 in mva_off_tags or arg2 in mva_off_tags:
+    doMVA = False
+if arg2 in pol_off_tags:
+    doPol = False
+
 doPlot = True
 doTrigger = False
 doMesonMassSB = False
 
 useD03=False
 if sys.argv[2]=='isOmega3PiCat' or sys.argv[2]=='isPhi3PiCat' or sys.argv[2]=='isD0StarCat' or sys.argv[2]=='isD0Pi0StarCat': useD03=True
+doRun3=True
+if doRun3 and sys.argv[2]=='isRhoCat' and sys.argv[2]=='isVBFtag': doMVA = True
+
+year = year_map.get(sys.argv[4])
+mode = sys.argv[1] # expected: isVBFtag, isGFtag,
 
 isGF = False
 isZinv = False
@@ -36,6 +53,13 @@ isZ = False
 isW = False
 isVBF = False
 isVBFlow = False
+
+if mode=='isGFtag': isGF = True
+if mode=='isZinvtag': isZinv = True
+if mode=='isZtag': isZ = True
+if mode=='isWtag': isW = True
+if mode=='isVBFtag': isVBF = True
+if mode=='isVBFtaglow': isVBFlow = True
 
 isPhiCat = "false"
 isRhoCat = "false"
@@ -45,13 +69,6 @@ isPhi3PiCat = "false"
 isD0StarCat = "false"
 isD0Pi0StarCat = "false"
 
-if sys.argv[1]=='isGFtag': isGF = True
-if sys.argv[1]=='isZinvtag': isZinv = True
-if sys.argv[1]=='isZtag': isZ = True
-if sys.argv[1]=='isWtag': isW = True
-if sys.argv[1]=='isVBFtag': isVBF = True
-if sys.argv[1]=='isVBFtaglow': isVBFlow = True
-
 if sys.argv[2]=='isPhiCat': isPhiCat = "true"
 if sys.argv[2]=='isRhoCat': isRhoCat = "true"
 if sys.argv[2]=='isK0StarCat': isK0StarCat = "true"
@@ -60,36 +77,6 @@ if sys.argv[2]=='isPhi3PiCat': isPhi3PiCat = "true"
 if sys.argv[2]=='isD0StarCat': isD0StarCat = "true"
 if sys.argv[2]=='isD0Pi0StarCat': isD0Pi0StarCat = "true"
 
-if sys.argv[4]=='2018': year = 2018
-if sys.argv[4]=='2017': year = 2017
-if sys.argv[4]=='22016': year = 22016 #F-H
-if sys.argv[4]=='12016': year = 12016 #B-F
-#
-if sys.argv[4]=='12022': year = 12022 #B-F
-if sys.argv[4]=='22022': year = 22022 #B-F
-if sys.argv[4]=='12023': year = 12023 #B-F
-if sys.argv[4]=='22023': year = 22023 #B-F
-
-DEEP_B_LOOSE={
-    '2018': 0.1208,
-    '2017': 0.1355,
-    '22016': 0.1918,
-    '12016': 0.2027,
-}
-
-DEEP_B_MEDIUM={
-    '2018': 0.4148,
-    '2017': 0.4506,
-    '22016': 0.5847,
-    '12016': 0.6001,
-}
-
-DEEP_B_TIGHT={
-    '2018': 0.7665,
-    '2017': 0.7738,
-    '22016': 0.8767,
-    '12016': 0.8819,
-}
 
 #$$$$
 #$$$$
@@ -106,26 +93,32 @@ with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/conf
     jsonObject = json.load(jsonFile)
     jsonFile.close()
 
-with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/trigger.json") as trgJsonFile:
+fileNameTRG='/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/trigger.json'
+if doRun3: fileNameTRG='/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/triggerRun3.json'
+
+with open(fileNameTRG) as trgJsonFile:
     trgObject = json.load(trgJsonFile)
     trgJsonFile.close()
 
-GOODJETS = jsonObject['GOODJETS']
-LOOSEmuons = jsonObject['LOOSEmuons']
-LOOSEelectrons = jsonObject['LOOSEelectrons']
-GOODMUON = jsonObject['GOODMUON']
-GOODELE = jsonObject['GOODELE']
-JSON = jsonObject['JSON']
-BARRELphotons = jsonObject['BARRELphotons']
-ENDCAPphotons = jsonObject['ENDCAPphotons']
-ENDCAPphotonsLoose = jsonObject['ENDCAPphotonsLoose']
-photonsLoose = jsonObject['photonsLOOSE']
+with open("/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/config/qualityData.json") as qualityJsonFile:
+    qualObject = json.load(qualityJsonFile)
+    qualityJsonFile.close()
 
-METFLAG = jsonObject['METFLAG']
+selections = {key: jsonObject[key] for key in ["GOODMUON", "GOODJETSRun3", "GOODJETSRun2", "GOODELERun3", "GOODELERun2", "LOOSEelectronsRun3", "LOOSEelectronsRun2","LOOSEmuons", "BARRELphotons", "ENDCAPphotons", "ENDCAPphotonsLoose", "photonsLOOSE", "METFLAG", "MVAweights", "mesons"]}
 
-MVA = jsonObject['MVAweights']
+if doRun3:
+    GOODJETS = selections['GOODJETSRun3']
+    LOOSEelectrons = selections['LOOSEelectronsRun3']
+    GOODELE = selections['GOODELERun3']
+else:
+    GOODJETS = selections['GOODJETSRun2']
+    LOOSEelectrons = selections['LOOSEelectronsRun2']
+    GOODELE = selections['GOODELERun2']
+
+JSON = qualObject['JSON']
+
+MVA = selections['MVAweights']
 TRIGGERS = trgObject['triggers']
-mesons = jsonObject['mesons']
 
 #$$$$
 #$$$$
@@ -133,11 +126,16 @@ mesons = jsonObject['mesons']
 
 def selectionTAG(df, doSyst, isData):
 
+    if year==2024:
+        df = df.Define("jetID_mask", 'cleaningJetIDMask(Jet_eta, Jet_chHEF, Jet_neHEF, Jet_chEmEF, Jet_neEmEF, Jet_muEF, Jet_chMultiplicity, Jet_neMultiplicity, "{0}")'.format(year)) #  for nanov15 use the JetID
+    else:
+        df = df.Define("jetID_mask", "cleaningJetSelMask(0, Jet_eta, Jet_neHEF, Jet_chEmEF, Jet_muEF, Jet_neEmEF, Jet_jetId)") # redo JetID for nanoV12
+
     if isZ:
-        dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25") # iso same as the loose
+        dftag = (df.Define("goodMuons","{}".format(selections["GOODMUON"])+" and Muon_mediumId and Muon_pfRelIso04_all < 0.25") # iso same as the loose
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP90") # medium
-                 .Define("looseMu","{}".format(LOOSEmuons))
+                 .Define("looseMu","{}".format(selections["LOOSEmuons"]))
                  .Define("looseEle","{}".format(LOOSEelectrons))
                  .Filter("Sum(looseEle)+Sum(looseMu)==2", "at least two muons or electrons, and no extra loose leptons")
                  .Define("isMuorEle","(Sum(looseMu)==2 and Sum(goodMuons)>=1)?1:(Sum(looseEle)==2 and Sum(goodElectrons)>=1)?2 :0")
@@ -163,11 +161,11 @@ def selectionTAG(df, doSyst, isData):
 
     if isW:
 
-        dftag = (df.Define("goodMuons","{}".format(GOODMUON)+" and Muon_tightId and Muon_pfRelIso04_all < 0.15") ## tight
+        dftag = (df.Define("goodMuons","{}".format(selections["GOODMUON"])+" and Muon_tightId and Muon_pfRelIso04_all < 0.15") ## tight
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("goodElectrons","{}".format(GOODELE)+" and Electron_mvaFall17V2Iso_WP80 and Electron_pt>30") ## tight
                  .Define("vetoEle","{}".format(LOOSEelectrons))
-                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Define("vetoMu","{}".format(selections["LOOSEmuons"]))
                  .Filter("(Sum(goodMuons)+Sum(goodElectrons))==1 and (Sum(vetoEle)+Sum(vetoMu))==1","one lepton")
                  .Define("isMuorEle","Sum(goodMuons)==1?1: Sum(goodElectrons)==1?2 :0")
                  .Define("V_mass","Sum(goodMuons)>0 ? mt(Muon_pt[goodMuons][0], Muon_phi[goodMuons][0], DeepMETResolutionTune_pt, DeepMETResolutionTune_phi) : mt(Electron_pt[goodElectrons][0], Electron_phi[goodElectrons][0], DeepMETResolutionTune_pt, DeepMETResolutionTune_phi)")
@@ -191,6 +189,7 @@ def selectionTAG(df, doSyst, isData):
     if isVBF or isVBFlow:
 
         VBFcut = "mJJ>300 and dEtaJJ>3 and Y1Y2<0 and Jet_pt[goodJets][0]>40"
+        if doRun3: VBFcut = "mJJ>200 and dEtaJJ>2.5 and Y1Y2<0 and Jet_pt[goodJets][0]>40"
         if isVBFlow: VBFcut = "mJJ>250 and dEtaJJ>3. and Y1Y2<0"
 
 # tight means less PU
@@ -217,7 +216,7 @@ def selectionTAG(df, doSyst, isData):
                  .Filter("{}".format(VBFcut),"Filter on MJJ , Deta, Y1Y2")
                  .Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
-                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Define("vetoMu","{}".format(selections["LOOSEmuons"]))
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
@@ -230,11 +229,15 @@ def selectionTAG(df, doSyst, isData):
                  .Define("jet1hfsigmaEtaEta","Jet_hfsigmaEtaEta[goodJets][0]")
                  .Define("jet2hfsigmaPhiPhi","Jet_hfsigmaPhiPhi[goodJets][1]")
                  .Define("jet2hfsigmaEtaEta","Jet_hfsigmaEtaEta[goodJets][1]")
+                 ##
                  .Define("deltaJetMeson","{}".format(CLEAN_JetMes))
                  .Define("deltaJetPhoton","{}".format(CLEAN_JetPH))
-                 .Define("zepVar","compute_jet_HiggsVars_var(Jet_pt[goodJets],Jet_eta[goodJets],Jet_phi[goodJets],Jet_mass[goodJets], photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]], goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]], goodMeson_mass[index_pair[0]], 0)")
-                 .Define("detaHigJet1","compute_jet_HiggsVars_var(Jet_pt[goodJets],Jet_eta[goodJets],Jet_phi[goodJets],Jet_mass[goodJets], photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]], goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]], goodMeson_mass[index_pair[0]], 1)")
-                 .Define("detaHigJet2","compute_jet_HiggsVars_var(Jet_pt[goodJets],Jet_eta[goodJets],Jet_phi[goodJets],Jet_mass[goodJets], photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]], goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]], goodMeson_mass[index_pair[0]], 2)")
+                 .Define("VBF1Cand","MakeTLV(jet1Pt,jet1Eta,Jet_phi[goodJets][0],Jet_mass[goodJets][0])")
+                 .Define("VBF2Cand","MakeTLV(jet2Pt,jet2Eta,Jet_phi[goodJets][1],Jet_mass[goodJets][0])")
+                 .Define("zepVar","getZep(MesonVec,PhotonVec,jet1Eta,jet2Eta)")
+                 .Define("Rpt","getRpt(MesonVec,PhotonVec,VBF1Cand,VBF2Cand)")
+                 .Define("detaHigJet1","fabs((MesonVec+PhotonVec).Eta()-jet1Eta)")
+                 .Define("detaHigJet2","fabs((MesonVec+PhotonVec).Eta()-jet2Eta)")
 #                 .Filter("DeepMETResolutionTune_pt<75","DeepMETResolutionTune_pt<75") # not doing Zinv as nominal
                  )
         return dftag
@@ -242,12 +245,12 @@ def selectionTAG(df, doSyst, isData):
     if isZinv:
         dftag = (df.Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
-                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Define("vetoMu","{}".format(selections["LOOSEmuons"]))
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
 #                 .Define("trigger","{}".format(TRIGGER))
 #                 .Filter("trigger>0", "pass triggers")
                  .Filter("DeepMETResolutionTune_pt>50","MET>50")
-                 .Define("metFilter","{}".format(METFLAG))
+                 .Define("metFilter","{}".format(selections["METFLAG"]))
                  .Filter("metFilter", "pass METfilter")
                  .Define("dPhiGammaMET","abs(deltaPhi(goodPhotons_phi[index_pair[1]], DeepMETResolutionTune_phi))")
                  .Define("dPhiMesonMET","abs(deltaPhi(goodMeson_phi[index_pair[0]], DeepMETResolutionTune_phi))")
@@ -272,7 +275,7 @@ def selectionTAG(df, doSyst, isData):
 
         dftag = (df.Define("ele_mask", "cleaningMask(Photon_electronIdx[goodPhotons],nElectron)")
                  .Define("vetoEle","{}".format(LOOSEelectrons))
-                 .Define("vetoMu","{}".format(LOOSEmuons))
+                 .Define("vetoMu","{}".format(selections["LOOSEmuons"]))
                  .Filter("(Sum(vetoEle)+Sum(vetoMu))==0", "no leptons")
                  #                 .Define("trigger","{}".format(TRIGGER))
                  #                 .Filter("trigger>0", "pass triggers")
@@ -288,20 +291,25 @@ def selectionTAG(df, doSyst, isData):
 
 def dfGammaMeson(df,PDType):
 
-    TRIGGER=pickTRG(TRIGGERS,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF))
+    isBPH=False
+    if doRun3: TRIGGER=pickTRGRun3(TRIGGERS,year,PDType,isVBF,isGF)
+    else: TRIGGER=pickTRG(TRIGGERS,year,PDType,isVBF,isW,isZ,(isZinv or isVBFlow or isGF),isBPH)
+
+    print('TRIGGER=',TRIGGER)
 
     GOODphotons = ""
-    if(isGF): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1 and Photon_mvaID_WP80".format(BARRELphotons,ENDCAPphotons) #90-80
-    if(isVBF): GOODphotons = "{} and Photon_pt>75 and Photon_electronVeto".format(BARRELphotons) #90
-    if(isVBFlow): GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto and abs(Photon_eta)<2.1 and Photon_mvaID_WP80".format(BARRELphotons,ENDCAPphotons) #90-80
-    if(isZinv): GOODphotons = "({0} or {1}) and Photon_pt>38 and abs(Photon_eta)<2.1 and Photon_electronVeto".format(BARRELphotons,ENDCAPphotons) #90-80
-    if(isW or isZ): GOODphotons = "({0} or {1}) and (Photon_pixelSeed == false)".format(BARRELphotons,ENDCAPphotonsLoose) #90-90
+    if isGF: GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_electronVeto and abs(Photon_eta)<2.1 and Photon_mvaID_WP80".format(selections["BARRELphotons"],selections["ENDCAPphotons"]) #90-80
+    if isVBF: GOODphotons = "{} and Photon_pt>75 and Photon_electronVeto".format(selections["BARRELphotons"]) #90
+    if doRun3 and isVBF: GOODphotons = "{} and Photon_pt>50 and Photon_electronVeto".format(selections["BARRELphotons"]) #90
+    if isVBFlow: GOODphotons = "({0} or {1}) and Photon_pt>38 and Photon_pt<75 and Photon_electronVeto and abs(Photon_eta)<2.1 and Photon_mvaID_WP80".format(selections["BARRELphotons"],selections["ENDCAPphotons"]) #90-80
+    if isZinv: GOODphotons = "({0} or {1}) and Photon_pt>38 and abs(Photon_eta)<2.1 and Photon_electronVeto".format(selections["BARRELphotons"],selections["ENDCAPphotons"]) #90-80
+    if isW or isZ: GOODphotons = "({0} or {1}) and (Photon_pixelSeed == false)".format(selections["BARRELphotons"],selections["ENDCAPphotonsLoose"]) #90-90
     print("PHOTONS = ", GOODphotons)
 
     dfOBJ = (df.Filter("nPhoton>0 and PV_npvsGood>0","photon from nano >0 and PV_npvsGood > 0")
              .Define("triggerAna","{}".format(TRIGGER))
              .Filter("triggerAna>0", "pass triggers")  ## comment while doing trigger studies
-             .Define("loosePhotons", "{}".format(photonsLoose))
+             .Define("loosePhotons", "{}".format(selections["photonsLOOSE"]))
              .Define("nPhotonsVeto","Sum(loosePhotons)")
              .Define("goodPhotons", "{}".format(GOODphotons))
              .Define("nGoodPhotons","Sum(goodPhotons)*1.0f")
@@ -309,8 +317,6 @@ def dfGammaMeson(df,PDType):
              .Define("goodPhotons_pt", "Photon_pt[goodPhotons]")
              .Define("goodPhotons_eta", "Photon_eta[goodPhotons]")
              .Define("goodPhotons_phi", "Photon_phi[goodPhotons]")
-             .Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
-             .Define("goodPhotons_pfRelIso03_chg", "Photon_pfRelIso03_chg[goodPhotons]")
              .Define("goodPhotons_hoe", "Photon_hoe[goodPhotons]")
 #             .Define("goodPhotons_pixelSeed", "Photon_pixelSeed[goodPhotons]")
 #             .Define("goodPhotons_r9", "Photon_r9[goodPhotons]")
@@ -324,72 +330,81 @@ def dfGammaMeson(df,PDType):
              .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
              )
 
+    if doRun3:
+        dfOBJ2 = ( dfOBJ.Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all_quadratic[goodPhotons]")
+                   .Define("goodPhotons_pfRelIso03_chg", "Photon_pfRelIso03_chg_quadratic[goodPhotons]")
+                   )
+    else:
+        dfOBJ2 = ( dfOBJ.Define("goodPhotons_pfRelIso03_all", "Photon_pfRelIso03_all[goodPhotons]")
+                   .Define("goodPhotons_pfRelIso03_chg", "Photon_pfRelIso03_chg[goodPhotons]")
+                   )
+
 #    if useD03:
 #        dfOBJ.Define("goodPhotons_x_calo", "Photon_x_calo[goodPhotons]").Define("goodPhotons_y_calo", "Photon_y_calo[goodPhotons]").Define("goodPhotons_z_calo", "Photon_z_calo[goodPhotons]")
 
-    return dfOBJ
+    return dfOBJ2
 
 def dfHiggsCand(df,isData):
 
     GOODPHI = ""
     if doMesonMassSB:
-        if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF", "isPhiCatMassSB"))
-        if(isVBFlow): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isPhiCatMassSB"))
-        if(isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isZinv", "isPhiCatMassSB"))
-        if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH", "isPhiCatMassSB"))
+        if(isVBF): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isPhiCatMassSB"))
+        if(isVBFlow): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isPhiCatMassSB"))
+        if(isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isPhiCatMassSB"))
+        if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isPhiCatMassSB"))
     else:
-        if(isVBF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBF", "isPhiCat"))
-        if(isVBFlow): GOODPHI = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isPhiCat"))
-        if(isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(mesons, "isZinv", "isPhiCat"))
-        if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(mesons, "VH", "isPhiCat"))
+        if(isVBF): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isPhiCat"))
+        if(isVBFlow): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isPhiCat"))
+        if(isZinv or isGF): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isPhiCat"))
+        if(isW or isZ): GOODPHI = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isPhiCat"))
 
     GOODRHO = ""
     if doMesonMassSB:
-        if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF", "isRhoCatMassSB"))
-        if(isVBFlow): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isRhoCatMassSB"))
-        if(isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isZinv", "isRhoCatMassSB"))
-        if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH", "isRhoCatMassSB"))
+        if(isVBF): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isRhoCatMassSB"))
+        if(isVBFlow): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isRhoCatMassSB"))
+        if(isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isRhoCatMassSB"))
+        if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isRhoCatMassSB"))
     else:
-        if(isVBF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBF", "isRhoCat"))
-        if(isVBFlow): GOODRHO = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isRhoCat"))
-        if(isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(mesons, "isZinv", "isRhoCat"))
-        if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(mesons, "VH", "isRhoCat"))
+        if(isVBF): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isRhoCat"))
+        if(isVBFlow): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isRhoCat"))
+        if(isZinv or isGF): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isRhoCat"))
+        if(isW or isZ): GOODRHO = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isRhoCat"))
 
     GOODK0STAR = ""
     if doMesonMassSB:
-        if(isVBF): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isVBF", "isK0StarCatMassSB"))
-        if(isVBFlow): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isK0StarCatMassSB"))
-        if(isZinv or isGF): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isZinv", "isK0StarCatMassSB"))
-        if(isW or isZ): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "VH", "isK0StarCatMassSB"))
+        if(isVBF): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isK0StarCatMassSB"))
+        if(isVBFlow): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isK0StarCatMassSB"))
+        if(isZinv or isGF): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isK0StarCatMassSB"))
+        if(isW or isZ): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isK0StarCatMassSB"))
     else:
-        if(isVBF): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isVBF", "isK0StarCat"))
-        if(isVBFlow): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isK0StarCat"))
-        if(isZinv or isGF): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "isZinv", "isK0StarCat"))
-        if(isW or isZ): GOODK0STAR = "{}".format(getMesonFromJson(mesons, "VH", "isK0StarCat"))
+        if(isVBF): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isK0StarCat"))
+        if(isVBFlow): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isK0StarCat"))
+        if(isZinv or isGF): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isK0StarCat"))
+        if(isW or isZ): GOODK0STAR = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isK0StarCat"))
 
     GOODOMEGA3Pi = ""
-    if(isVBF): GOODOMEGA3Pi = "{}".format(getMesonFromJson(mesons, "isVBF", "isOmega3PiCat"))
-    if(isVBFlow): GOODOMEGA3Pi = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isOmega3PiCat"))
-    if(isZinv or isGF): GOODOMEGA3Pi = "{}".format(getMesonFromJson(mesons, "isZinv", "isOmega3PiCat"))
-    if(isW or isZ): GOODOMEGA3Pi = "{}".format(getMesonFromJson(mesons, "VH", "isOmega3PiCat"))
+    if(isVBF): GOODOMEGA3Pi = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isOmega3PiCat"))
+    if(isVBFlow): GOODOMEGA3Pi = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isOmega3PiCat"))
+    if(isZinv or isGF): GOODOMEGA3Pi = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isOmega3PiCat"))
+    if(isW or isZ): GOODOMEGA3Pi = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isOmega3PiCat"))
 
     GOODPHI3Pi = ""
-    if(isVBF): GOODPHI3Pi = "{}".format(getMesonFromJson(mesons, "isVBF", "isPhi3PiCat"))
-    if(isVBFlow): GOODPHI3Pi = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isPhi3PiCat"))
-    if(isZinv or isGF): GOODPHI3Pi = "{}".format(getMesonFromJson(mesons, "isZinv", "isPhi3PiCat"))
-    if(isW or isZ): GOODPHI3Pi = "{}".format(getMesonFromJson(mesons, "VH", "isPhi3PiCat"))
+    if(isVBF): GOODPHI3Pi = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isPhi3PiCat"))
+    if(isVBFlow): GOODPHI3Pi = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isPhi3PiCat"))
+    if(isZinv or isGF): GOODPHI3Pi = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isPhi3PiCat"))
+    if(isW or isZ): GOODPHI3Pi = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isPhi3PiCat"))
 
     GOODD0STAR = ""
-    if(isVBF): GOODD0STAR = "{}".format(getMesonFromJson(mesons, "isVBF", "isD0StarCat"))
-    if(isVBFlow): GOODD0STAR = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isD0StarCat"))
-    if(isZinv or isGF): GOODD0STAR = "{}".format(getMesonFromJson(mesons, "isZinv", "isD0StarCat"))
-    if(isW or isZ): GOODD0STAR = "{}".format(getMesonFromJson(mesons, "VH", "isD0StarCat"))
+    if(isVBF): GOODD0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isD0StarCat"))
+    if(isVBFlow): GOODD0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isD0StarCat"))
+    if(isZinv or isGF): GOODD0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isD0StarCat"))
+    if(isW or isZ): GOODD0STAR = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isD0StarCat"))
 
     GOODD0PI0STAR = ""
-    if(isVBF): GOODD0PI0STAR = "{}".format(getMesonFromJson(mesons, "isVBF", "isD0Pi0StarCat"))
-    if(isVBFlow): GOODD0PI0STAR = "{}".format(getMesonFromJson(mesons, "isVBFlow" , "isD0Pi0StarCat"))
-    if(isZinv or isGF): GOODD0PI0STAR = "{}".format(getMesonFromJson(mesons, "isZinv", "isD0Pi0StarCat"))
-    if(isW or isZ): GOODD0PI0STAR = "{}".format(getMesonFromJson(mesons, "VH", "isD0Pi0StarCat"))
+    if(isVBF): GOODD0PI0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBF", "isD0Pi0StarCat"))
+    if(isVBFlow): GOODD0PI0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isVBFlow" , "isD0Pi0StarCat"))
+    if(isZinv or isGF): GOODD0PI0STAR = "{}".format(getMesonFromJson(selections["mesons"], "isZinv", "isD0Pi0StarCat"))
+    if(isW or isZ): GOODD0PI0STAR = "{}".format(getMesonFromJson(selections["mesons"], "VH", "isD0Pi0StarCat"))
 
     if(isPhiCat=="true"):
 
@@ -483,6 +498,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_trk2_pt", "K0Star_kaon_pt[goodMeson]")
                   .Define("goodMeson_trk1_eta", "K0Star_pion_eta[goodMeson]")
                   .Define("goodMeson_trk2_eta", "K0Star_kaon_eta[goodMeson]")
+                  .Define("goodMeson_trk1_phi", "K0Star_pion_phi[goodMeson]")
+                  .Define("goodMeson_trk2_phi", "K0Star_kaon_phi[goodMeson]")
                   .Define("goodMeson_DR","DeltaR(K0Star_kaon_eta[goodMeson],K0Star_pion_eta[goodMeson],K0Star_kaon_phi[goodMeson],K0Star_pion_phi[goodMeson])")
                   .Define("wrongMeson","({}".format(GOODRHO)+")")
                   .Define("wrongMeson_pt","Sum(wrongMeson) > 0 ? rho_kin_pt[wrongMeson]: ROOT::VecOps::RVec<float>(0.f)")
@@ -503,6 +520,7 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_eta", "omega_Nbody_eta[goodMeson]")
                   .Define("goodMeson_phi", "omega_Nbody_phi[goodMeson]")
                   .Define("goodMeson_iso", "omega_iso[goodMeson]")
+                  .Define("goodMeson_isoNeuHad", "omega_isoNeuHad[goodMeson]")
                   .Define("goodMeson_vtx_chi2dof", "omega_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "omega_kin_vtx_prob[goodMeson]")
                   .Define("goodMeson_sipPV", "omega_kin_sipPV[goodMeson]")
@@ -586,6 +604,7 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_phi", "d0_d0Star_Nbody_phi[goodMeson]")
                   #
                   .Define("goodMeson_iso", "d0_iso[goodMeson]")
+                  .Define("goodMeson_isoNeuHad", "d0_isoNeuHad[goodMeson]")
                   .Define("goodMeson_vtx_chi2dof", "d0_kin_vtx_chi2dof[goodMeson]")
                   .Define("goodMeson_vtx_prob", "d0_kin_vtx_prob[goodMeson]")
                   .Define("goodMeson_sipPV", "d0_kin_sipPV[goodMeson]")
@@ -602,6 +621,8 @@ def dfHiggsCand(df,isData):
                   .Define("goodMeson_trk2_pt", "d0_kaon_pt[goodMeson]")
                   .Define("goodMeson_trk1_eta", "d0_pion_eta[goodMeson]")
                   .Define("goodMeson_trk2_eta", "d0_kaon_eta[goodMeson]")
+                  .Define("goodMeson_trk1_phi", "d0_pion_phi[goodMeson]")
+                  .Define("goodMeson_trk2_phi", "d0_kaon_phi[goodMeson]")
                   .Define("goodMeson_DR","DeltaR(d0_pion_eta[goodMeson],d0_kaon_eta[goodMeson],d0_pion_phi[goodMeson],d0_kaon_phi[goodMeson])")
                   .Define("goodMeson_photon_pt", "(Sum(d0_d0Star_Nphotons[goodMeson]) >= 1) ? d0_d0Star_photon_pt[goodMeson] : Vec_f {0.0}")
                   .Define("goodMeson_photon2_pt", "(Sum(d0_d0Star_Nphotons[goodMeson]) >= 2) ? d0_d0Star_photon2_pt[goodMeson] : Vec_f {0.0}")
@@ -667,17 +688,21 @@ def dfHiggsCand(df,isData):
     dfHig = (dfbase.Define("index_pair","HiggsCandFromRECO(goodMeson_pt, goodMeson_eta, goodMeson_phi, goodMeson_mass, goodMeson_trk1_pt, goodMeson_trk2_pt, wrongMeson_pt, wrongMeson2_pt, goodPhotons_pt, goodPhotons_eta, goodPhotons_phi)").Filter("index_pair[0]!= -1", "at least a good meson candidate")
              #               .Define("jet_mask", "cleaningMask(Photon_jetIdx[goodPhotons],nJet)")
              .Define("jet_mask2", "cleaningJetFromOBJ(Jet_eta, Jet_phi, goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]])")
-             #.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
+             #.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f") # this is defined differently when regression is used or not
+             .Define("meson_iso", "(index_pair[0]!= -1) ? goodMeson_iso[index_pair[0]]: 0.f")
              .Define("photon_pt", "(index_pair[1]!= -1) ? goodPhotons_pt[index_pair[1]]: 0.f")
+             .Define("photon_mvaID","(index_pair[1]!= -1) ? goodPhotons_mvaID[index_pair[1]]: 0.f")
              .Define("meson_isoNeuHad", "(index_pair[0]!= -1) ? goodMeson_isoNeuHad[index_pair[0]]: 0.f")
              )
 
-    if(isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0StarCat=="true" or isD0Pi0StarCat=="true"): dfHig_ = callMVAregress(dfHig,isVBF,isVBFlow,isGF,isZinv)
-    if(isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"): dfHig_ = dfHig.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
+    if(isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0Pi0StarCat=="true"): dfHig_ = callMVAregress(dfHig,isVBF,isVBFlow,isGF,isZinv)
+    if(isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true" or isD0StarCat=="true"): dfHig_ = dfHig.Define("meson_pt", "(index_pair[0]!= -1) ? goodMeson_pt[index_pair[0]]: 0.f")
 
-    dfFinal = (dfHig_.Define("HCandMass", "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
-               .Define("HCandPT",   "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],1)")
-               .Define("HCandPHI",   "compute_HiggsVars_var(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],2)")
+    dfFinal = (dfHig_.Define("MesonVec","MakeTLV(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]], goodMeson_phi[index_pair[0]], goodMeson_mass[index_pair[0]])")
+               .Define("PhotonVec","MakeTLV(photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0.f)")
+               .Define("HCandMass", "(MesonVec+PhotonVec).M()")
+               .Define("HCandPT", "(MesonVec+PhotonVec).Pt()")
+               .Define("HCandPHI", "(MesonVec+PhotonVec).Phi()")
                .Define("HCandMass_noregress", "compute_HiggsVars_var(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],0)")
 #               .Define("HCandMass_VTXcorr", "compute_HiggsVars_var_VtxCorr(meson_pt,goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],goodMeson_bestVtx_X[index_pair[0]],goodMeson_bestVtx_Y[index_pair[0]], goodMeson_bestVtx_Z[index_pair[0]],photon_pt,goodPhotons_eta[index_pair[1]],goodPhotons_phi[index_pair[1]],goodPhotons_x_calo[index_pair[1]],goodPhotons_y_calo[index_pair[1]],goodPhotons_z_calo[index_pair[1]],0)")
                .Define("dPhiGammaMesonCand","abs(deltaPhi(goodPhotons_phi[index_pair[1]], goodMeson_phi[index_pair[0]]))")
@@ -687,13 +712,21 @@ def dfHiggsCand(df,isData):
                .Define("classify","topology(goodPhotons_eta[index_pair[1]], goodMeson_eta[index_pair[0]])")
                )
 
+    '''
     if (isData == "false"):
         dfFinal = dfFinal.Define("indexMatch","genMatch(goodMeson_pt[index_pair[0]],goodMeson_eta[index_pair[0]],goodMeson_phi[index_pair[0]],goodMeson_mass[index_pair[0]],GenPart_eta,GenPart_phi,GenPart_pdgId,GenPart_genPartIdxMother,{0})".format(genMatchPDFNum))
+    '''
 
     return dfFinal
 
 def dfwithSYST(df,year):
 
+    # DUMMY not available
+    if doRun3:
+        df=(df.Define("L1PreFiringWeight_Nom", '1.f')
+            .Define("L1PreFiringWeight_Up", '1.f')
+            .Define("L1PreFiringWeight_Dn", '1.f')
+            )
 
     if df.HasColumn("Photon_dEsigmaUp") and df.HasColumn("Photon_dEsigmaDown"):
 
@@ -734,6 +767,7 @@ def dfwithSYST(df,year):
 
     ###"(index_pair[1]!= -1 && goodPhotons_isScEtaEB[index_pair[1]]>0) ? wp90 : wp80"
 
+    #for 2022 the structure changed i.e. muonIDyear
     dfFinal_withSF = (dfVary
                       .Define("SFphoton_ID_Nom",'corr_sf.eval_photonSF("{0}", "sf", "{1}", goodPhotons_eta[index_pair[1]], photon_pt)'.format(photonIDyear,photonIDwp))
                       .Define("SFphoton_ID_Up",'corr_sf.eval_photonSF("{0}", "sfup", "{1}" , goodPhotons_eta[index_pair[1]], photon_pt)'.format(photonIDyear,photonIDwp))
@@ -762,7 +796,6 @@ def dfwithSYST(df,year):
                       #
                       )
 
-
     if isGF or isVBFlow:
         dfFinal_withSF_2 = (dfFinal_withSF
                             .Define("photonTrigSF_Nom",'SF_HLT_leg(photon_pt,22,0)')
@@ -785,15 +818,14 @@ def dfwithSYST(df,year):
                             .Define("SFmuon_ID_Up",'isMuorEle==1 ? corr_sf.eval_muonIDSF("{0}", "systup", LeadingLeptonEta, LeadingLeptonPt, "T"):1'.format(muonIDyear))
                             .Define("SFmuon_ID_Dn",'isMuorEle==1 ? corr_sf.eval_muonIDSF("{0}", "systdown", LeadingLeptonEta, LeadingLeptonPt, "T"):1'.format(muonIDyear))
                             #
-                            .Define("SFelectron_ID_Nom",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sf", "{1}", LeadingLeptonEta, LeadingLeptonPt):1'.format(photonIDyear,"wp80iso"))
-                            .Define("SFelectron_ID_Up",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfup", "{1}", LeadingLeptonEta, LeadingLeptonPt):1'.format(photonIDyear,"wp80iso"))
-                            .Define("SFelectron_ID_Dn",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfdown", "{1}", LeadingLeptonEta, LeadingLeptonPt):1'.format(photonIDyear,"wp80iso"))
-                            .Define("SFelectron_reco_Nom",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sf", "{1}", LeadingLeptonEta, LeadingLeptonPt):1'.format(photonIDyear,"RecoAbove20"))
-                            .Define("SFelectron_reco_Up",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfup", "{1}", LeadingLeptonEta, LeadingLeptonPt):1'.format(photonIDyear,"RecoAbove20"))
-                            .Define("SFelectron_reco_Dn",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfdown", "{1}", LeadingLeptonEta, LeadingLeptonPt):1'.format(photonIDyear,"RecoAbove20"))
+                            .Define("SFelectron_ID_Nom",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sf", "{1}", LeadingLeptonEta, LeadingLeptonPt,{2}):1'.format(photonIDyear,"wp80iso",10.001))
+                            .Define("SFelectron_ID_Up",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfup", "{1}", LeadingLeptonEta, LeadingLeptonPt,{2}):1'.format(photonIDyear,"wp80iso",10.001))
+                            .Define("SFelectron_ID_Dn",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfdown", "{1}", LeadingLeptonEta, LeadingLeptonPt,{2}):1'.format(photonIDyear,"wp80iso",10.001))
+                            .Define("SFelectron_reco_Nom",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sf", "{1}", LeadingLeptonEta, LeadingLeptonPt,{2}):1'.format(photonIDyear,"RecoAbove20",20.001))
+                            .Define("SFelectron_reco_Up",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfup", "{1}", LeadingLeptonEta, LeadingLeptonPt,{2}):1'.format(photonIDyear,"RecoAbove20",20.001))
+                            .Define("SFelectron_reco_Dn",'isMuorEle==2 ? corr_sf.eval_electronSF("{0}", "sfdown", "{1}", LeadingLeptonEta, LeadingLeptonPt,{2}):1'.format(photonIDyear,"RecoAbove20",20.001))
                             #
                             )
-
 
     if isZ:
         dfFinal_withSF_3 = (dfFinal_withSF_2
@@ -815,7 +847,6 @@ def dfwithSYST(df,year):
 
     #####
     #####
-
 
     if isZ: dfFinal = (dfFinal_withSF_3
                        .Define("w_allSF", "w*SFpu_Nom*L1PreFiringWeight_Nom*SFphoton_ID_Nom*SFphoton_PixVeto_Nom*SFmeson_reco_Nom*SFelectron_ID_Nom*SFelectron_reco_Nom*SFmuon_ID_Nom*SFmuon_ISO_Nom*SFmuon2_ISO_Nom*SFmuon2_ID_Nom")
@@ -887,12 +918,14 @@ def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
 
     lumiIntegrated = 1.
     print('isData = ',isData)
-
     if (isData == "false"):
         if(isGF and year == 12022): lumiIntegrated = lumisMgamma['12022']
         if(isGF and year == 22022): lumiIntegrated = lumisMgamma['22022']
         if(isGF and year == 12023): lumiIntegrated = lumisMgamma['12023']
         if(isGF and year == 22023): lumiIntegrated = lumisMgamma['22023']
+        if(isGF and year == 2024): lumiIntegrated = lumisMgamma['2024']
+        #
+        if(isVBF and year == 2024): lumiIntegrated = lumisMgamma['2024']
         #
         if((isVBF or isW or isZ) and year == 2018): lumiIntegrated = lumisMgamma['2018']
         if((isW or isZ) and year == 2017): lumiIntegrated = lumisMgamma['2017']
@@ -905,7 +938,7 @@ def dfCommon(df,year,isData,mc,sumw,isVBF,isVBFlow,isGF,isZinv):
     dfComm = (df
               .Define("mc","{}".format(mc))
               .Define("isData","{}".format(isData))
-              .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
+#              .Define("applyJson","{}".format(JSON)).Filter("applyJson","pass JSON")
               .Define("w","{}".format(weight))
               .Define("wraw","{}".format(weight))
               .Define("lumiIntegrated","{}".format(lumiIntegrated))
@@ -933,6 +966,7 @@ def callPolarization(dfcandtag, mc):
                  )
     if (mc >= 1010 and mc <= 1038):
         dfNew = (dfcandtag.Define('theta',"getPolAngle(event,rdfslot_)")
+                 .Filter("TMath::IsNaN(theta)<1 ","remove Nan")
                  )
     else:
         dfNew = dfcandtag.Define("theta","1.f")
@@ -945,7 +979,7 @@ def callMVAregress(df,isVBF,isVBFlow,isGF,isZinv):
     if(isGF): MVAweights = "{}".format(getMVAFromJson(MVA, "isGF" , sys.argv[2] ))
     print(MVAweights)
 
-    tmva_helper = tmva_helper_xml.TMVAHelperXML(MVAweights)
+    tmva_helper = helper_tmva.TMVAHelperXML(MVAweights)
     print(tmva_helper.variables)
 
     dfWithMVA = (df.Define("goodMeson_photon1_pt_input_pred", "(index_pair[0]!= -1) ? goodMeson_photon_pt[index_pair[0]] : 0.f")
@@ -977,7 +1011,7 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
     if(isZinv): MVAweights = "{}".format(getMVAFromJson(MVA, "isZinv" , sys.argv[2] ))
     print(MVAweights)
 
-    tmva_helper = tmva_helper_xml.TMVAHelperXML(MVAweights)
+    tmva_helper = helper_tmva.TMVAHelperXML(MVAweights)
     print(tmva_helper.variables)
 
     NVar = "10"
@@ -1000,7 +1034,6 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
                #"goodPhotons_eta"
                .Define("photon_eta","(index_pair[1]!= -1) ? goodPhotons_eta[index_pair[1]]: 0.f")
                #"goodPhotons_mvaID"
-               .Define("photon_mvaID","(index_pair[1]!= -1) ? goodPhotons_mvaID[index_pair[1]]: 0.f")
                #"goodPhotons_pfRelIso03_all"
                .Define("photon_pfRelIso03_all","(index_pair[1]!= -1) ? goodPhotons_pfRelIso03_all[index_pair[1]]: 0.f")
                #"goodPhotons_energyErr"
@@ -1037,71 +1070,194 @@ def callMVA(df,isVBF,isVBFlow,isGF,isZinv):
 
     return dfWithMVA
 
+mode_map = {
+    "isVBFtag":  "_VBFcat",
+    "isGFtag":   "ggHcat", # to fix
+}
+
+MVA_map = {
+    "isVBFtag": "MVA-Mgamma/output/classification_model__VBFcat_feb26.root"
+}
+
+def callMVAclassificationXGB(df):
+
+    modelname = f"bdt_model_{mode_map[mode]}"
+    fileName = MVA_map[mode]
+    tmva_helper = helper_tmva.TMVAHelperXGB(fileName, modelname)
+    print(tmva_helper.variables)
+    dfWithMVA = tmva_helper.run_inference(df,"MVAdisc")
+    return dfWithMVA
+
+
 def DefineContent(branchList,isData):
 
-    for branchName in [
-            "HCandMass",
-            "HCandMass_noregress",
-#            "HCandMass_VTXcorr",
-            "HCandPT",
-            "index_pair",
-            "meson_pt",
-            "photon_pt",
-            "sigmaHCandMass_Rel2",
-            #
-            "goodPhotons_pt",
-            "goodPhotons_eta",
-            "goodPhotons_pfRelIso03_all",
-            "goodPhotons_hoe",
-#            "goodPhotons_r9",
-#            "goodPhotons_sieie",
-            "goodPhotons_mvaID",
-            "goodPhotons_energyErr",
-            "nPhoton",
-            "nGoodPhotons",
-            "nPhotonsVeto",
-            #
-            "SoftActivityJetNjets5",
-            "DeepMETResolutionTune_pt",
-            "DeepMETResolutionTune_phi",
-            "dPhiGammaMesonCand",
-            "dEtaGammaMesonCand",
-            "classify",
-            #
-            "triggerAna",
-            # these below are for the 2018
-#            "L1_LooseIsoEG22er2p1_IsoTau26er2p1_dR_Min0p3",
-#            "L1_LooseIsoEG22er2p1_Tau70er2p1_dR_Min0p3",
-#            "L1_LooseIsoEG24er2p1_IsoTau27er2p1_dR_Min0p3",
-#            "L1_SingleIsoEG32er2p1",
-#            "L1_SingleIsoEG30er2p1",
-#            "L1_SingleIsoEG28er2p1",
-#            "L1_SingleLooseIsoEG30er1p5",
-#            "L1_SingleLooseIsoEG28er1p5",
-            #
-            "w",
-            "wraw",
-            "w_allSF",
-            "mc",
-            "PV_npvsGood",
-            "run",
-            "luminosityBlock",
-            "event",
-            "lumiIntegrated",
-    ]:
-        branchList.push_back(branchName)
+    base_branches = [
+        "HCandMass",
+        "HCandMass_noregress",
+        #            "HCandMass_VTXcorr",
+        "HCandPT",
+        "index_pair",
+        "meson_pt",
+        "meson_iso",
+        "photon_pt",
+        "photon_mvaID",
+        "sigmaHCandMass_Rel2",
+        #
+        "goodPhotons_pt",
+        "goodPhotons_eta",
+        #            "goodPhotons_pfRelIso03_all", # need to comment for Run3
+        "goodPhotons_hoe",
+        #            "goodPhotons_r9",
+        #            "goodPhotons_sieie",
+        #"goodPhotons_mvaID",
+        "goodPhotons_energyErr",
+        "nPhoton",
+        "nGoodPhotons",
+        "nPhotonsVeto",
+        #
+        "SoftActivityJetNjets5",
+        "DeepMETResolutionTune_pt",
+        "DeepMETResolutionTune_phi",
+        "dPhiGammaMesonCand",
+        "dEtaGammaMesonCand",
+        "classify",
+        #
+        "triggerAna",
+        # these below are for the 2018
+        #            "L1_LooseIsoEG22er2p1_IsoTau26er2p1_dR_Min0p3",
+        #            "L1_LooseIsoEG22er2p1_Tau70er2p1_dR_Min0p3",
+        #            "L1_LooseIsoEG24er2p1_IsoTau27er2p1_dR_Min0p3",
+        #            "L1_SingleIsoEG32er2p1",
+        #            "L1_SingleIsoEG30er2p1",
+        #            "L1_SingleIsoEG28er2p1",
+        #            "L1_SingleLooseIsoEG30er1p5",
+        #            "L1_SingleLooseIsoEG28er1p5",
+        #"cos_Jpsi_z_angle",
+        #
+        "w",
+        "wraw",
+        "w_allSF",
+        "mc",
+        "PV_npvsGood",
+        "run",
+        "luminosityBlock",
+        "event",
+        "lumiIntegrated",
+    ]
 
-    if doPol:
+    meson_branches = [
+        #"goodMeson",
+        "goodMeson_DR",
+        "goodMeson_mass",
+        "goodMeson_massErr",
+        "goodMeson_pt",
+        "goodMeson_trk1_pt",
+        "goodMeson_trk2_pt",
+        "goodMeson_trk1_eta",
+        "goodMeson_trk2_eta",
+        "goodMeson_vtx_chi2dof",
+        "goodMeson_vtx_prob",
+        "goodMeson_sipPV",
+        "goodMeson_bestVtx_Z",
+        "goodMeson_bestVtx_X",
+        "goodMeson_bestVtx_Y",
+        "goodMeson_bestVtx_idx",
+    ]
+
+    # Mode-specific branches
+    mode_branches = {
+        "isVBFtag": [
+            "mJJ",
+            "nGoodJets",
+            "dEtaJJ",
+            "dPhiJJ",
+            "Y1Y2",
+            "deltaJetMeson",
+            "deltaJetPhoton",
+            "jet1Pt",
+            "jet2Pt",
+            "jet1Eta",
+            "jet2Eta",
+            "jet1hfsigmaPhiPhi",
+            "jet1hfsigmaEtaEta",
+            "jet2hfsigmaPhiPhi",
+            "jet2hfsigmaEtaEta",
+            "zepVar",
+            "Rpt",
+            "detaHigJet1",
+            "detaHigJet2"
+        ],
+        "isZ": [
+            "V_mass",
+            "isMuorEle",
+            "LeadingLeptonPt",
+            "Z_veto1",
+            "Z_veto2",
+            "Visr_mass",
+            "SubLeadingLeptonPt",
+        ],
+        "isW": [
+            "V_mass",
+            "isMuorEle",
+            "LeadingLeptonPt",
+            "deltaLepMeson",
+            "dPhiGammaMET",
+            "dPhiMesonMET",
+            "Z_veto",
+        ],
+        "isZinv": [
+            "dPhiGammaMET",
+            "dPhiMesonMET",
+            "ptRatioMEThiggs",
+            "HCandPHI",
+            "nbtag",
+            "nGoodJets"
+        ],
+        "isGF": [
+            "nGoodJets"
+        ],
+    }
+
+    mode_branches["isVBFlow"]=mode_branches["isVBFtag"]
+
+    if (isGF or isVBF or isVBFlow or isZinv) and doMVA and (isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"):
+        for branchName in [
+                "MVAdisc",
+        ]:
+            branchList.push_back(branchName)
+
+    if (isGF or isVBF) and doMVA and (isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0Pi0StarCat=="true"):
+        for branchName in [
+                "meson_regress_pt_sf",
+        ]:
+            branchList.push_back(branchName)
+
+
+    # Add base branches
+    for b in base_branches:
+        branchList.push_back(b)
+
+    # Add meson branches
+    for b in meson_branches:
+        branchList.push_back(b)
+
+    # Add extra depending on mode
+    for b in mode_branches.get(mode, []):
+        branchList.push_back(b)
+
+    if doPol and not doRun3:
         for branchName in [
                 "theta",
         ]:
             branchList.push_back(branchName)
 
+    '''
     if (isData == "false"):
         for branchName in [
             "indexMatch",
         ]:
             branchList.push_back(branchName)
+    '''
 
     if (doSyst and isData == "false"):
         for branchName in [
@@ -1134,104 +1290,6 @@ def DefineContent(branchList,isData):
         ]:
             branchList.push_back(branchName)
 
-    for branchName in [
-            "goodMeson",
-            "goodMeson_DR",
-            "goodMeson_mass",
-            "goodMeson_massErr",
-            "goodMeson_pt",
-            "goodMeson_iso",
-            "goodMeson_trk1_pt",
-            "goodMeson_trk2_pt",
-            "goodMeson_trk1_eta",
-            "goodMeson_trk2_eta",
-            "goodMeson_vtx_chi2dof",
-            "goodMeson_vtx_prob",
-            "goodMeson_sipPV",
-            "goodMeson_bestVtx_Z",
-            "goodMeson_bestVtx_X",
-            "goodMeson_bestVtx_Y",
-            "goodMeson_bestVtx_idx",
-    ]:
-        branchList.push_back(branchName)
-
-    if isZ or isW:
-        for branchName in [
-                "V_mass",
-                "isMuorEle",
-                "LeadingLeptonPt",
-        ]:
-            branchList.push_back(branchName)
-
-    if isZ:
-        for branchName in [
-                "Z_veto1",
-                "Z_veto2",
-                "Visr_mass",
-                "SubLeadingLeptonPt",
-        ]:
-            branchList.push_back(branchName)
-
-    if isW:
-        for branchName in [
-                "deltaLepMeson",
-                "dPhiGammaMET",
-                "dPhiMesonMET",
-                "Z_veto",
-        ]:
-            branchList.push_back(branchName)
-
-    if isZinv:
-        for branchName in [
-                "dPhiGammaMET",
-                "dPhiMesonMET",
-                "ptRatioMEThiggs",
-                "HCandPHI",
-                "nbtag",
-        ]:
-            branchList.push_back(branchName)
-
-    if (isGF or isVBF or isVBFlow or isZinv) and doMVA and (isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"):
-        for branchName in [
-                "MVAdisc",
-        ]:
-            branchList.push_back(branchName)
-
-    if isGF and doMVA and (isOmega3PiCat=="true" or isPhi3PiCat=="true" or isD0Pi0StarCat=="true" or isD0StarCat=="true"):
-        for branchName in [
-                "meson_regress_pt_sf",
-        ]:
-            branchList.push_back(branchName)
-
-    if isGF or isZinv:
-        for branchName in [
-                "nGoodJets",
-        ]:
-            branchList.push_back(branchName)
-
-    if isVBF or isVBFlow:
-        for branchName in [
-                "mJJ",
-                "nGoodJets",
-                "dEtaJJ",
-                "dPhiJJ",
-                "Y1Y2",
-                "deltaJetMeson",
-                "deltaJetPhoton",
-                "jet1Pt",
-                "jet2Pt",
-                "jet1Eta",
-                "jet2Eta",
-                "jet1hfsigmaPhiPhi",
-                "jet1hfsigmaEtaEta",
-                "jet2hfsigmaPhiPhi",
-                "jet2hfsigmaEtaEta",
-                "zepVar",
-                "detaHigJet1",
-                "detaHigJet2"
-        ]:
-            branchList.push_back(branchName)
-
     return branchList
 
 def analysis(df,year,mc,sumw,isData,PDType):
@@ -1247,14 +1305,16 @@ def analysis(df,year,mc,sumw,isData,PDType):
         dfOBJ = dfGammaMeson(dfCom,PDType)
         dfbase = dfHiggsCand(dfOBJ,isData)
         dfcandtag = selectionTAG(dfbase,doSyst,isData)
-        dfpol_ = callPolarization(dfcandtag,mc)
+        if not doRun3: dfpol_ = callPolarization(dfcandtag,mc)
+        else: dfpol_ = dfcandtag
         if (doSyst and isData == "false"):
             dfpreFINAL = dfwithSYST(dfpol_,year)
         else:
             dfpreFINAL = dfpol_.Define("w_allSF", "w")
 
         if doMVA and (isRhoCat=="true" or isPhiCat=="true" or isK0StarCat=="true"):
-            dfFINAL = callMVA(dfpreFINAL,isVBF,isVBFlow,isGF,isZinv)
+            if doRun3 and isRhoCat=="true": dfFINAL = callMVAclassificationXGB(dfpreFINAL)
+            elif not doRun3:  dfFINAL = callMVA(dfpreFINAL,isVBF,isVBFlow,isGF,isZinv)
         else: dfFINAL = dfpreFINAL
 
     branchList = ROOT.vector('string')()
@@ -1376,8 +1436,8 @@ def analysis(df,year,mc,sumw,isData,PDType):
     if isGF: catTag = "GFcat"
 
     if True:
-        outputFile = "/work/submit/mariadlf/NOV1/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
-        if sys.argv[2]=='isOmega3PiCat' or sys.argv[2]=='isPhi3PiCat' or sys.argv[2]=='isD0StarCat' or sys.argv[2]=='isD0Pi0StarCat':
+        outputFile = outputdir+str(year)+"/"+catTag+"/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
+        if sys.argv[2]=='isPhi3PiCat' or sys.argv[2]=='isD0Pi0StarCat':
             outputFile = "/work/submit/mariadlf/NOVMarti/{0}/outname_mc{1}_{2}_{3}_{0}.root".format(year,mc,catTag,catM)
         print(outputFile)
         snapshotOptions = ROOT.RDF.RSnapshotOptions()
@@ -1475,7 +1535,8 @@ def analysis(df,year,mc,sumw,isData,PDType):
 #        evtcounts.append(evtcount)
 #        ROOT.ROOT.RDF.RunGraphs(evtcounts)
 
-        outputFileHisto = "/work/submit/mariadlf/OCT_SYSTvar/{0}/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
+#        outputFileHisto = "/work/submit/mariadlf/NOV1_SYSTvar/{0}/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
+        outputFileHisto = "/home/submit/mariadlf/Hrare/CMSSW_10_6_27_new/src/Hrare/analysis/TESTS/histoname_mc{1}_{2}_{3}_{0}_wSF.root".format(year,mc,catTag,catM,year)
         print(outputFileHisto)
         myfile = ROOT.TFile(outputFileHisto,"RECREATE")
 
@@ -1484,19 +1545,80 @@ def analysis(df,year,mc,sumw,isData,PDType):
         myfile.Close()
         myfile.Write()
 
+## USED IN Run3
 def readMCSample(year,sampleNOW,useD03):
 
-    files = getMClist(year,sampleNOW,useD03)
-    print(len(files))
-    #local
-    df = ROOT.RDataFrame("Events", files)
-    rdf = ROOT.RDataFrame("Runs", files)
+    if doRun3:
+        thisdict = BuildDictMgammaRun3(year)
 
-    sumW = computeWeigths(df, rdf, sampleNOW, year, True, useD03)
-    if (doPol and sampleNOW>1000 and sampleNOW<1039): loadPolarizationTree(sampleNOW,year)
+        files = SwitchSample(thisdict,sampleNOW)[0]
+        xsec = SwitchSample(thisdict,sampleNOW)[1]
+        print("READING num FILEs: ",len(files))
+        rdf = ROOT.RDataFrame("Runs", files) # make sure this is not the distributed
+        df = makeRDF(files,year)
+
+    else:
+        loadUserCode()
+        loadtmvahelper()
+        loadCorrectionSet(year)
+
+        files = getMClist(year,sampleNOW,useD03)
+        print(len(files))
+        #local
+        df = ROOT.RDataFrame("Events", files)
+        rdf = ROOT.RDataFrame("Runs", files)
+        xsec = SwitchSampleORG(sampleNOW,year,useD03)[1]
+
+        #    sumW = computeWeigths(df, rdf, sampleNOW, year, True, useD03)
+        #sumW = computeWeigthsORG(rdf, sampleNOW, year, True, useD03)
+
+    sumW = computeWeigths(rdf, xsec)
+    if (doPol and sampleNOW>1000 and sampleNOW<1039 and not doRun3): loadPolarizationTree(sampleNOW,year)
     if doSyst: loadSFhisto(sampleNOW,year)
-    loadCorrectionSet(year)
     analysis(df,year,sampleNOW,sumW,"false","NULL")
+
+## USED IN Run3    
+def readDataSkims(datasetNumber,year,category,useD03):
+
+    if doRun3:
+
+        thisdict = BuildDictMgammaRun3(year)
+        readDataQuality(year) # comment for nano
+
+        files = SwitchSample(thisdict,datasetNumber)[0]
+        print('outside the function: ', len(files))
+        df = makeRDF(files,year)
+        PDType = 'Tau'
+
+    else:
+
+        loadUserCode()
+        loadtmvahelper()
+        loadCorrectionSet(year)
+
+        print("enum",datasetNumber)
+        print("year",year)
+        print("cat",category)
+        if (category=="isZtag" or category=="isWtag"):
+            pair = getSkims(datasetNumber,year,"VH",useD03)
+        elif category=="isVBFtag":
+            pair = getSkims(datasetNumber,year,"VBF",useD03)
+            if (category=="isZinvtag" or category=="isVBFtaglow" or category=="isGFtag"):
+                pair = getSkims(datasetNumber,year,"Zinv",useD03)
+
+        files = pair[0]
+        PDType = pair[1]
+        print(len(files))
+        print(PDType)
+
+        #local
+        df = ROOT.RDataFrame("Events", files)
+        nevents = df.Count().GetValue()
+        print("%s entries in the dataset" %nevents)
+
+    #check the new directory
+    analysis(df,year,datasetNumber,1.,"true",PDType)
+    print("***ANALYSIS DONE ***")
 
 def readDataSample(year,datasetNumber):
 
@@ -1513,31 +1635,6 @@ def readDataSample(year,datasetNumber):
 
     analysis(df,year,datasetNumber, 1. ,"true",PDType)
 
-def readDataSkims(datasetNumber,year,category,useD03):
-
-    print("enum",datasetNumber)
-    print("year",year)
-    print("cat",category)
-    if (category=="isZtag" or category=="isWtag"):
-        pair = getSkims(datasetNumber,year,"VH",useD03)
-    elif category=="isVBFtag":
-        pair = getSkims(datasetNumber,year,"VBF",useD03)
-    if (category=="isZinvtag" or category=="isVBFtaglow" or category=="isGFtag"):
-        pair = getSkims(datasetNumber,year,"Zinv",useD03)
-
-    files = pair[0]
-    PDType = pair[1]
-    print(len(files))
-    print(PDType)
-
-    #local
-    df = ROOT.RDataFrame("Events", files)
-    nevents = df.Count().GetValue()
-    print("%s entries in the dataset" %nevents)
-
-    analysis(df,year,datasetNumber,1.,"true",PDType)
-    print("***ANALYSIS DONE ***")
-
 def runTest():
 
     df = ROOT.RDataFrame("Events", "root://eoscms.cern.ch//eos/cms//store/group/phys_higgs/HiggsExo/dalfonso/Hrare/D01/vbf-hphigamma-powheg/NANOAOD_01/step7_VBS_Phigamma_8.root")
@@ -1552,19 +1649,28 @@ def runTest():
    
 if __name__ == "__main__":
 
-    loadUserCode()
-    loadtmva_helper()
-
 #    runTest()
 #    to run: python3 -i VGammaMeson_cat.py isVBFtag isPhiCat 12 2018
     print(int(sys.argv[3]))
 
-    if ( sys.argv[1]=="isVBFtag" and int(sys.argv[3]) in [ -31, -32, -33, -34, -76, -81, -82, -83, -84, -85, -86, -62, -63, -64, -65, -66]):
-        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1],False) # skims VBF
+    if doRun3:
+        data_runs = {
+	12022: [-61, -62],
+        22022: [-63, -64, -65],
+        12023: [-61, -62, -63, -64],
+	22023: [-65, -66],
+#	2024:  list(range(-71, -78, -1)),  # generates -71 to -77 this is Tau
+	2024:  list(range(-51, -65, -1)),  # generates -71 to -64 this is EGamma
+    }
 
+    if ( (doRun3 and (sys.argv[1]=="isGFtag" or sys.argv[1]=="isVBFtag")) and int(sys.argv[3]) in data_runs[year] ):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1],useD03) # skims Data
+
+    ## below old Run2
+    elif ( sys.argv[1]=="isVBFtag" and int(sys.argv[3]) in [ -31, -32, -33, -34, -76, -81, -82, -83, -84, -85, -86, -62, -63, -64, -65, -66]):
+        readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1],False) # skims VBF
     elif ( (sys.argv[1]=="isZinvtag" or sys.argv[1]=="isVBFtaglow" or sys.argv[1]=="isGFtag") and int(sys.argv[3]) in [-62, -63, -64, -65, -66]):
         readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1],useD03) # skims Tau
-
     elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-1, -2, -3, -4, -5, -6, -7, -8]):
         readDataSkims(int(sys.argv[3]),int(sys.argv[4]),sys.argv[1],False) # skims singleMu
     elif ( (sys.argv[1]=="isWtag" or sys.argv[1]=="isZtag") and int(sys.argv[3]) in [-11, -12, -13, -14, -15, -16, -17, -18]):
