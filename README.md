@@ -2,25 +2,27 @@
 
 *==================  below is for Run3 2024 v15 VGamma  =================
 
-scram p CMSSW_15_0_6
+scram p CMSSW_1X_Y_Z
 
-cd CMSSW_15_0_6/src/
+cd CMSSW_1X_Y_Z/src/
 
 cmsenv
 
-git clone git@github.com:mariadalfonso/Hrare.git --branch D07Run3
+git clone git@github.com:mariadalfonso/Hrare.git --branch D08Run3
 
 --customise=Hrare/NanoAOD/nano_cff.nanoAOD_customizeMesons_Run3
 
 # nanoV15 GT and campaigns for data and MC
 
-| Input dataset | GT | Era |
-| ------ | ------ | ------ |
-| RunIII2024Summer24MiniAODv6 | 150X_mcRun3_2024_realistic | Run3_2024 |
-| Run2024C-MINIv6NANOv15 C-I | 150X_dataRun3_v2 | Run3_2024 |
+| | Input dataset | GT | Era | CMSSW release |
+| |  ------  | ------ | ------ |
+| 2024 MC    | RunIII2024Summer24MiniAODv6 | 150X_mcRun3_2024_realistic | Run3_2024 |  CMSSW_15_0_6 |
+| 2024 data  | Run2024C-MINIv6NANOv15 C-I | 150X_dataRun3_v2 | Run3_2024 | CMSSW_15_0_6 |
+| 2025 data  | Run2025G-PromptReco B-G | 150X_dataRun3_Prompt_v1 | Run3 | CMSSW_15_0_14	|
+| 2026 data  | Run2026B-PromptReco B,D | 160X_dataRun3_Prompt_v1 | Run3 | CMSSW_16_0_4	|
 
 
-*==================  below is for Run3 early =================
+*==================  below is for Run3 early , nano v12 =================
 
 scram p CMSSW_13_0_13
 
