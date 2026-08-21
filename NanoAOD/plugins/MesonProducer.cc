@@ -1105,9 +1105,11 @@ MesonProducer::getRhosToPiPi(const edm::Event& iEvent,
   rhosCand.addUserFloat( "trk1_pt",  pfCand1.pt() );
   rhosCand.addUserFloat( "trk1_eta", pfCand1.eta() );
   rhosCand.addUserFloat( "trk1_phi", pfCand1.phi() );
+  rhosCand.addUserFloat( "trk1_charge", pfCand1.charge() );
   rhosCand.addUserFloat( "trk2_pt",  pfCand2.pt() );
   rhosCand.addUserFloat( "trk2_eta", pfCand2.eta() );
   rhosCand.addUserFloat( "trk2_phi", pfCand2.phi() );
+  rhosCand.addUserFloat( "trk2_charge", pfCand2.charge() );
   rhosCand.addUserFloat( "trk1_sip", trackImpactParameterSignificance(pfCand1) );
   rhosCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
   //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
@@ -1149,9 +1151,11 @@ MesonProducer::getOmegasToPiPiPi0(const edm::Event& iEvent,
   omegasCand.addUserFloat( "trk1_pt",  pfCand1.pt() );
   omegasCand.addUserFloat( "trk1_eta", pfCand1.eta() );
   omegasCand.addUserFloat( "trk1_phi", pfCand1.phi() );
+  omegasCand.addUserFloat( "trk1_charge", pfCand1.charge() );
   omegasCand.addUserFloat( "trk2_pt",  pfCand2.pt() );
   omegasCand.addUserFloat( "trk2_eta", pfCand2.eta() );
   omegasCand.addUserFloat( "trk2_phi", pfCand2.phi() );
+  omegasCand.addUserFloat( "trk2_charge", pfCand2.charge() );
   omegasCand.addUserFloat( "trk1_sip", trackImpactParameterSignificance(pfCand1) );
   omegasCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
 
@@ -1550,9 +1554,11 @@ MesonProducer::getPhiToKK(const edm::Event& iEvent,
   phiCand.addUserFloat( "trk1_pt",  pfCand1.pt() );
   phiCand.addUserFloat( "trk1_eta", pfCand1.eta() );
   phiCand.addUserFloat( "trk1_phi", pfCand1.phi() );
+  phiCand.addUserFloat( "trk1_charge", pfCand1.charge() );
   phiCand.addUserFloat( "trk2_pt",  pfCand2.pt() );
   phiCand.addUserFloat( "trk2_eta", pfCand2.eta() );
   phiCand.addUserFloat( "trk2_phi", pfCand2.phi() );
+  phiCand.addUserFloat( "trk2_charge", pfCand2.charge() );
   phiCand.addUserFloat( "trk1_sip", trackImpactParameterSignificance(pfCand1) );
   phiCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
   //  phiCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
