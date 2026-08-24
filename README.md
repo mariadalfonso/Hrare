@@ -30,7 +30,7 @@ cd CMSSW_13_0_13/src/
 
 cmsenv
 
-git clone git@github.com:mariadalfonso/Hrare.git --branch D05Run3
+git clone git@github.com:mariadalfonso/Hrare.git --branch D08Run3
 
 # nanoV12 GT and campaigns for data and MC
 
