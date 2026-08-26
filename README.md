@@ -17,8 +17,8 @@ git clone git@github.com:mariadalfonso/Hrare.git --branch D08Run3
 |           | Input dataset | GT | Era | CMSSW release |
 | ------    |  ------  | ------ | ------ | ------ |
 | 2024 MC   | RunIII2024Summer24MiniAODv6 | 150X_mcRun3_2024_realistic | Run3 |  CMSSW_15_0_6 |
-| 2024 data | Run2024C-MINIv6NANOv15 C-I | 150X_dataRun3_v2 | Run3 | CMSSW_15_0_6 |
-| 2025 data | Run2025G-PromptReco B-G | 150X_dataRun3_Prompt_v1 | Run3 | CMSSW_15_0_14	|
+| 2024 data | Run2024C-MINIv6NANOv15 C-I | 150X_dataRun3_v2 | Run3 | CMSSW_15_0_20 |
+| 2025 data | Run2025G-PromptReco B-G | 150X_dataRun3_Prompt_v1 | Run3 | CMSSW_15_0_20	|
 | 2026 data | Run2026B-PromptReco B,D | 160X_dataRun3_Prompt_v1 | Run3 | CMSSW_16_0_4	|
 
 

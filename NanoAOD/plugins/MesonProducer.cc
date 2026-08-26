@@ -1063,9 +1063,11 @@ MesonProducer::getKsToPiPi(const edm::Event& iEvent,
   ksCand.addUserFloat( "trk1_pt",  pfCand1.pt() );
   ksCand.addUserFloat( "trk1_eta", pfCand1.eta() );
   ksCand.addUserFloat( "trk1_phi", pfCand1.phi() );
+  ksCand.addUserFloat( "trk1_charge", pfCand1.charge() );
   ksCand.addUserFloat( "trk2_pt",  pfCand2.pt() );
   ksCand.addUserFloat( "trk2_eta", pfCand2.eta() );
   ksCand.addUserFloat( "trk2_phi", pfCand2.phi() );
+  ksCand.addUserFloat( "trk2_charge", pfCand2.charge() );
   ksCand.addUserFloat( "trk1_sip", trackImpactParameterSignificance(pfCand1) );
   ksCand.addUserFloat( "trk2_sip", trackImpactParameterSignificance(pfCand2) );
   //  ksCand.addUserInt( "trk1_mu_index", match_to_muon(pfCand1,*muonHandle_));
